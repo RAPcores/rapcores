@@ -1,0 +1,38 @@
+
+icetime topological timing analysis report
+==========================================
+
+Info: max_span_hack is enabled: estimate is conservative.
+
+Report for critical path:
+-------------------------
+
+        lc40_26_27_7 (LogicCell40) [clk] -> lcout: 0.640 ns
+     0.640 ns net_103986 (resetn_counter[7])
+        t197 (LocalMux) I -> O: 0.330 ns
+        inmux_26_26_107885_107917 (InMux) I -> O: 0.260 ns
+        lc40_26_26_1 (LogicCell40) in0 -> lcout: 0.449 ns
+     1.678 ns net_103878 ($abc$977$auto$simplemap.cc:127:simplemap_reduce$118[0]_new_)
+        odrv_26_26_103878_100493 (Odrv4) I -> O: 0.372 ns
+        t180 (Span4Mux_h4) I -> O: 0.316 ns
+        t179 (Span4Mux_v4) I -> O: 0.372 ns
+        t178 (LocalMux) I -> O: 0.330 ns
+        inmux_19_26_80021_80081 (InMux) I -> O: 0.260 ns
+        lc40_19_26_6 (LogicCell40) in0 -> lcout: 0.449 ns
+     3.775 ns net_75900 ($abc$977$auto$dff2dffe.cc:158:make_patterns_logic$704)
+        odrv_19_26_75900_71949 (Odrv12) I -> O: 0.540 ns
+        t111 (LocalMux) I -> O: 0.330 ns
+        inmux_18_26_75946_76014 (CEMux) I -> O: 0.603 ns
+     5.248 ns net_76014 ($abc$977$auto$dff2dffe.cc:158:make_patterns_logic$704)
+        lc40_18_26_1 (LogicCell40) ce [setup]: 0.000 ns
+     5.248 ns net_71819 (LED7)
+
+Resolvable net names on path:
+     0.640 ns ..  1.229 ns resetn_counter[7]
+     1.678 ns ..  3.326 ns $abc$977$auto$simplemap.cc:127:simplemap_reduce$118[0]_new_
+     3.775 ns ..  5.248 ns $abc$977$auto$dff2dffe.cc:158:make_patterns_logic$704
+                  lcout -> LED7
+
+Total number of logic levels: 3
+Total path delay: 5.25 ns (190.55 MHz)
+
