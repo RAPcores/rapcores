@@ -1,4 +1,4 @@
-PROJ = top
+PROJ = ulticore
 PIN_DEF = hx8kboard.pcf
 DEVICE = hx8k
 

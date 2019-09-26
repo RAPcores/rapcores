@@ -7,8 +7,11 @@ http://www.clifford.at/icestorm/
 
 Simulation
 //yosys sim.ys
-yosys quad_sim.ys
-gtkwave quad.vcd
+yosys ulticore_tb.ys
+gtkwave quad_enc.vcd
+
+//nextpnr-ice40 --json blinky.json --pcf blinky.pcf --asc blinky.asc --gui
+
 
 Build with make 
 make
@@ -24,3 +27,7 @@ https://www.fpga4fun.com/QuadratureDecoder.html
 
 
 yosys -p 'synth_ice40 -top quad -json quad.json' quad.v --gui
+
+icepll -i 12 -o 60
+
+nextpnr-ice40 --hx8k --json ulticore.json --asc ulticore.asc --gui

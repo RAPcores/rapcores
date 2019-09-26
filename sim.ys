@@ -1,4 +1,4 @@
-read_verilog -sv quad_testbench.v
-prep -top top
+read_verilog -sv ulticore_tb.v
+prep -top testbench
 show quad_enc
 sim -n 400 -clock clk -vcd quad_enc.vcd

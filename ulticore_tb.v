@@ -1,6 +1,4 @@
-/*
- *
- *  UltiCores -- IP Cores for Mechatronic Control Systems
+/*  UltiCores -- IP Cores for Mechatronic Control Systems
  *
  *  Copyright (C) 2019 UltiMachine <info@ultimachine.com>
  *
@@ -15,13 +13,12 @@
  *  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
  *  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  *  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- *
  */
 
 `include "quad_enc.v"
 `timescale 1ns/100ps
 
-module top(
+module testbench(
   input clk, 
   output enc1a, //Changed for sim
   output enc1b, //Changed for sim
