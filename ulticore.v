@@ -18,10 +18,9 @@
  *
  */
 
-`include "quad_enc.v"
 `timescale 1ns/100ps
 
-module top(
+module soc(
   input clk, 
   input enc1a,
   input enc1b,
@@ -44,7 +43,7 @@ module top(
   wire resetn;
   reg [7:0] resetn_counter = 0;
   wire faultn;
-  reg [7:0] fault;
+  wire [7:0] fault;
 
   assign resetn = &resetn_counter;
 

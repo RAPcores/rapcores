@@ -4,8 +4,8 @@ DEVICE = hx8k
 
 all: $(PROJ).rpt $(PROJ).bin
 
-%.json: %.v
-	yosys -p 'synth_ice40 -top top -json $@' $<
+%.json: %.v quad_enc.v
+	yosys -p 'synth_ice40 -top soc -json $@' $^
 
 %.asc: %.json $(PIN_DEF)
 	nextpnr-ice40 --$(DEVICE) --json $< --pcf $(word 2,$^) --asc $@

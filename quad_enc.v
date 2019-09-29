@@ -54,7 +54,6 @@ module quad_enc(
           count <= count + 1;
         else 
           count <= count - 1;
-          faultn <= faultn;
       end
     end
   end
