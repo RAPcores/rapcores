@@ -34,11 +34,15 @@ module soc(
   output LED5,
   output LED6,
   output LED7,
-  output faultn
+  output faultn,
+  input SCK,
+  input SSEL,
+  input MOSI,
+  output MISO
   );
 
 //  reg enc1a, enc1b, enc2a, enc2b;
-  wire [15:0] count1, count2;
+  wire [31:0] count1, count2;
 //  reg resetn;
   wire resetn;
   reg [7:0] resetn_counter = 0;
@@ -53,6 +57,7 @@ module soc(
 
   quad_enc quad1(.resetn(resetn), .clk(clk), .a(enc1a), .b(enc1b), .count(count1), .faultn(fault[0]));
   quad_enc quad2(.resetn(resetn), .clk(clk), .a(enc2a), .b(enc2b), .count(count2), .faultn(fault[1]));
+  spi spi0( .clk(clk), .SCK(SCK), .SSEL(SSEL), .MOSI(MOSI), .MISO(MISO), .count(count1) );
 
 /*
   reg [20:0] cnt;

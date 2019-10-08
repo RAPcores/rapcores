@@ -4,7 +4,7 @@ DEVICE = hx8k
 
 all: $(PROJ).rpt $(PROJ).bin
 
-%.json: %.v quad_enc.v
+%.json: %.v quad_enc.v spi.v
 	yosys -p 'synth_ice40 -top soc -json $@' $^
 
 %.asc: %.json $(PIN_DEF)
