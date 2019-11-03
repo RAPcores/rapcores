@@ -11,3 +11,6 @@
 *.exp
 *.vlog
 *.json
+*.swp
+*.bit
+*.config

@@ -1,30 +1,32 @@
 PROJ = ulticore
-PIN_DEF = hx8kboard.pcf
-DEVICE = hx8k
+TRELLIS=/usr/share/trellis
 
-all: $(PROJ).rpt $(PROJ).bin
+all: ulticore.bit
+
+%_tb.vvp: %_tb.v %.v quad_enc.v
+	iverilog -s testbench -o $@ $^
+
+%_sim: %_tb.vvp
+	vvp -N $<
 
 %.json: %.v quad_enc.v
-	yosys -p 'synth_ice40 -top soc -json $@' $^
+	yosys -p 'synth_ecp5 -json $@' $^
 
-%.asc: %.json $(PIN_DEF)
-	nextpnr-ice40 --$(DEVICE) --json $< --pcf $(word 2,$^) --asc $@
+%_out.config: %.json
+	nextpnr-ecp5 --um5g-25k --package CABGA256 --json $< --textcfg $@ --no-tmdriv
 
-%.bin: %.asc
-	icepack $< $@
+%.bit: %_out.config
+	ecppack --svf ulticore.svf $< $@
 
-%.rpt: %.asc
-	icetime -d $(DEVICE) -mtr $@ $<
+%.svf : %.bit
 
-prog: $(PROJ).bin
-	iceprog $<
+prog: %.svf
+	openocd -f ${TRELLIS}/misc/openocd/ecp5-evn.cfg -c "transport select jtag; init; svf $<; exit"
 
-sudo-prog: $(PROJ).bin
-	@echo 'Executing prog as root!!!'
-	sudo iceprog $<
 
 clean:
-	rm -f $(PROJ).json $(PROJ).asc $(PROJ).rpt $(PROJ).bin
+	rm -f ulticore_tb.vvp testbench.vcd %.json %_out.config
 
-.SECONDARY:
-.PHONY: all prog clean
+.PHONY: %_sim clean prog
+.PRECIOUS: %.json %_out.config %.bit
+
