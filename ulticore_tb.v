@@ -20,20 +20,9 @@ module testbench();
   wire [7:0]led;
   reg faultn;
   wire [31:0] count1, count2, count3, count4, count5, count6, count7, count8;
-//  wire resetn;
-//  wire resetn_tb;
   reg [7:0] resetn_tb_counter = 0;
   reg [7:0] fault;
   reg [20:0] cnt;
-
-/*
-// Reset
-  assign resetn_tb = &resetn_tb_counter;
-
-  always @(posedge clk) begin
-    if (!resetn) resetn_counter <= resetn_counter +1;
-  end
-*/
 
 // Clock stimulation
   always #5 clk = (clk === 1'b0);

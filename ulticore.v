@@ -18,6 +18,8 @@
  *
  */
 
+// Parts lifted from picorv32 - regfile
+
 //`include "quad_enc.v"
 `timescale 1ns/100ps
 
@@ -82,7 +84,6 @@ module ulticore(
   assign {LED5} = count6[3:3];
   assign {LED6} = count7[3:3];
   assign {LED7} = count8[3:3];
-//  assign {LED4, LED5, LED6, LED7} = count2[3:0];
-
 
 endmodule
+

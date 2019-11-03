@@ -15,32 +15,22 @@
  *  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-`include "quad_enc.v"
+`include "pos_count.v"
 `timescale 1ns/100ps
 
 module testbench(
-  input clk, 
-  output enc1a,
-  output enc1b,
-  output enc2a,
-  output enc2b,
-  output LED0,
-  output LED1,
-  output LED2,
-  output LED3,
-  output LED4,
-  output LED5,
-  output LED6,
-  output LED7,
-  output faultn
+    input reg clk
   );
-
-  reg enc1a, enc1b, enc2a, enc2b;
-  wire [15:0] count1, count2;
+//  reg clk;
   wire resetn;
+  reg step;
+  reg dir;
+  reg step_active_high;
+  reg invert_dir;
+  reg [31:0] count;
   reg [7:0] resetn_counter = 0;
-  wire faultn;
-  reg [7:0] fault;
+
+//  always #5 clk = (clk === 1'b0);
 
   assign resetn = &resetn_counter;
 
@@ -48,48 +38,43 @@ module testbench(
     if (!resetn) resetn_counter <= resetn_counter +1;
   end
 
-  quad_enc quad1(.resetn(resetn), .clk(clk), .a(enc1a), .b(enc1b), .count(count1), .faultn(fault[0]));
-  quad_enc quad2(.resetn(resetn), .clk(clk), .a(enc2a), .b(enc2b), .count(count2), .faultn(fault[1]));
-
+  pos_count count1(.resetn(resetn), .clk(clk), .step(step), .dir(dir),
+    .step_active_high(step_active_high), .invert_dir(invert_dir), .count(count));
 
   reg [20:0] cnt;
   initial begin
-    enc1a <= 0;
-    enc1b <= 0;
-    enc2a <= 0;
-    enc2b <= 0;
-    cnt <= 0;
+//    resetn = 0;
+    step <= 0;
+    dir <= 0;
+    step_active_high <= 1;
+    invert_dir <= 0;
+//    cnt <= 0;
   end
 
-  reg [3:0] enccntA = 0;
-  reg [3:0] enccntB = 4;
+//  reg [3:0] enccntA = 0;
+//  reg [3:0] enccntB = 4;
 
 
   always @(posedge clk)
   begin
     if (!resetn) begin
       cnt <= 0;
-      fault[7:2] <= 'b111111;
+//      fault[7:2] <= 'b111111;
     end
-    faultn <= &fault;
+//    faultn <= &fault;
     cnt <= cnt + 1;
     if (cnt <= 20'h90) begin
-      enccntA <= enccntA + 1;
-      enc1a <= enccntA[3];
-      enccntB <= enccntB - 1;
-      enc1b <= enccntB[3];
-      enc2a <= enc1b;
-      enc2b <= enc1a;
+      step <= ~step;
+      dir <= 0;
     end
     else begin
-      cnt <=0;
-      enc2a <= ~enc2a;  //Inject fault in encoder 2
-      enc2b <= ~enc2b;
+      step <= ~step;
+      dir <= 1;
     end
   end
 
-  assign {LED0, LED1, LED2, LED3} = count1[3:0];
-  assign {LED4, LED5, LED6, LED7} = count2[3:0];
+//  assign {LED0, LED1, LED2, LED3} = count1[3:0];
+//  assign {LED4, LED5, LED6, LED7} = count1[7:4];
 
 
 endmodule
