@@ -21,7 +21,7 @@
 //`include "quad_enc.v"
 `timescale 1ns/100ps
 
-module top(
+module ulticore(
   input clk, 
   input enc1a,
   input enc1b,
@@ -51,7 +51,7 @@ module top(
   );
 
 //  reg enc1a, enc1b, enc2a, enc2b;
-  wire [15:0] count1, count2, count3, count4, count5, count6, count7, count8;
+  wire [31:0] count1, count2, count3, count4, count5, count6, count7, count8;
 //  reg resetn;
   wire resetn;
   reg [7:0] resetn_counter = 0;
@@ -73,56 +73,7 @@ module top(
   quad_enc quad7(.resetn(resetn), .clk(clk), .a(enc7a), .b(enc7b), .count(count7), .faultn(fault[6]));
   quad_enc quad8(.resetn(resetn), .clk(clk), .a(enc8a), .b(enc8b), .count(count8), .faultn(fault[7]));
 
-/*
-  reg [20:0] cnt;
-  initial begin
-    enc1a <= 0;
-    enc1b <= 0;
-    enc2a <= 0;
-    enc2b <= 0;
-    enc3a <= 0;
-    enc3b <= 0;
-    enc4a <= 0;
-    enc4b <= 0;
-    enc5a <= 0;
-    enc6b <= 0;
-    enc7a <= 0;
-    enc7b <= 0;
-    enc8a <= 0;
-    enc8b <= 0;
-    enc9a <= 0;
-    enc9b <= 0;
-    cnt <= 0;
-  end
 
-  reg [3:0] enccntA = 0;
-  reg [3:0] enccntB = 4;
-
-
-  always @(posedge clk)
-  begin
-    if (!resetn) begin
-      cnt <= 0;
-      fault[7:2] <= 'b111111;
-    end
-    faultn <= &fault;
-	// Simulation counter
-    cnt <= cnt + 1;
-    if (cnt <= 20'h90) begin
-      enccntA <= enccntA + 1;
-      enc1a <= enccntA[3];
-      enccntB <= enccntB - 1;
-      enc1b <= enccntB[3];
-      enc2a <= enc1b;
-      enc2b <= enc1a;
-    end
-    else begin
-      cnt <=0;
-      enc2a <= ~enc2a;  //Inject fault in encoder 2
-      enc2b <= ~enc2b;
-    end
-  end
-*/
   assign {LED0} = count1[3:3];
   assign {LED1} = count2[3:3];
   assign {LED2} = count3[3:3];

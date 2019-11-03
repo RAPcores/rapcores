@@ -23,10 +23,9 @@ all: ulticore.bit
 prog: %.svf
 	openocd -f ${TRELLIS}/misc/openocd/ecp5-evn.cfg -c "transport select jtag; init; svf $<; exit"
 
-
 clean:
-	rm -f ulticore_tb.vvp testbench.vcd %.json %_out.config
+	rm -f ulticore_tb.vvp testbench.vcd ulticore.json ulticore_out.config
 
-.PHONY: %_sim clean prog
+.PHONY: sim clean prog
 .PRECIOUS: %.json %_out.config %.bit
 
