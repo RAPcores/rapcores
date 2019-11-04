@@ -76,7 +76,7 @@ module ulticore(
 //  reg resetn;
   wire resetn;
   reg [7:0] resetn_counter = 0;
-  wire faultn;
+//  wire faultn;
   wire [7:0] fault;
 
   assign faultn = &fault;

@@ -35,15 +35,21 @@ module pos_counter(
 
   reg [2:0] step_buf;  // Hold sample before compare for stability
   reg [1:0] dir_buf;
-
+  reg active_edge;
+  
   wire step_edge = step_buf[1] ^ step_buf[2];  // Saw a signal level change if a changed
-  wire active_edge = (step & step_active_high) | (step ~| step_active_high); // Is the edge we are triggering on the correct edge?
+	
+//  wire active_edge = ((step & step_active_high) | (step ~| step_active_high)); // Is the edge we are triggering on the correct edge?
   wire stepped = step_edge & active_edge; // If the edge was the right polarity
   wire direction = dir_buf[1] ^ invert_dir;  //Direction determined by buffered input and config register
 
   always @(posedge clk) begin
     step_buf <= {step_buf[1:0], step};  //Shift new step in. Last 2 samples shift to bits 2 and 1 
     dir_buf <= {dir_buf[0], dir};  //Shift new dir in
+    if (step_active_high)	
+	  active_edge <= step;
+    else 
+	  active_edge <= ~step;
 
     if (!resetn) begin
       count <= 0;  //reset count
