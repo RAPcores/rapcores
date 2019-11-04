@@ -3,13 +3,13 @@ TRELLIS=/usr/share/trellis
 
 all: ulticore.bit
 
-%_tb.vvp: %_tb.v %.v quad_enc.v
+%_tb.vvp: %_tb.v %.v quad_enc.v pos_count.v
 	iverilog -s testbench -o $@ $^
 
 %_sim: %_tb.vvp
 	vvp -N $<
 
-%.json: %.v quad_enc.v
+%.json: %.v quad_enc.v pos_count.v
 	yosys -p 'synth_ecp5 -json $@' $^
 
 %_out.config: %.json

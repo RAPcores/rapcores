@@ -20,7 +20,7 @@
  * Converted to 32 bit. Added reset and fault logic. Changed some names to fit us.
  */
 
-module pos_count(
+module pos_counter(
   input resetn,
   input clk,
   input step,
@@ -36,10 +36,10 @@ module pos_count(
   reg [2:0] step_buf;  // Hold sample before compare for stability
   reg [1:0] dir_buf;
 
-  wire edge = step_buf[1] ^ step_buf[2];  // Saw a signal level change if a changed
-  wire active_edge = step & step_active_high; // Is the edge we are triggering on the correct edge?
-  wire stepped = edge & active_edge; // If the edge was the right polarity
-  wire direction = dir_buf[1] & invert_dir;  //Direction determined by buffered input and config register
+  wire step_edge = step_buf[1] ^ step_buf[2];  // Saw a signal level change if a changed
+  wire active_edge = (step & step_active_high) | (step ~| step_active_high); // Is the edge we are triggering on the correct edge?
+  wire stepped = step_edge & active_edge; // If the edge was the right polarity
+  wire direction = dir_buf[1] ^ invert_dir;  //Direction determined by buffered input and config register
 
   always @(posedge clk) begin
     step_buf <= {step_buf[1:0], step};  //Shift new step in. Last 2 samples shift to bits 2 and 1 

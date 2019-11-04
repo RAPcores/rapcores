@@ -19,7 +19,9 @@
 `timescale 1ns/100ps
 
 module testbench(
-    input reg clk
+    input clk,
+    output [31:0] count1,
+    output [31:0] count2
   );
 //  reg clk;
   wire resetn;
@@ -27,7 +29,7 @@ module testbench(
   reg dir;
   reg step_active_high;
   reg invert_dir;
-  reg [31:0] count;
+//  reg [31:0] count;
   reg [7:0] resetn_counter = 0;
 
 //  always #5 clk = (clk === 1'b0);
@@ -38,8 +40,10 @@ module testbench(
     if (!resetn) resetn_counter <= resetn_counter +1;
   end
 
-  pos_count count1(.resetn(resetn), .clk(clk), .step(step), .dir(dir),
-    .step_active_high(step_active_high), .invert_dir(invert_dir), .count(count));
+  pos_counter pos_counter1(.resetn(resetn), .clk(clk), .step(step), .dir(dir),
+    .step_active_high(step_active_high), .invert_dir(invert_dir), .count(count1));
+  pos_counter pos_counter2(.resetn(resetn), .clk(clk), .step(step), .dir(!dir),
+    .step_active_high(step_active_high), .invert_dir(invert_dir), .count(count2));
 
   reg [20:0] cnt;
   initial begin
@@ -48,28 +52,32 @@ module testbench(
     dir <= 0;
     step_active_high <= 1;
     invert_dir <= 0;
-//    cnt <= 0;
+    cnt <= 0;
   end
 
 //  reg [3:0] enccntA = 0;
-//  reg [3:0] enccntB = 4;
+  reg [3:0] step_stim = 0;
 
 
   always @(posedge clk)
   begin
     if (!resetn) begin
       cnt <= 0;
+      dir <= 0;
 //      fault[7:2] <= 'b111111;
     end
-//    faultn <= &fault;
-    cnt <= cnt + 1;
-    if (cnt <= 20'h90) begin
-      step <= ~step;
-      dir <= 0;
-    end
     else begin
-      step <= ~step;
-      dir <= 1;
+//    faultn <= &fault;
+	    cnt <= cnt + 1;
+            step_stim <= step_stim +1;
+	    if (cnt <= 20'h40) begin
+	      step <= step_stim[3];
+	      dir <= 0;
+	    end
+	    else begin
+	      step <= ~step_stim[3];
+	      dir <= 1;
+	    end
     end
   end
 

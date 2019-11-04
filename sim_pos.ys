@@ -1,4 +1,4 @@
 read_verilog -sv pos_count_tb.v
 prep -top testbench
-show pos_count
+show pos_counter
 sim -n 400 -clock clk -vcd pos_count.vcd

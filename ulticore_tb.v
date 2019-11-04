@@ -17,12 +17,30 @@ module testbench();
   reg enc7b;
   reg enc8a;
   reg enc8b;
+  reg step1;
+  reg step2;
+  reg step3;
+  reg step4;
+  reg step5;
+  reg step6;
+  reg step7;
+  reg step8;
+  reg dir1;
+  reg dir2;
+  reg dir3;
+  reg dir4;
+  reg dir5;
+  reg dir6;
+  reg dir7;
+  reg dir8;
   wire [7:0]led;
   reg faultn;
-  wire [31:0] count1, count2, count3, count4, count5, count6, count7, count8;
-  reg [7:0] resetn_tb_counter = 0;
+//  wire [31:0] enc_count1, enc_count2, enc_count3, enc_count4, enc_count5, enc_count6, enc_count7, enc_count8;
+  reg [3:0] resetn_tb_counter = 0;
   reg [7:0] fault;
-  reg [20:0] cnt;
+  reg [20:0] cnt = 0;
+  reg [7:0] invert_dir = 0;
+  reg [7:0] step_active_high = 256;
 
 // Clock stimulation
   always #5 clk = (clk === 1'b0);
@@ -66,36 +84,73 @@ module testbench();
       cnt <= 0;
       fault[7:0] <= 'b11111111;
     end
-    faultn <= &fault;
-    cnt <= cnt + 1;
-    if (cnt <= 20'h90) begin
-      enccntA <= enccntA + 1;
-      enc1a <= enccntA[3];
-      enccntB <= enccntB - 1;
-      enc1b <= enccntB[3];
-      enc2a <= enc1b;
-      enc2b <= enc1a;
-      enc3a <= enc1a;
-      enc3b <= enc1b;
-      enc4a <= enc1b;
-      enc4b <= enc1a;
-      enc5a <= enc1a;
-      enc5b <= enc1b;
-      enc6a <= enc1b;
-      enc6b <= enc1a;
-      enc7a <= enc1a;
-      enc7b <= enc1b;
-      enc8a <= enc1b;
-      enc8b <= enc1a;
-    end
     else begin
-      cnt <=0;
-      enc2a <= ~enc2a;  //Inject fault in encoder 2
-      enc2b <= ~enc2b;
-      enc7a <= ~enc7a;
-      enc7b <= ~enc7b;
+      faultn <= &fault;
+      cnt <= cnt + 1;
+      if (cnt <= 20'h90) begin
+        enccntA <= enccntA + 1;
+        enc1a <= enccntA[3];
+        enccntB <= enccntB - 1;
+        enc1b <= enccntB[3];
+        enc2a <= enc1b;
+        enc2b <= enc1a;
+        enc3a <= enc1a;
+        enc3b <= enc1b;
+        enc4a <= enc1b;
+        enc4b <= enc1a;
+        enc5a <= enc1a;
+        enc5b <= enc1b;
+        enc6a <= enc1b;
+        enc6b <= enc1a;
+        enc7a <= enc1a;
+        enc7b <= enc1b;
+        enc8a <= enc1b;
+        enc8b <= enc1a;
+        step1 <= enccntA[3];
+        step2 <= enccntA[3];
+        step3 <= enccntA[3];
+        step4 <= enccntA[3];
+        step5 <= enccntA[3];
+        step6 <= enccntA[3];
+        step7 <= enccntA[3];
+        step8 <= enccntA[3];
+        dir1 <= 0;
+        dir2 <= 0;
+        dir3 <= 0;
+        dir4 <= 0;
+        dir5 <= 0;
+        dir6 <= 0;
+        dir7 <= 0;
+        dir8 <= 0;
+      end
+      else begin
+//        cnt <=0;
+        enccntA <= enccntA + 1;
+        enc1a <= enccntA[3];
+        enccntB <= enccntB - 1;
+        enc1b <= enccntB[3];
+        enc2a <= ~enc2a;  //Inject fault in encoder 2
+        enc2b <= ~enc2b;
+        enc7a <= ~enc7a;
+        enc7b <= ~enc7b;
+        step1 <= enccntA[3]; //Step opposite direction
+        step2 <= enccntA[3];
+        step3 <= enccntA[3];
+        step4 <= enccntA[3];
+        step5 <= enccntA[3];
+        step6 <= enccntA[3];
+        step7 <= enccntA[3];
+        step8 <= enccntA[3];
+        dir1 <= 1;
+        dir2 <= 1;
+        dir3 <= 1;
+        dir4 <= 1;
+        dir5 <= 1;
+        dir6 <= 1;
+        dir7 <= 1;
+        dir8 <= 1;
+      end
     end
-
   end
 
 
@@ -126,6 +181,24 @@ module testbench();
     .LED4 (led[4] ),
     .LED5 (led[5] ),
     .LED6 (led[6] ),
-    .LED7 (led[7] )
+    .LED7 (led[7] ),
+    .invert_dir (0),
+    .step_active_high (256),
+    .step1 (step1),
+    .step2 (step2),
+    .step3 (step3),
+    .step4 (step4),
+    .step5 (step5),
+    .step6 (step6),
+    .step7 (step7),
+    .step8 (step8),
+    .dir1 (dir1),
+    .dir2 (dir2),
+    .dir3 (dir3),
+    .dir4 (dir4),
+    .dir5 (dir5),
+    .dir6 (dir6),
+    .dir7 (dir7),
+    .dir8 (dir8)
   );
 endmodule
