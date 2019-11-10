@@ -1,3 +1,6 @@
+`timescale 1ns/100ps
+
+
 module testbench();
 
   reg clk;
@@ -34,10 +37,10 @@ module testbench();
   reg dir7;
   reg dir8;
   wire [7:0]led;
-  reg faultn;
+  wire faultn;
 //  wire [31:0] enc_count1, enc_count2, enc_count3, enc_count4, enc_count5, enc_count6, enc_count7, enc_count8;
   reg [3:0] resetn_tb_counter = 0;
-  reg [7:0] fault;
+//  reg [7:0] fault;
   reg [20:0] cnt = 0;
   reg [7:0] invert_dir = 0;
   reg [7:0] step_active_high = 256;
@@ -58,8 +61,8 @@ module testbench();
 
 // Debug output
 
-  always @(fault) begin
-    #1 $display("%b", fault);
+  always @(faultn) begin
+    #1 $display("%b", faultn);
   end
 
   always @(led) begin
@@ -82,12 +85,12 @@ module testbench();
   always @(posedge clk) begin
     if(!resetn_tb) begin
       cnt <= 0;
-      fault[7:0] <= 'b11111111;
+//      fault[7:0] <= 'b11111111;
     end
     else begin
-      faultn <= &fault;
+//      faultn <= &fault;
       cnt <= cnt + 1;
-      if (cnt <= 20'h90) begin
+      if (cnt <= 20'h110) begin
         enccntA <= enccntA + 1;
         enc1a <= enccntA[3];
         enccntB <= enccntB - 1;
@@ -131,8 +134,18 @@ module testbench();
         enc1b <= enccntB[3];
         enc2a <= ~enc2a;  //Inject fault in encoder 2
         enc2b <= ~enc2b;
-        enc7a <= ~enc7a;
-        enc7b <= ~enc7b;
+        enc3a <= enc1b; //Reverse
+        enc3b <= enc1a;
+        enc4a <= enc1b;
+        enc4b <= enc1a;
+        enc5a <= enc1a;
+        enc5b <= enc1b;
+        enc6a <= enc1b;
+        enc6b <= enc1a;
+        enc7a <= enc1a;
+        enc7b <= enc1b;
+        enc8a <= enc1b;
+        enc8b <= enc1a;
         step1 <= enccntA[3]; //Step opposite direction
         step2 <= enccntA[3];
         step3 <= enccntA[3];
@@ -199,6 +212,7 @@ module testbench();
     .dir5 (dir5),
     .dir6 (dir6),
     .dir7 (dir7),
-    .dir8 (dir8)
+    .dir8 (dir8),
+    .faultn(faultn)
   );
 endmodule
