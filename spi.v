@@ -1,15 +1,23 @@
 module spi (
-  input clk,
-  input SCK,
-  input SSEL,
-  input MOSI,
-  output MISO,
-  input wire [31:0] send_data,
-  output byte_received,
-  output [7:0] byte_data_received
+  clk,
+  SCK,
+  SSEL,
+  MOSI,
+  MISO,
+  send_data,
+  byte_received,
+  rx_data,
 );
-
 parameter txwidth = 40;
+parameter rxwidth = 40;
+input clk;
+input SCK;
+input SSEL;
+input MOSI;
+output MISO;
+input [txwidth-1:0] send_data;
+output byte_received;
+output [rxwidth-1:0] rx_data;
 
 // sync SCK to the FPGA clock using a 3-bits shift register
 reg [2:0] SCKr;  
@@ -39,6 +47,8 @@ reg [7:0] byte_data_received;
 
 reg [7:0] last_byte_received;
 
+reg [rxwidth-1:0] rx_data;
+
 always @(posedge clk)
 begin
   if(~SSEL_active)
@@ -49,14 +59,18 @@ begin
     bitcnt <= bitcnt + 6'b00001;
 
     // implement a shift-left register (since we receive the data MSB first)
-    if( bitcnt < 8 )
-      byte_data_received <= {byte_data_received[6:0], MOSI_data};
+    //if( bitcnt < 8 )
+    //  byte_data_received <= {byte_data_received[6:0], MOSI_data};
+    rx_data <= {rx_data[rxwidth-2:0], MOSI_data};
   end
 end
 
-always @(posedge clk) byte_received <= SSEL_active && SCK_risingedge && (bitcnt[2:0]==3'b111);
+//always @(posedge clk) byte_received <= SSEL_active && SCK_risingedge && (bitcnt[2:0]==3'b111);
+//always @(posedge clk) if(byte_received) last_byte_received <= byte_data_received;
 
-always @(posedge clk) if(byte_received) last_byte_received <= byte_data_received;
+always @(posedge clk) byte_received <= SSEL_active && SCK_risingedge && (bitcnt == rxwidth-1);
+
+always @(posedge clk) if(byte_received) last_byte_received <= rx_data[rxwidth-1:rxwidth-8];
 
 // we use the LSB of the data received to control an LED
 //reg LED;
@@ -83,29 +97,15 @@ begin
       
       //if(last_byte_received == 1)
       //  data_sent[31:8] <= 
-      
+
       data_sent[39:8] <= send_data;
       data_sent[7:0] <= last_byte_received;
     end
   else
   if(SCK_fallingedge)
-  begin
-    //if(bitcnt==3'b000)
-    //  data_sent <= 8'h00;  // after that, we send 0s
-/*
-    if(     bitcnt == 8)
-      data_sent <= count[7:0];
-    else if(bitcnt == 16)
-      data_sent <= count[15:8];
-    else if(bitcnt == 24)
-      data_sent <= count[23:16];
-    else if(bitcnt == 32)
-      data_sent <= count[31:24];
-    else
-      data_sent <= {data_sent[6:0], 1'b0};
-*/
-    data_sent <= {data_sent[txwidth-1:0], 1'b0};
-  end
+    begin
+      data_sent <= {data_sent[txwidth-1:0], 1'b0};
+    end
 end
 
 assign MISO = data_sent[txwidth-1];  // send MSB first

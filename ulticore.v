@@ -58,6 +58,8 @@ module soc(
   
   wire byte_received;  // high when a byte has been received
   wire [7:0] byte_data_received;
+  wire [31:0] packet_received;
+  
   reg [31:0] spi_send_data;
   
   wire [7:0] adc_result;
@@ -75,7 +77,7 @@ module soc(
   //quad_enc quad2(.resetn(resetn), .clk(clk), .a(enc2a), .b(enc2b), .count(count2), .faultn(fault[1]));
   //spi spi0( .clk(clk), .SCK(SCK), .SSEL(SSEL), .MOSI(MOSI), .MISO(MISO), .count(count1), .byte_received(byte_received), .byte_data_received(byte_data_received) );
   
-  spi spi0( .clk(clk), .SCK(SCK), .SSEL(SSEL), .MOSI(MOSI), .MISO(MISO), .send_data(spi_send_data), .byte_received(byte_received), .byte_data_received(byte_data_received) );
+  spi spi0(.clk(clk), .SCK(SCK), .SSEL(SSEL), .MOSI(MOSI), .MISO(MISO), .send_data(spi_send_data), .byte_received(byte_received), .rx_data( {byte_data_received, packet_received} ) );
   
   wire invert_dir = 0;
   
@@ -171,8 +173,8 @@ module soc(
       spi_send_data <= pos_count1;
     else if( byte_data_received == 2)
       spi_send_data <= count1;
-    //else if( byte_data_received == 3)
-    //  spi_send_data <= count1;
+    else if( byte_data_received == 3)
+      spi_send_data <= packet_received;
     else
       spi_send_data <= 1234567890;
   end
