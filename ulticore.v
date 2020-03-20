@@ -26,6 +26,8 @@ module soc(
   input enc1b,
   input enc2a,
   input enc2b,
+  input step1,
+  input dir1,
   output LED0,
   output LED1,
   output LED2,
@@ -38,9 +40,14 @@ module soc(
   input SCK,
   input SSEL,
   input MOSI,
-  output MISO
+  output MISO,
+  //input A0_P,
+  //output A0_PWM
   );
 
+  
+  wire [31:0] pos_count1;
+  
 //  reg enc1a, enc1b, enc2a, enc2b;
   wire [31:0] count1, count2;
 //  reg resetn;
@@ -48,6 +55,15 @@ module soc(
   reg [7:0] resetn_counter = 0;
   wire faultn;
   wire [7:0] fault;
+  
+  wire byte_received;  // high when a byte has been received
+  wire [7:0] byte_data_received;
+  reg [31:0] spi_send_data;
+  
+  wire [7:0] adc_result;
+  wire sample_rdy;
+  
+  wire [31:0] response_data;
 
   assign resetn = &resetn_counter;
 
@@ -56,8 +72,53 @@ module soc(
   end
 
   quad_enc quad1(.resetn(resetn), .clk(clk), .a(enc1a), .b(enc1b), .count(count1), .faultn(fault[0]));
-  quad_enc quad2(.resetn(resetn), .clk(clk), .a(enc2a), .b(enc2b), .count(count2), .faultn(fault[1]));
-  spi spi0( .clk(clk), .SCK(SCK), .SSEL(SSEL), .MOSI(MOSI), .MISO(MISO), .count(count1) );
+  //quad_enc quad2(.resetn(resetn), .clk(clk), .a(enc2a), .b(enc2b), .count(count2), .faultn(fault[1]));
+  //spi spi0( .clk(clk), .SCK(SCK), .SSEL(SSEL), .MOSI(MOSI), .MISO(MISO), .count(count1), .byte_received(byte_received), .byte_data_received(byte_data_received) );
+  
+  spi spi0( .clk(clk), .SCK(SCK), .SSEL(SSEL), .MOSI(MOSI), .MISO(MISO), .send_data(spi_send_data), .byte_received(byte_received), .byte_data_received(byte_data_received) );
+  
+  wire invert_dir = 0;
+  
+  pos_counter pos_counter1(.resetn(resetn), .clk(clk), .step(step1), .dir(dir1), .invert_dir(invert_dir), .count(pos_count1));
+
+  /*
+  sigmadelta_adc adc0(
+    .clk(clk),                    
+    .rstn(resetn),                   
+    .digital_out2(adc_result),            
+    .analog_cmp(A0_P),	            
+    .analog_out(A0_PWM),             
+    .sample_rdy(sample_rdy)
+  );
+  */
+  
+/*******
+  ADC_top  #(
+	.ADC_WIDTH(8),
+	.ACCUM_BITS(10),
+	.LPF_DEPTH_BITS(3),
+	.LPF_DEPTH_BITS(0)
+	)
+  adc0 (
+    .clk_in(clk),
+    .rstn(resetn),
+    .digital_out(adc_result),
+    .analog_cmp(A0_P),
+    .analog_out(A0_PWM),
+    .sample_rdy(sample_rdy)
+  );
+  
+  assign {LED0, LED1, LED2, LED3} = adc_result[3:0];
+  
+  *******/
+  
+  //always @(posedge clk)
+  //  response_data = { 24'0, adc_result };
+    
+  
+  assign faultn = 0; //fault[0] & fault[1];
+    
+  
 
 /*
   reg [20:0] cnt;
@@ -96,8 +157,45 @@ module soc(
     end
   end
 */
-  assign {LED0, LED1, LED2, LED3} = count1[3:0];
-  assign {LED4, LED5, LED6, LED7} = count2[3:0];
+
+  
+  //always @(posedge clk)
+  //  if(sample_rdy)
+  //    response_data = { 24'0, adc_result };
+
+  always @(posedge clk)
+  if(byte_received)
+  begin
+    //led_pwm_value = byte_data_received;
+    if( byte_data_received == 1)
+      spi_send_data <= pos_count1;
+    else if( byte_data_received == 2)
+      spi_send_data <= count1;
+    //else if( byte_data_received == 3)
+    //  spi_send_data <= count1;
+    else
+      spi_send_data <= 1234567890;
+  end
+  
+  reg [7:0] led_pwm_value = 240;
+  PWM pwm0 ( .clk(clk), .PWM_in(led_pwm_value), .PWM_out(LED3) );
+  assign {LED0, LED1, LED2} = count1[3:1];
+  ///assign {LED0, LED1, LED2, LED3} = byte_data_received[3:0]; //count1[3:0];
+  
+  //assign {LED4, LED5, LED6, LED7} = count2[3:0];
+  
+  //always @(posedge clk) if(sample_rdy) response_data = { 24'0, adc_result };
+  
+  
+  //assign {LED0, LED1, LED2, LED3} =  byte_data_received[3:0];
+  //assign {LED0, LED1, LED2, LED3} = adc_result[3:0];
+  
+  //always @(posedge clk)
+  //  if(sample_rdy)
+  //    assign {LED0, LED1, LED2, LED3} = adc_result[3:0];
+    //else
+      //assign {LED0, LED1, LED2, LED3} = 4'b0000;
+      //response_data = { 24'0, adc_result };
 
 
 endmodule

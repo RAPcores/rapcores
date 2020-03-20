@@ -4,7 +4,7 @@ TRELLIS=/usr/share/trellis
 
 all: ${PROJ}.bit
 
-%.json: %.v quad_enc.v spi.v
+%.json: %.v quad_enc.v spi.v pwm.v sigmadelta_adc.v adc_top.v box_ave.v pos_count.v
 	yosys -p "synth_ecp5 -top soc -json $@" $^
 
 %_out.config: %.json
