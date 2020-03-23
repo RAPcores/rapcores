@@ -21,13 +21,22 @@
  */
 
 module quad_enc(
-  input resetn,
-  input clk,
-  input a,
-  input b,
-  output reg faultn,
-  output reg [31:0] count
+  resetn,
+  clk,
+  a,
+  b,
+  faultn,
+  count,
+  multiplier,
   );
+  
+  input wire resetn;
+  input wire  clk;
+  input wire  a;
+  input wire  b;
+  output reg faultn;
+  output reg [31:0] count;
+  input [7:0] multiplier;
 
 //  wire faultn;
 
@@ -51,9 +60,9 @@ module quad_enc(
         faultn <= 0;
       if (step) begin
         if (direction) 
-          count <= count + 1;
+          count <= count + multiplier;
         else 
-          count <= count - 1;
+          count <= count - multiplier;
       end
     end
   end

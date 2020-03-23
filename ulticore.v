@@ -66,14 +66,23 @@ module soc(
   wire sample_rdy;
   
   wire [31:0] response_data;
+  
+  reg [7:1] step_multiplier = 5;
+  reg [7:1] quad_multiplier = 4;
+  
+  reg [7:0] led_pwm_value; // = 240;
 
   assign resetn = &resetn_counter;
 
   always @(posedge clk) begin
     if (!resetn) resetn_counter <= resetn_counter +1;
   end
+  
+  wire app_resetn;
+  
+  assign faultn = 0; //fault[0] & fault[1];
 
-  quad_enc quad1(.resetn(resetn), .clk(clk), .a(enc1a), .b(enc1b), .count(count1), .faultn(fault[0]));
+  quad_enc quad1(.resetn(app_resetn), .clk(clk), .a(enc1a), .b(enc1b), .count(count1), .faultn(fault[0]), .multiplier(quad_multiplier) );
   //quad_enc quad2(.resetn(resetn), .clk(clk), .a(enc2a), .b(enc2b), .count(count2), .faultn(fault[1]));
   //spi spi0( .clk(clk), .SCK(SCK), .SSEL(SSEL), .MOSI(MOSI), .MISO(MISO), .count(count1), .byte_received(byte_received), .byte_data_received(byte_data_received) );
   
@@ -81,7 +90,7 @@ module soc(
   
   wire invert_dir = 0;
   
-  pos_counter pos_counter1(.resetn(resetn), .clk(clk), .step(step1), .dir(dir1), .invert_dir(invert_dir), .count(pos_count1));
+  pos_counter pos_counter1(.resetn(app_resetn), .clk(clk), .step(step1), .dir(dir1), .invert_dir(invert_dir), .count(pos_count1), .multiplier(step_multiplier));
 
   /*
   sigmadelta_adc adc0(
@@ -117,8 +126,6 @@ module soc(
   //always @(posedge clk)
   //  response_data = { 24'0, adc_result };
     
-  
-  assign faultn = 0; //fault[0] & fault[1];
     
   
 
@@ -166,22 +173,95 @@ module soc(
   //    response_data = { 24'0, adc_result };
 
   always @(posedge clk)
+  begin
+  if (!resetn)
+  begin
+    //step_multiplier = 5;
+    //quad_multiplier = 4;
+    led_pwm_value = 240;
+    LED0 = 1;
+    LED1 = 1;
+    LED2 = 1;
+    LED3 = 1;
+    app_resetn = 1;
+  end
   if(byte_received)
   begin
     //led_pwm_value = byte_data_received;
+    
+    // 1 - Read Step Position
     if( byte_data_received == 1)
       spi_send_data <= pos_count1;
+    
+    // 2 - Read Quadrature
     else if( byte_data_received == 2)
       spi_send_data <= count1;
+      
+    // 3 - SPI Echo
     else if( byte_data_received == 3)
       spi_send_data <= packet_received;
+      
+    // 4 - Write Quadrature Numerator
+    else if( byte_data_received == 4)
+      quad_multiplier <= packet_received[7:0];
+    
+    // 5 - Write Step Numerator
+    else if( byte_data_received == 5)
+      step_multiplier <= packet_received[7:0];
+      
+    // 6 - Read Quadrature Numerator  
+    else if( byte_data_received == 6)
+      spi_send_data <= { 24'0, quad_multiplier };
+      
+    // 7 - Read Step Numerator
+    else if( byte_data_received == 7)
+      spi_send_data <= { 24'0, step_multiplier };
+      
+    // 8 - Reset
+    else if( byte_data_received == 8)
+    begin
+      app_resetn <= 0;
+      LED1 <= 0;
+    end
+
+    // 9 - ResetN = 1
+    else if( byte_data_received == 9)
+    begin
+      app_resetn <= 1;
+      LED1 <= 1;
+    end
+      
+    // 10 - LED3 PWM
+    else if( byte_data_received == 10)
+      led_pwm_value <= packet_received[7:0];
+      
+    // 11 - LED3
+    else if( byte_data_received == 11)
+      LED3 <= 1;
+      
+    // 12- LED3
+    else if( byte_data_received == 12)
+      LED3 <= 0;
+      
+    // 13- LED3
+    else if( byte_data_received == 13)
+      LED3 <= packet_received[0];
+      
+    // 14 - Read app_resetn
+    else if( byte_data_received == 14)
+      spi_send_data <= { 31'0, app_resetn };
+      
+    // Default - Read 1234567890
     else
       spi_send_data <= 1234567890;
   end
+  end
+
+  //Commented Out 3/23/20 4:11PM
+  //PWM pwm0 ( .clk(clk), .PWM_in(led_pwm_value), .PWM_out(LED3) );
+  //assign {LED0, LED1, LED2} = count1[3:1];
+  //
   
-  reg [7:0] led_pwm_value = 240;
-  PWM pwm0 ( .clk(clk), .PWM_in(led_pwm_value), .PWM_out(LED3) );
-  assign {LED0, LED1, LED2} = count1[3:1];
   ///assign {LED0, LED1, LED2, LED3} = byte_data_received[3:0]; //count1[3:0];
   
   //assign {LED4, LED5, LED6, LED7} = count2[3:0];
