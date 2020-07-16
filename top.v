@@ -19,34 +19,34 @@ module stepper (
     // increment the blink_counter every clock
     always @(posedge CLK) begin
         blink_counter <= blink_counter + 1;
-        if (blink_counter >= 10000000) begin
+        if (blink_counter >= 1000000) begin
             blink_counter <= 0;
             phase_ct <= phase_ct + 1;
 
             case (phase_ct%4)
                 0: begin // 1010
                     phase_a1 <= 1'b1;
-                    phase_a2 <= 0;
-                    phase_b1 <= 1;
-                    phase_b2 <= 0;
+                    phase_a2 <= 1'b0;
+                    phase_b1 <= 1'b1;
+                    phase_b2 <= 1'b0;
                 end
                 1:  begin // 0110
-                    phase_a1 <= 0;
-                    phase_a2 <= 1;
-                    phase_b1 <= 1;
-                    phase_b2 <= 0;
+                    phase_a1 <= 1'b0;
+                    phase_a2 <= 1'b1;
+                    phase_b1 <= 1'b1;
+                    phase_b2 <= 1'b0;
                 end
                 2:  begin //0101
-                    phase_a1 <= 0;
-                    phase_a2 <= 1;
-                    phase_b1 <= 0;
-                    phase_b2 <= 1;
+                    phase_a1 <= 1'b0;
+                    phase_a2 <= 1'b1;
+                    phase_b1 <= 1'b0;
+                    phase_b2 <= 1'b1;
                 end
                 3:  begin //1001
-                    phase_a1 <= 1;
-                    phase_a2 <= 0;
-                    phase_b1 <= 0;
-                    phase_b2 <= 1;
+                    phase_a1 <= 1'b1;
+                    phase_a2 <= 1'b0;
+                    phase_b1 <= 1'b0;
+                    phase_b2 <= 1'b1;
                 end
             endcase
         end
@@ -81,8 +81,8 @@ module top (
                 //.pwm_a (PIN_7),
                 //.pwm_b (PIN_13));
     stepper s1 (.CLK (CLK),
-                .phase_a1 (PIN_24),
-                .phase_a2 (PIN_23),
-                .phase_b1 (PIN_22),
-                .phase_b2 (PIN_21));
+                 .phase_a1 (PIN_24),
+                 .phase_a2 (PIN_23),
+                 .phase_b1 (PIN_22),
+                 .phase_b2 (PIN_21));
 endmodule
