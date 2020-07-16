@@ -1,22 +1,14 @@
 module stepper (
     input CLK,    // 16MHz clock
-    output LED,   // User/boot LED next to power LED
-    output USBPU,  // USB pull-up resistor
     output phase_a1, // Phase A
     output phase_a2, // Phase A
     output phase_b1, // Phase B
     output phase_b2 // Phase B
 );
 
-    // drive USB pull-up resistor to '0' to disable USB
-    assign USBPU = 0;
-
     // keep track of time and location in blink_pattern
     reg [25:0] blink_counter;
     reg phase_a1, phase_a2, phase_b1, phase_b2;
-
-    // pattern that will be flashed over the LED over time
-    wire [31:0] blink_pattern = 32'b101010001110111011100010101;
 
     // increment the blink_counter every clock
     always @(posedge CLK) begin
@@ -50,8 +42,6 @@ module stepper (
         endcase
     end
 
-    // light up the LED according to the pattern
-    assign LED = blink_pattern[blink_counter[25:21]];
 endmodule
 
 module top (
@@ -64,9 +54,10 @@ module top (
     output PIN_21 // Phase B
 );
 
+    // drive USB pull-up resistor to '0' to disable USB
+    assign USBPU = 0;
+
     stepper s0 (.CLK (CLK),
-                .LED (LED),
-                .USBPU (USBPU),
                 .phase_a1 (PIN_24),
                 .phase_a2 (PIN_23),
                 .phase_b1 (PIN_22),
