@@ -4,8 +4,8 @@ module stepper (
     output phase_a2, // Phase A
     output phase_b1, // Phase B
     output phase_b2, // Phase B
-    //output pwm_a,
-    //output pwm_b,
+    output pwm_a,
+    output pwm_b,
 );
 
     // keep track of time and location in blink_pattern
@@ -13,13 +13,13 @@ module stepper (
     wire phase_a1, phase_a2, phase_b1, phase_b2; //, pwm_a, pwm_b, stby;
 
     reg [31:0] phase_ct;
-    //assign pwm_a = 1; // phase a pwm TODO: microstep
-    //assign pwm_b = 1; // phase b pwm
+    assign pwm_a = 1; // phase a pwm TODO: microstep
+    assign pwm_b = 1; // phase b pwm
 
     // increment the blink_counter every clock
     always @(posedge CLK) begin
         blink_counter <= blink_counter + 1;
-        if (blink_counter >= 1000000) begin
+        if (blink_counter >= 100000) begin
             blink_counter <= 0;
             phase_ct <= phase_ct + 1;
 
@@ -66,8 +66,8 @@ module top (
     output PIN_23,
     output PIN_22,
     output PIN_21,
-    //output PIN_7,
-    //output PIN_13,
+    output PIN_7,
+    output PIN_13,
 );
 
     // drive USB pull-up resistor to '0' to disable USB
@@ -77,12 +77,14 @@ module top (
                 .phase_a1 (PIN_8),
                 .phase_a2 (PIN_9),
                 .phase_b1 (PIN_11),
-                .phase_b2 (PIN_12));
-                //.pwm_a (PIN_7),
-                //.pwm_b (PIN_13));
+                .phase_b2 (PIN_12),
+                .pwm_a (PIN_7),
+                .pwm_b (PIN_13));
     stepper s1 (.CLK (CLK),
                  .phase_a1 (PIN_24),
                  .phase_a2 (PIN_23),
                  .phase_b1 (PIN_22),
-                 .phase_b2 (PIN_21));
+                 .phase_b2 (PIN_21),
+                 .pwm_a (),
+                 .pwm_b ());
 endmodule
