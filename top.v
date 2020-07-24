@@ -5,15 +5,14 @@ module stepper (
     output phase_b1, // Phase B
     output phase_b2, // Phase B
     output pwm_a,
-    output pwm_b,
-);
+    output pwm_b);
 
     // keep track of time and location in blink_pattern
     reg [25:0] blink_counter;
     wire phase_a1, phase_a2, phase_b1, phase_b2; //, pwm_a, pwm_b, stby;
 
     reg [2:0] microsteps;
-    assign microsteps = 1;
+    assign microsteps = 2;
 
     reg [31:0] phase_ct;
     assign pwm_a = 1; // phase a pwm TODO: microstep
@@ -136,8 +135,7 @@ module top (
     output PIN_22,
     output PIN_21,
     output PIN_7,
-    output PIN_13,
-);
+    output PIN_13);
 
     // drive USB pull-up resistor to '0' to disable USB
     assign USBPU = 0;
