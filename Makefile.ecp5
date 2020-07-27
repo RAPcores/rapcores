@@ -1,5 +1,5 @@
 PROJ=ulticore
-PIN_DEF = ecp5evn.lpf
+PIN_DEF = boards/ecp5evn.lpf
 TRELLIS=/usr/share/trellis
 
 all: ${PROJ}.bit

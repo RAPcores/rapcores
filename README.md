@@ -1,6 +1,18 @@
-# TinyFPGA-Stepper
-WIP and PoC for stepper motor control using TinyFPGA, to merge with Ulticores
+# Ulticores (RAPcore)
 
+
+
+
+
+
+## Build WIP
+
+`make -f <makefile>`
+e.g
+`make -f Makefile.ecp5`
+
+Program:
+`make prog -f Makefile.ecp5`
 
 ## Reproducability
 

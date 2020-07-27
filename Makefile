@@ -1,5 +1,5 @@
 PROJ = ulticore
-PIN_DEF = hx8kboard.pcf
+PIN_DEF = boards/hx8kboard.pcf
 DEVICE = hx8k
 
 all: $(PROJ).rpt $(PROJ).bin
