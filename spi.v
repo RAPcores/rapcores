@@ -8,8 +8,8 @@ module spi (
   byte_received,
   rx_data,
 );
-parameter txwidth = 40;
-parameter rxwidth = 40;
+parameter txwidth = 8;
+parameter rxwidth = 8;
 input clk;
 input SCK;
 input SSEL;
@@ -20,14 +20,14 @@ output byte_received;
 output [rxwidth-1:0] rx_data;
 
 // sync SCK to the FPGA clock using a 3-bits shift register
-reg [2:0] SCKr;  
+reg [2:0] SCKr;
 always @(posedge clk) SCKr <= {SCKr[1:0], SCK};
 
 wire SCK_risingedge = (SCKr[2:1]==2'b01);  // now we can detect SCK rising edges
 wire SCK_fallingedge = (SCKr[2:1]==2'b10);  // and falling edges
 
 // same thing for SSEL
-reg [2:0] SSELr;  
+reg [2:0] SSELr;
 always @(posedge clk) SSELr <= {SSELr[1:0], SSEL};
 
 wire SSEL_active = ~SSELr[1];  // SSEL is active low
@@ -90,15 +90,15 @@ begin
   if(SSEL_startmessage)
     begin
       //data_sent <= { cnt, 24'0 }; //{ cnt, 24'0 }; //count; //cnt;  // first byte sent in a message is the message count
-      
+
       //data_sent[31:24] <= cnt;
       //data_sent[23:16] <= last_byte_received;
       //data_sent[15:0] <= byte_data_received;
-      
-      //if(last_byte_received == 1)
-      //  data_sent[31:8] <= 
 
-      data_sent[39:8] <= send_data;
+      //if(last_byte_received == 1)
+      //  data_sent[31:8] <=
+
+      data_sent[7:0] <= send_data;
       data_sent[7:0] <= last_byte_received;
     end
   else

@@ -14,16 +14,20 @@ module top (
     output PIN_22,
     output PIN_21,
     output PIN_7,
-    output PIN_13);
+    output PIN_13,
+    input PIN_14,
+    input PIN_15,
+    input PIN_16,
+    input PIN_17);
 
     // drive USB pull-up resistor to '0' to disable USB
     assign USBPU = 0;
 
     wire byte_received;  // high when a byte has been received
     wire [7:0] byte_data_received;
-    wire [31:0] packet_received;
+    wire [7:0] packet_received;
 
-    reg [31:0] spi_send_data;
+    reg [7:0] spi_send_data;
 
     stepper s0 (.CLK (CLK),
                 .phase_a1 (PIN_8),
@@ -52,13 +56,11 @@ module top (
 
 
     always @(posedge byte_received) begin
+        PIN_23 <= ~PIN_23;
         case (byte_data_received)
             //led_pwm_value = byte_data_received;
-
-            // 1 - Read Step Position
             1: PIN_24 <= 1;
 
-            // 2 - Read Quadrature
             2: PIN_24 <= 0;
         endcase
     end
