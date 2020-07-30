@@ -1,23 +1,15 @@
 module spi (
-  clk,
-  SCK,
-  SSEL,
-  MOSI,
-  MISO,
-  send_data,
-  byte_received,
-  rx_data,
+  input clk,
+  input SCK,
+  input SSEL,
+  input MOSI,
+  output MISO,
+  input send_data,
+  output byte_received,
+  output byte_data_received,
 );
 parameter txwidth = 8;
 parameter rxwidth = 8;
-input clk;
-input SCK;
-input SSEL;
-input MOSI;
-output MISO;
-input [txwidth-1:0] send_data;
-output byte_received;
-output [rxwidth-1:0] rx_data;
 
 // sync SCK to the FPGA clock using a 3-bits shift register
 reg [2:0] SCKr;
@@ -40,10 +32,9 @@ wire MOSI_data = MOSIr[1];
 
 
 // we handle SPI in 8-bits format, so we need a 3 bits counter to count the bits as they come in
-reg [5:0] bitcnt;
+reg [2:0] bitcnt;
 
 reg byte_received;  // high when a byte has been received
-reg [7:0] byte_data_received;
 
 reg [7:0] last_byte_received;
 
@@ -52,25 +43,25 @@ reg [rxwidth-1:0] rx_data;
 always @(posedge clk)
 begin
   if(~SSEL_active)
-    bitcnt <= 6'b00000;
+    bitcnt <= 3'b000;
   else
   if(SCK_risingedge)
   begin
-    bitcnt <= bitcnt + 6'b00001;
+    bitcnt <= bitcnt + 3'b001;
 
     // implement a shift-left register (since we receive the data MSB first)
     //if( bitcnt < 8 )
-    //  byte_data_received <= {byte_data_received[6:0], MOSI_data};
-    rx_data <= {rx_data[rxwidth-2:0], MOSI_data};
+    byte_data_received <= {byte_data_received[rxwidth-2:0], MOSI_data};
+    //rx_data <= {rx_data[rxwidth-2:0], MOSI_data};
   end
 end
 
-//always @(posedge clk) byte_received <= SSEL_active && SCK_risingedge && (bitcnt[2:0]==3'b111);
-//always @(posedge clk) if(byte_received) last_byte_received <= byte_data_received;
+always @(posedge clk) byte_received <= SSEL_active && SCK_risingedge && (bitcnt[2:0]==3'b111);
+always @(posedge clk) if(byte_received) last_byte_received <= byte_data_received;
 
-always @(posedge clk) byte_received <= SSEL_active && SCK_risingedge && (bitcnt == rxwidth-1);
+//always @(posedge clk) byte_received <= SSEL_active && SCK_risingedge && (bitcnt == rxwidth-1);
 
-always @(posedge clk) if(byte_received) last_byte_received <= rx_data[rxwidth-1:rxwidth-8];
+//always @(posedge clk) if(byte_received) last_byte_received <= rx_data[rxwidth-1:rxwidth-8];
 
 // we use the LSB of the data received to control an LED
 //reg LED;
