@@ -29,7 +29,7 @@ module top (
     assign USBPU = 0;
 
     wire byte_received;  // high when a byte has been received
-    wire [7:0] byte_data_received;
+    reg [7:0] byte_data_received;
     wire [7:0] packet_received;
 
     reg [7:0] spi_send_data;
@@ -62,10 +62,10 @@ module top (
 
     always @(posedge byte_received) begin
         PIN_20 <= ~PIN_20;
-        PIN_24 <= byte_data_received[1];
-        PIN_23 <= byte_data_received[2];
-        PIN_22 <= byte_data_received[3];
-        PIN_21 <= byte_data_received[4];
+        PIN_24 = byte_data_received[0];
+        PIN_23 = byte_data_received[1];
+        PIN_22 = byte_data_received[2];
+        spi_send_data <= byte_data_received;
     end
 
 endmodule
