@@ -5,7 +5,7 @@ module spi (
   input MOSI,
   output MISO,
   input [7:0] send_data,
-  output byte_received,
+  output reg byte_received,
   output [7:0] byte_data_received,
 );
 parameter txwidth = 8;
@@ -30,15 +30,8 @@ wire SSEL_endmessage = (SSELr[2:1]==2'b01);  // message stops at rising edge
 reg [1:0] MOSIr;  always @(posedge clk) MOSIr <= {MOSIr[0], MOSI};
 wire MOSI_data = MOSIr[1];
 
-
 // we handle SPI in 8-bits format, so we need a 3 bits counter to count the bits as they come in
 reg [2:0] bitcnt;
-
-reg byte_received;  // high when a byte has been received
-
-reg [7:0] last_byte_received;
-
-reg [rxwidth-1:0] rx_data;
 
 always @(posedge clk)
 begin
@@ -51,25 +44,16 @@ begin
 
     // implement a shift-left register (since we receive the data MSB first)
     byte_data_received <= {byte_data_received[rxwidth-2:0], MOSI_data};
+
+    // Peripheral Output
+    MISO <= send_data[7];  // send MSB first
   end
+  if (SCK_fallingedge) begin
+    send_data <= {send_data[6:0], 1'b0};
+  end
+  byte_received <= SSEL_active && SCK_risingedge && (bitcnt[2:0]==3'b111);
 end
 
-always @(posedge clk) byte_received <= SSEL_active && SCK_risingedge && (bitcnt[2:0]==3'b111);
-always @(posedge clk) if(byte_received) last_byte_received <= byte_data_received;
-
-reg [txwidth-1:0] data_sent;
-
-reg [7:0] cnt;
-always @(posedge clk) if(SSEL_startmessage) cnt<=cnt+8'h1;  // count the messages
-
-always @(posedge clk)
-if(SSEL_active)
-begin
-  if(SCK_fallingedge)
-  send_data <= {send_data[6:0], 1'b0};
-end
-
-assign MISO = send_data[txwidth-1];  // send MSB first
 // we assume that there is only one slave on the SPI bus
 // so we don't bother with a tri-state buffer for MISO
 // otherwise we would need to tri-state MISO when SSEL is inactive

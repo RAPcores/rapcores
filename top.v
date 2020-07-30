@@ -30,7 +30,6 @@ module top (
 
     wire byte_received;  // high when a byte has been received
     reg [7:0] byte_data_received;
-    wire [7:0] packet_received;
 
     reg [7:0] spi_send_data;
 
