@@ -44,7 +44,7 @@ module top (
     // The system operates on 32 bit little endian words
     reg [31:0] word_send_data;
     wire [31:0] word_data_received;
-    reg word_received;
+    wire word_received;
     spi_packet word_proc (
                 .clk(CLK),
                 .send_data(spi_send_data),

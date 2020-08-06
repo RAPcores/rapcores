@@ -6,8 +6,7 @@ module spi (
   output reg MISO,
   input [7:0] send_data,
   output byte_received,
-  output [7:0] byte_data_received,
-);
+  output [7:0] byte_data_received);
 parameter txwidth = 8;
 parameter rxwidth = 8;
 
@@ -79,7 +78,7 @@ module spi_packet(
   output [7:0] send_data,
   output [31:0] word_send_data,
   input byte_received,
-  output reg word_received,
+  output word_received,
   output [7:0] byte_data_received,
   output [31:0] word_data_received,
   output LED1,
@@ -89,17 +88,15 @@ module spi_packet(
 reg [2:0] byte_count;
 
 always @(posedge byte_received) begin
-    byte_count <= byte_count + 3'b001;
-    word_data_received <= {byte_received[7:0], word_data_received[31:7]};
-    LED1 <= byte_count[0];
-    LED2 <= byte_count[1];
-    if (byte_count[2:0]==3'b100) begin
-        LED3 <= ~LED3;
-        byte_count <= 3'b000;
-
-    end
+    if (byte_count[2:0]==3'b100)
+        byte_count = 3'b001;
+    else
+        byte_count = byte_count + 3'b001;
+    word_data_received = {byte_data_received[7:0], word_data_received[31:7]};
+    LED1 = byte_count[0];
+    LED2 = byte_count[1];
 end
 
-assign word_received = (byte_count[2:0]==3'b100);
+always @(posedge clk) word_received <= (byte_count[2:0]==3'b100);
 
 endmodule
