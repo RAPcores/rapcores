@@ -8,7 +8,9 @@ module stepper (
     output pwm_b,
     input [23:0] duration,
     input start,
-    output LED
+    output LED,
+    input [23:0] clk_divisor,
+    input [2:0] microsteps
 );
 
   // keep track of time and location in blink_pattern
@@ -16,19 +18,21 @@ module stepper (
   reg [23:0] last_step_tick = 0;
   wire phase_a1, phase_a2, phase_b1, phase_b2;  //, pwm_a, pwm_b, stby;
 
-  reg [2:0] microsteps;
-  assign microsteps = 2;
-
   reg [31:0] phase_ct;
   assign pwm_a = 1;  // phase a pwm TODO: microstep
   assign pwm_b = 1;  // phase b pwm
 
+  reg interp_clock;
+  reg [24:0] clk_accum = 0;
+
+  reg [24:0] step_freq;
+  assign step_freq = ((50000) / microsteps);
+
   // increment the move_ticks every clock
   always @(posedge CLK) begin
     move_ticks <= move_ticks + 1;
-    LED <= (move_ticks < duration);
-    if (((move_ticks - last_step_tick) >= (50000 / microsteps)) && start) begin
-      last_step_ticks <= move_ticks;
+    if ((move_ticks) >= step_freq && start) begin
+      move_ticks <= 0;
       phase_ct <= phase_ct + 1;
 
       if (microsteps == 0 || microsteps == 1) begin
@@ -124,10 +128,6 @@ module stepper (
           end
         endcase
       end
-    end else begin
-      start <= 0;
-      last_step_tick <= 0;
-      move_ticks <= 0;
     end
   end
 

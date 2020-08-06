@@ -60,6 +60,8 @@ module top (
   // TODO: Generate statement?
   reg [23:0] move_duration;
   reg move_start = 0;
+  reg [23:0] clock_divisior = 1;
+  reg [2:0] microsteps = 1;
   stepper s0 (.CLK (CLK),
                 .phase_a1 (PIN_8),
                 .phase_a2 (PIN_9),
@@ -69,15 +71,25 @@ module top (
                 .pwm_b (PIN_13),
                 .duration (move_duration),
                 .start (move_start),
-                .LED (PIN_24));
+                .LED (PIN_24),
+                .clk_divisor (clock_divisor),
+                .microsteps (microsteps));
 
   always @(posedge word_received) begin
     LED <= !LED;
-    if (word_data_received[31:24] == 8'h01) begin
-      PIN_21 <= ~PIN_21;
-      move_duration[23:0] = word_data_received[23:0];
-      move_start = 1;
-    end
+    case (word_data_received[31:24])
+      1: begin
+        PIN_21 <= ~PIN_21;
+        move_duration[23:0] = word_data_received[23:0];
+        move_start = 1;
+      end
+      3: begin
+        clock_divisor[23:0] = word_data_received[23:0];
+      end
+      4: begin
+        microsteps[2:0] = word_data_received[2:0];
+      end
+    endcase
     PIN_23 <= word_data_received[1];
     PIN_22 <= word_data_received[2];
     word_send_data[31:0] = word_data_received[31:0];
