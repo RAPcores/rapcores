@@ -60,20 +60,21 @@ module top (
   // TODO: Generate statement?
   reg [23:0] move_duration;
   reg move_start = 0;
-  reg [23:0] clock_divisior = 1;
+  reg [23:0] clock_divisior = 24'hc00;
   reg [2:0] microsteps = 1;
-  stepper s0 (.CLK (CLK),
-                .phase_a1 (PIN_8),
+  reg step;
+  reg dir;
+  stepper s0 (.phase_a1 (PIN_8),
                 .phase_a2 (PIN_9),
                 .phase_b1 (PIN_11),
                 .phase_b2 (PIN_12),
                 .pwm_a (PIN_7),
                 .pwm_b (PIN_13),
-                .duration (move_duration),
-                .start (move_start),
-                .LED (PIN_24),
-                .clk_divisor (clock_divisor),
+                .step (step),
+                .dir (dir),
                 .microsteps (microsteps));
+
+
 
   always @(posedge word_received) begin
     LED <= !LED;
@@ -84,15 +85,29 @@ module top (
         move_start = 1;
       end
       3: begin
-        clock_divisor[23:0] = word_data_received[23:0];
+        clock_divisor = word_data_received[23:0];
       end
       4: begin
+        // TODO needs to be power of two
         microsteps[2:0] = word_data_received[2:0];
       end
     endcase
     PIN_23 <= word_data_received[1];
     PIN_22 <= word_data_received[2];
     word_send_data[31:0] = word_data_received[31:0];
+  end
+
+  reg step_clock;
+  reg [31:0] clkaccum = 0;
+  always @(posedge CLK) begin
+    if (clkaccum >= 50000) begin
+      step <= 1;
+      clkaccum <= 0;
+    end
+    else begin
+      clkaccum <= clkaccum + 1;
+      step <= 0;
+    end
   end
 
 endmodule
