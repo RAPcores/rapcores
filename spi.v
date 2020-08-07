@@ -1,3 +1,5 @@
+`default_nettype none
+
 module spi (
     input            clk,
     input            SCK,

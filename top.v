@@ -1,3 +1,5 @@
+`default_nettype none
+
 `include "stepper.v"
 `include "spi.v"
 
@@ -30,7 +32,7 @@ module top (
   // SPI Initialization
   // The standard unit of transfer is 8 bits, MSB
   reg byte_received;  // high when a byte has been received
-  wire [7:0] byte_data_received;
+  reg [7:0] byte_data_received;
   reg [7:0] spi_send_data;
   spi spi0 (.clk(CLK),
         .SCK(PIN_1),
@@ -45,7 +47,7 @@ module top (
   // The system operates on 32 bit little endian words
   // This should make it easier to send 32 bit chunks from the host controller
   reg [31:0] word_send_data;
-  wire [31:0] word_data_received;
+  reg [31:0] word_data_received;
   reg word_received;
   spi_packet word_proc (
                 .clk(CLK),
@@ -60,7 +62,7 @@ module top (
   // TODO: Generate statement?
   reg [23:0] move_duration;
   reg move_start = 0;
-  reg [23:0] clock_divisior = 24'hc00;
+  reg [23:0] clock_divisor = 24'd50000;
   reg [2:0] microsteps = 1;
   reg step;
   reg dir;
@@ -85,11 +87,11 @@ module top (
         move_start = 1;
       end
       3: begin
-        clock_divisor = word_data_received[23:0];
+        clock_divisor[23:0] <= word_data_received[23:0];
       end
       4: begin
         // TODO needs to be power of two
-        microsteps[2:0] = word_data_received[2:0];
+        microsteps[2:0] <= word_data_received[2:0];
       end
     endcase
     PIN_23 <= word_data_received[1];
@@ -100,7 +102,7 @@ module top (
   reg step_clock;
   reg [31:0] clkaccum = 0;
   always @(posedge CLK) begin
-    if (clkaccum >= 50000) begin
+    if (clkaccum[23:0] >= clock_divisor[23:0]) begin
       step <= 1;
       clkaccum <= 0;
     end

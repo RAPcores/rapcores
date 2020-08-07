@@ -1,3 +1,5 @@
+`default_nettype none
+
 module stepper (
     output phase_a1,  // Phase A
     output phase_a2,  // Phase A
@@ -9,8 +11,6 @@ module stepper (
     input dir,
     input [2:0] microsteps
 );
-
-  wire phase_a1, phase_a2, phase_b1, phase_b2;  //, pwm_a, pwm_b, stby;
 
   reg [31:0] phase_ct;
   assign pwm_a = 1;  // phase a pwm TODO: microstep
