@@ -34,7 +34,7 @@ module top (
   reg byte_received;  // high when a byte has been received
   reg [7:0] byte_data_received;
   reg [7:0] spi_send_data;
-  spi spi0 (.clk(CLK),
+  SPI spi0 (.clk(CLK),
         .SCK(PIN_1),
         .SSEL(PIN_2),
         .MOSI(PIN_3),
@@ -66,7 +66,7 @@ module top (
   reg [2:0] microsteps = 1;
   reg step;
   reg dir;
-  stepper s0 (.phase_a1 (PIN_8),
+  DualHBridge s0 (.phase_a1 (PIN_8),
                 .phase_a2 (PIN_9),
                 .phase_b1 (PIN_11),
                 .phase_b2 (PIN_12),

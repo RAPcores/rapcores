@@ -1,6 +1,6 @@
 `default_nettype none
 
-module stepper (
+module DualHBridge (
     output phase_a1,  // Phase A
     output phase_a2,  // Phase A
     output phase_b1,  // Phase B

@@ -1,6 +1,6 @@
 `default_nettype none
 
-module spi (
+module SPI (
     input            clk,
     input            SCK,
     input            SSEL,
@@ -78,7 +78,7 @@ module spi_packet (
     output [31:0] word_send_data,
     input         byte_received,
     output        word_received,
-    output [ 7:0] byte_data_received,
+    input [ 7:0] byte_data_received,
     output [31:0] word_data_received
 );
 
