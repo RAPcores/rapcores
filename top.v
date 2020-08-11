@@ -60,8 +60,8 @@ module top (
 
   // Stepper Setup
   // TODO: Generate statement?
-  reg [23:0] move_duration;
-  reg move_start = 0;
+  reg [31:0] move_duration = 32'h0fffffff;
+  reg move_start = 1;
   reg [23:0] clock_divisor = 24'd50000;
   reg [2:0] microsteps = 1;
   reg step;
@@ -77,39 +77,63 @@ module top (
                 .microsteps (microsteps));
 
 
-
+  // State Machine for handling SPI Messages
+  reg awaiting_more_words = 0;
+  reg [7:0] message_word_count = 0;
+  reg [7:0] message_header;
   always @(posedge word_received) begin
     LED <= !LED;
-    case (word_data_received[31:24])
-      1: begin
-        PIN_21 <= ~PIN_21;
-        move_duration[23:0] = word_data_received[23:0];
-        move_start = 1;
-      end
-      3: begin
-        clock_divisor[23:0] <= word_data_received[23:0];
-      end
-      4: begin
-        // TODO needs to be power of two
-        microsteps[2:0] <= word_data_received[2:0];
-      end
-    endcase
-    PIN_23 <= word_data_received[1];
-    PIN_22 <= word_data_received[2];
-    word_send_data[31:0] = word_data_received[31:0];
+    if (!awaiting_more_words) begin
+        message_header = word_data_received[31:24];
+        case (message_header)
+            // Coordianted Move
+            1: begin
+                PIN_21 <= ~PIN_21;
+                awaiting_more_words <= 1;
+            end
+            3: begin
+                clock_divisor[23:0] <= word_data_received[23:0];
+                awaiting_more_words <= 0;
+            end
+            4: begin
+                // TODO needs to be power of two
+                microsteps[2:0] <= word_data_received[2:0];
+                awaiting_more_words <= 0;
+            end
+        endcase
+    end else begin
+        message_word_count = message_word_count + 1;
+        case (message_header)
+            1: begin
+                // the first non-header word is the move duration
+                if (message_word_count == 1) move_duration[31:0] = word_data_received[31:0];
+                message_word_count = 0;
+                awaiting_more_words = 0;
+                clkaccum = 0;
+                PIN_22 = ~PIN_22;
+            end
+        endcase
+    end
   end
 
+  // coordinated move execution
   reg step_clock;
-  reg [31:0] clkaccum = 0;
+  reg [63:0] clkaccum = 0; // this is the move accumulator (clock cycles)
+  reg [23:0] clkfreq = 0; // this is the intra-tick accumulator
   always @(posedge CLK) begin
-    if (clkaccum[23:0] >= clock_divisor[23:0]) begin
-      step <= 1;
-      clkaccum <= 0;
+    if (clkaccum <= move_duration) begin
+      clkaccum = clkaccum + 1;
+      clkfreq = clkfreq + 1;
+      if (clkfreq[23:0] >= clock_divisor[23:0]) begin
+        step <= 1;
+        clkfreq <= 0;
+      end
+      else begin
+        step <= 0;
+      end
+    end else begin
+      clkfreq = 0;
     end
-    else begin
-      clkaccum <= clkaccum + 1;
-      step <= 0;
-    end
-  end
 
+  end
 endmodule
