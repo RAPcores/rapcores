@@ -60,7 +60,7 @@ module top (
 
   // Stepper Setup
   // TODO: Generate statement?
-  reg [31:0] move_duration = 32'h0fffffff;
+  reg [31:0] move_duration = 32'h05fffff;
   reg move_start = 1;
   reg [23:0] clock_divisor = 24'd50000;
   reg [2:0] microsteps = 1;
@@ -89,7 +89,8 @@ module top (
             // Coordianted Move
             1: begin
                 PIN_21 <= ~PIN_21;
-                awaiting_more_words <= 1;
+                stepping <= ~stepping;
+                awaiting_more_words <= 0;
             end
             3: begin
                 clock_divisor[23:0] <= word_data_received[23:0];
@@ -106,11 +107,11 @@ module top (
         case (message_header)
             1: begin
                 // the first non-header word is the move duration
-                if (message_word_count == 1) move_duration[31:0] = word_data_received[31:0];
-                message_word_count = 0;
-                awaiting_more_words = 0;
-                clkaccum = 0;
-                PIN_22 = ~PIN_22;
+                if (message_word_count == 1) move_duration[31:0] <= word_data_received[31:0];
+                message_word_count <= 0;
+                awaiting_more_words <= 0;
+                stepping <= 1;
+                PIN_22 <= ~PIN_22;
             end
         endcase
     end
@@ -118,10 +119,12 @@ module top (
 
   // coordinated move execution
   reg step_clock;
+  reg stepping = 0;
+  reg steplast = 1;
   reg [63:0] clkaccum = 0; // this is the move accumulator (clock cycles)
   reg [23:0] clkfreq = 0; // this is the intra-tick accumulator
   always @(posedge CLK) begin
-    if (clkaccum <= move_duration) begin
+    if ((stepping ^ steplast) && clkaccum <= move_duration) begin
       clkaccum = clkaccum + 1;
       clkfreq = clkfreq + 1;
       if (clkfreq[23:0] >= clock_divisor[23:0]) begin
@@ -132,7 +135,9 @@ module top (
         step <= 0;
       end
     end else begin
-      clkfreq = 0;
+      clkfreq <= 0;
+      clkaccum <= 0;
+      steplast <= stepping;
     end
 
   end
