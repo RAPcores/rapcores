@@ -88,9 +88,9 @@ module top (
         case (message_header)
             // Coordianted Move
             1: begin
+                // TODO get direction bits here
                 PIN_21 <= ~PIN_21;
-                stepping <= ~stepping;
-                awaiting_more_words <= 0;
+                awaiting_more_words <= 1;
             end
             3: begin
                 clock_divisor[23:0] <= word_data_received[23:0];
@@ -107,11 +107,11 @@ module top (
         case (message_header)
             1: begin
                 // the first non-header word is the move duration
-                if (message_word_count == 1) move_duration[31:0] <= word_data_received[31:0];
-                message_word_count <= 0;
-                awaiting_more_words <= 0;
-                stepping <= 1;
-                PIN_22 <= ~PIN_22;
+                if (message_word_count == 1) move_duration[31:0] = word_data_received[31:0];
+                message_word_count = 0;
+                awaiting_more_words = 0;
+                stepping = ~stepping;
+                PIN_22 = ~PIN_22;
             end
         endcase
     end
@@ -121,7 +121,7 @@ module top (
   reg step_clock;
   reg stepping = 0;
   reg steplast = 1;
-  reg [63:0] clkaccum = 0; // this is the move accumulator (clock cycles)
+  reg [32:0] clkaccum = 0; // this is the move accumulator (clock cycles)
   reg [23:0] clkfreq = 0; // this is the intra-tick accumulator
   always @(posedge CLK) begin
     if ((stepping ^ steplast) && clkaccum <= move_duration) begin
