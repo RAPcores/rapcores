@@ -60,9 +60,6 @@ module top (
 
   // Stepper Setup
   // TODO: Generate statement?
-  reg [31:0] move_duration = 32'h05fffff;
-  reg move_start = 1;
-  reg [23:0] clock_divisor = 24'd50000;
   reg [2:0] microsteps = 1;
   reg step;
   reg dir;
@@ -76,8 +73,10 @@ module top (
                 .dir (dir),
                 .microsteps (microsteps));
 
-
+  //
   // State Machine for handling SPI Messages
+  //
+
   reg awaiting_more_words = 0;
   reg [7:0] message_word_count = 0;
   reg [7:0] message_header;
@@ -86,16 +85,20 @@ module top (
     if (!awaiting_more_words) begin
         message_header = word_data_received[31:24];
         case (message_header)
-            // Coordianted Move
+            // 0x01 - Coordinated Move
+            // Header: 24 bits for direction
+            // Word 1: Increment (signed)
+            // Word 2: Increment Increment (signed)
             1: begin
                 // TODO get direction bits here
-                PIN_21 <= ~PIN_21;
                 awaiting_more_words <= 1;
             end
+            // 0x03 - Clock divisor (24 bit)
             3: begin
                 clock_divisor[23:0] <= word_data_received[23:0];
                 awaiting_more_words <= 0;
             end
+            // 0x04 - Set Microstepping
             4: begin
                 // TODO needs to be power of two
                 microsteps[2:0] <= word_data_received[2:0];
@@ -117,12 +120,21 @@ module top (
     end
   end
 
+  //
+  // Stepper Timing Routine
+  //
+
   // coordinated move execution
-  reg step_clock;
+  // Latching mechanism for engaging the move. This is currently unbuffered, so TODO
   reg stepping = 0;
-  reg steplast = 1;
-  reg [32:0] clkaccum = 0; // this is the move accumulator (clock cycles)
-  reg [23:0] clkfreq = 0; // this is the intra-tick accumulator
+  reg steplast = 0;
+
+  reg [31:0] move_duration = 32'h05fffff;
+  reg [23:0] clock_divisor = 24'd50000; // should be 32 for 500 khz with bresenham
+
+  reg [32:0] clkaccum = 0; // move accumulator (clock cycles)
+  reg [23:0] clkfreq = 0; // intra-tick accumulator
+
   always @(posedge CLK) begin
     if ((stepping ^ steplast) && clkaccum <= move_duration) begin
       clkaccum = clkaccum + 1;

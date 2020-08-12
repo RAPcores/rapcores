@@ -1,5 +1,6 @@
 `default_nettype none
 
+// TODO license unknown, replace with MIT version in soft_spi.v
 module SPI (
     input            clk,
     input            SCK,
@@ -84,6 +85,7 @@ module spi_packet (
 
   reg [2:0] byte_count;
 
+  // TODO Send does not work
   always @(posedge byte_received) begin
     if (byte_count[2:0] == 3'b100) byte_count = 3'b001;
     else byte_count = byte_count + 3'b001;
