@@ -1,15 +1,15 @@
 `default_nettype none
 
 module DualHBridge (
-    output phase_a1,  // Phase A
-    output phase_a2,  // Phase A
-    output phase_b1,  // Phase B
-    output phase_b2,  // Phase B
-    output pwm_a,
-    output pwm_b,
-    input step,
-    input dir,
-    input [2:0] microsteps
+    output       phase_a1,  // Phase A
+    output       phase_a2,  // Phase A
+    output       phase_b1,  // Phase B
+    output       phase_b2,  // Phase B
+    output       pwm_a,
+    output       pwm_b,
+    input        step,
+    input        dir,
+    input  [2:0] microsteps
 );
 
   reg [31:0] phase_ct;
