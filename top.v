@@ -110,11 +110,17 @@ module top (
       case (message_header)
         1: begin
           // the first non-header word is the move duration
-          if (message_word_count == 1) move_duration[31:0] = word_data_received[31:0];
-          message_word_count = 0;
-          awaiting_more_words = 0;
-          stepping = ~stepping;
-          PIN_22 = ~PIN_22;
+          case (message_word_count)
+            1: move_duration[31:0] = word_data_received[31:0];
+            //2: increment[31:0] = word_data_received[31:0];
+            //3: begin
+            //    incrementincrement[31:0] = word_data_received[31:0];
+            //    message_word_count = 0;
+            //    awaiting_more_words = 0;
+            //    stepping = ~stepping;
+            //    PIN_22 = ~PIN_22;
+            //end
+          endcase
         end
       endcase
     end
@@ -126,30 +132,39 @@ module top (
 
   // coordinated move execution
   // Latching mechanism for engaging the move. This is currently unbuffered, so TODO
-  reg stepping = 0;
+  reg stepping = 1;
   reg steplast = 0;
 
-  reg [31:0] move_duration = 32'h05fffff;
-  reg [23:0] clock_divisor = 24'd50000;  // should be 32 for 500 khz with bresenham
+  reg [31:0] move_duration = 32'h04fffff;
+  reg [23:0] clock_divisor = 32;  // should be 32 for 500 khz with bresenham
 
-  reg [32:0] clkaccum = 0;  // move accumulator (clock cycles)
+  reg [31:0] clkaccum = 0;  // move accumulator (clock cycles)
   reg [23:0] clkfreq = 0;  // intra-tick accumulator
+
+  reg signed [31:0] stepaccum = 32'h80000064; // typemin(Int32) - 100 for buffer
+  reg signed [31:0] increment = 100;
+  reg signed [31:0] incrementincrement = 1;
 
   always @(posedge CLK) begin
     if ((stepping ^ steplast) && clkaccum <= move_duration) begin
-      clkaccum = clkaccum + 1;
-      clkfreq = clkfreq + 1;
-      if (clkfreq[23:0] >= clock_divisor[23:0]) begin
-        step <= 1;
-        clkfreq <= 0;
-      end else begin
-        step <= 0;
-      end
+        clkfreq = clkfreq + 1;
+        if (clkfreq[23:0] >= clock_divisor[23:0]) begin
+            clkfreq <= 0;
+            clkaccum = clkaccum + 1;
+            stepaccum = stepaccum + increment;
+            increment = increment + incrementincrement;
+            // TODO need to set residency on the signal
+            if (stepaccum >= 0) begin
+                step <= 1;
+                stepaccum <= stepaccum + 32'h80000000;
+            end else begin
+                 step <= 0;
+            end
+        end
     end else begin
-      clkfreq <= 0;
-      clkaccum <= 0;
-      steplast <= stepping;
+        clkaccum <= 0;
+        steplast <= stepping;
+        clkfreq <= 0;
     end
-
   end
 endmodule
