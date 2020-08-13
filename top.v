@@ -112,14 +112,14 @@ module top (
           // the first non-header word is the move duration
           case (message_word_count)
             1: move_duration[31:0] = word_data_received[31:0];
-            //2: increment[31:0] = word_data_received[31:0];
-            //3: begin
-            //    incrementincrement[31:0] = word_data_received[31:0];
-            //    message_word_count = 0;
-            //    awaiting_more_words = 0;
-            //    stepping = ~stepping;
-            //    PIN_22 = ~PIN_22;
-            //end
+            2: increment[31:0] = word_data_received[31:0];
+            3: begin
+                incrementincrement[31:0] = word_data_received[31:0];
+                message_word_count = 0;
+                awaiting_more_words = 0;
+                stepping = ~stepping;
+                PIN_22 = ~PIN_22;
+            end
           endcase
         end
       endcase
@@ -142,6 +142,7 @@ module top (
   reg [23:0] clkfreq = 0;  // intra-tick accumulator
 
   reg signed [31:0] stepaccum = 32'h80000064; // typemin(Int32) - 100 for buffer
+  reg [31:0] steps_taken = 0;
   reg signed [31:0] increment = 100;
   reg signed [31:0] incrementincrement = 1;
 
@@ -151,11 +152,11 @@ module top (
         if (clkfreq[23:0] >= clock_divisor[23:0]) begin
             clkfreq <= 0;
             clkaccum = clkaccum + 1;
-            stepaccum = stepaccum + increment;
-            increment = increment + incrementincrement;
+            stepaccum = stepaccum + increment + clkaccum*incrementincrement;
             // TODO need to set residency on the signal
             if (stepaccum >= 0) begin
                 step <= 1;
+                steps_taken <= steps_taken + 1;
                 stepaccum <= stepaccum + 32'h80000000;
             end else begin
                  step <= 0;
@@ -164,6 +165,7 @@ module top (
     end else begin
         clkaccum <= 0;
         steplast <= stepping;
+        steps_taken <= 0;
         clkfreq <= 0;
     end
   end
