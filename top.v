@@ -7,10 +7,10 @@ module top (
     input  CLK,  // 16MHz clock
     output LED,  // User/boot LED next to power LED
     output USBPU,  // USB pull-up resistor
-    input  PIN_1,
-    input  PIN_2,
-    input  PIN_3,
-    output PIN_4,
+    input  SCK,
+    input  SSEL,
+    input  MOSI,
+    output MISO,
     output PIN_8,  // Phase A
     output PIN_9,  // Phase A
     output PIN_11,  // Phase B
@@ -29,33 +29,20 @@ module top (
   // drive USB pull-up resistor to '0' to disable USB
   assign USBPU = 0;
 
-  // SPI Initialization
-  // The standard unit of transfer is 8 bits, MSB
-  reg byte_received;  // high when a byte has been received
-  reg [7:0] byte_data_received;
-  reg [7:0] spi_send_data;
-  SPI spi0 (.clk(CLK),
-        .SCK(PIN_1),
-        .SSEL(PIN_2),
-        .MOSI(PIN_3),
-        .MISO(PIN_4),
-        .send_data(spi_send_data),
-        .byte_received(byte_received),
-        .byte_data_received(byte_data_received) );
-
   // Word handler
   // The system operates on 32 bit little endian words
   // This should make it easier to send 32 bit chunks from the host controller
   reg [31:0] word_send_data;
   reg [31:0] word_data_received;
-  reg word_received;
-  spi_packet word_proc (
+  wire word_received;
+  SPIWord word_proc (
                 .clk(CLK),
-                .send_data(spi_send_data),
+                .SCK(SCK),
+                .SSEL(SSEL),
+                .MOSI(MOSI),
+                .MISO(MISO),
                 .word_send_data(word_send_data),
-                .byte_received(byte_received),
                 .word_received(word_received),
-                .byte_data_received(byte_data_received),
                 .word_data_received(word_data_received));
 
   // Stepper Setup
@@ -82,6 +69,7 @@ module top (
   reg [7:0] message_header;
   always @(posedge word_received) begin
     LED <= !LED;
+    word_send_data[31:0] <= word_data_received[31:0]; // Debug Echo
     if (!awaiting_more_words) begin
       message_header = word_data_received[31:24];
       case (message_header)

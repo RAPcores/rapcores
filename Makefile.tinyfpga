@@ -18,6 +18,7 @@ PROJ = top
 
 PIN_DEF = boards/tinyfpga.pcf
 DEVICE = lp8k
+FREQ = 16
 
 all: $(PROJ).rpt $(PROJ).bin
 
@@ -25,7 +26,7 @@ all: $(PROJ).rpt $(PROJ).bin
 	yosys -p 'synth_ice40 -top $(PROJ) -blif $@ -json $*.json' $<
 
 %.asc: $(PIN_DEF) %.blif %.json
-	nextpnr-ice40 --$(DEVICE) --package cm81   --json $*.json --asc $@ --pcf  $(PIN_DEF)
+	nextpnr-ice40 --$(DEVICE) --freq $(FREQ) --package cm81 --json $*.json --asc $@ --pcf  $(PIN_DEF)
 
 %.bin: %.asc
 	icepack $< $@

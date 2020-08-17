@@ -9,7 +9,7 @@ module SPI (
     output reg       MISO,
     input      [7:0] send_data,
     output           byte_received,
-    output     [7:0] byte_data_received
+    output reg    [7:0] byte_data_received
 );
   parameter txwidth = 8;
   parameter rxwidth = 8;
@@ -73,28 +73,45 @@ endmodule
 
 // 32 bit word SPI wrapper for Little endian 8 bit transfers
 //
-module spi_packet (
+module SPIWord (
     input         clk,
-    output [ 7:0] send_data,
-    output [31:0] word_send_data,
-    input         byte_received,
-    output        word_received,
-    input  [ 7:0] byte_data_received,
+    input SCK,
+    input SSEL,
+    input MOSI,
+    output MISO,
+    input [31:0] word_send_data,
+    output reg       word_received,
     output [31:0] word_data_received
 );
 
-  reg [2:0] byte_count;
+  // SPI Initialization
+  // The standard unit of transfer is 8 bits, MSB
+  wire byte_received;  // high when a byte has been received
+  reg [7:0] byte_data_received;
+  reg [7:0] send_data;
+  SPI spi0 (.clk(clk),
+            .SCK(SCK),
+            .SSEL(SSEL),
+            .MOSI(MOSI),
+            .MISO(MISO),
+            .send_data(send_data),
+            .byte_received(byte_received),
+            .byte_data_received(byte_data_received) );
+
+
+  reg [2:0] byte_count = 0;
 
   // TODO Send does not work
   always @(posedge byte_received) begin
-    if (byte_count[2:0] == 3'b100) byte_count = 3'b001;
-    else byte_count = byte_count + 3'b001;
-
+    byte_count = (byte_count == 4) ? 1 : byte_count + 1;
     word_data_received = {byte_data_received[7:0], word_data_received[31:8]};
-    send_data[7:0] = word_send_data[7:0];
-    word_send_data = {8'b0, word_send_data[31:8]};
   end
 
-  always @(posedge clk) word_received <= (byte_count[2:0] == 3'b100);
-
+  always @(posedge clk) begin
+    word_received <= (byte_count[2:0] == 3'b100);
+    if (byte_count == 4) send_data[7:0] <= word_send_data[7:0];
+    if (byte_count == 1) send_data[7:0] <= word_send_data[15:8];
+    if (byte_count == 2) send_data[7:0] <= word_send_data[23:16];
+    if (byte_count == 3) send_data[7:0] <= word_send_data[31:24];
+  end
 endmodule
