@@ -269,7 +269,7 @@ module SPIWord (
   always @(posedge byte_received) begin
     byte_count = (byte_count == 4) ? 1 : byte_count + 1;
     word_data_received = {byte_data_received[7:0], word_data_received[31:8]};
-    send_data = 8'h00;
+    send_data = 8'hff;
   end
 
   always @(posedge clk) begin

@@ -105,7 +105,7 @@ module top (
                 incrementincrement[31:0] = word_data_received[31:0];
                 message_word_count = 0;
                 awaiting_more_words = 0;
-                stepping = ~stepping;
+                move_cmd_ready = ~move_cmd_ready;
                 PIN_22 = ~PIN_22;
             end
           endcase
@@ -120,41 +120,59 @@ module top (
 
   // coordinated move execution
   // Latching mechanism for engaging the move. This is currently unbuffered, so TODO
+  reg move_cmd_ready = 1;
   reg stepping = 1;
-  reg steplast = 0;
+  wire execute_step_timer;
+  assign execute_step_timer = move_cmd_ready ^ stepping;
 
   reg [31:0] move_duration = 32'h04fffff;
   reg [23:0] clock_divisor = 32;  // should be 32 for 500 khz with bresenham
 
   reg [31:0] clkaccum = 0;  // move accumulator (clock cycles)
-  reg [23:0] clkfreq = 0;  // intra-tick accumulator
+  reg [23:0] clkfreq = 0;  // intra-tick accumulator rename clock tick
 
-  reg signed [31:0] stepaccum = 32'h80000064; // typemin(Int32) - 100 for buffer
+  reg signed [63:0] stepaccum = 64'h8000000000000064; // typemin(Int32) - 100 for buffer
   reg [31:0] steps_taken = 0;
-  reg signed [31:0] increment = 100;
-  reg signed [31:0] incrementincrement = 1;
+  reg signed [31:0] increment = 400000000; // always positive
+  reg signed [31:0] incrementincrement = 1000000;
+  reg signed [31:0] increment_r = 0;
+
+
+  assign PIN_21 = step;
+ assign PIN_24 = move_cmd_ready;
+//  assign PIN_23 = steplast;
 
   always @(posedge CLK) begin
-    if ((stepping ^ steplast) && clkaccum <= move_duration) begin
+    // step pin residency would go here
+
+    if (move_cmd_ready && clkaccum <= move_duration) begin
         clkfreq = clkfreq + 1;
+        if (clkaccum == 0) begin
+          increment_r = increment;
+        end
         if (clkfreq[23:0] >= clock_divisor[23:0]) begin
-            clkfreq <= 0;
+            // step -> 0
+            clkfreq = 0;
             clkaccum = clkaccum + 1;
-            stepaccum = stepaccum + increment + clkaccum*incrementincrement;
+            increment_r = increment_r + incrementincrement;
+            stepaccum = stepaccum + increment_r;
             // TODO need to set residency on the signal
             if (stepaccum >= 0) begin
-                step <= 1;
-                steps_taken <= steps_taken + 1;
-                stepaccum <= stepaccum + 32'h80000000;
+                step = 1;
+                steps_taken = steps_taken + 1;
+                stepaccum = stepaccum + 64'h8000000000000000;
             end else begin
-                 step <= 0;
+                 step = 0;
             end
-        end
+            //increment <= increment + incrementincrement;
+        end //TODO set DTR for next move, and load from buffer if complete
+        // need to keep the residue between moves
+        // need to handle direction -> complement. line 527 stepper.cpp
     end else begin
-        clkaccum <= 0;
-        steplast <= stepping;
-        steps_taken <= 0;
-        clkfreq <= 0;
+        clkaccum = 0;
+        stepping = 0;
+        steps_taken = 0;
+        clkfreq = 0;
     end
   end
 endmodule
