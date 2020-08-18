@@ -1,0 +1,17 @@
+set_io --warn-no-port 	clk	M16
+		
+set_io --warn-no-port 	LED0	A4
+set_io --warn-no-port 	LED1	B4
+set_io --warn-no-port 	LED2	A3
+set_io --warn-no-port 	LED3	B3
+		
+set_io --warn-no-port 	CHARGEPUMP	C11
+		
+set_io --warn-no-port 	LS_DRIVE_AR	A8
+set_io --warn-no-port 	HS_DRIVE_AR	A7
+set_io --warn-no-port 	HS_DRIVE_AL	B7
+set_io --warn-no-port 	LS_DRIVE_AL	C7
+set_io --warn-no-port 	HS_DRIVE_BL	D7
+set_io --warn-no-port 	LS_DRIVE_BL	E7
+set_io --warn-no-port 	LS_DRIVE_BR	B6
+set_io --warn-no-port 	HS_DRIVE_BR	C6
