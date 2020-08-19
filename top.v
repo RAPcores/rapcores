@@ -99,10 +99,10 @@ module top (
         1: begin
           // the first non-header word is the move duration
           case (message_word_count)
-            1: move_duration[31:0] = word_data_received[31:0];
-            2: increment[31:0] = word_data_received[31:0];
+            1: move_duration[63:0] = word_data_received[63:0];
+            2: increment[63:0] = word_data_received[63:0];
             3: begin
-                incrementincrement[31:0] = word_data_received[31:0];
+                incrementincrement[63:0] = word_data_received[63:0];
                 message_word_count = 0;
                 awaiting_more_words = 0;
                 stepping = ~stepping;
