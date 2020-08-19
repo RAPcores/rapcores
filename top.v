@@ -126,38 +126,38 @@ module top (
   reg [63:0] move_duration = 64'h0000000004fffff;
   reg [23:0] clock_divisor = 32;  // should be 32 for 500 khz with bresenham
 
-  reg [63:0] clkaccum = 0;  // move accumulator (clock cycles)
-  reg [23:0] clkfreq = 0;  // intra-tick accumulator
+  reg [63:0] tickaccum = 0;  // move accumulator (clock cycles)
+  reg [23:0] clkaccum = 0;  // intra-tick accumulator
 
-  reg signed [63:0] stepaccum = 64'h8000000000000064; // typemin(Int32) - 100 for buffer
+  reg signed [63:0] substeps = 64'h8000000000000064; // typemin(Int32) - 100 for buffer
   reg [63:0] steps_taken = 0;
   reg signed [63:0] increment_r = 0;
   reg signed [63:0] increment = 100000000000;
   reg signed [63:0] incrementincrement = 1000000000;
 
   always @(posedge CLK) begin
-    if ((stepping ^ steplast) && clkaccum <= move_duration) begin
-        clkfreq = clkfreq + 1;
-        if (clkaccum == 0) increment_r = increment;
-        if (clkfreq[23:0] >= clock_divisor[23:0]) begin
-            clkfreq = 0;
-            clkaccum = clkaccum + 1;
+    if ((stepping ^ steplast) && tickaccum <= move_duration) begin
+        clkaccum = clkaccum + 1;
+        if (tickaccum == 0) increment_r = increment;
+        if (clkaccum[23:0] >= clock_divisor[23:0]) begin
+            clkaccum = 0;
+            tickaccum = tickaccum + 1;
             increment_r = increment_r + incrementincrement;
-            stepaccum = stepaccum + increment_r;
+            substeps = substeps + increment_r;
             // TODO need to set residency on the signal
-            if (stepaccum >= 0) begin
+            if (substeps >= 0) begin
                 step = 1;
                 steps_taken = steps_taken + 1;
-                stepaccum = stepaccum + 64'h8000000000000000;
+                substeps = substeps + 64'h8000000000000000;
             end else begin
                  step = 0;
             end
         end
     end else begin
-        clkaccum = 0;
+        tickaccum = 0;
         steplast = stepping;
         steps_taken = 0;
-        clkfreq = 0;
+        clkaccum = 0;
     end
   end
 endmodule
