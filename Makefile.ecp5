@@ -1,14 +1,20 @@
-PROJ=ulticore
+PROJ = rapcores
 PIN_DEF = boards/ecp5evn.lpf
-TRELLIS=/usr/share/trellis
+TRELLIS = /usr/share/trellis
 
 all: ${PROJ}.bit
 
-%.json: %.v quad_enc.v spi.v pwm.v sigmadelta_adc.v adc_top.v box_ave.v pos_count.v
-	yosys -p "synth_ecp5 -top soc -json $@" $^
+%_tb.vvp: quad_enc.v spi.v 
+	iverilog -s testbench -o $@ $^
+
+%_sim: %_tb.vvp
+	vvp -N $<
+
+%.json: %.v quad_enc.v spi.v 
+	yosys -p 'synth_ecp5 -json $@' $^
 
 %_out.config: %.json
-	nextpnr-ecp5 --json $< --textcfg $@ --25k --package CABGA256 --lpf $(PIN_DEF) # CABGA381 CABGA256
+	nextpnr-ecp5 --um5g-25k --package CABGA256 --lpf $(PIN_DEF) --json $< --textcfg $@
 
 %.bit: %_out.config
 	ecppack --svf ${PROJ}.svf $< $@
@@ -19,6 +25,8 @@ prog: ${PROJ}.svf
 	openocd -f ${TRELLIS}/misc/openocd/ecp5-evn.cfg -c "transport select jtag; init; svf $<; exit"
 
 clean:
-	rm -f *.svf *.bit *.config *.json
+	rm -f adc_tb.vvp testbench.vcd adc.json adc_out.config *.bit
 
-.PHONY: prog clean
+.PHONY: all sim clean prog
+.PRECIOUS: %.json %_out.config %.bit
+
