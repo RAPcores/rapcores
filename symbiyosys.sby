@@ -1,0 +1,14 @@
+[options]
+mode prove
+
+[engines]
+smtbmc
+
+[script]
+read -formal top.v
+prep -top top
+
+[files]
+spi.v
+stepper.v
+top.v
