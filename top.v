@@ -9,8 +9,8 @@ module top (
     output USBPU,  // USB pull-up resistor
     input  SCK,
     input  SSEL,
-    input  MOSI,
-    output MISO,
+    input  COPI,
+    output CIPO,
     output PIN_8,  // Phase A
     output PIN_9,  // Phase A
     output PIN_11,  // Phase B
@@ -39,8 +39,8 @@ module top (
                 .clk(CLK),
                 .SCK(SCK),
                 .SSEL(SSEL),
-                .MOSI(MOSI),
-                .MISO(MISO),
+                .MOSI(COPI),
+                .MISO(CIPO),
                 .word_send_data(word_send_data),
                 .word_received(word_received),
                 .word_data_received(word_data_received));
