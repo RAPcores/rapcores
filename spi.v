@@ -238,9 +238,9 @@ module SPIWord (
     input SSEL,
     input MOSI,
     output MISO,
-    input [31:0] word_send_data,
+    input [63:0] word_send_data,
     output reg       word_received,
-    output [31:0] word_data_received
+    output [63:0] word_data_received
 );
 
   // SPI Initialization
@@ -263,17 +263,17 @@ module SPIWord (
             .i_SPI_MOSI(MOSI),
             .i_SPI_CS_n(SSEL));
 
-  reg [2:0] byte_count = 0;
+  reg [4:0] byte_count = 0;
 
   // TODO Send does not work
   always @(posedge byte_received) begin
-    byte_count = (byte_count == 4) ? 1 : byte_count + 1;
-    word_data_received = {byte_data_received[7:0], word_data_received[31:8]};
+    byte_count = (byte_count == 8) ? 1 : byte_count + 1;
+    word_data_received = {byte_data_received[7:0], word_data_received[63:8]};
     send_data = 8'h00;
   end
 
   always @(posedge clk) begin
-    word_received <= (byte_count == 4);
+    word_received <= (byte_count == 8);
     //if (byte_count == 4) send_data[7:0] <= word_send_data[7:0];
     //if (byte_count == 1) send_data[7:0] <= word_send_data[15:8];
     //if (byte_count == 2) send_data[7:0] <= word_send_data[23:16];
