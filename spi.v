@@ -239,8 +239,8 @@ module SPIWord (
     input MOSI,
     output MISO,
     input [63:0] word_send_data,
-    output reg       word_received,
-    output [63:0] word_data_received
+    output       word_received,
+    output reg [63:0] word_data_received
 );
 
   // SPI Initialization
@@ -250,7 +250,7 @@ module SPIWord (
   reg [7:0] send_data;
   wire reset;
   assign reset = 1;
-  reg SPI_TX_DV;
+  reg SPI_TX_DV = 1;
   SPI_Slave spi0 (
             .i_Rst_L(reset),
             .i_Clk(clk),
@@ -269,14 +269,8 @@ module SPIWord (
   always @(posedge byte_received) begin
     byte_count = (byte_count == 8) ? 1 : byte_count + 1;
     word_data_received = {byte_data_received[7:0], word_data_received[63:8]};
-    send_data = 8'h00;
   end
 
-  always @(posedge clk) begin
-    word_received <= (byte_count == 8);
-    //if (byte_count == 4) send_data[7:0] <= word_send_data[7:0];
-    //if (byte_count == 1) send_data[7:0] <= word_send_data[15:8];
-    //if (byte_count == 2) send_data[7:0] <= word_send_data[23:16];
-    //if (byte_count == 3) send_data[7:0] <= word_send_data[31:24];
-  end
+  assign word_received = (byte_count == 8);
+
 endmodule
