@@ -68,8 +68,8 @@ module top (
   reg [7:0] message_word_count = 0;
   reg [7:0] message_header;
   always @(posedge word_received) begin
-    LED <= !LED;
-    word_send_data[63:0] <= word_data_received[63:0]; // Debug Echo
+    LED = !LED;
+    word_send_data[63:0] = word_data_received[63:0]; // Debug Echo
     if (!awaiting_more_words) begin
       message_header = word_data_received[63:56];
       case (message_header)
@@ -79,21 +79,22 @@ module top (
         // Word 2: Increment Increment (signed)
         1: begin
           // TODO get direction bits here
-          awaiting_more_words <= 1;
+          awaiting_more_words = 1;
         end
         // 0x03 - Clock divisor (24 bit)
         3: begin
-          clock_divisor[23:0] <= word_data_received[23:0];
-          awaiting_more_words <= 0;
+          clock_divisor[23:0] = word_data_received[23:0];
+          awaiting_more_words = 0;
         end
         // 0x04 - Set Microstepping
         4: begin
           // TODO needs to be power of two
-          microsteps[2:0] <= word_data_received[2:0];
-          awaiting_more_words <= 0;
+          microsteps[2:0] = word_data_received[2:0];
+          awaiting_more_words = 0;
         end
       endcase
     end else begin
+      // Begin assigning extra words
       message_word_count = message_word_count + 1;
       case (message_header)
         1: begin
