@@ -32,8 +32,8 @@ module top (
   // Word handler
   // The system operates on 32 bit little endian words
   // This should make it easier to send 32 bit chunks from the host controller
-  reg [31:0] word_send_data;
-  reg [31:0] word_data_received;
+  reg [63:0] word_send_data;
+  reg [63:0] word_data_received;
   wire word_received;
   SPIWord word_proc (
                 .clk(CLK),
@@ -69,9 +69,9 @@ module top (
   reg [7:0] message_header;
   always @(posedge word_received) begin
     LED <= !LED;
-    word_send_data[31:0] <= word_data_received[31:0]; // Debug Echo
+    word_send_data[63:0] <= word_data_received[63:0]; // Debug Echo
     if (!awaiting_more_words) begin
-      message_header = word_data_received[31:24];
+      message_header = word_data_received[63:56];
       case (message_header)
         // 0x01 - Coordinated Move
         // Header: 24 bits for direction
@@ -99,10 +99,10 @@ module top (
         1: begin
           // the first non-header word is the move duration
           case (message_word_count)
-            1: move_duration[31:0] = word_data_received[31:0];
-            2: increment[31:0] = word_data_received[31:0];
+            1: move_duration[63:0] = word_data_received[63:0];
+            2: increment[63:0] = word_data_received[63:0];
             3: begin
-                incrementincrement[31:0] = word_data_received[31:0];
+                incrementincrement[63:0] = word_data_received[63:0];
                 message_word_count = 0;
                 awaiting_more_words = 0;
                 stepping = ~stepping;
@@ -123,38 +123,41 @@ module top (
   reg stepping = 1;
   reg steplast = 0;
 
-  reg [31:0] move_duration = 32'h04fffff;
+  reg [63:0] move_duration = 64'h0000000004fffff;
   reg [23:0] clock_divisor = 32;  // should be 32 for 500 khz with bresenham
 
-  reg [31:0] clkaccum = 0;  // move accumulator (clock cycles)
-  reg [23:0] clkfreq = 0;  // intra-tick accumulator
+  reg [63:0] tickaccum = 0;  // move accumulator (clock cycles)
+  reg [23:0] clkaccum = 0;  // intra-tick accumulator
 
-  reg signed [31:0] stepaccum = 32'h80000064; // typemin(Int32) - 100 for buffer
-  reg [31:0] steps_taken = 0;
-  reg signed [31:0] increment = 100;
-  reg signed [31:0] incrementincrement = 1;
+  reg signed [63:0] substeps = 64'h8000000000000064; // typemin(Int32) - 100 for buffer
+  reg [63:0] steps_taken = 0;
+  reg signed [63:0] increment_r = 0;
+  reg signed [63:0] increment = 100000000000;
+  reg signed [63:0] incrementincrement = 1000000000;
 
   always @(posedge CLK) begin
-    if ((stepping ^ steplast) && clkaccum <= move_duration) begin
-        clkfreq = clkfreq + 1;
-        if (clkfreq[23:0] >= clock_divisor[23:0]) begin
-            clkfreq <= 0;
-            clkaccum = clkaccum + 1;
-            stepaccum = stepaccum + increment + clkaccum*incrementincrement;
+    if ((stepping ^ steplast) && tickaccum <= move_duration) begin
+        clkaccum = clkaccum + 1;
+        if (tickaccum == 0) increment_r = increment;
+        if (clkaccum[23:0] >= clock_divisor[23:0]) begin
+            clkaccum = 0;
+            tickaccum = tickaccum + 1;
+            increment_r = increment_r + incrementincrement;
+            substeps = substeps + increment_r;
             // TODO need to set residency on the signal
-            if (stepaccum >= 0) begin
-                step <= 1;
-                steps_taken <= steps_taken + 1;
-                stepaccum <= stepaccum + 32'h80000000;
+            if (substeps >= 0) begin
+                step = 1;
+                steps_taken = steps_taken + 1;
+                substeps = substeps + 64'h8000000000000000;
             end else begin
-                 step <= 0;
+                 step = 0;
             end
         end
     end else begin
-        clkaccum <= 0;
-        steplast <= stepping;
-        steps_taken <= 0;
-        clkfreq <= 0;
+        tickaccum = 0;
+        steplast = stepping;
+        steps_taken = 0;
+        clkaccum = 0;
     end
   end
 endmodule
