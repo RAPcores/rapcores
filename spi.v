@@ -57,10 +57,9 @@ module SPI_Slave
   #(parameter SPI_MODE = 0)
   (
    // Control/Data Signals,
-   input            i_Rst_L,    // FPGA Reset, active low
    input            i_Clk,      // FPGA Clock
-   output reg       o_RX_DV,    // Data Valid pulse (1 clock cycle)
-   output reg [7:0] o_RX_Byte,  // Byte received on MOSI
+   output       o_RX_DV,    // Data Valid pulse (1 clock cycle)
+   output [7:0] o_RX_Byte,  // Byte received on MOSI
    input            i_TX_DV,    // Data Valid pulse to register i_TX_Byte
    input  [7:0]     i_TX_Byte,  // Byte to serialize to MISO.
 
@@ -82,7 +81,7 @@ module SPI_Slave
   reg [2:0] r_TX_Bit_Count;
   reg [7:0] r_Temp_RX_Byte;
   reg [7:0] r_RX_Byte;
-  reg r_RX_Done, r2_RX_Done, r3_RX_Done;
+  reg r_RX_Done;
   reg [7:0] r_TX_Byte;
   reg r_SPI_MISO_Bit, r_Preload_MISO;
 
@@ -100,7 +99,8 @@ module SPI_Slave
 
   assign w_SPI_Clk = w_CPHA ? ~i_SPI_Clk : i_SPI_Clk;
 
-
+  assign o_RX_Byte = r_RX_Byte;
+  assign o_RX_DV = r_RX_Done;
 
   // Purpose: Recover SPI Byte in SPI Clock Domain
   // Samples line on correct edge of SPI Clock
@@ -132,54 +132,6 @@ module SPI_Slave
   end // always @ (posedge w_SPI_Clk or posedge i_SPI_CS_n)
 
 
-
-  // Purpose: Cross from SPI Clock Domain to main FPGA clock domain
-  // Assert o_RX_DV for 1 clock cycle when o_RX_Byte has valid data.
-  always @(posedge i_Clk or negedge i_Rst_L)
-  begin
-    if (~i_Rst_L)
-    begin
-      r2_RX_Done <= 1'b0;
-      r3_RX_Done <= 1'b0;
-      o_RX_DV    <= 1'b0;
-      o_RX_Byte  <= 8'h00;
-    end
-    else
-    begin
-      // Here is where clock domains are crossed.
-      // This will require timing constraint created, can set up long path.
-      r2_RX_Done <= r_RX_Done;
-
-      r3_RX_Done <= r2_RX_Done;
-
-      if (r3_RX_Done == 1'b0 && r2_RX_Done == 1'b1) // rising edge
-      begin
-        o_RX_DV   <= 1'b1;  // Pulse Data Valid 1 clock cycle
-        o_RX_Byte <= r_RX_Byte;
-      end
-      else
-      begin
-        o_RX_DV <= 1'b0;
-      end
-    end // else: !if(~i_Rst_L)
-  end // always @ (posedge i_Bus_Clk)
-
-
-  // Control preload signal.  Should be 1 when CS is high, but as soon as
-  // first clock edge is seen it goes low.
-  always @(posedge w_SPI_Clk or posedge i_SPI_CS_n)
-  begin
-    if (i_SPI_CS_n)
-    begin
-      r_Preload_MISO <= 1'b1;
-    end
-    else
-    begin
-      r_Preload_MISO <= 1'b0;
-    end
-  end
-
-
   // Purpose: Transmits 1 SPI Byte whenever SPI clock is toggling
   // Will transmit read data back to SW over MISO line.
   // Want to put data on the line immediately when CS goes low.
@@ -188,15 +140,10 @@ module SPI_Slave
     if (i_SPI_CS_n)
     begin
       r_TX_Bit_Count <= 3'b111;  // Send MSb first
-      r_SPI_MISO_Bit <= r_TX_Byte[3'b111];  // Reset to MSb
     end
     else
     begin
       r_TX_Bit_Count <= r_TX_Bit_Count - 1;
-
-      // Here is where data crosses clock domains from i_Clk to w_SPI_Clk
-      // Can set up a timing constraint with wide margin for data path.
-      r_SPI_MISO_Bit <= r_TX_Byte[r_TX_Bit_Count];
 
     end // else: !if(i_SPI_CS_n)
   end // always @ (negedge w_SPI_Clk or posedge i_SPI_CS_n_SW)
@@ -204,27 +151,12 @@ module SPI_Slave
 
   // Purpose: Register TX Byte when DV pulse comes.  Keeps registed byte in
   // this module to get serialized and sent back to master.
-  always @(posedge i_Clk or negedge i_Rst_L)
-  begin
-    if (~i_Rst_L)
-    begin
-      r_TX_Byte <= 8'h00;
-    end
-    else
-    begin
-      if (i_TX_DV)
-      begin
-        r_TX_Byte <= i_TX_Byte;
-      end
-    end // else: !if(~i_Rst_L)
+  always @(posedge i_Clk) begin
+      r_TX_Byte <= i_TX_Byte;
   end // always @ (posedge i_Clk or negedge i_Rst_L)
 
-  // Preload MISO with top bit of send data when preload selector is high.
-  // Otherwise just send the normal MISO data
-  assign w_SPI_MISO_Mux = r_Preload_MISO ? r_TX_Byte[3'b111] : r_SPI_MISO_Bit;
-
-  // Tri-statae MISO when CS is high.  Allows for multiple slaves to talk.
-  assign o_SPI_MISO = i_SPI_CS_n ? 1'bZ : w_SPI_MISO_Mux;
+  // MISO
+  assign o_SPI_MISO = r_TX_Byte[r_TX_Bit_Count];
 
 endmodule // SPI_Slave
 
@@ -246,13 +178,10 @@ module SPIWord (
   // SPI Initialization
   // The standard unit of transfer is 8 bits, MSB
   wire byte_received;  // high when a byte has been received
-  reg [7:0] byte_data_received;
+  wire [7:0] byte_data_received;
   reg [7:0] send_data;
-  wire reset;
-  assign reset = 1;
   reg SPI_TX_DV = 1;
   SPI_Slave spi0 (
-            .i_Rst_L(reset),
             .i_Clk(clk),
             .o_RX_DV(byte_received),
             .o_RX_Byte(byte_data_received),
@@ -272,5 +201,19 @@ module SPIWord (
   end
 
   assign word_received = (byte_count == 8);
+
+  always @(posedge clk) begin
+    case (byte_count)
+        0: send_data[7:0] = word_send_data[7:0];
+        1: send_data[7:0] = word_send_data[15:8];
+        2: send_data[7:0] = word_send_data[23:16];
+        3: send_data[7:0] = word_send_data[31:24];
+        4: send_data[7:0] = word_send_data[39:32];
+        5: send_data[7:0] = word_send_data[47:40];
+        6: send_data[7:0] = word_send_data[55:48];
+        7: send_data[7:0] = word_send_data[63:56];
+        8: send_data[7:0] = word_send_data[7:0];
+    endcase
+  end
 
 endmodule
