@@ -23,7 +23,7 @@ FREQ = 16
 all: $(PROJ).rpt $(PROJ).bin
 
 %.blif %.json : %.v spi.v stepper.v
-	yosys -p 'synth_ice40 -top $(PROJ) -blif $@ -json $*.json' $<
+	yosys -p 'synth_ice40 -top $(PROJ) -abc2 -dsp -blif $@ -json $*.json' $<
 
 %.asc: $(PIN_DEF) %.blif %.json
 	nextpnr-ice40 --$(DEVICE) --freq $(FREQ) --package cm81 --json $*.json --asc $@ --pcf  $(PIN_DEF)
