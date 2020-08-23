@@ -22,4 +22,4 @@ jobs:
     - name: Lint Verilog source files with Verible
       uses: librecores/ci-action@2020.6-rc1
       with:
-        command: verible-verilog-lint *.v
+        command: verilator -exe -f *.v
