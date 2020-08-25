@@ -39,7 +39,7 @@
 
 # Left side of board
 set_io --warn-no-port SCK A2 # PIN_1
-set_io --warn-no-port SSEL A1 # PIN_2
+set_io --warn-no-port CS A1 # PIN_2
 set_io --warn-no-port COPI B1 # PIN_3
 set_io --warn-no-port CIPO C2 # PIN_4
 set_io --warn-no-port PIN_5 C1

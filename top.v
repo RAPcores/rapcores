@@ -8,7 +8,7 @@ module top (
     output LED,  // User/boot LED next to power LED
     output USBPU,  // USB pull-up resistor
     input  SCK,
-    input  SSEL,
+    input  CS,
     input  COPI,
     output CIPO,
     output PIN_8,  // Phase A
@@ -38,9 +38,9 @@ module top (
   SPIWord word_proc (
                 .clk(CLK),
                 .SCK(SCK),
-                .SSEL(SSEL),
-                .MOSI(COPI),
-                .MISO(CIPO),
+                .CS(CS),
+                .COPI(COPI),
+                .CIPO(CIPO),
                 .word_send_data(word_send_data),
                 .word_received(word_received),
                 .word_data_received(word_data_received));
