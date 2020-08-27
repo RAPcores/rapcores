@@ -13,8 +13,8 @@ module top (
     output CIPO,
     output PIN_8,  // Phase A
     output PIN_9,  // Phase A
+    output PIN_10,  // Phase B
     output PIN_11,  // Phase B
-    output PIN_12,  // Phase B
     output PIN_24,
     output PIN_23,
     output PIN_22,
@@ -52,10 +52,8 @@ module top (
   reg dir;
   DualHBridge s0 (.phase_a1 (PIN_8),
                 .phase_a2 (PIN_9),
-                .phase_b1 (PIN_11),
-                .phase_b2 (PIN_12),
-                .pwm_a (PIN_7),
-                .pwm_b (PIN_13),
+                .phase_b1 (PIN_10),
+                .phase_b2 (PIN_11),
                 .step (step),
                 .dir (dir),
                 .microsteps (microsteps));

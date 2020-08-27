@@ -5,16 +5,12 @@ module DualHBridge (
     output       phase_a2,  // Phase A
     output       phase_b1,  // Phase B
     output       phase_b2,  // Phase B
-    output       pwm_a,
-    output       pwm_b,
     input        step,
     input        dir,
     input  [2:0] microsteps
 );
 
   reg [31:0] phase_ct;
-  assign pwm_a = 1;  // phase a pwm TODO: microstep
-  assign pwm_b = 1;  // phase b pwm
 
   reg pa1 = 1'b0;
   reg pa2 = 1'b0;
