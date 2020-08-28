@@ -1,5 +1,6 @@
 `default_nettype none
 
+`include "configuration.v"
 `include "stepper.v"
 `include "spi.v"
 
@@ -68,6 +69,9 @@ module top (
   always @(posedge word_received) begin
     LED <= !LED;
 
+    // Zero out the next word
+    word_send_data = 0;
+
     // Header Processing
     if (!awaiting_more_words) begin
 
@@ -85,7 +89,7 @@ module top (
 
           dir <= word_data_received[0];
           // Next we send prior ticks
-          word_send_data[63:0] = tickaccum_last[63:0]; // Prep to send steps
+          word_send_data[63:0] <= tickaccum_last[63:0]; // Prep to send steps
         end
 
         // 0x03 - Clock divisor (24 bit)
@@ -99,6 +103,14 @@ module top (
           // TODO needs to be power of two
           microsteps[2:0] <= word_data_received[2:0];
           awaiting_more_words <= 0;
+        end
+
+        // 0xfe - API Version
+        8'hfe: begin
+          word_send_data[7:0] <= `VERSION_PATCH;
+          word_send_data[15:8] <= `VERSION_MINOR;
+          word_send_data[23:16] <= `VERSION_MAJOR;
+          awaiting_more_words <= 1;
         end
       endcase
 
@@ -124,6 +136,9 @@ module top (
             end
           endcase
         end
+
+        // Version
+        8'hfe: awaiting_more_words = 0;
       endcase
     end
   end

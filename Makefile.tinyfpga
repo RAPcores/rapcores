@@ -22,7 +22,7 @@ FREQ = 16
 
 all: $(PROJ).rpt $(PROJ).bin
 
-%.blif %.json : %.v spi.v stepper.v
+%.blif %.json : %.v configuration.v spi.v stepper.v
 	yosys -p 'synth_ice40 -top $(PROJ) -abc2 -dsp -blif $@ -json $*.json' $<
 
 %.asc: $(PIN_DEF) %.blif %.json
