@@ -25,8 +25,18 @@ FREQ = 16
 
 all: $(PROJ).rpt $(PROJ).bin
 
+<<<<<<< HEAD
 %.blif %.json : %.v
 	yosys -p 'synth_$(ARCH) -top $(PROJ) -abc2 -dsp -blif $@ -json $*.json' $<
+=======
+<<<<<<< HEAD
+%.blif %.json : %.v spi.v stepper.v
+	yosys -p 'synth_ice40 -top $(PROJ) -abc2 -dsp -blif $@ -json $*.json' $<
+=======
+%.blif %.json : %.v
+	yosys -p 'synth_$(ARCH) -top $(PROJ) -abc2 -dsp -blif $@ -json $*.json' $<
+>>>>>>> 1419384... refactor Makefile
+>>>>>>> refactor Makefile
 
 %.asc: $(PIN_DEF) %.blif %.json
 	nextpnr-$(ARCH) --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --json $*.json --asc $@ --$(PIN_TYPE)  $(PIN_DEF)
