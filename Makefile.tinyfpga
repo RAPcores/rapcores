@@ -20,8 +20,8 @@ PROJ = top
 
 all: $(PROJ).rpt $(PROJ).bin
 
-top.blif top.json : top.v
-	yosys -p 'synth_$(ARCH) -top $(PROJ) -abc2 -dsp -blif $@ -json $*.json' $<
+top.blif top.json : top.v ./boards/$(BOARD)/$(BOARD).v
+	yosys -p 'read_verilog ./boards/$(BOARD)/$(BOARD).v; synth_$(ARCH) -top $(PROJ) -abc2 -dsp -blif $@ -json $*.json' $<
 
 top.asc: top.blif top.json
 	nextpnr-$(ARCH) --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --json $*.json --asc $@ --$(PIN_TYPE) ./boards/$(BOARD)/$(PIN_DEF)
