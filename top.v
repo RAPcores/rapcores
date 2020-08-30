@@ -1,5 +1,6 @@
 `default_nettype none
 
+`include "buildconfig.v"
 `include "stepper.v"
 `include "spi.v"
 
@@ -7,10 +8,12 @@ module top (
     input  CLK,  // 16MHz clock
     output LED,  // User/boot LED next to power LED
     output USBPU,  // USB pull-up resistor
-    input  SCK,
-    input  CS,
-    input  COPI,
-    output CIPO,
+    `ifdef SPI_INTERFACE
+      input  SCK,
+      input  CS,
+      input  COPI,
+      output CIPO,
+    `endif
     output PIN_8,  // Phase A
     output PIN_9,  // Phase A
     output PIN_10,  // Phase B
