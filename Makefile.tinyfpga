@@ -14,52 +14,37 @@
 #  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 #  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-PROJ = top
+include ./boards/${BOARD}/${BOARD}.mk
 
-PIN_TYPE = pcf
-PIN_DEF = boards/tinyfpga.pcf
-ARCH = ice40
-DEVICE = lp8k
-PACKAGE = cm81
-FREQ = 16
+PROJ = top
 
 all: $(PROJ).rpt $(PROJ).bin
 
-<<<<<<< HEAD
-%.blif %.json : %.v
+top.blif top.json : top.v
 	yosys -p 'synth_$(ARCH) -top $(PROJ) -abc2 -dsp -blif $@ -json $*.json' $<
-=======
-<<<<<<< HEAD
-%.blif %.json : %.v spi.v stepper.v
-	yosys -p 'synth_ice40 -top $(PROJ) -abc2 -dsp -blif $@ -json $*.json' $<
-=======
-%.blif %.json : %.v
-	yosys -p 'synth_$(ARCH) -top $(PROJ) -abc2 -dsp -blif $@ -json $*.json' $<
->>>>>>> 1419384... refactor Makefile
->>>>>>> refactor Makefile
 
-%.asc: $(PIN_DEF) %.blif %.json
-	nextpnr-$(ARCH) --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --json $*.json --asc $@ --$(PIN_TYPE)  $(PIN_DEF)
+top.asc: top.blif top.json
+	nextpnr-$(ARCH) --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --json $*.json --asc $@ --$(PIN_TYPE) ./boards/$(BOARD)/$(PIN_DEF)
 
-%.bin: %.asc
+top.bin: top.asc
 	icepack $< $@
 
-%.rpt: %.asc
+top.rpt: top.asc
 	icetime -d $(DEVICE) -mtr $@ $<
 
-%_tb: %_tb.v %.v
+top_tb: top_tb.v top.v
 	iverilog -o $@ $^
 
-%_tb.vcd: %_tb
+top_tb.vcd: top_tb
 	vvp -N $< +vcd=$@
 
-%_syn.v: %.blif
+top_syn.v: top.blif
 	yosys -p 'read_blif -wideports $^; write_verilog $@'
 
-%_syntb: %_tb.v %_syn.v
+top_syntb: top_tb.v top_syn.v
 	iverilog -o $@ $^ `yosys-config --datdir/$(ARCH)/cells_sim.v`
 
-%_syntb.vcd: %_syntb
+top_syntb.vcd: top_syntb
 	vvp -N $< +vcd=$@
 
 prog: $(PROJ).bin
