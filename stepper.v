@@ -10,7 +10,7 @@ module DualHBridge (
     input  [2:0] microsteps
 );
 
-  reg [31:0] phase_ct;
+  reg [7:0] phase_ct; // needs to be the size of microsteps, for LUT
 
   reg pa1 = 1'b0;
   reg pa2 = 1'b0;
@@ -24,7 +24,7 @@ module DualHBridge (
 
   // increment the move_ticks every clock
   always @(posedge step) begin
-    phase_ct <= phase_ct + 1;
+    phase_ct <= (dir) ? phase_ct - 1'b1 : phase_ct + 1'b1;
 
     if (microsteps == 0 || microsteps == 1) begin
       // TODO: Function?

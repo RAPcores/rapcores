@@ -78,6 +78,7 @@ module top (
         1: begin
           // TODO get direction bits here
           awaiting_more_words <= 1;
+          dir <= word_data_received[0];
         end
         // 0x03 - Clock divisor (24 bit)
         3: begin
