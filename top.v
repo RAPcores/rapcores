@@ -47,7 +47,7 @@ module top (
 
   // Stepper Setup
   // TODO: Generate statement?
-  reg [2:0] microsteps = 1;
+  reg [2:0] microsteps = 2;
   reg step;
   reg dir;
   DualHBridge s0 (.phase_a1 (PIN_8),
