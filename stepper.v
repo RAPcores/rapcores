@@ -11,7 +11,7 @@ module DualHBridge (
 );
 
   reg [2:0] phase_ct; // needs to be the size of microsteps, for LUT
-  reg [3:0] phase_inc; // Phase increment per step
+  reg [2:0] phase_inc; // Phase increment per step
 
   // Table of phases
   reg [3:0] phase_table [7:0];
@@ -28,16 +28,9 @@ module DualHBridge (
 
   always @(posedge step) begin
 
-    // TODO try with bit shifts
-    case(microsteps)
-      1: begin
-        phase_inc = 4'h2;
-      end
-      2: begin
-        phase_inc = 4'h1;
-      end
-    endcase
+    phase_inc = 3'b100 >> microsteps; // Generate increment, multiple of microsteps
 
+    // Traverse the table based on direction, rolls over
     phase_ct = (dir) ? phase_ct - phase_inc : phase_ct + phase_inc;
 
     // TODO these should be initialized in a resetable block
