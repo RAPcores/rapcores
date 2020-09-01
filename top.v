@@ -13,8 +13,8 @@ module top (
     output CIPO,
     output PIN_8,  // Phase A
     output PIN_9,  // Phase A
+    output PIN_10,  // Phase B
     output PIN_11,  // Phase B
-    output PIN_12,  // Phase B
     output PIN_24,
     output PIN_23,
     output PIN_22,
@@ -47,15 +47,13 @@ module top (
 
   // Stepper Setup
   // TODO: Generate statement?
-  reg [2:0] microsteps = 1;
+  reg [2:0] microsteps = 2;
   reg step;
   reg dir;
   DualHBridge s0 (.phase_a1 (PIN_8),
                 .phase_a2 (PIN_9),
-                .phase_b1 (PIN_11),
-                .phase_b2 (PIN_12),
-                .pwm_a (PIN_7),
-                .pwm_b (PIN_13),
+                .phase_b1 (PIN_10),
+                .phase_b2 (PIN_11),
                 .step (step),
                 .dir (dir),
                 .microsteps (microsteps));
@@ -80,6 +78,7 @@ module top (
         1: begin
           // TODO get direction bits here
           awaiting_more_words <= 1;
+          dir <= word_data_received[0];
         end
         // 0x03 - Clock divisor (24 bit)
         3: begin

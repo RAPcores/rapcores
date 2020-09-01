@@ -5,123 +5,45 @@ module DualHBridge (
     output       phase_a2,  // Phase A
     output       phase_b1,  // Phase B
     output       phase_b2,  // Phase B
-    output       pwm_a,
-    output       pwm_b,
     input        step,
     input        dir,
     input  [2:0] microsteps
 );
 
-  reg [31:0] phase_ct;
-  assign pwm_a = 1;  // phase a pwm TODO: microstep
-  assign pwm_b = 1;  // phase b pwm
+  reg [2:0] phase_ct; // needs to be the size of microsteps, for LUT
+  reg [2:0] phase_inc; // Phase increment per step
 
-  reg pa1 = 1'b0;
-  reg pa2 = 1'b0;
-  reg pb1 = 1'b0;
-  reg pb2 = 1'b0;
+  // Table of phases
+  reg [3:0] phase_table [7:0];
 
-  assign phase_a1 = pa1;
-  assign phase_a2 = pa2;
-  assign phase_b1 = pb1;
-  assign phase_b2 = pb2;
+  reg [3:0] phase_reg; // this will be 4xN bits PWM
 
-  // increment the move_ticks every clock
+  assign phase_a1 = phase_reg[0];
+  assign phase_a2 = phase_reg[1];
+  assign phase_b1 = phase_reg[2];
+  assign phase_b2 = phase_reg[3];
+
   always @(posedge step) begin
-    phase_ct <= phase_ct + 1;
 
-    if (microsteps == 0 || microsteps == 1) begin
-      // TODO: Function?
-      // 1010
-      // 0110
-      // 0101
-      // 1001
-      case (phase_ct % 4)
-        0: begin  // 1010
-          pa1 <= 1'b1;
-          pa2 <= 1'b0;
-          pb1 <= 1'b1;
-          pb2 <= 1'b0;
-        end
-        1: begin  // 0110
-          pa1 <= 1'b0;
-          pa2 <= 1'b1;
-          pb1 <= 1'b1;
-          pb2 <= 1'b0;
-        end
-        2: begin  //0101
-          pa1 <= 1'b0;
-          pa2 <= 1'b1;
-          pb1 <= 1'b0;
-          pb2 <= 1'b1;
-        end
-        3: begin  //1001
-          pa1 <= 1'b1;
-          pa2 <= 1'b0;
-          pb1 <= 1'b0;
-          pb2 <= 1'b1;
-        end
-      endcase
-    end else if (microsteps == 2) begin
-      // 1010
-      // 0010
-      // 0110
-      // 0100
-      // 0101
-      // 0001
-      // 1001
-      // 1000
-      case (phase_ct % 8)
-        0: begin  // 1010
-          pa1 <= 1'b1;
-          pa2 <= 1'b0;
-          pb1 <= 1'b1;
-          pb2 <= 1'b0;
-        end
-        1: begin  // 0010
-          pa1 <= 1'b0;
-          pa2 <= 1'b0;
-          pb1 <= 1'b1;
-          pb2 <= 1'b0;
-        end
-        2: begin  // 0110
-          pa1 <= 1'b0;
-          pa2 <= 1'b1;
-          pb1 <= 1'b1;
-          pb2 <= 1'b0;
-        end
-        3: begin  // 0100
-          pa1 <= 1'b0;
-          pa2 <= 1'b1;
-          pb1 <= 1'b0;
-          pb2 <= 1'b0;
-        end
-        4: begin  // 0101
-          pa1 <= 1'b0;
-          pa2 <= 1'b1;
-          pb1 <= 1'b0;
-          pb2 <= 1'b1;
-        end
-        5: begin  // 0001
-          pa1 <= 1'b0;
-          pa2 <= 1'b0;
-          pb1 <= 1'b0;
-          pb2 <= 1'b1;
-        end
-        6: begin  // 1001
-          pa1 <= 1'b1;
-          pa2 <= 1'b0;
-          pb1 <= 1'b0;
-          pb2 <= 1'b1;
-        end
-        7: begin  // 1000
-          pa1 <= 1'b1;
-          pa2 <= 1'b0;
-          pb1 <= 1'b0;
-          pb2 <= 1'b0;
-        end
-      endcase
-    end
+    phase_inc = 3'b100 >> microsteps; // Generate increment, multiple of microsteps
+
+    // Traverse the table based on direction, rolls over
+    phase_ct = (dir) ? phase_ct - phase_inc : phase_ct + phase_inc;
+
+    // TODO PWM these should be initialized in a resetable block for user calibration
+    // Yosys memory support is influx, so track issues.
+    phase_table[0] <= 4'b1010;
+    phase_table[1] <= 4'b0010;
+    phase_table[2] <= 4'b0110;
+    phase_table[3] <= 4'b0100;
+    phase_table[4] <= 4'b0101;
+    phase_table[5] <= 4'b0001;
+    phase_table[6] <= 4'b1001;
+    phase_table[7] <= 4'b1000;
+
+    // Write the phase wires
+    phase_reg = phase_table[phase_ct % 8];
+
   end
 
 endmodule
