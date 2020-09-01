@@ -16,15 +16,12 @@ module DualHBridge (
   // Table of phases
   reg [3:0] phase_table [7:0];
 
-  reg pa1 = 1'b0;
-  reg pa2 = 1'b0;
-  reg pb1 = 1'b0;
-  reg pb2 = 1'b0;
+  reg [3:0] phase_reg; // this will be 4xN bits PWM
 
-  assign phase_a1 = pa1;
-  assign phase_a2 = pa2;
-  assign phase_b1 = pb1;
-  assign phase_b2 = pb2;
+  assign phase_a1 = phase_reg[0];
+  assign phase_a2 = phase_reg[1];
+  assign phase_b1 = phase_reg[2];
+  assign phase_b2 = phase_reg[3];
 
   always @(posedge step) begin
 
@@ -33,7 +30,7 @@ module DualHBridge (
     // Traverse the table based on direction, rolls over
     phase_ct = (dir) ? phase_ct - phase_inc : phase_ct + phase_inc;
 
-    // TODO these should be initialized in a resetable block
+    // TODO PWM these should be initialized in a resetable block for user calibration
     // Yosys memory support is influx, so track issues.
     phase_table[0] <= 4'b1010;
     phase_table[1] <= 4'b0010;
@@ -44,10 +41,9 @@ module DualHBridge (
     phase_table[6] <= 4'b1001;
     phase_table[7] <= 4'b1000;
 
-    pa1 = phase_table[phase_ct % 8][0];
-    pa2 = phase_table[phase_ct % 8][1];
-    pb1 = phase_table[phase_ct % 8][2];
-    pb2 = phase_table[phase_ct % 8][3];
+    // Write the phase wires
+    phase_reg = phase_table[phase_ct % 8];
+
   end
 
 endmodule
