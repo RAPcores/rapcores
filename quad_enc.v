@@ -29,7 +29,7 @@ module quad_enc(
   count,
   multiplier,
   );
-  
+
   input wire resetn;
   input wire  clk;
   input wire  a;
@@ -48,7 +48,7 @@ module quad_enc(
   wire direction = a_stable[1] ^ b_stable[2];  //Direction determined by comparing current sample to last
 
   always @(posedge clk) begin
-    a_stable <= {a_stable[1:0], a};  //Shift new a in. Last 2 samples shift to bits 2 and 1 
+    a_stable <= {a_stable[1:0], a};  //Shift new a in. Last 2 samples shift to bits 2 and 1
     b_stable <= {b_stable[1:0], b};  //Shift new b in
 
     if (!resetn) begin
@@ -59,9 +59,9 @@ module quad_enc(
       if (step_a && step_b)  //We do not know direction if both inputs triggered on single clock
         faultn <= 0;
       if (step) begin
-        if (direction) 
+        if (direction)
           count <= count + multiplier;
-        else 
+        else
           count <= count - multiplier;
       end
     end
