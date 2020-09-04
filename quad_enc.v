@@ -21,22 +21,14 @@
  */
 
 module quad_enc(
-  resetn,
-  clk,
-  a,
-  b,
-  faultn,
-  count,
-  multiplier,
+  input wire resetn,
+  input wire  clk,
+  input wire  a,
+  input wire  b,
+  output reg faultn,
+  output reg signed [63:0] count,
+  input [7:0] multiplier
   );
-
-  input wire resetn;
-  input wire  clk;
-  input wire  a;
-  input wire  b;
-  output reg faultn;
-  output reg [31:0] count;
-  input [7:0] multiplier;
 
 //  wire faultn;
 

@@ -3,6 +3,7 @@
 `include "configuration.v"
 `include "stepper.v"
 `include "spi.v"
+`include "quad_enc.v"
 
 module top (
     input  CLK,  // 16MHz clock
@@ -21,12 +22,17 @@ module top (
     output PIN_22,
     output PIN_21,
     output PIN_20,
+    input PIN_15,
+    input PIN_14,
     output PIN_18,
     output PIN_19,
     output PIN_7,
     output PIN_13
 );
 
+  // Global Reset (TODO: Make input pin)
+  wire reset;
+  assign reset = 1;
   // drive USB pull-up resistor to '0' to disable USB
   assign USBPU = 0;
 
@@ -60,6 +66,22 @@ module top (
                 .microsteps (microsteps));
 
   //
+  // Encoder
+  //
+  reg signed [63:0] encoder_count;
+  reg signed [63:0] encoder_count_last;
+  reg [7:0] encoder_multiplier = 1;
+  wire encoder_fault;
+  quad_enc encoder0 (
+    .resetn(reset),
+    .clk(CLK),
+    .a(PIN_14),
+    .b(PIN_15),
+    .faultn(encoder_fault),
+    .count(encoder_count),
+    .multiplier(encoder_multiplier));
+
+  //
   // State Machine for handling SPI Messages
   //
 
@@ -70,7 +92,8 @@ module top (
     LED <= !LED;
 
     // Zero out the next word
-    word_send_data = 0;
+    //word_send_data = 0;
+              word_send_data[63:0] = encoder_count[63:0]; // Prep to send encoder read
 
     // Header Processing
     if (!awaiting_more_words) begin
@@ -126,7 +149,10 @@ module top (
               move_duration[63:0] = word_data_received[63:0];
               word_send_data[63:0] = last_steps_taken[63:0]; // Prep to send steps
             end
-            2: increment[63:0] = word_data_received[63:0];
+            2: begin
+              increment[63:0] = word_data_received[63:0];
+              word_send_data[63:0] = encoder_count_last[63:0]; // Prep to send encoder read
+            end
             3: begin
                 incrementincrement[63:0] = word_data_received[63:0];
                 message_word_count = 0;
@@ -189,6 +215,7 @@ module top (
             clkaccum = 0;
             tickaccum = tickaccum + 1;
             tickaccum_last = tickaccum;
+            encoder_count_last = encoder_count;
         end
     end else begin
         tickaccum = 0;
