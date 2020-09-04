@@ -69,6 +69,7 @@ module top (
   // Encoder
   //
   reg signed [63:0] encoder_count;
+  reg signed [63:0] encoder_count_last;
   reg [7:0] encoder_multiplier = 1;
   wire encoder_fault;
   quad_enc encoder0 (
@@ -91,8 +92,7 @@ module top (
     LED <= !LED;
 
     // Zero out the next word
-    //word_send_data = 0;
-              word_send_data[63:0] = encoder_count[63:0]; // Prep to send encoder read
+    word_send_data = 0;
 
     // Header Processing
     if (!awaiting_more_words) begin
@@ -150,7 +150,7 @@ module top (
             end
             2: begin
               increment[63:0] = word_data_received[63:0];
-              //word_send_data[63:0] = encoder_count[63:0]; // Prep to send encoder read
+              word_send_data[63:0] = encoder_count_last[63:0]; // Prep to send encoder read
             end
             3: begin
                 incrementincrement[63:0] = word_data_received[63:0];
@@ -214,6 +214,7 @@ module top (
             clkaccum = 0;
             tickaccum = tickaccum + 1;
             tickaccum_last = tickaccum;
+            encoder_count_last = encoder_count;
         end
     end else begin
         tickaccum = 0;
