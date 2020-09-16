@@ -62,5 +62,8 @@ sudo-prog: $(PROJ).bin
 clean:
 	rm -f $(PROJ).blif $(PROJ).asc $(PROJ).rpt $(PROJ).bin $(PROJ).json
 
+formal:
+	sby -f symbiyosys.sby
+
 .SECONDARY:
 .PHONY: all prog clean
