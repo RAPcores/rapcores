@@ -65,5 +65,8 @@ clean:
 formal:
 	sby -f symbiyosys.sby
 
+lint:
+	verible-verilog-lint *.v
+
 .SECONDARY:
 .PHONY: all prog clean
