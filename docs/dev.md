@@ -1,30 +1,46 @@
 # Developer Docs
 
-## Prerequisites
+## Build Prerequisites
 
-```
-Yosys 0.9+2406 (git sha1 3209c076, gcc 9.3.0-10ubuntu2 -fPIC -Os)
-nextpnr-ice40 -- Next Generation Place and Route (Version 44007eab)
+RAPCores targets the FOSS synthesis, place and route, and bitstream tools.
+Linux is recommended for development. These tools rapidly improve, so it is recommended
+the tools are built from source and kept up to date.
 
-Name: tinyprog
-Version: 1.0.21
-```
+Please check each repo for detailed build instruction.
+If something breaks use `git reflog` to rollback to the prior commit.
 
-TinyFPGA program utility:
-```
-pip install --user tinyprog
-```
+### Yosys (Required)
+
+[https://github.com/YosysHQ/yosys](https://github.com/YosysHQ/yosys)
+
+### Nextpnr (Required)
+
+[https://github.com/YosysHQ/nextpnr](https://github.com/YosysHQ/nextpnr)
+
+Note: Icestorm and/or Prjtrellis should be installed before nextpnr.
+
+### Icestorm (Ice40 Architectures)
+
+[https://github.com/YosysHQ/icestorm](https://github.com/YosysHQ/icestorm)
+
+### prjtrellis (ECP5 Architectures)
+
+[https://github.com/YosysHQ/prjtrellis](https://github.com/YosysHQ/prjtrellis)
+
+### Programming Tools
+
+#### ECP5 Devboard
+
+openocd
+
+#### TinyFPGA BX
+
+The TinyFPGA BX uses tinyprog:
+
+`pip3 install --user tinyprog`
 
 
-Program the TinyFPGA B-series board with the bitstream:
-```shell
-make prog
-```
-
-## Build
-
-
-## Format Spec
+## Formatting
 
 All files should have `none` as the default nettype:
 
@@ -32,7 +48,9 @@ All files should have `none` as the default nettype:
 `default_nettype none
 ```
 
-## Verification
+## Formal Verification
+
+[https://github.com/YosysHQ/SymbiYosys](https://github.com/YosysHQ/SymbiYosys)
 
 sby -f symbiyosys.sby
 

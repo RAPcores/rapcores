@@ -16,17 +16,20 @@
 
 PROJ = top
 
+PIN_TYPE = pcf
 PIN_DEF = boards/tinyfpga.pcf
+ARCH = ice40
 DEVICE = lp8k
+PACKAGE = cm81
 FREQ = 16
 
 all: $(PROJ).rpt $(PROJ).bin
 
-%.blif %.json : %.v spi.v stepper.v
-	yosys -p 'synth_ice40 -top $(PROJ) -abc2 -dsp -blif $@ -json $*.json' $<
+%.blif %.json : %.v
+	yosys -p 'synth_$(ARCH) -top $(PROJ) -abc2 -dsp -blif $@ -json $*.json' $<
 
 %.asc: $(PIN_DEF) %.blif %.json
-	nextpnr-ice40 --$(DEVICE) --freq $(FREQ) --package cm81 --json $*.json --asc $@ --pcf  $(PIN_DEF)
+	nextpnr-$(ARCH) --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --json $*.json --asc $@ --$(PIN_TYPE)  $(PIN_DEF)
 
 %.bin: %.asc
 	icepack $< $@
@@ -44,7 +47,7 @@ all: $(PROJ).rpt $(PROJ).bin
 	yosys -p 'read_blif -wideports $^; write_verilog $@'
 
 %_syntb: %_tb.v %_syn.v
-	iverilog -o $@ $^ `yosys-config --datdir/ice40/cells_sim.v`
+	iverilog -o $@ $^ `yosys-config --datdir/$(ARCH)/cells_sim.v`
 
 %_syntb.vcd: %_syntb
 	vvp -N $< +vcd=$@

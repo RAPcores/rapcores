@@ -12,3 +12,5 @@ prep -top top
 spi.v
 stepper.v
 top.v
+configuration.v
+quad_enc.v
