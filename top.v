@@ -1,10 +1,7 @@
 `default_nettype none
 
-<<<<<<< HEAD
 `include "configuration.v"
-=======
 `include "buildconfig.v"
->>>>>>> [build] init board specific verilog config
 `include "stepper.v"
 `include "spi.v"
 `include "quad_enc.v"
