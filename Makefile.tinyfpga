@@ -18,19 +18,12 @@ include ./boards/${BOARD}/${BOARD}.mk
 
 PROJ = top
 
-all: $(PROJ).rpt $(PROJ).bin
+all: $(PROJ).bin
 
-top.blif top.json : top.v ./boards/$(BOARD)/$(BOARD).v
-	yosys -p 'read_verilog ./boards/$(BOARD)/$(BOARD).v; synth_$(ARCH) -top $(PROJ) -abc2 -dsp -blif $@ -json $*.json' $<
-
-top.asc: top.blif top.json
-	nextpnr-$(ARCH) --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --json $*.json --asc $@ --$(PIN_TYPE) ./boards/$(BOARD)/$(PIN_DEF)
-
-top.bin: top.asc
-	icepack $< $@
-
-top.rpt: top.asc
-	icetime -d $(DEVICE) -mtr $@ $<
+top.bin:
+	yosys -ql rapcore.log -p 'synth_ice40 -top top -abc2 -dsp -blif top.blif -json top.json' $(PROJ).v
+	nextpnr-ice40 --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --json top.json --asc $(PROJ).asc --$(PIN_TYPE) ./boards/$(BOARD)/$(PIN_DEF)
+	icepack $(PROJ).asc $(PROJ).bin
 
 top_tb: top_tb.v top.v
 	iverilog -o $@ $^
