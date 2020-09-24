@@ -20,32 +20,20 @@ PROJ = top
 
 all: $(PROJ).bin
 
-top.bin:
+$(PROJ).bin:
+ifeq ($(ARCH), ice40)
 	yosys -ql rapcore.log -p 'synth_ice40 -top top -abc2 -dsp -blif top.blif -json top.json' $(PROJ).v
-	nextpnr-ice40 --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --json top.json --asc $(PROJ).asc --$(PIN_TYPE) ./boards/$(BOARD)/$(PIN_DEF)
+	nextpnr-ice40 --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --json top.json --asc $(PROJ).asc --pcf ./boards/$(BOARD)/$(PIN_DEF)
 	icepack $(PROJ).asc $(PROJ).bin
-
-top_tb: top_tb.v top.v
-	iverilog -o $@ $^
-
-top_tb.vcd: top_tb
-	vvp -N $< +vcd=$@
-
-top_syn.v: top.blif
-	yosys -p 'read_blif -wideports $^; write_verilog $@'
-
-top_syntb: top_tb.v top_syn.v
-	iverilog -o $@ $^ `yosys-config --datdir/$(ARCH)/cells_sim.v`
-
-top_syntb.vcd: top_syntb
-	vvp -N $< +vcd=$@
+endif
+ifeq ($(ARCH), ecp5)
+	yosys -ql rapcore.log -p 'synth_ecp5 -top top -json top.json' $(PROJ).v
+	nextpnr-ecp5 --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --json top.json --lpf ./boards/$(BOARD)/$(PIN_DEF)
+	ecppack --svf $(PROJ).svf
+endif
 
 prog: $(PROJ).bin
-	tinyprog -p $<
-
-sudo-prog: $(PROJ).bin
-	@echo 'Executing prog as root!!!'
-	sudo tinyprog -p $<
+	$(PROGRAMMER) $<
 
 clean:
 	rm -f $(PROJ).blif $(PROJ).asc $(PROJ).rpt $(PROJ).bin $(PROJ).json
