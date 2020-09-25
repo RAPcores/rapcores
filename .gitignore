@@ -1,4 +1,5 @@
 *.bin
+*.bit
 *.blif
 *.asc
 *.rpt
@@ -6,10 +7,12 @@
 *.psb
 *.sdf
 *.vsb
-*.bin
+*.log
 *.tmp/
 *.exp
 *.vlog
 *.json
 *.config
 symbiyosys
+
+board.v
