@@ -1,5 +1,7 @@
 `default_nettype none
 
+`include "board.v"
+`include "buildconfig.v"
 `include "configuration.v"
 `include "buildconfig.v"
 `include "stepper.v"
@@ -9,35 +11,31 @@
 module top (
     input  CLK,  // 16MHz clock
     output LED,  // User/boot LED next to power LED
-    output USBPU,  // USB pull-up resistor
+    `ifdef tinyfpgabx
+      output USBPU,  // USB pull-up resistor
+    `endif
     `ifdef SPI_INTERFACE
       input  SCK,
       input  CS,
       input  COPI,
       output CIPO,
     `endif
-    output PIN_8,  // Phase A
-    output PIN_9,  // Phase A
-    output PIN_10,  // Phase B
-    output PIN_11,  // Phase B
-    output PIN_24,
-    output PIN_23,
-    output PIN_22,
-    output PIN_21,
-    output PIN_20,
-    input PIN_15,
-    input PIN_14,
-    output PIN_18,
-    output PIN_19,
-    output PIN_7,
-    output PIN_13
+    output M1_PHASE_A1,  // Phase A
+    output M1_PHASE_A2,  // Phase A
+    output M1_PHASE_B1,  // Phase B
+    output M1_PHASE_B2,  // Phase B
+    input ENC1_B,
+    input ENC1_A,
 );
+
 
   // Global Reset (TODO: Make input pin)
   wire reset;
   assign reset = 1;
-  // drive USB pull-up resistor to '0' to disable USB
-  assign USBPU = 0;
+  `ifdef tinyfpgabx
+    // drive USB pull-up resistor to '0' to disable USB
+    assign USBPU = 0;
+  `endif
 
   // Word handler
   // The system operates on 32 bit little endian words
@@ -60,10 +58,10 @@ module top (
   reg [2:0] microsteps = 2;
   reg step;
   reg dir;
-  DualHBridge s0 (.phase_a1 (PIN_8),
-                .phase_a2 (PIN_9),
-                .phase_b1 (PIN_10),
-                .phase_b2 (PIN_11),
+  DualHBridge s0 (.phase_a1 (M1_PHASE_A1),
+                .phase_a2 (M1_PHASE_A2),
+                .phase_b1 (M1_PHASE_B1),
+                .phase_b2 (M1_PHASE_B2),
                 .step (step),
                 .dir (dir),
                 .microsteps (microsteps));
@@ -79,8 +77,8 @@ module top (
   quad_enc encoder0 (
     .resetn(reset),
     .clk(CLK),
-    .a(PIN_14),
-    .b(PIN_15),
+    .a(ENC1_A),
+    .b(ENC1_B),
     .faultn(encoder_fault),
     .count(encoder_count),
     .multiplier(encoder_multiplier));
@@ -166,7 +164,6 @@ module top (
                 awaiting_more_words = 0;
                 stepready[writemoveind] = ~stepready[writemoveind];
                 writemoveind = writemoveind + 1'b1;
-                PIN_22 = ~PIN_22;
                 `ifdef FORMAL
                   assert(writemoveind <= `MOVE_BUFFER_SIZE);
                 `endif

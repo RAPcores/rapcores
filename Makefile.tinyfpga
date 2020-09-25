@@ -18,25 +18,26 @@ include ./boards/${BOARD}/${BOARD}.mk
 
 PROJ = top
 
-all: $(PROJ).bin
+all: $(BOARD).bit
 
-$(PROJ).bin:
+$(BOARD).bit:
+	echo '`define $(BOARD)' > board.v # set board define for Verilog
 ifeq ($(ARCH), ice40)
-	yosys -ql rapcore.log -p 'synth_ice40 -top top -abc2 -dsp -blif top.blif -json top.json' $(PROJ).v
-	nextpnr-ice40 --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --json top.json --asc $(PROJ).asc --pcf ./boards/$(BOARD)/$(PIN_DEF)
-	icepack $(PROJ).asc $(PROJ).bin
+	yosys -ql $(BOARD).log -p 'synth_ice40 -top $(PROJ) -abc2 -dsp -blif $(PROJ).blif -json $(PROJ).json' $(PROJ).v
+	nextpnr-ice40 --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --json $(PROJ).json --asc $(PROJ).asc --pcf ./boards/$(BOARD)/$(PIN_DEF)
+	icepack $(PROJ).asc $(BOARD).bit
 endif
 ifeq ($(ARCH), ecp5)
-	yosys -ql rapcore.log -p 'synth_ecp5 -top top -json top.json' $(PROJ).v
-	nextpnr-ecp5 --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --json top.json --lpf ./boards/$(BOARD)/$(PIN_DEF)
-	ecppack --svf $(PROJ).svf
+	yosys -ql $(BOARD).log -p 'synth_ecp5 -top $(PROJ) -json top.json' $(PROJ).v
+	nextpnr-ecp5 --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --json $(PROJ).json --lpf ./boards/$(BOARD)/$(PIN_DEF)
+	ecppack --svf $(PROJ).svf $(BOARD).bit
 endif
 
-prog: $(PROJ).bin
+prog: $(BOARD).bit
 	$(PROGRAMMER) $<
 
 clean:
-	rm -f $(PROJ).blif $(PROJ).asc $(PROJ).rpt $(PROJ).bin $(PROJ).json
+	rm -f $(PROJ).blif $(PROJ).asc $(PROJ).rpt  $(PROJ).json $(BOARD).bin $(BOARD).bit
 
 formal:
 	sby -f symbiyosys.sby
