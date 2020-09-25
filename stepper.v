@@ -23,15 +23,7 @@ module DualHBridge (
   assign phase_b1 = phase_reg[2];
   assign phase_b2 = phase_reg[3];
 
-  always @(posedge step) begin
-
-    phase_inc = 3'b100 >> microsteps; // Generate increment, multiple of microsteps
-
-    // Traverse the table based on direction, rolls over
-    phase_ct = (dir) ? phase_ct - phase_inc : phase_ct + phase_inc;
-
-    // TODO PWM these should be initialized in a resetable block for user calibration
-    // Yosys memory support is influx, so track issues.
+  initial begin
     phase_table[0] <= 4'b1010;
     phase_table[1] <= 4'b0010;
     phase_table[2] <= 4'b0110;
@@ -40,6 +32,20 @@ module DualHBridge (
     phase_table[5] <= 4'b0001;
     phase_table[6] <= 4'b1001;
     phase_table[7] <= 4'b1000;
+  end
+
+  always @(posedge step) begin
+
+    phase_inc = 3'b100 >> microsteps; // Generate increment, multiple of microsteps
+
+    // TODO: Need to add safety SPI or here
+    //`ifdef FORMAL
+    //  assert( (microsteps == 3'b010 && phase_inc == 3'b001) ||
+    //          (microsteps == 3'b001 && phase_inc == 3'b010) );
+    //`endif
+
+    // Traverse the table based on direction, rolls over
+    phase_ct = (dir) ? phase_ct - phase_inc : phase_ct + phase_inc;
 
     // Write the phase wires
     phase_reg = phase_table[phase_ct % 8];
