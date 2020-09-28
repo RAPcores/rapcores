@@ -41,6 +41,7 @@ clean:
 	rm -f $(PROJ).blif $(PROJ).asc $(PROJ).rpt  $(PROJ).json $(BOARD).bin $(BOARD).bit
 
 formal:
+	@echo '`define $(BOARD)\n`include "./boards/$(BOARD)/$(BOARD).v"' > board.v
 	sby -f symbiyosys.sby
 
 lint:

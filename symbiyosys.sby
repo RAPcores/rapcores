@@ -9,8 +9,11 @@ read -formal top.v
 prep -top top
 
 [files]
+board.v
+boards/tinyfpgabx/tinyfpgabx.v boards/tinyfpgabx/tinyfpgabx.v
+buildconfig.v
+configuration.v
 spi.v
 stepper.v
 top.v
-configuration.v
 quad_enc.v
