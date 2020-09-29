@@ -45,16 +45,16 @@ set_io --warn-no-port CIPO C2 # PIN_4
 set_io --warn-no-port PIN_5 C1
 set_io --warn-no-port PIN_6 D2
 set_io --warn-no-port PIN_7 D1
-set_io --warn-no-port PIN_8 E2
-set_io --warn-no-port PIN_9 E1
-set_io --warn-no-port PIN_10 G2
-set_io --warn-no-port PIN_11 H1
+set_io --warn-no-port M1_PHASE_A1 E2
+set_io --warn-no-port M1_PHASE_A2 E1
+set_io --warn-no-port M1_PHASE_B1 G2
+set_io --warn-no-port M1_PHASE_B2 H1
 set_io --warn-no-port PIN_12 J1
 set_io --warn-no-port PIN_13 H2
 
 # Right side of board
-set_io --warn-no-port PIN_14 H9
-set_io --warn-no-port PIN_15 D9
+set_io --warn-no-port ENC1_A H9
+set_io --warn-no-port ENC1_B D9
 set_io --warn-no-port PIN_16 D8
 set_io --warn-no-port PIN_17 C9
 set_io --warn-no-port PIN_18 A9

@@ -2,7 +2,10 @@
 
 ## Build Prerequisites
 
-RAPCores targets the FOSS synthesis, place and route, and bitstream tools.
+RAPCores targets the FOSS synthesis, place and route, and bitstream tools. Namely yosys and
+nextpnr. We are open to support other flows and open source tool chain. However do note
+that RAPcores does use some SystemVerilog features supported by Yosys.
+
 Linux is recommended for development. These tools rapidly improve, so it is recommended
 the tools are built from source and kept up to date.
 
@@ -40,6 +43,11 @@ The TinyFPGA BX uses tinyprog:
 `pip3 install --user tinyprog`
 
 
+## Board Definition Structure
+
+
+
+
 ## Formatting
 
 All files should have `none` as the default nettype:
@@ -52,7 +60,17 @@ All files should have `none` as the default nettype:
 
 [https://github.com/YosysHQ/SymbiYosys](https://github.com/YosysHQ/SymbiYosys)
 
-sby -f symbiyosys.sby
+SymbiYosys is used for formal verification of the codebase. It can be run with:
+
+`make formal`
+
+This command will create a `symbiyosys` directory in the project that
+contains all the logs and data from the verification. If an assert or
+cover fails, a `.vcd` file will be generated that will display the states
+of registers and wires that induced the failure. GTKWave is a useful
+program for viewing the `.vcd` files.
+
+
 
 ## Helpful Articles
 
