@@ -43,10 +43,19 @@ The TinyFPGA BX uses tinyprog:
 `pip3 install --user tinyprog`
 
 
-## Board Definition Structure
+## Build Bitstream
+
+`make BOARD=<board>`
 
 
+## Board Definition Structure and Porting Guide
 
+Each board should have the following three files in the name derived from the `BOARD`
+parameter sent to make:
+
+- [.mk] FPGA Architecture parameters
+- [.v] Verilog configuration parameters
+- [.pcf/.lpf] Pin out and pin name information
 
 ## Formatting
 
@@ -62,15 +71,13 @@ All files should have `none` as the default nettype:
 
 SymbiYosys is used for formal verification of the codebase. It can be run with:
 
-`make formal`
+`make formal BOARD=<board>`
 
 This command will create a `symbiyosys` directory in the project that
 contains all the logs and data from the verification. If an assert or
 cover fails, a `.vcd` file will be generated that will display the states
 of registers and wires that induced the failure. GTKWave is a useful
 program for viewing the `.vcd` files.
-
-
 
 ## Helpful Articles
 
