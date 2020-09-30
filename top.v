@@ -3,6 +3,7 @@
 `include "board.v"
 `include "buildconfig.v"
 `include "configuration.v"
+`include "constants.v"
 `include "buildconfig.v"
 `include "stepper.v"
 `include "spi.v"
@@ -99,7 +100,7 @@ module top (
 
     // Zero out the next word
     //word_send_data = 0;
-              word_send_data[63:0] = encoder_count[63:0]; // Prep to send encoder read
+    word_send_data[63:0] = encoder_count[63:0]; // Prep to send encoder read
 
     // Header Processing
     if (!awaiting_more_words) begin
@@ -108,11 +109,11 @@ module top (
 
       case (message_header)
 
-        // 0x01 - Coordinated Move
+        // Coordinated Move
         // Header: 24 bits for direction
         // Word 1: Increment (signed)
         // Word 2: Increment Increment (signed)
-        1: begin
+        `CMD_COORDINATED_STEP: begin
           // TODO get direction bits here
           awaiting_more_words <= 1;
 
@@ -122,26 +123,26 @@ module top (
           //word_send_data[63:0] <= tickdowncount_last[63:0]; // Prep to send steps
         end
 
-        // 0x02 - Motor Enable/disable
-        2: begin
+        // Motor Enable/disable
+        `CMD_MOTOR_ENABLE: begin
           enable <= word_data_received[0];
         end
 
-        // 0x03 - Clock divisor (24 bit)
-        3: begin
+        // Clock divisor (24 bit)
+        `CMD_CLK_DIVISOR: begin
           clock_divisor[23:0] <= word_data_received[23:0];
           awaiting_more_words <= 0;
         end
 
-        // 0x04 - Set Microstepping
-        4: begin
+        // Set Microstepping
+        `CMD_MICROSTEPS: begin
           // TODO needs to be power of two
           microsteps[2:0] <= word_data_received[2:0];
           awaiting_more_words <= 0;
         end
 
-        // 0xfe - API Version
-        8'hfe: begin
+        // API Version
+        `CMD_API_VERSION: begin
           word_send_data[7:0] <= `VERSION_PATCH;
           word_send_data[15:8] <= `VERSION_MINOR;
           word_send_data[23:16] <= `VERSION_MAJOR;
@@ -154,7 +155,7 @@ module top (
       message_word_count = message_word_count + 1;
       case (message_header)
         // Move Routine
-        1: begin
+        `CMD_COORDINATED_STEP: begin
           // the first non-header word is the move duration
           case (message_word_count)
             1: begin
@@ -178,8 +179,9 @@ module top (
           endcase
         end
 
-        // Version
-        8'hfe: awaiting_more_words = 0;
+        // Otherwise we did a single word reply and are now done
+        default: awaiting_more_words = 0;
+
       endcase
     end
   end
