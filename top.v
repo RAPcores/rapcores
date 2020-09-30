@@ -58,12 +58,14 @@ module top (
   reg [2:0] microsteps = 2;
   reg step;
   reg dir;
+  reg enable;
   DualHBridge s0 (.phase_a1 (M1_PHASE_A1),
                 .phase_a2 (M1_PHASE_A2),
                 .phase_b1 (M1_PHASE_B1),
                 .phase_b2 (M1_PHASE_B2),
                 .step (step),
                 .dir (dir),
+                .enable (enable),
                 .microsteps (microsteps));
 
 
@@ -118,6 +120,11 @@ module top (
 
           // Next we send prior ticks
           //word_send_data[63:0] <= tickdowncount_last[63:0]; // Prep to send steps
+        end
+
+        // 0x02 - Motor Enable/disable
+        2: begin
+          enable <= word_data_received[0];
         end
 
         // 0x03 - Clock divisor (24 bit)

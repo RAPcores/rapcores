@@ -7,6 +7,7 @@ module DualHBridge (
     output       phase_b2,  // Phase B
     input        step,
     input        dir,
+    input        enable,
     input  [2:0] microsteps
 );
 
@@ -16,10 +17,10 @@ module DualHBridge (
   // Table of phases
   reg [31:0] phase_table [0:255]; // Larger to trigger BRAM inference
 
-  assign phase_a1 = phase_table[phase_ct][0];
-  assign phase_a2 = phase_table[phase_ct][1];
-  assign phase_b1 = phase_table[phase_ct][2];
-  assign phase_b2 = phase_table[phase_ct][3];
+  assign phase_a1 = (enable) ? phase_table[phase_ct][0] : 0;
+  assign phase_a2 = (enable) ? phase_table[phase_ct][1] : 0;
+  assign phase_b1 = (enable) ? phase_table[phase_ct][2] : 0;
+  assign phase_b2 = (enable) ? phase_table[phase_ct][3] : 0;
 
   assign phase_inc = 3'b100 >> microsteps; // Generate increment, multiple of microsteps\
 
