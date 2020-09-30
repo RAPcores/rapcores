@@ -14,7 +14,7 @@ module DualHBridge (
   wire [2:0] phase_inc; // Phase increment per step
 
   // Table of phases
-  reg [3:0] phase_table [7:0];
+  reg [31:0] phase_table [0:255]; // Larger to trigger BRAM inference
 
   assign phase_a1 = phase_table[phase_ct][0];
   assign phase_a2 = phase_table[phase_ct][1];
