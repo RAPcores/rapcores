@@ -11,17 +11,17 @@ module DualHBridge (
 );
 
   reg [2:0] phase_ct; // needs to be the size of microsteps, for LUT
-  reg [2:0] phase_inc; // Phase increment per step
+  wire [2:0] phase_inc; // Phase increment per step
 
   // Table of phases
   reg [3:0] phase_table [7:0];
 
-  reg [3:0] phase_reg = 4'b0000; // this will be 4xN bits PWM
+  assign phase_a1 = phase_table[phase_ct][0];
+  assign phase_a2 = phase_table[phase_ct][1];
+  assign phase_b1 = phase_table[phase_ct][2];
+  assign phase_b2 = phase_table[phase_ct][3];
 
-  assign phase_a1 = phase_reg[0];
-  assign phase_a2 = phase_reg[1];
-  assign phase_b1 = phase_reg[2];
-  assign phase_b2 = phase_reg[3];
+  assign phase_inc = 3'b100 >> microsteps; // Generate increment, multiple of microsteps\
 
   initial begin
     phase_table[0] = 4'b1010;
@@ -36,8 +36,6 @@ module DualHBridge (
 
   always @(posedge step) begin
 
-    phase_inc = 3'b100 >> microsteps; // Generate increment, multiple of microsteps
-
     // TODO: Need to add safety SPI or here
     //`ifdef FORMAL
     //  assert( (microsteps == 3'b010 && phase_inc == 3'b001) ||
@@ -45,10 +43,7 @@ module DualHBridge (
     //`endif
 
     // Traverse the table based on direction, rolls over
-    phase_ct = (dir) ? phase_ct - phase_inc : phase_ct + phase_inc;
-
-    // Write the phase wires
-    phase_reg = phase_table[phase_ct % 8];
+    phase_ct <= (dir) ? phase_ct - phase_inc : phase_ct + phase_inc;
 
   end
 
