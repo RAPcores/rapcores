@@ -13,6 +13,7 @@ board.v
 boards/tinyfpgabx/tinyfpgabx.v boards/tinyfpgabx/tinyfpgabx.v
 buildconfig.v
 configuration.v
+constants.v
 spi.v
 stepper.v
 top.v
