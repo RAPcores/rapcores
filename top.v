@@ -130,7 +130,7 @@ module top (
 
         // Clock divisor (24 bit)
         `CMD_CLK_DIVISOR: begin
-          clock_divisor[23:0] <= word_data_received[23:0];
+          clock_divisor[7:0] <= word_data_received[7:0];
           awaiting_more_words <= 0;
         end
 
@@ -199,11 +199,11 @@ module top (
   reg stepfinished [`MOVE_BUFFER_SIZE:0];
 
   reg [63:0] move_duration [`MOVE_BUFFER_SIZE:0];
-  reg [23:0] clock_divisor = 40;  // should be 40 for 400 khz at 16Mhz Clk
+  reg [7:0] clock_divisor = 40;  // should be 40 for 400 khz at 16Mhz Clk
   reg dir_r [`MOVE_BUFFER_SIZE:0];
 
   reg [63:0] tickdowncount;  // move down count (clock cycles)
-  reg [23:0] clkaccum = 0;  // intra-tick accumulator
+  reg [7:0] clkaccum = 0;  // intra-tick accumulator
 
   reg signed [63:0] substep_accumulator = 0; // typemax(Int64) - 100 for buffer
   reg signed [63:0] increment_r;
@@ -224,8 +224,8 @@ module top (
     if(!finishedmove & (stepfinished[moveind] ^ stepready[moveind])) begin
 
       // DDA clock divisor
-      clkaccum = clkaccum + 1;
-      if (clkaccum[23:0] == clock_divisor[23:0]) begin
+      clkaccum = clkaccum + 8'b1;
+      if (clkaccum == clock_divisor) begin
         dir = dir_r[moveind]; // set direction
         // TODO For N axes
         increment_r = (tickdowncount == move_duration[moveind]) ? increment[moveind] : increment_r + incrementincrement[moveind];
@@ -239,7 +239,7 @@ module top (
         end
 
         // Increment tick accumulators
-        clkaccum = 0;
+        clkaccum = 8'b0;
         tickdowncount = tickdowncount - 1'b1;
         encoder_count_last = encoder_count;
         // See if we finished the segment and incrment the buffer
