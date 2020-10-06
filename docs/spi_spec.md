@@ -8,6 +8,13 @@
 - Forward Channel: SPI communication initiated by firmware to FPGA
 - Reverse Channel: Data transmitted by FPGA to firmware during message transfer
 
+## Versioning
+
+RAPCores follows [Semantic Versioning](https://semver.org/). This is still a pre-1.0
+project so breaking changes are likely to happen with the SPI protocol. This document
+serves as the "as-built" reference for the RAPcore, and may deviate from documents outside
+this repository.
+
 ## Overview
 
 The SPI bus operated in peripheral mode 0 MSB.The protocol assumes any complete transfer is
@@ -21,3 +28,4 @@ SPI controller devices.
 | 0x02                  | Integration Timer Scale | 1                           | 32            |
 | 0x03                  | Set Motor Count         | 1                           | 6             |
 | 0x04                  | Set Microstepping       | 1                           | 2             |
+| 0xfe                  | Get Version             | 2                           | 0x...MMmmpp   |
