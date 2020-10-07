@@ -195,12 +195,12 @@ module top (
   reg [`MOVE_BUFFER_BITS:0] moveind = 0; // Move index cursor
 
   // Latching mechanism for engaging the move. This is currently unbuffered, so TODO
-  reg stepready [`MOVE_BUFFER_SIZE:0];
-  reg stepfinished [`MOVE_BUFFER_SIZE:0];
+  reg [`MOVE_BUFFER_SIZE:0] stepready;
+  reg [`MOVE_BUFFER_SIZE:0] stepfinished;
 
   reg [63:0] move_duration [`MOVE_BUFFER_SIZE:0];
   reg [7:0] clock_divisor = 40;  // should be 40 for 400 khz at 16Mhz Clk
-  reg dir_r [`MOVE_BUFFER_SIZE:0];
+  reg [`MOVE_BUFFER_SIZE:0] dir_r;
 
   reg [63:0] tickdowncount;  // move down count (clock cycles)
   reg [7:0] clkaccum = 0;  // intra-tick accumulator
