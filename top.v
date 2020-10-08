@@ -203,7 +203,7 @@ module top (
   reg [`MOVE_BUFFER_SIZE:0] dir_r;
 
   reg [63:0] tickdowncount;  // move down count (clock cycles)
-  reg [7:0] clkaccum = 0;  // intra-tick accumulator
+  reg [7:0] clkaccum = 8'b1;  // intra-tick accumulator
 
   reg signed [63:0] substep_accumulator = 0; // typemax(Int64) - 100 for buffer
   reg signed [63:0] increment_r;
@@ -239,7 +239,7 @@ module top (
         end
 
         // Increment tick accumulators
-        clkaccum <= 8'b0;
+        clkaccum <= 8'b1;
         tickdowncount <= tickdowncount - 1'b1;
         encoder_count_last <= encoder_count;
         // See if we finished the segment and incrment the buffer
