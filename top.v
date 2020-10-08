@@ -58,7 +58,7 @@ module top (
   // TODO: Generate statement?
   reg [2:0] microsteps = 2;
   reg step;
-  reg dir;
+  wire dir;
   reg enable;
   DualHBridge s0 (.phase_a1 (M1_PHASE_A1),
                 .phase_a2 (M1_PHASE_A2),
@@ -212,6 +212,8 @@ module top (
 
   reg finishedmove = 1; // flag inidicating a move has been finished, so load next
 
+  assign dir = dir_r[moveind]; // set direction
+
   always @(posedge CLK) begin
 
     // Load up the move duration
@@ -226,11 +228,10 @@ module top (
       // DDA clock divisor
       clkaccum = clkaccum + 8'b1;
       if (clkaccum == clock_divisor) begin
-        dir = dir_r[moveind]; // set direction
-        // TODO For N axes
+
         increment_r = (tickdowncount == move_duration[moveind]) ? increment[moveind] : increment_r + incrementincrement[moveind];
         substep_accumulator = substep_accumulator + increment_r;
-        // TODO need to set residency on the signal
+
         if (substep_accumulator > 0) begin
           step <= 1;
           substep_accumulator <= substep_accumulator - 64'h7fffffffffffff9b;
