@@ -7,6 +7,7 @@
 `include "buildconfig.v"
 `include "stepper.v"
 `include "spi.v"
+`include "spi_pll.v"
 `include "quad_enc.v"
 
 module top (
@@ -38,6 +39,13 @@ module top (
     assign USBPU = 0;
   `endif
 
+  // PLL for SPI Bus
+  wire spi_clock;
+  wire spipll_locked;
+  spi_pll spll (.clock_in(CLK),
+                .clock_out(spi_clock),
+                .locked(spipll_locked));
+
   // Word handler
   // The system operates on 32 bit little endian words
   // This should make it easier to send 32 bit chunks from the host controller
@@ -45,7 +53,7 @@ module top (
   reg [63:0] word_data_received;
   wire word_received;
   SPIWord word_proc (
-                .clk(CLK),
+                .clk(spi_clock),
                 .SCK(SCK),
                 .CS(CS),
                 .COPI(COPI),
