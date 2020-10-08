@@ -232,16 +232,16 @@ module top (
         substep_accumulator = substep_accumulator + increment_r;
         // TODO need to set residency on the signal
         if (substep_accumulator > 0) begin
-          step = 1;
-          substep_accumulator = substep_accumulator - 64'h7fffffffffffff9b;
+          step <= 1;
+          substep_accumulator <= substep_accumulator - 64'h7fffffffffffff9b;
         end else begin
-          step = 0;
+          step <= 0;
         end
 
         // Increment tick accumulators
-        clkaccum = 8'b0;
-        tickdowncount = tickdowncount - 1'b1;
-        encoder_count_last = encoder_count;
+        clkaccum <= 8'b0;
+        tickdowncount <= tickdowncount - 1'b1;
+        encoder_count_last <= encoder_count;
         // See if we finished the segment and incrment the buffer
         if(tickdowncount == 0) begin
           stepfinished[moveind] = stepready[moveind];
