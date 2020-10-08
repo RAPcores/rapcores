@@ -152,26 +152,29 @@ module top (
 
     // Addition Word Processing
     end else begin
+
+      // TODO try this non blocking
       message_word_count = message_word_count + 1;
+
       case (message_header)
         // Move Routine
         `CMD_COORDINATED_STEP: begin
           // the first non-header word is the move duration
           case (message_word_count)
             1: begin
-              move_duration[writemoveind][63:0] = word_data_received[63:0];
+              move_duration[writemoveind][63:0] <= word_data_received[63:0];
               //word_send_data[63:0] = last_steps_taken[63:0]; // Prep to send steps
             end
             2: begin
-              increment[writemoveind][63:0] = word_data_received[63:0];
-              word_send_data[63:0] = encoder_count_last[63:0]; // Prep to send encoder read
+              increment[writemoveind][63:0] <= word_data_received[63:0];
+              word_send_data[63:0] <= encoder_count_last[63:0]; // Prep to send encoder read
             end
             3: begin
-                incrementincrement[writemoveind][63:0] = word_data_received[63:0];
-                message_word_count = 0;
-                awaiting_more_words = 0;
-                stepready[writemoveind] = ~stepready[writemoveind];
-                writemoveind = writemoveind + 1'b1;
+                incrementincrement[writemoveind][63:0] <= word_data_received[63:0];
+                message_word_count <= 0;
+                awaiting_more_words <= 0;
+                stepready[writemoveind] <= ~stepready[writemoveind];
+                writemoveind <= writemoveind + 1'b1;
                 `ifdef FORMAL
                   assert(writemoveind <= `MOVE_BUFFER_SIZE);
                 `endif
@@ -180,7 +183,7 @@ module top (
         end
 
         // Otherwise we did a single word reply and are now done
-        default: awaiting_more_words = 0;
+        default: awaiting_more_words <= 0;
 
       endcase
     end
