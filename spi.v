@@ -83,7 +83,7 @@ module SPIWord (
   // The standard unit of transfer is 8 bits, MSB
   wire rx_byte_ready;  // high when a byte has been received
   reg [7:0] rx_byte;
-  reg [7:0] tx_byte;
+  wire [7:0] tx_byte;
   SPI spi0 (.clk(clk),
             .CS(CS),
             .SCK(SCK),
@@ -94,30 +94,27 @@ module SPIWord (
             .rx_byte_ready(rx_byte_ready));
 
   reg [3:0] byte_count = 0;
+  wire [7:0] word_slice [8:0];
 
   // Recieve Shift Register
   always @(posedge rx_byte_ready) begin
-    byte_count = (byte_count == 8) ? 1 : byte_count + 1;
-    word_data_received = {rx_byte[7:0], word_data_received[63:8]};
+    byte_count <= (byte_count == 8) ? 1 : byte_count + 1;
+    word_data_received <= {rx_byte[7:0], word_data_received[63:8]};
   end
 
   assign word_received = (byte_count == 8);
 
-  // Transmit data assignment
-  always @(posedge clk) begin
-    case (byte_count)
-        0: tx_byte[7:0] = word_send_data[7:0]; // This should only hit at initialization
-        1: tx_byte[7:0] = word_send_data[15:8];
-        2: tx_byte[7:0] = word_send_data[23:16];
-        3: tx_byte[7:0] = word_send_data[31:24];
-        4: tx_byte[7:0] = word_send_data[39:32];
-        5: tx_byte[7:0] = word_send_data[47:40];
-        6: tx_byte[7:0] = word_send_data[55:48];
-        7: tx_byte[7:0] = word_send_data[63:56];
-        8: tx_byte[7:0] = word_send_data[7:0];
-        `ifdef FORMAL
-          default: assert(0);
-        `endif
-    endcase
-  end
+  //TODO: Use generate
+  assign word_slice[0] = word_send_data[7:0]; // This should only hit at initialization
+  assign word_slice[1] = word_send_data[15:8];
+  assign word_slice[2] = word_send_data[23:16];
+  assign word_slice[3] = word_send_data[31:24];
+  assign word_slice[4] = word_send_data[39:32];
+  assign word_slice[5] = word_send_data[47:40];
+  assign word_slice[6] = word_send_data[55:48];
+  assign word_slice[7] = word_send_data[63:56];
+  assign word_slice[8] = word_send_data[7:0];
+
+  assign tx_byte[7:0] = word_slice[byte_count];
+
 endmodule
