@@ -9,12 +9,13 @@ read -formal top.v
 prep -top top
 
 [files]
-board.v
+generated/board.v src/generated/board.v
+generated/spi_pll.v src/generated/spi_pll.v
 boards/tinyfpgabx/tinyfpgabx.v boards/tinyfpgabx/tinyfpgabx.v
-buildconfig.v
-configuration.v
-constants.v
-spi.v
-stepper.v
-top.v
-quad_enc.v
+src/buildconfig.v
+src/configuration.v
+src/constants.v
+src/spi.v
+src/stepper.v
+src/top.v
+src/quad_enc.v

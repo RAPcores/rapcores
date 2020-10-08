@@ -1,13 +1,13 @@
 `default_nettype none
 
-`include "board.v"
+`include "generated/board.v"
 `include "buildconfig.v"
 `include "configuration.v"
 `include "constants.v"
 `include "buildconfig.v"
 `include "stepper.v"
 `include "spi.v"
-`include "spi_pll.v"
+`include "generated/spi_pll.v"
 `include "quad_enc.v"
 
 module top (

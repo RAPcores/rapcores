@@ -15,5 +15,6 @@
 *.config
 symbiyosys
 
-board.v
-pll.v
+src/generated/*
+build/*
+logs/*
