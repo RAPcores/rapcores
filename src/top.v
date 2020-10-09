@@ -7,8 +7,12 @@
 `include "buildconfig.v"
 `include "stepper.v"
 `include "spi.v"
-`include "generated/spi_pll.v"
 `include "quad_enc.v"
+
+// Hide PLLs from Formal
+`ifndef FORMAL
+  `include "generated/spi_pll.v"
+`endif
 
 module top (
     input  CLK,  // 16MHz clock
@@ -39,12 +43,16 @@ module top (
     assign USBPU = 0;
   `endif
 
-  // PLL for SPI Bus
-  wire spi_clock;
-  wire spipll_locked;
-  spi_pll spll (.clock_in(CLK),
-                .clock_out(spi_clock),
-                .locked(spipll_locked));
+  `ifndef FORMAL
+    // PLL for SPI Bus
+    wire spi_clock;
+    wire spipll_locked;
+    spi_pll spll (.clock_in(CLK),
+                  .clock_out(spi_clock),
+                  .locked(spipll_locked));
+  `elsif FORMAL
+    wire spi_clock = CLK;
+  `endif
 
   // Word handler
   // The system operates on 32 bit little endian words
