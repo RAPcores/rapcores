@@ -7,6 +7,7 @@
 `include "buildconfig.v"
 `include "stepper.v"
 `include "spi.v"
+`include "spi_pll.v"
 `include "quad_enc.v"
 
 module top (
@@ -38,6 +39,13 @@ module top (
     assign USBPU = 0;
   `endif
 
+  // PLL for SPI Bus
+  wire spi_clock;
+  wire spipll_locked;
+  spi_pll spll (.clock_in(CLK),
+                .clock_out(spi_clock),
+                .locked(spipll_locked));
+
   // Word handler
   // The system operates on 32 bit little endian words
   // This should make it easier to send 32 bit chunks from the host controller
@@ -45,7 +53,7 @@ module top (
   reg [63:0] word_data_received;
   wire word_received;
   SPIWord word_proc (
-                .clk(CLK),
+                .clk(spi_clock),
                 .SCK(SCK),
                 .CS(CS),
                 .COPI(COPI),
@@ -58,7 +66,7 @@ module top (
   // TODO: Generate statement?
   reg [2:0] microsteps = 2;
   reg step;
-  reg dir;
+  wire dir;
   reg enable;
   DualHBridge s0 (.phase_a1 (M1_PHASE_A1),
                 .phase_a2 (M1_PHASE_A2),
@@ -152,26 +160,29 @@ module top (
 
     // Addition Word Processing
     end else begin
+
+      // TODO try this non blocking
       message_word_count = message_word_count + 1;
+
       case (message_header)
         // Move Routine
         `CMD_COORDINATED_STEP: begin
           // the first non-header word is the move duration
           case (message_word_count)
             1: begin
-              move_duration[writemoveind][63:0] = word_data_received[63:0];
+              move_duration[writemoveind][63:0] <= word_data_received[63:0];
               //word_send_data[63:0] = last_steps_taken[63:0]; // Prep to send steps
             end
             2: begin
-              increment[writemoveind][63:0] = word_data_received[63:0];
-              word_send_data[63:0] = encoder_count_last[63:0]; // Prep to send encoder read
+              increment[writemoveind][63:0] <= word_data_received[63:0];
+              word_send_data[63:0] <= encoder_count_last[63:0]; // Prep to send encoder read
             end
             3: begin
-                incrementincrement[writemoveind][63:0] = word_data_received[63:0];
-                message_word_count = 0;
-                awaiting_more_words = 0;
-                stepready[writemoveind] = ~stepready[writemoveind];
-                writemoveind = writemoveind + 1'b1;
+                incrementincrement[writemoveind][63:0] <= word_data_received[63:0];
+                message_word_count <= 0;
+                awaiting_more_words <= 0;
+                stepready[writemoveind] <= ~stepready[writemoveind];
+                writemoveind <= writemoveind + 1'b1;
                 `ifdef FORMAL
                   assert(writemoveind <= `MOVE_BUFFER_SIZE);
                 `endif
@@ -180,7 +191,7 @@ module top (
         end
 
         // Otherwise we did a single word reply and are now done
-        default: awaiting_more_words = 0;
+        default: awaiting_more_words <= 0;
 
       endcase
     end
@@ -195,15 +206,15 @@ module top (
   reg [`MOVE_BUFFER_BITS:0] moveind = 0; // Move index cursor
 
   // Latching mechanism for engaging the move. This is currently unbuffered, so TODO
-  reg stepready [`MOVE_BUFFER_SIZE:0];
-  reg stepfinished [`MOVE_BUFFER_SIZE:0];
+  reg [`MOVE_BUFFER_SIZE:0] stepready;
+  reg [`MOVE_BUFFER_SIZE:0] stepfinished;
 
   reg [63:0] move_duration [`MOVE_BUFFER_SIZE:0];
   reg [7:0] clock_divisor = 40;  // should be 40 for 400 khz at 16Mhz Clk
-  reg dir_r [`MOVE_BUFFER_SIZE:0];
+  reg [`MOVE_BUFFER_SIZE:0] dir_r;
 
   reg [63:0] tickdowncount;  // move down count (clock cycles)
-  reg [7:0] clkaccum = 0;  // intra-tick accumulator
+  reg [7:0] clkaccum = 8'b1;  // intra-tick accumulator
 
   reg signed [63:0] substep_accumulator = 0; // typemax(Int64) - 100 for buffer
   reg signed [63:0] increment_r;
@@ -211,6 +222,8 @@ module top (
   reg signed [63:0] incrementincrement [`MOVE_BUFFER_SIZE:0];
 
   reg finishedmove = 1; // flag inidicating a move has been finished, so load next
+
+  assign dir = dir_r[moveind]; // set direction
 
   always @(posedge CLK) begin
 
@@ -226,22 +239,21 @@ module top (
       // DDA clock divisor
       clkaccum = clkaccum + 8'b1;
       if (clkaccum == clock_divisor) begin
-        dir = dir_r[moveind]; // set direction
-        // TODO For N axes
+
         increment_r = (tickdowncount == move_duration[moveind]) ? increment[moveind] : increment_r + incrementincrement[moveind];
         substep_accumulator = substep_accumulator + increment_r;
-        // TODO need to set residency on the signal
+
         if (substep_accumulator > 0) begin
-          step = 1;
-          substep_accumulator = substep_accumulator - 64'h7fffffffffffff9b;
+          step <= 1;
+          substep_accumulator <= substep_accumulator - 64'h7fffffffffffff9b;
         end else begin
-          step = 0;
+          step <= 0;
         end
 
         // Increment tick accumulators
-        clkaccum = 8'b0;
-        tickdowncount = tickdowncount - 1'b1;
-        encoder_count_last = encoder_count;
+        clkaccum <= 8'b1;
+        tickdowncount <= tickdowncount - 1'b1;
+        encoder_count_last <= encoder_count;
         // See if we finished the segment and incrment the buffer
         if(tickdowncount == 0) begin
           stepfinished[moveind] = stepready[moveind];

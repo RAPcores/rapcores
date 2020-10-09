@@ -20,6 +20,8 @@
  * Converted to 32 bit. Added reset and fault logic. Changed some names to fit us.
  */
 
+`default_nettype none
+
 module quad_enc(
   input wire resetn,
   input wire  clk,

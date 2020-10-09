@@ -4,3 +4,4 @@ DEVICE = lp8k
 PACKAGE = cm81
 FREQ = 16
 PROGRAMMER = tinyprog -p
+SPIFREQ = 64
