@@ -55,7 +55,10 @@ formal:
 	sby -f symbiyosys.sby
 
 lint:
-	verible-verilog-lint *.v
+	verible-verilog-lint src/*.v
+
+testbench:
+	yosys sim.ys
 
 .SECONDARY:
 .PHONY: all prog clean

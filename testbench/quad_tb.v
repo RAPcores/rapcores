@@ -15,11 +15,11 @@
  *  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-`include "quad_enc.v"
+`include "../src/quad_enc.v"
 `timescale 1ns/100ps
 
 module testbench(
-  input clk, 
+  input clk,
   output enc1a, //Changed for sim
   output enc1b, //Changed for sim
   output enc2a, //Changed for sim
@@ -94,6 +94,3 @@ module testbench(
 
 
 endmodule
-
-
-

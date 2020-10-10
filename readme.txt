@@ -1,4 +1,3 @@
-https://www.reddit.com/r/yosys/comments/6ulm3m/new_simulation_within_yosys/
 
 
 https://github.com/YosysHQ/nextpnr
@@ -13,7 +12,7 @@ gtkwave quad_enc.vcd
 //nextpnr-ice40 --json blinky.json --pcf blinky.pcf --asc blinky.asc --gui
 
 
-Build with make 
+Build with make
 make
 make prog
 

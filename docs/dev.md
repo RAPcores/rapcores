@@ -82,6 +82,7 @@ program for viewing the `.vcd` files.
 ## Helpful Articles
 
 - https://zipcpu.com/blog/2020/01/13/reuse.html
+- https://www.reddit.com/r/yosys/comments/6ulm3m/new_simulation_within_yosys/
 
 ## Useful Tools
 
