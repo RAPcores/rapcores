@@ -61,7 +61,7 @@ module top (
   reg [63:0] word_data_received;
   wire word_received;
   SPIWord word_proc (
-                .clk(spi_clock),
+                .clk(CLK), //.clk(spi_clock),
                 .SCK(SCK),
                 .CS(CS),
                 .COPI(COPI),
