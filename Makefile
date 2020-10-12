@@ -61,4 +61,4 @@ testbench:
 	yosys sim.ys
 
 .SECONDARY:
-.PHONY: all prog clean
+.PHONY: all prog clean testbench formal

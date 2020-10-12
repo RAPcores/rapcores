@@ -13,6 +13,7 @@
 *.vlog
 *.json
 *.config
+*.vcd
 symbiyosys
 
 src/generated/*

@@ -10,7 +10,6 @@ prep -top top
 
 [files]
 generated/board.v src/generated/board.v
-generated/spi_pll.v src/generated/spi_pll.v
 boards/tinyfpgabx/tinyfpgabx.v boards/tinyfpgabx/tinyfpgabx.v
 src/buildconfig.v
 src/configuration.v
