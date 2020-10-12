@@ -23,9 +23,9 @@ TOP = ./src/top.v
 GENERATEDDIR = ./src/generated/
 SRCDIR = ./src/
 BUILDDIR = ./build/
-BUILD = $(BUILDDIR)$(PROJ)
+BUILD = $(BUILDDIR)$(BOARD)
 
-all: $(BOARD).bit
+all: $(BUILD).bit
 
 $(BUILD).bit:
 # set board define for Verilog and include the board specific verilog file
