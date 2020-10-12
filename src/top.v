@@ -237,8 +237,9 @@ module top (
 
     // Load up the move duration
     if (finishedmove & (stepfinished[moveind] ^ stepready[moveind])) begin
-      tickdowncount = move_duration[moveind];
-      finishedmove = 0;
+      tickdowncount <= move_duration[moveind];
+      finishedmove <= 0;
+      increment_r <= increment[moveind];
     end
 
     // check if this move has been done before
@@ -248,7 +249,7 @@ module top (
       clkaccum = clkaccum + 8'b1;
       if (clkaccum == clock_divisor) begin
 
-        increment_r = (tickdowncount == move_duration[moveind]) ? increment[moveind] : increment_r + incrementincrement[moveind];
+        increment_r = increment_r + incrementincrement[moveind];
         substep_accumulator = substep_accumulator + increment_r;
 
         if (substep_accumulator > 0) begin
@@ -264,9 +265,9 @@ module top (
         encoder_count_last <= encoder_count;
         // See if we finished the segment and incrment the buffer
         if(tickdowncount == 0) begin
-          stepfinished[moveind] = stepready[moveind];
-          moveind = moveind + 1'b1;
-          finishedmove = 1;
+          stepfinished[moveind] <= stepready[moveind];
+          moveind <= moveind + 1'b1;
+          finishedmove <= 1;
           `ifdef FORMAL
             assert(moveind <= `MOVE_BUFFER_SIZE);
           `endif
