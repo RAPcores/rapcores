@@ -73,7 +73,7 @@ module top (
   // Stepper Setup
   // TODO: Generate statement?
   reg [2:0] microsteps = 2;
-  reg step;
+  wire step;
   wire dir;
   reg enable;
   DualHBridge s0 (.phase_a1 (M1_PHASE_A1),
@@ -235,20 +235,29 @@ module top (
   reg signed [63:0] incrementincrement [`MOVE_BUFFER_SIZE:0];
 
   reg finishedmove = 1; // flag inidicating a move has been finished, so load next
+  wire processing_move = (stepfinished[moveind] ^ stepready[moveind]);
+  wire loading_move = finishedmove & processing_move;
+  wire executing_move = !finishedmove & processing_move;
 
   assign dir = dir_r[moveind]; // set direction
+  assign step = (substep_accumulator > 0);
 
   always @(posedge CLK) begin
 
     // Load up the move duration
-    if (finishedmove & (stepfinished[moveind] ^ stepready[moveind])) begin
+    if (loading_move) begin
       tickdowncount <= move_duration[moveind];
       finishedmove <= 0;
       increment_r <= increment[moveind];
     end
 
     // check if this move has been done before
-    if(!finishedmove & (stepfinished[moveind] ^ stepready[moveind])) begin
+    if(executing_move) begin
+
+      // Step taken, rollback accumulator
+      if (substep_accumulator > 0) begin
+        substep_accumulator <= substep_accumulator - 64'h7fffffffffffff9b;
+      end
 
       // DDA clock divisor
       clkaccum <= clkaccum - 8'b1;
@@ -256,14 +265,6 @@ module top (
 
         increment_r <= increment_r + incrementincrement[moveind];
         substep_accumulator <= substep_accumulator + increment_r;
-
-        // TODO maybe move out of IF block to avoid non-blocked assign issues
-        if (substep_accumulator > 0) begin
-          step <= 1;
-          substep_accumulator <= substep_accumulator - 64'h7fffffffffffff9b;
-        end else begin
-          step <= 0;
-        end
 
         // Increment tick accumulators
         clkaccum <= clock_divisor;
