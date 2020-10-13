@@ -118,10 +118,20 @@ module top (
     //word_send_data = 0;
     word_send_data[63:0] <= encoder_count[63:0]; // Prep to send encoder read
 
+    // TODO try this non blocking
+    message_word_count <= message_word_count + 1;
+
     // Header Processing
     if (!awaiting_more_words) begin
 
+      // Save CMD header incase multi word transaction
       message_header <= word_data_received[63:56]; // Header is 8 MSB
+
+      // By default assume single word command
+      awaiting_more_words <= 0;
+
+      // First word so message count zero
+      message_word_count <= 1;
 
       case (word_data_received[63:56])
 
@@ -147,14 +157,12 @@ module top (
         // Clock divisor (24 bit)
         `CMD_CLK_DIVISOR: begin
           clock_divisor[7:0] <= word_data_received[7:0];
-          awaiting_more_words <= 0;
         end
 
         // Set Microstepping
         `CMD_MICROSTEPS: begin
           // TODO needs to be power of two
           microsteps[2:0] <= word_data_received[2:0];
-          awaiting_more_words <= 0;
         end
 
         // API Version
@@ -168,9 +176,6 @@ module top (
 
     // Addition Word Processing
     end else begin
-
-      // TODO try this non blocking
-      message_word_count = message_word_count + 1;
 
       case (message_header)
         // Move Routine
