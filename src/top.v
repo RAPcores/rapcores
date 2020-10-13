@@ -116,14 +116,14 @@ module top (
 
     // Zero out the next word
     //word_send_data = 0;
-    word_send_data[63:0] = encoder_count[63:0]; // Prep to send encoder read
+    word_send_data[63:0] <= encoder_count[63:0]; // Prep to send encoder read
 
     // Header Processing
     if (!awaiting_more_words) begin
 
-      message_header = word_data_received[63:56]; // Header is 8 MSB
+      message_header <= word_data_received[63:56]; // Header is 8 MSB
 
-      case (message_header)
+      case (word_data_received[63:56])
 
         // Coordinated Move
         // Header: 24 bits for direction
@@ -246,12 +246,13 @@ module top (
     if(!finishedmove & (stepfinished[moveind] ^ stepready[moveind])) begin
 
       // DDA clock divisor
-      clkaccum = clkaccum + 8'b1;
-      if (clkaccum == clock_divisor) begin
+      clkaccum <= clkaccum - 8'b1;
+      if (clkaccum == 8'b0) begin
 
-        increment_r = increment_r + incrementincrement[moveind];
-        substep_accumulator = substep_accumulator + increment_r;
+        increment_r <= increment_r + incrementincrement[moveind];
+        substep_accumulator <= substep_accumulator + increment_r;
 
+        // TODO maybe move out of IF block to avoid non-blocked assign issues
         if (substep_accumulator > 0) begin
           step <= 1;
           substep_accumulator <= substep_accumulator - 64'h7fffffffffffff9b;
@@ -260,7 +261,7 @@ module top (
         end
 
         // Increment tick accumulators
-        clkaccum <= 8'b1;
+        clkaccum <= clock_divisor;
         tickdowncount <= tickdowncount - 1'b1;
         encoder_count_last <= encoder_count;
         // See if we finished the segment and incrment the buffer
