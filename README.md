@@ -14,12 +14,20 @@ control applications.
 
 ## Target Hardware
 
-The following FPGA architectures are supported:
+The following FPGA architectures are supported and tested:
 
 - iCE40
 - ECP5
+
+We welcome ports to other architectures.
+
+## Build Requirements
+
+RAPCores uses the free and open source Yosys and nextpnr toolchains.
+See the [dev docs](./docs/dev.md) for more information.
 
 ## Documentation
 
 - [Dev](./docs/dev.md)
 - [SPI Protocol](./docs/spi_spec.md)
+- [Board Parameters](./docs/boards.md)

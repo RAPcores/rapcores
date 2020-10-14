@@ -30,6 +30,13 @@ Note: Icestorm and/or Prjtrellis should be installed before nextpnr.
 
 [https://github.com/YosysHQ/prjtrellis](https://github.com/YosysHQ/prjtrellis)
 
+
+### Verible (Optional)
+
+Verilog Linting and formatting tool from Google.
+
+[https://github.com/google/verible](https://github.com/google/verible)
+
 ### Programming Tools
 
 #### ECP5 Devboard
@@ -48,23 +55,6 @@ The TinyFPGA BX uses tinyprog:
 `make BOARD=<board>`
 
 
-## Board Definition Structure and Porting Guide
-
-Each board should have the following three files in the name derived from the `BOARD`
-parameter sent to make:
-
-- [.mk] FPGA Architecture parameters
-- [.v] Verilog configuration parameters
-- [.pcf/.lpf] Pin out and pin name information
-
-## Formatting
-
-All files should have `none` as the default nettype:
-
-```
-`default_nettype none
-```
-
 ## Formal Verification
 
 [https://github.com/YosysHQ/SymbiYosys](https://github.com/YosysHQ/SymbiYosys)
@@ -78,6 +68,32 @@ contains all the logs and data from the verification. If an assert or
 cover fails, a `.vcd` file will be generated that will display the states
 of registers and wires that induced the failure. GTKWave is a useful
 program for viewing the `.vcd` files.
+
+The config for Symbiyosys is `symbiyosys.sby` in the root of the directory.
+
+
+## Test Benches
+
+`make testbench`
+
+The config for the test bench is `sim.ys` in the root of the directory.
+
+## Formatting
+
+All files should have `none` as the default nettype:
+
+```
+`default_nettype none
+```
+
+## Linting
+
+`make lint` : Will run Verible to lint the source.
+
+Optionally this VSCode extension is helpful as well:
+
+[https://github.com/mshr-h/vscode-verilog-hdl-support](https://github.com/mshr-h/vscode-verilog-hdl-support)
+
 
 ## Helpful Articles
 
