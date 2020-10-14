@@ -13,7 +13,9 @@
 *.vlog
 *.json
 *.config
+*.vcd
 symbiyosys
 
-board.v
-pll.v
+src/generated/*
+build/*
+logs/*

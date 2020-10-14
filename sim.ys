@@ -1,4 +1,4 @@
-read_verilog -sv quad_tb.v
+read_verilog -sv testbench/quad_tb.v
 prep -top testbench
 show quad_enc
-sim -n 400 -clock clk -vcd quad_enc.vcd
+sim -n 400 -clock clk -vcd testbench/quad_enc.vcd

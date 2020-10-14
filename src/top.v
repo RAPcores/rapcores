@@ -1,14 +1,18 @@
 `default_nettype none
 
-`include "board.v"
+`include "generated/board.v"
 `include "buildconfig.v"
 `include "configuration.v"
 `include "constants.v"
 `include "buildconfig.v"
 `include "stepper.v"
 `include "spi.v"
-`include "spi_pll.v"
 `include "quad_enc.v"
+
+// Hide PLLs from Formal
+`ifndef FORMAL
+  `include "generated/spi_pll.v"
+`endif
 
 module top (
     input  CLK,  // 16MHz clock
@@ -39,12 +43,16 @@ module top (
     assign USBPU = 0;
   `endif
 
-  // PLL for SPI Bus
-  wire spi_clock;
-  wire spipll_locked;
-  spi_pll spll (.clock_in(CLK),
-                .clock_out(spi_clock),
-                .locked(spipll_locked));
+  `ifndef FORMAL
+    // PLL for SPI Bus
+    wire spi_clock;
+    wire spipll_locked;
+    spi_pll spll (.clock_in(CLK),
+                  .clock_out(spi_clock),
+                  .locked(spipll_locked));
+  `elsif FORMAL
+    wire spi_clock = CLK;
+  `endif
 
   // Word handler
   // The system operates on 32 bit little endian words
@@ -53,7 +61,7 @@ module top (
   reg [63:0] word_data_received;
   wire word_received;
   SPIWord word_proc (
-                .clk(spi_clock),
+                .clk(CLK), //.clk(spi_clock),
                 .SCK(SCK),
                 .CS(CS),
                 .COPI(COPI),
@@ -65,7 +73,7 @@ module top (
   // Stepper Setup
   // TODO: Generate statement?
   reg [2:0] microsteps = 2;
-  reg step;
+  wire step;
   wire dir;
   reg enable;
   DualHBridge s0 (.phase_a1 (M1_PHASE_A1),
@@ -82,7 +90,7 @@ module top (
   // Encoder
   //
   reg signed [63:0] encoder_count;
-  reg signed [63:0] encoder_count_last;
+  reg signed [63:0] encoder_store; // Snapshot for SPI comms
   reg [7:0] encoder_multiplier = 1;
   wire encoder_fault;
   quad_enc encoder0 (
@@ -98,37 +106,39 @@ module top (
   // State Machine for handling SPI Messages
   //
 
-  reg awaiting_more_words = 0;
   reg [7:0] message_word_count = 0;
   reg [7:0] message_header;
   reg [`MOVE_BUFFER_BITS:0] writemoveind = 0;
 
-  always @(posedge word_received) begin
-    LED <= !LED;
+  // check if the Header indicated multi-word transfer
+  wire awaiting_more_words = (message_header == `CMD_COORDINATED_STEP) |
+                             (message_header == `CMD_API_VERSION);
 
-    // Zero out the next word
-    //word_send_data = 0;
-    word_send_data[63:0] = encoder_count[63:0]; // Prep to send encoder read
+  always @(posedge word_received) begin
+
+    // Zero out send data register
+    word_send_data <= 64'b0;
 
     // Header Processing
     if (!awaiting_more_words) begin
 
-      message_header = word_data_received[63:56]; // Header is 8 MSB
+      // Save CMD header incase multi word transaction
+      message_header <= word_data_received[63:56]; // Header is 8 MSB
 
-      case (message_header)
+      // First word so message count zero
+      message_word_count <= 1;
+
+      case (word_data_received[63:56])
 
         // Coordinated Move
-        // Header: 24 bits for direction
-        // Word 1: Increment (signed)
-        // Word 2: Increment Increment (signed)
         `CMD_COORDINATED_STEP: begin
-          // TODO get direction bits here
-          awaiting_more_words <= 1;
 
+          // Get Direction Bits
           dir_r[writemoveind] <= word_data_received[0];
 
-          // Next we send prior ticks
-          //word_send_data[63:0] <= tickdowncount_last[63:0]; // Prep to send steps
+          // Store encoder values across all axes Now
+          encoder_store <= encoder_count;
+
         end
 
         // Motor Enable/disable
@@ -139,14 +149,12 @@ module top (
         // Clock divisor (24 bit)
         `CMD_CLK_DIVISOR: begin
           clock_divisor[7:0] <= word_data_received[7:0];
-          awaiting_more_words <= 0;
         end
 
         // Set Microstepping
         `CMD_MICROSTEPS: begin
           // TODO needs to be power of two
           microsteps[2:0] <= word_data_received[2:0];
-          awaiting_more_words <= 0;
         end
 
         // API Version
@@ -154,15 +162,13 @@ module top (
           word_send_data[7:0] <= `VERSION_PATCH;
           word_send_data[15:8] <= `VERSION_MINOR;
           word_send_data[23:16] <= `VERSION_MAJOR;
-          awaiting_more_words <= 1;
         end
       endcase
 
     // Addition Word Processing
     end else begin
 
-      // TODO try this non blocking
-      message_word_count = message_word_count + 1;
+      message_word_count <= message_word_count + 1;
 
       case (message_header)
         // Move Routine
@@ -175,24 +181,20 @@ module top (
             end
             2: begin
               increment[writemoveind][63:0] <= word_data_received[63:0];
-              word_send_data[63:0] <= encoder_count_last[63:0]; // Prep to send encoder read
+              word_send_data[63:0] <= encoder_store[63:0]; // Prep to send encoder read
             end
             3: begin
                 incrementincrement[writemoveind][63:0] <= word_data_received[63:0];
                 message_word_count <= 0;
-                awaiting_more_words <= 0;
                 stepready[writemoveind] <= ~stepready[writemoveind];
                 writemoveind <= writemoveind + 1'b1;
+                message_header <= 8'b0; // Reset Message Header
                 `ifdef FORMAL
                   assert(writemoveind <= `MOVE_BUFFER_SIZE);
                 `endif
             end
           endcase
         end
-
-        // Otherwise we did a single word reply and are now done
-        default: awaiting_more_words <= 0;
-
       endcase
     end
   end
@@ -222,43 +224,45 @@ module top (
   reg signed [63:0] incrementincrement [`MOVE_BUFFER_SIZE:0];
 
   reg finishedmove = 1; // flag inidicating a move has been finished, so load next
+  wire processing_move = (stepfinished[moveind] ^ stepready[moveind]);
+  wire loading_move = finishedmove & processing_move;
+  wire executing_move = !finishedmove & processing_move;
 
   assign dir = dir_r[moveind]; // set direction
+  assign step = (substep_accumulator > 0);
 
   always @(posedge CLK) begin
 
     // Load up the move duration
-    if (finishedmove & (stepfinished[moveind] ^ stepready[moveind])) begin
-      tickdowncount = move_duration[moveind];
-      finishedmove = 0;
+    if (loading_move) begin
+      tickdowncount <= move_duration[moveind];
+      finishedmove <= 0;
+      increment_r <= increment[moveind];
     end
 
     // check if this move has been done before
-    if(!finishedmove & (stepfinished[moveind] ^ stepready[moveind])) begin
+    if(executing_move) begin
+
+      // Step taken, rollback accumulator
+      if (substep_accumulator > 0) begin
+        substep_accumulator <= substep_accumulator - 64'h7fffffffffffff9b;
+      end
 
       // DDA clock divisor
-      clkaccum = clkaccum + 8'b1;
-      if (clkaccum == clock_divisor) begin
+      clkaccum <= clkaccum - 8'b1;
+      if (clkaccum == 8'b0) begin
 
-        increment_r = (tickdowncount == move_duration[moveind]) ? increment[moveind] : increment_r + incrementincrement[moveind];
-        substep_accumulator = substep_accumulator + increment_r;
-
-        if (substep_accumulator > 0) begin
-          step <= 1;
-          substep_accumulator <= substep_accumulator - 64'h7fffffffffffff9b;
-        end else begin
-          step <= 0;
-        end
+        increment_r <= increment_r + incrementincrement[moveind];
+        substep_accumulator <= substep_accumulator + increment_r;
 
         // Increment tick accumulators
-        clkaccum <= 8'b1;
+        clkaccum <= clock_divisor;
         tickdowncount <= tickdowncount - 1'b1;
-        encoder_count_last <= encoder_count;
         // See if we finished the segment and incrment the buffer
         if(tickdowncount == 0) begin
-          stepfinished[moveind] = stepready[moveind];
-          moveind = moveind + 1'b1;
-          finishedmove = 1;
+          stepfinished[moveind] <= ~stepfinished[moveind];
+          moveind <= moveind + 1'b1;
+          finishedmove <= 1;
           `ifdef FORMAL
             assert(moveind <= `MOVE_BUFFER_SIZE);
           `endif

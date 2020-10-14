@@ -19,18 +19,23 @@ ifdef BOARD
 endif
 
 PROJ = top
+TOP = ./src/top.v
+GENERATEDDIR = ./src/generated/
+SRCDIR = ./src/
+BUILDDIR = ./build/
+BUILD = $(BUILDDIR)$(BOARD)
 
-all: $(BOARD).bit
+all: $(BUILD).bit
 
-$(BOARD).bit:
+$(BUILD).bit:
 # set board define for Verilog and include the board specific verilog file
-	echo '`define $(BOARD)\n`include "./boards/$(BOARD)/$(BOARD).v"' > board.v
+	echo '`define $(BOARD)\n`include "./boards/$(BOARD)/$(BOARD).v"' > $(GENERATEDDIR)board.v
 ifeq ($(ARCH), ice40)
-	icepll -i $(FREQ) -o $(SPIFREQ) -m -n spi_pll -f spi_pll.v
-	yosys -ql $(BOARD)_yosys.log -p 'synth_ice40 -top $(PROJ) -abc2 -dsp -blif $(PROJ).blif -json $(PROJ).json' $(PROJ).v
-	nextpnr-ice40 -ql $(BOARD)_nextpnr.log --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --json $(PROJ).json --asc $(PROJ).asc --pcf ./boards/$(BOARD)/$(PIN_DEF)
-	icetime -d $(DEVICE) -c $(FREQ) -mtr $(BOARD).rpt $(PROJ).asc
-	icepack $(PROJ).asc $(BOARD).bit
+	icepll -i $(FREQ) -o $(SPIFREQ) -m -n spi_pll -f $(GENERATEDDIR)spi_pll.v
+	yosys -ql ./logs/$(BOARD)_yosys.log -p 'synth_ice40 -top $(PROJ) -abc9 -dsp -blif $(BUILD).blif -json $(BUILD).json' $(TOP)
+	nextpnr-ice40 -ql ./logs/$(BOARD)_nextpnr.log --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --json $(BUILD).json --asc $(BUILD).asc --pcf ./boards/$(BOARD)/$(PIN_DEF)
+	icetime -d $(DEVICE) -c $(FREQ) -mtr $(BUILD).rpt $(BUILD).asc
+	icepack $(BUILD).asc $(BUILD).bit
 endif
 ifeq ($(ARCH), ecp5)
 	ecppll -i $(FREQ) -o $(SPIFREQ) -n spi_pll -f spi_pll.v
@@ -39,18 +44,21 @@ ifeq ($(ARCH), ecp5)
 	ecppack --svf $(PROJ).svf $(BOARD).bit
 endif
 
-prog: $(BOARD).bit
+prog: $(BUILD).bit
 	$(PROGRAMMER) $<
 
 clean:
-	rm -f $(PROJ).blif $(PROJ).asc $(PROJ).rpt  $(PROJ).json $(BOARD).bin $(BOARD).bit
+	rm -f $(BUILD).blif $(BUILD).asc $(BUILD).rpt  $(BUILD).json $(BUILD).bin $(BUILD).bit ./src/generated/*.v
 
 formal:
-	echo '`define $(BOARD)\n`include "./boards/$(BOARD)/$(BOARD).v"' > board.v
+	echo '`define $(BOARD)\n`include "./boards/$(BOARD)/$(BOARD).v"' > $(GENERATEDDIR)board.v
 	sby -f symbiyosys.sby
 
 lint:
-	verible-verilog-lint *.v
+	verible-verilog-lint src/*.v
+
+testbench:
+	yosys sim.ys
 
 .SECONDARY:
-.PHONY: all prog clean
+.PHONY: all prog clean testbench formal
