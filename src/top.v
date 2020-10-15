@@ -26,10 +26,10 @@ module top (
       input  COPI,
       output CIPO,
     `endif
-    output M1_PHASE_A1,  // Phase A
-    output M1_PHASE_A2,  // Phase A
-    output M1_PHASE_B1,  // Phase B
-    output M1_PHASE_B2,  // Phase B
+    output wire [1:1] PHASE_A1,  // Phase A
+    output wire [1:1] PHASE_A2,  // Phase A
+    output wire [1:1] PHASE_B1,  // Phase B
+    output wire [1:1] PHASE_B2,  // Phase B
     input ENC1_B,
     input ENC1_A,
     `ifdef BUFFER_DTR
@@ -82,10 +82,10 @@ module top (
   wire step;
   wire dir;
   reg enable;
-  DualHBridge s0 (.phase_a1 (M1_PHASE_A1),
-                .phase_a2 (M1_PHASE_A2),
-                .phase_b1 (M1_PHASE_B1),
-                .phase_b2 (M1_PHASE_B2),
+  DualHBridge s0 (.phase_a1 (PHASE_A1[1]),
+                .phase_a2 (PHASE_A2[1]),
+                .phase_b1 (PHASE_B1[1]),
+                .phase_b2 (PHASE_B2[1]),
                 .step (step),
                 .dir (dir),
                 .enable (enable),
