@@ -58,6 +58,13 @@ Enables the SPI Interface.
 ```
 Active High when move buffer has slots available for send.
 
+### Move Buffer
+
+```
+`define MOVE_BUFFER_SIZE 2
+```
+Changes the default move buffer size. Must be a power of two.
+
 ## (.pcf/.lpf) Parameters
 
 The following are pin naming conventions for the RAPCore "top" module:
