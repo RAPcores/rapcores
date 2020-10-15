@@ -9,8 +9,40 @@ parameter sent to make:
 
 ## (.mk) Parameters
 
+The following parameters are passed to place and route (nextpnr) and timing analysis
+tools to generate the bitstream of the RAPCore for FPGAs.
+
+### ARCH
+```
+ARCH = ice40
+```
+
+### DEVICE
+```
+DEVICE = lp8k
+```
+
+### PACKAGE
+```
+PACKAGE = cm81
+```
+
+### FREQ
+```
+FREQ = 16
+```
+
+### PROGRAMMER (Optional)
+```
+PROGRAMMER = tinyprog -p
+```
+The programming command for the device used with the `make prog` target.
+
 
 ## (.v) Parameters
+
+The following Verilog Macro Definitions may be used to enable or disable certain
+features:
 
 ### SPI Interface
 
@@ -19,7 +51,16 @@ parameter sent to make:
 ```
 Enables the SPI Interface.
 
+### Buffer DTR
+
+```
+`define BUFFER_DTR
+```
+Active High when move buffer has slots available for send.
+
 ## (.pcf/.lpf) Parameters
+
+The following are pin naming conventions for the RAPCore "top" module:
 
 ### SPI Pin Names
 
@@ -27,3 +68,7 @@ Enables the SPI Interface.
 - `CS` - SPI Chip Select
 - `COPI` - SPI Controller Out Peripheral In (RAPCore is the Peripheral)
 - `CIPO` - SPI Controller In Peripheral Out
+
+### Buffer DTR
+
+- `BUFFER_DTR` - Active High when move buffer has slots

@@ -32,6 +32,9 @@ module top (
     output M1_PHASE_B2,  // Phase B
     input ENC1_B,
     input ENC1_A,
+    `ifdef BUFFER_DTR
+      output BUFFER_DTR,
+    `endif
 );
 
 
@@ -227,6 +230,10 @@ module top (
   wire processing_move = (stepfinished[moveind] ^ stepready[moveind]);
   wire loading_move = finishedmove & processing_move;
   wire executing_move = !finishedmove & processing_move;
+
+  `ifdef BUFFER_DTR
+    assign BUFFER_DTR = ~(~stepfinished == stepready);
+  `endif
 
   assign dir = dir_r[moveind]; // set direction
   assign step = (substep_accumulator > 0);
