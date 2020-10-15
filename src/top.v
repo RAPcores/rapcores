@@ -35,6 +35,9 @@ module top (
     `ifdef BUFFER_DTR
       output BUFFER_DTR,
     `endif
+    `ifdef MOVE_DONE
+      output MOVE_DONE,
+    `endif
 );
 
 
@@ -231,8 +234,16 @@ module top (
   wire loading_move = finishedmove & processing_move;
   wire executing_move = !finishedmove & processing_move;
 
+  // Implement flow control and event pins if specified
   `ifdef BUFFER_DTR
     assign BUFFER_DTR = ~(~stepfinished == stepready);
+  `endif
+
+  `ifdef MOVE_DONE
+    reg move_done_r = 0;
+    assign MOVE_DONE = move_done_r;
+    always @(posedge finishedmove)
+      move_done_r = ~move_done_r;
   `endif
 
   assign dir = dir_r[moveind]; // set direction

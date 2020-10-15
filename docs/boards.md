@@ -51,12 +51,17 @@ features:
 ```
 Enables the SPI Interface.
 
-### Buffer DTR
+### Flow Control and Events
 
 ```
 `define BUFFER_DTR
 ```
 Active High when move buffer has slots available for send.
+
+```
+`define MOVE_DONE
+```
+Toggles when a move in the buffer has completed.
 
 ### Move Buffer
 
@@ -71,11 +76,15 @@ The following are pin naming conventions for the RAPCore "top" module:
 
 ### SPI Pin Names
 
+Enabled by `SPI_INTERFACE` in the Verilog config.
+
 - `SCK` - SPI Clock
 - `CS` - SPI Chip Select
 - `COPI` - SPI Controller Out Peripheral In (RAPCore is the Peripheral)
 - `CIPO` - SPI Controller In Peripheral Out
 
-### Buffer DTR
+### Flow Control and Events
 
-- `BUFFER_DTR` - Active High when move buffer has slots
+
+- `BUFFER_DTR` - Active High when move buffer has slots.
+- `MOVE_DONE` - Toggles when a move in the buffer has finished.

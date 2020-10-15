@@ -5,6 +5,9 @@
 // Enable Buffer DTR pin
 `define BUFFER_DTR
 
+// Enable Move Done Pin
+`define MOVE_DONE
+
 // Motor Definitions
 `define MOTOR1 DUAL_H_BRIDGE
 
