@@ -152,10 +152,12 @@ module top (
           enable <= word_data_received[0];
         end
 
-        // Clock divisor (24 bit)
-        `CMD_CLK_DIVISOR: begin
-          clock_divisor[7:0] <= word_data_received[7:0];
-        end
+        `ifndef CONST_STEP_TICK_DIVISOR
+          // Clock divisor (24 bit)
+          `CMD_CLK_DIVISOR: begin
+            clock_divisor[7:0] <= word_data_received[7:0];
+          end
+        `endif
 
         // Set Microstepping
         `CMD_MICROSTEPS: begin
@@ -209,6 +211,10 @@ module top (
   // Stepper Timing Routine
   //
 
+  `ifndef CONST_STEP_TICK_DIVISOR
+    reg [7:0] clock_divisor = 40;  // should be 40 for 400 khz at 16Mhz Clk
+  `endif
+
   // coordinated move execution
 
   reg [`MOVE_BUFFER_BITS:0] moveind = 0; // Move index cursor
@@ -218,7 +224,7 @@ module top (
   reg [`MOVE_BUFFER_SIZE:0] stepfinished;
 
   reg [63:0] move_duration [`MOVE_BUFFER_SIZE:0];
-  reg [7:0] clock_divisor = 40;  // should be 40 for 400 khz at 16Mhz Clk
+
   reg [`MOVE_BUFFER_SIZE:0] dir_r;
 
   reg [63:0] tickdowncount;  // move down count (clock cycles)
@@ -274,7 +280,11 @@ module top (
         substep_accumulator <= substep_accumulator + increment_r;
 
         // Increment tick accumulators
-        clkaccum <= clock_divisor;
+        `ifndef CONST_STEP_TICK_DIVISOR
+          clkaccum <= clock_divisor;
+        `elsif CONST_STEP_TICK_DIVISOR
+          clkaccum <= `CONST_STEP_TICK_DIVISOR;
+        `endif
         tickdowncount <= tickdowncount - 1'b1;
         // See if we finished the segment and incrment the buffer
         if(tickdowncount == 0) begin

@@ -11,5 +11,8 @@
 // Motor Definitions
 `define MOTOR1 DUAL_H_BRIDGE
 
+// Enable constant Step Tick Divisor
+`define CONST_STEP_TICK_DIVISOR 40
+
 // Change the Move Buffer Size. Should be power of two
 //`define MOVE_BUFFER_SIZE 4

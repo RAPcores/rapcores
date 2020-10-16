@@ -63,12 +63,19 @@ Active High when move buffer has slots available for send.
 ```
 Toggles when a move in the buffer has completed.
 
-### Move Buffer
+### Step Timer Parameters
 
 ```
 `define MOVE_BUFFER_SIZE 2
 ```
-Changes the default move buffer size. Must be a power of two.
+Changes the default move buffer size. NOTE: Must be a power of two.
+
+```
+`define CONST_STEP_TICK_DIVISOR 40
+```
+
+Enables an immutable step tick divisor. Has a minor reduction in gate count and improvment
+to timing.
 
 ## (.pcf/.lpf) Parameters
 
