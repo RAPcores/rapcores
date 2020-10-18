@@ -9,11 +9,6 @@
 `include "spi.v"
 `include "quad_enc.v"
 
-// Hide PLLs from Formal
-`ifndef FORMAL
-  `include "generated/spi_pll.v"
-`endif
-
 module top (
     input  CLK,  // 16MHz clock
     output LED,  // User/boot LED next to power LED
@@ -46,16 +41,6 @@ module top (
     assign USBPU = 0;
   `endif
 
-  `ifndef FORMAL
-    // PLL for SPI Bus
-    wire spi_clock;
-    wire spipll_locked;
-    spi_pll spll (.clock_in(CLK),
-                  .clock_out(spi_clock),
-                  .locked(spipll_locked));
-  `elsif FORMAL
-    wire spi_clock = CLK;
-  `endif
 
   // Word handler
   // The system operates on 32 bit little endian words
@@ -64,7 +49,7 @@ module top (
   reg [63:0] word_data_received;
   wire word_received;
   SPIWord word_proc (
-                .clk(CLK), //.clk(spi_clock),
+                .clk(CLK),
                 .SCK(SCK),
                 .CS(CS),
                 .COPI(COPI),

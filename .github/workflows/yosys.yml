@@ -12,6 +12,6 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt install yosys
-    - name: Analysing the code with pylint
+    - name: Running TinyFPGABX Synth
       run: |
-        make BOARD=tinyfpgabx
+        make synth BOARD=tinyfpgabx
