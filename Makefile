@@ -47,7 +47,7 @@ endif
 synth:
 	echo '`define $(BOARD)\n`include "./boards/$(BOARD)/$(BOARD).v"' > $(GENERATEDDIR)board.v
 ifeq ($(ARCH), ice40)
-	yosys -l ./logs/$(BOARD)_yosys.log -p 'synth_ice40 -top $(PROJ) -abc9 -dsp -blif $(BUILD).blif -json $(BUILD).json' $(TOP)
+	yosys -l ./logs/$(BOARD)_yosys.log -p 'synth_ice40 -top $(PROJ) -abc2 -dsp -blif $(BUILD).blif -json $(BUILD).json' $(TOP)
 endif
 ifeq ($(ARCH), ecp5)
 	yosys -l $(BOARD)_yosys.log -p 'synth_ecp5 -top $(PROJ) -json top.json' $(PROJ).v
