@@ -1,5 +1,7 @@
 # RAPcore
 
+![RAPCore](https://github.com/RAPcores/Ulticores/workflows/RAPCore/badge.svg)
+
 The Robotic Application Processing Core.
 
 RAPCore is a project targeting FPGAs and ASIC devices for the next generation of motor and motion
