@@ -10,5 +10,7 @@ jobs:
     - uses: cachix/install-nix-action@v11
       with:
         nix_path: nixpkgs=channel:nixos-unstable
-    - run: nix-shell --command 'make BOARD=tinyfpgabx'
-    - run: nix-shell --command 'make formal BOARD=tinyfpgabx'
+    - name: TinyFPGABX Flow  
+      run: nix-shell --command 'make BOARD=tinyfpgabx'
+    - name: Formal Verification
+      run: nix-shell --command 'make formal BOARD=tinyfpgabx'
