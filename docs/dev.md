@@ -6,36 +6,15 @@ RAPCores targets the FOSS synthesis, place and route, and bitstream tools. Namel
 nextpnr. We are open to support other flows and open source tool chain. However do note
 that RAPcores does use some SystemVerilog features supported by Yosys.
 
-Linux is recommended for development. These tools rapidly improve, so it is recommended
-the tools are built from source and kept up to date.
+We recommend using a relatively recent build of these tools. The ones included in Linux
+distros may be out of date.
 
-Please check each repo for detailed build instruction.
-If something breaks use `git reflog` to rollback to the prior commit.
-
-### Yosys (Required)
-
-[https://github.com/YosysHQ/yosys](https://github.com/YosysHQ/yosys)
-
-### Nextpnr (Required)
-
-[https://github.com/YosysHQ/nextpnr](https://github.com/YosysHQ/nextpnr)
-
-Note: Icestorm and/or Prjtrellis should be installed before nextpnr.
-
-### Icestorm (Ice40 Architectures)
-
-[https://github.com/YosysHQ/icestorm](https://github.com/YosysHQ/icestorm)
-
-### prjtrellis (ECP5 Architectures)
-
-[https://github.com/YosysHQ/prjtrellis](https://github.com/YosysHQ/prjtrellis)
-
-
-### Verible (Optional)
-
-Verilog Linting and formatting tool from Google.
-
-[https://github.com/google/verible](https://github.com/google/verible)
+- [Yosys](https://github.com/YosysHQ/yosys)
+- [nextpnr](https://github.com/YosysHQ/nextpnr)
+- [icestorm](https://github.com/YosysHQ/icestorm) (ice40 targets)
+- [prjtrellis](https://github.com/YosysHQ/prjtrellis) (ECP5 targets)
+- [verible](https://github.com/google/verible) (Optional, for linting)
+- [SymbiYosys](https://github.com/YosysHQ/SymbiYosys) (Optional, for formal verification)
 
 ### Programming Tools
 
@@ -50,14 +29,25 @@ The TinyFPGA BX uses tinyprog:
 `pip3 install --user tinyprog`
 
 
+## Developing with Nix
+
+RAPcore includes a [shell.nix](../shell.nix) for use with the Nix Package manager.
+This makes it easy to get a development environment with all build requirements installed
+for you.
+
+To start you will need to install Nix using the instructions [here](https://nixos.org/download.html).
+Next, log out and log back in. Then `cd` to the RAPCore directory. Run `nix-shell`, and some
+packages will be installed. Once complete you should be able to run any of the `make` commands
+below.
+
+Note: the `prog` target is currently not supported in the `nix-shell` environment.
+
 ## Build Bitstream
 
 `make BOARD=<board>`
 
 
 ## Formal Verification
-
-[https://github.com/YosysHQ/SymbiYosys](https://github.com/YosysHQ/SymbiYosys)
 
 SymbiYosys is used for formal verification of the codebase. It can be run with:
 
