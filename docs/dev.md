@@ -35,12 +35,19 @@ RAPcore includes a [shell.nix](../shell.nix) for use with the Nix Package manage
 This makes it easy to get a development environment with all build requirements installed
 for you.
 
-To start you will need to install Nix using the instructions [here](https://nixos.org/download.html).
-Next, log out and log back in. Then `cd` to the RAPCore directory. Run `nix-shell`, and some
-packages will be installed. Once complete you should be able to run any of the `make` commands
-below.
+To start you will need to install Nix using the instructions [here](https://nixos.wiki/wiki/Nix_Installation_Guide).
+They are reproduced here with some recommendations:
 
-Note: the `prog` target is currently not supported in the `nix-shell` environment.
+```
+sudo install -d -m755 -o $(id -u) -g $(id -g) /nix
+curl -L https://nixos.org/nix/install | sh
+source $HOME/.nix-profile/etc/profile.d/nix.sh >> ~/.bashrc
+```
+
+Then `cd` to the RAPCore directory. Run `nix-shell`, and some
+packages will be installed. Once complete you should be able to run any of the `make` commands
+below. This environment includes all the tools to synthesis, place, route, program, and
+formally verify the RAPCore project.
 
 ## Build Bitstream
 
