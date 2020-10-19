@@ -11,7 +11,7 @@ let
     # these are generally useful packages for tests, verification, synthesis
     # and deployment, etc
     [ yosys symbiyosys nextpnr icestorm trellis
-      z3 boolector yices
+      z3 boolector yices tinyprog fujprog
     ];
 
 # Export a usable shell environment
