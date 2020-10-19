@@ -1,0 +1,7 @@
+PIN_DEF = ulx3s.lpf
+ARCH = ecp5
+DEVICE = 85k
+PACKAGE = CABGA381
+FREQ = 25
+PROGRAMMER = fujprog
+SPIFREQ = 64

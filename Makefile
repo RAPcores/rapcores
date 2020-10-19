@@ -32,15 +32,15 @@ $(BUILD).bit:
 	echo '`define $(BOARD)\n`include "./boards/$(BOARD)/$(BOARD).v"' > $(GENERATEDDIR)board.v
 ifeq ($(ARCH), ice40)
 	icepll -i $(FREQ) -o $(SPIFREQ) -m -n spi_pll -f $(GENERATEDDIR)spi_pll.v
-	yosys -ql ./logs/$(BOARD)_yosys.log -p 'synth_ice40 -top $(PROJ) -abc9 -dsp -blif $(BUILD).blif -json $(BUILD).json' $(TOP)
+	yosys -ql ./logs/$(BOARD)_yosys.log -p 'synth_ice40 -top $(PROJ) -abc9 -dsp -json $(BUILD).json' $(TOP)
 	nextpnr-ice40 -ql ./logs/$(BOARD)_nextpnr.log --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --json $(BUILD).json --asc $(BUILD).asc --pcf ./boards/$(BOARD)/$(PIN_DEF)
 	icetime -d $(DEVICE) -c $(FREQ) -mtr $(BUILD).rpt $(BUILD).asc
 	icepack $(BUILD).asc $(BUILD).bit
 endif
 ifeq ($(ARCH), ecp5)
-	ecppll -i $(FREQ) -o $(SPIFREQ) -n spi_pll -f spi_pll.v
-	yosys -ql $(BOARD)_yosys.log -p 'synth_ecp5 -top $(PROJ) -json top.json' $(PROJ).v
-	nextpnr-ecp5 -ql $(BOARD)_nextpnr.log --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --json $(PROJ).json --lpf ./boards/$(BOARD)/$(PIN_DEF)
+	ecppll -i $(FREQ) -o $(SPIFREQ) --clkin_name clock_in --clkout0_name clock_out -n spi_pll -f $(GENERATEDDIR)spi_pll.v
+	yosys -ql ./logs/$(BOARD)_yosys.log -p 'synth_ecp5 -top $(PROJ) -abc9 -json $(BUILD).json' $(TOP)
+	nextpnr-ecp5 -ql ./logs/$(BOARD)_nextpnr.log --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --json $(BUILD).json  --lpf ./boards/$(BOARD)/$(PIN_DEF)
 	ecppack --svf $(PROJ).svf $(BOARD).bit
 endif
 
