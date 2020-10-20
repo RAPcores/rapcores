@@ -1,10 +1,8 @@
 `default_nettype none
 
 `include "generated/board.v"
-`include "buildconfig.v"
-`include "configuration.v"
+`include "macro_params.v"
 `include "constants.v"
-`include "buildconfig.v"
 `include "stepper.v"
 `include "spi.v"
 `include "quad_enc.v"
