@@ -11,8 +11,7 @@ prep -top top
 [files]
 generated/board.v src/generated/board.v
 boards/tinyfpgabx/tinyfpgabx.v boards/tinyfpgabx/tinyfpgabx.v
-src/buildconfig.v
-src/configuration.v
+src/macro_params.v
 src/constants.v
 src/spi.v
 src/stepper.v

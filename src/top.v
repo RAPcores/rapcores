@@ -1,10 +1,8 @@
 `default_nettype none
 
 `include "generated/board.v"
-`include "buildconfig.v"
-`include "configuration.v"
+`include "macro_params.v"
 `include "constants.v"
-`include "buildconfig.v"
 `include "stepper.v"
 `include "spi.v"
 `include "quad_enc.v"
@@ -26,12 +24,16 @@ module top (
       input  COPI,
       output CIPO,
     `endif
-    output M1_PHASE_A1,  // Phase A
-    output M1_PHASE_A2,  // Phase A
-    output M1_PHASE_B1,  // Phase B
-    output M1_PHASE_B2,  // Phase B
-    input ENC1_B,
-    input ENC1_A,
+    `ifdef DUAL_HBRIDGE
+      output wire [`DUAL_HBRIDGE:1] PHASE_A1,  // Phase A
+      output wire [`DUAL_HBRIDGE:1] PHASE_A2,  // Phase A
+      output wire [`DUAL_HBRIDGE:1] PHASE_B1,  // Phase B
+      output wire [`DUAL_HBRIDGE:1] PHASE_B2,  // Phase B
+    `endif
+    `ifdef QUAD_ENC
+      input [`QUAD_ENC:1] ENC_B,
+      input [`QUAD_ENC:1] ENC_A,
+    `endif
     `ifdef BUFFER_DTR
       output BUFFER_DTR,
     `endif
@@ -82,10 +84,10 @@ module top (
   wire step;
   wire dir;
   reg enable;
-  DualHBridge s0 (.phase_a1 (M1_PHASE_A1),
-                .phase_a2 (M1_PHASE_A2),
-                .phase_b1 (M1_PHASE_B1),
-                .phase_b2 (M1_PHASE_B2),
+  DualHBridge s0 (.phase_a1 (PHASE_A1[1]),
+                .phase_a2 (PHASE_A2[1]),
+                .phase_b1 (PHASE_B1[1]),
+                .phase_b2 (PHASE_B2[1]),
                 .step (step),
                 .dir (dir),
                 .enable (enable),
@@ -102,8 +104,8 @@ module top (
   quad_enc encoder0 (
     .resetn(reset),
     .clk(CLK),
-    .a(ENC1_A),
-    .b(ENC1_B),
+    .a(ENC_A[1]),
+    .b(ENC_B[1]),
     .faultn(encoder_fault),
     .count(encoder_count),
     .multiplier(encoder_multiplier));

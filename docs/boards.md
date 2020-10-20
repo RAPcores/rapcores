@@ -16,6 +16,7 @@ tools to generate the bitstream of the RAPCore for FPGAs.
 ```
 ARCH = ice40
 ```
+Values: ice40, ecp5
 
 ### DEVICE
 ```
@@ -31,6 +32,7 @@ PACKAGE = cm81
 ```
 FREQ = 16
 ```
+Device external clock frequency. Used to validate timings.
 
 ### PROGRAMMER (Optional)
 ```
@@ -51,6 +53,23 @@ features:
 ```
 Enables the SPI Interface.
 
+### Motors
+
+```
+`define DUAL_HBRIDGE <N>
+```
+Enables control of Dual H Bridge motor drivers used for stepper control. Where `<N>`
+dual H Bridges are specified.
+
+See: "Dual H Bridge" in Pinouts for name specification.
+
+### Encoders
+
+```
+`define QUAD_ENC <N>
+```
+Enables quadrature encoder . Where `<N>` encoders are specified.
+
 ### Flow Control and Events
 
 ```
@@ -70,7 +89,7 @@ Toggles when a move in the buffer has completed.
 ```
 Changes the default move buffer size. Must be a power of two.
 
-## (.pcf/.lpf) Parameters
+## (.pcf/.lpf) Pin Names
 
 The following are pin naming conventions for the RAPCore "top" module:
 
@@ -86,5 +105,21 @@ Enabled by `SPI_INTERFACE` in the Verilog config.
 ### Flow Control and Events
 
 
-- `BUFFER_DTR` - Active High when move buffer has slots.
-- `MOVE_DONE` - Toggles when a move in the buffer has finished.
+- `BUFFER_DTR` - Output active High when move buffer has slots.
+- `MOVE_DONE` - Output toggles when a move in the buffer has finished.
+
+### Motors
+
+
+#### Dual H Bridge
+
+- `PHASE_A1[N]`
+- `PHASE_A2[N]`
+- `PHASE_B1[N]`
+- `PHASE_B2[N]`
+
+
+### Quadrature Encoders
+
+- `ENC_A[N]`
+- `ENC_B[N]`
