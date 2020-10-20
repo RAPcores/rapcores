@@ -29,7 +29,7 @@ all: $(BUILD).bit
 
 $(BUILD).bit:
 # set board define for Verilog and include the board specific verilog file
-	echo '`define $(BOARD)\n`include "./boards/$(BOARD)/$(BOARD).v"' > $(GENERATEDDIR)board.v
+	printf '`define $(BOARD)\n`include "./boards/$(BOARD)/$(BOARD).v"' > $(GENERATEDDIR)board.v
 ifeq ($(ARCH), ice40)
 	icepll -i $(FREQ) -o $(SPIFREQ) -m -n spi_pll -f $(GENERATEDDIR)spi_pll.v
 	yosys -ql ./logs/$(BOARD)_yosys.log -p 'synth_ice40 -top $(PROJ) -abc9 -dsp -blif $(BUILD).blif -json $(BUILD).json' $(TOP)
@@ -51,7 +51,7 @@ clean:
 	rm -f $(BUILD).blif $(BUILD).asc $(BUILD).rpt  $(BUILD).json $(BUILD).bin $(BUILD).bit ./src/generated/*.v
 
 formal:
-	echo '`define $(BOARD)\n`include "./boards/$(BOARD)/$(BOARD).v"' > $(GENERATEDDIR)board.v
+	printf '`define $(BOARD)\n`include "./boards/$(BOARD)/$(BOARD).v"' > $(GENERATEDDIR)board.v
 	sby -f symbiyosys.sby
 
 lint:
