@@ -26,12 +26,16 @@ module top (
       input  COPI,
       output CIPO,
     `endif
-    output wire [1:1] PHASE_A1,  // Phase A
-    output wire [1:1] PHASE_A2,  // Phase A
-    output wire [1:1] PHASE_B1,  // Phase B
-    output wire [1:1] PHASE_B2,  // Phase B
-    input ENC1_B,
-    input ENC1_A,
+    `ifdef DUAL_HBRIDGE
+      output wire [`DUAL_HBRIDGE:1] PHASE_A1,  // Phase A
+      output wire [`DUAL_HBRIDGE:1] PHASE_A2,  // Phase A
+      output wire [`DUAL_HBRIDGE:1] PHASE_B1,  // Phase B
+      output wire [`DUAL_HBRIDGE:1] PHASE_B2,  // Phase B
+    `endif
+    `ifdef QUAD_ENC
+      input [`QUAD_ENC:1] ENC_B,
+      input [`QUAD_ENC:1] ENC_A,
+    `endif
     `ifdef BUFFER_DTR
       output BUFFER_DTR,
     `endif
@@ -102,8 +106,8 @@ module top (
   quad_enc encoder0 (
     .resetn(reset),
     .clk(CLK),
-    .a(ENC1_A),
-    .b(ENC1_B),
+    .a(ENC_A[1]),
+    .b(ENC_B[1]),
     .faultn(encoder_fault),
     .count(encoder_count),
     .multiplier(encoder_multiplier));

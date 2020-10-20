@@ -9,7 +9,10 @@
 `define MOVE_DONE
 
 // Motor Definitions
-`define MOTOR1 DUAL_H_BRIDGE
+`define DUAL_HBRIDGE 1
+
+// Encoder Count
+`define QUAD_ENC 1
 
 // Change the Move Buffer Size. Should be power of two
 //`define MOVE_BUFFER_SIZE 4
