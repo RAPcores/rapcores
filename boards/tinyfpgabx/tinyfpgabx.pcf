@@ -63,7 +63,7 @@ set_io --warn-no-port PIN_20 A8
 set_io --warn-no-port PIN_21 B7
 set_io --warn-no-port BUFFER_DTR A7 # PIN_22
 set_io --warn-no-port MOVE_DONE B6 # PIN_23
-set_io --warn-no-port PIN_24 A6
+set_io --warn-no-port -pullup yes HALT A6 # PIN_24
 
 # SPI flash interface on bottom of board
 set_io --warn-no-port SPI_SS F7
