@@ -33,3 +33,7 @@ See the [dev docs](./docs/dev.md) for more information.
 - [Dev](./docs/dev.md)
 - [SPI Protocol](./docs/spi_spec.md)
 - [Board Parameters](./docs/boards.md)
+
+## License
+
+[ISC License](https://en.wikipedia.org/wiki/ISC_license).
