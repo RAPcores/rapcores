@@ -142,7 +142,8 @@ module top (
         `CMD_COORDINATED_STEP: begin
 
           // Get Direction Bits
-          dir_r[writemoveind] <= word_data_received[0];
+          dir_r[writemoveind] <= word_data_received[32];
+          move_duration[writemoveind][31:0] <= word_data_received[31:0];
 
           // Store encoder values across all axes Now
           encoder_store <= encoder_count;
@@ -184,14 +185,10 @@ module top (
           // the first non-header word is the move duration
           case (message_word_count)
             1: begin
-              move_duration[writemoveind][63:0] <= word_data_received[63:0];
-              //word_send_data[63:0] = last_steps_taken[63:0]; // Prep to send steps
-            end
-            2: begin
               increment[writemoveind][63:0] <= word_data_received[63:0];
               word_send_data[63:0] <= encoder_store[63:0]; // Prep to send encoder read
             end
-            3: begin
+            2: begin
                 incrementincrement[writemoveind][63:0] <= word_data_received[63:0];
                 message_word_count <= 0;
                 stepready[writemoveind] <= ~stepready[writemoveind];
@@ -219,11 +216,11 @@ module top (
   reg [`MOVE_BUFFER_SIZE:0] stepready;
   reg [`MOVE_BUFFER_SIZE:0] stepfinished;
 
-  reg [63:0] move_duration [`MOVE_BUFFER_SIZE:0];
+  reg [31:0] move_duration [`MOVE_BUFFER_SIZE:0];
   reg [7:0] clock_divisor = 40;  // should be 40 for 400 khz at 16Mhz Clk
   reg [`MOVE_BUFFER_SIZE:0] dir_r;
 
-  reg [63:0] tickdowncount;  // move down count (clock cycles)
+  reg [31:0] tickdowncount;  // move down count (clock cycles)
   reg [7:0] clkaccum = 8'b1;  // intra-tick accumulator
 
   reg signed [63:0] substep_accumulator = 0; // typemax(Int64) - 100 for buffer
