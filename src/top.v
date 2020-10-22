@@ -84,6 +84,7 @@ module top (
   wire step;
   wire dir;
   reg enable;
+  reg signed [31:0] step_encoder;
   DualHBridge s0 (.phase_a1 (PHASE_A1[1]),
                 .phase_a2 (PHASE_A2[1]),
                 .phase_b1 (PHASE_B1[1]),
@@ -91,27 +92,28 @@ module top (
                 .step (step),
                 .dir (dir),
                 .enable (enable),
-                .microsteps (microsteps));
+                .microsteps (microsteps),
+                .step_encoder (step_encoder));
 
 
   //
   // Encoder
   //
-  reg signed [31:0] encoder_count;
-  reg signed [31:0] encoder_store; // Snapshot for SPI comms
+  reg signed [31:0] quad_enc_count;
   reg [7:0] encoder_multiplier = 1;
   quad_enc encoder0 (
     .resetn(reset),
     .clk(CLK),
     .a(ENC_A[1]),
     .b(ENC_B[1]),
-    .count(encoder_count),
+    .count(quad_enc_count),
     .multiplier(encoder_multiplier));
 
   //
   // State Machine for handling SPI Messages
   //
-
+  reg signed [31:0] quad_enc_store; // Snapshot for SPI comms
+  reg signed [31:0] step_enc_store; // Snapshot for SPI comms
   reg [7:0] message_word_count = 0;
   reg [7:0] message_header;
   reg [`MOVE_BUFFER_BITS:0] writemoveind = 0;
@@ -143,9 +145,12 @@ module top (
           dir_r[writemoveind] <= word_data_received[32];
           move_duration[writemoveind][31:0] <= word_data_received[31:0];
 
-          // Store encoder values across all axes Now
-          encoder_store <= encoder_count;
+          // Store encoder values across all axes now
+          quad_enc_store <= quad_enc_count;
+          step_enc_store <= step_encoder;
 
+          // prep the first channel encoder send
+          word_send_data <= step_encoder;
         end
 
         // Motor Enable/disable
@@ -184,7 +189,7 @@ module top (
           case (message_word_count)
             1: begin
               increment[writemoveind][63:0] <= word_data_received[63:0];
-              word_send_data <= encoder_store; // Prep to send encoder read
+              word_send_data <= quad_enc_store; // Prep to send encoder read
             end
             2: begin
                 incrementincrement[writemoveind][63:0] <= word_data_received[63:0];
