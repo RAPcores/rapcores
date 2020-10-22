@@ -28,7 +28,7 @@ module quad_enc(
   input wire  a,
   input wire  b,
   output reg faultn,
-  output reg signed [63:0] count,
+  output reg signed [31:0] count,
   input [7:0] multiplier
   );
 

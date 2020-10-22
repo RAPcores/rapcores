@@ -97,8 +97,8 @@ module top (
   //
   // Encoder
   //
-  reg signed [63:0] encoder_count;
-  reg signed [63:0] encoder_store; // Snapshot for SPI comms
+  reg signed [31:0] encoder_count;
+  reg signed [31:0] encoder_store; // Snapshot for SPI comms
   reg [7:0] encoder_multiplier = 1;
   wire encoder_fault;
   quad_enc encoder0 (
@@ -186,7 +186,7 @@ module top (
           case (message_word_count)
             1: begin
               increment[writemoveind][63:0] <= word_data_received[63:0];
-              word_send_data[63:0] <= encoder_store[63:0]; // Prep to send encoder read
+              word_send_data <= encoder_store; // Prep to send encoder read
             end
             2: begin
                 incrementincrement[writemoveind][63:0] <= word_data_received[63:0];
