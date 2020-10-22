@@ -100,13 +100,11 @@ module top (
   reg signed [31:0] encoder_count;
   reg signed [31:0] encoder_store; // Snapshot for SPI comms
   reg [7:0] encoder_multiplier = 1;
-  wire encoder_fault;
   quad_enc encoder0 (
     .resetn(reset),
     .clk(CLK),
     .a(ENC_A[1]),
     .b(ENC_B[1]),
-    .faultn(encoder_fault),
     .count(encoder_count),
     .multiplier(encoder_multiplier));
 
