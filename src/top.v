@@ -84,7 +84,6 @@ module top (
   wire step;
   wire dir;
   reg enable;
-  reg signed [31:0] step_encoder;
   DualHBridge s0 (.phase_a1 (PHASE_A1[1]),
                 .phase_a2 (PHASE_A2[1]),
                 .phase_b1 (PHASE_B1[1]),
@@ -92,28 +91,29 @@ module top (
                 .step (step),
                 .dir (dir),
                 .enable (enable),
-                .microsteps (microsteps),
-                .step_encoder (step_encoder));
+                .microsteps (microsteps));
 
 
   //
   // Encoder
   //
-  reg signed [31:0] quad_enc_count;
+  reg signed [63:0] encoder_count;
+  reg signed [63:0] encoder_store; // Snapshot for SPI comms
   reg [7:0] encoder_multiplier = 1;
+  wire encoder_fault;
   quad_enc encoder0 (
     .resetn(reset),
     .clk(CLK),
     .a(ENC_A[1]),
     .b(ENC_B[1]),
-    .count(quad_enc_count),
+    .faultn(encoder_fault),
+    .count(encoder_count),
     .multiplier(encoder_multiplier));
 
   //
   // State Machine for handling SPI Messages
   //
-  reg signed [31:0] quad_enc_store; // Snapshot for SPI comms
-  reg signed [31:0] step_enc_store; // Snapshot for SPI comms
+
   reg [7:0] message_word_count = 0;
   reg [7:0] message_header;
   reg [`MOVE_BUFFER_BITS:0] writemoveind = 0;
@@ -142,15 +142,11 @@ module top (
         `CMD_COORDINATED_STEP: begin
 
           // Get Direction Bits
-          dir_r[writemoveind] <= word_data_received[32];
-          move_duration[writemoveind][31:0] <= word_data_received[31:0];
+          dir_r[writemoveind] <= word_data_received[0];
 
-          // Store encoder values across all axes now
-          quad_enc_store <= quad_enc_count;
-          step_enc_store <= step_encoder;
+          // Store encoder values across all axes Now
+          encoder_store <= encoder_count;
 
-          // prep the first channel encoder send
-          word_send_data <= step_encoder;
         end
 
         // Motor Enable/disable
@@ -188,10 +184,14 @@ module top (
           // the first non-header word is the move duration
           case (message_word_count)
             1: begin
-              increment[writemoveind][63:0] <= word_data_received[63:0];
-              word_send_data <= quad_enc_store; // Prep to send encoder read
+              move_duration[writemoveind][63:0] <= word_data_received[63:0];
+              //word_send_data[63:0] = last_steps_taken[63:0]; // Prep to send steps
             end
             2: begin
+              increment[writemoveind][63:0] <= word_data_received[63:0];
+              word_send_data[63:0] <= encoder_store[63:0]; // Prep to send encoder read
+            end
+            3: begin
                 incrementincrement[writemoveind][63:0] <= word_data_received[63:0];
                 message_word_count <= 0;
                 stepready[writemoveind] <= ~stepready[writemoveind];
@@ -219,11 +219,11 @@ module top (
   reg [`MOVE_BUFFER_SIZE:0] stepready;
   reg [`MOVE_BUFFER_SIZE:0] stepfinished;
 
-  reg [31:0] move_duration [`MOVE_BUFFER_SIZE:0];
+  reg [63:0] move_duration [`MOVE_BUFFER_SIZE:0];
   reg [7:0] clock_divisor = 40;  // should be 40 for 400 khz at 16Mhz Clk
   reg [`MOVE_BUFFER_SIZE:0] dir_r;
 
-  reg [31:0] tickdowncount;  // move down count (clock cycles)
+  reg [63:0] tickdowncount;  // move down count (clock cycles)
   reg [7:0] clkaccum = 8'b1;  // intra-tick accumulator
 
   reg signed [63:0] substep_accumulator = 0; // typemax(Int64) - 100 for buffer
