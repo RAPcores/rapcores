@@ -27,7 +27,8 @@ module quad_enc(
   input wire  clk,
   input wire  a,
   input wire  b,
-  output reg signed [31:0] count,
+  output reg faultn,
+  output reg signed [63:0] count,
   input [7:0] multiplier
   );
 
@@ -39,7 +40,6 @@ module quad_enc(
   wire step_b = b_stable[1] ^ b_stable[2];  //Step if b changed
   wire step = step_a ^ step_b;  //Step if a xor b stepped
   wire direction = a_stable[1] ^ b_stable[2];  //Direction determined by comparing current sample to last
-  wire signed [7:0] increment = (direction) ? multiplier : -multiplier;
 
   always @(posedge clk) begin
     a_stable <= {a_stable[1:0], a};  //Shift new a in. Last 2 samples shift to bits 2 and 1
@@ -47,13 +47,16 @@ module quad_enc(
 
     if (!resetn) begin
       count <= 0;  //reset count
+      faultn <= 1; //reset faultn
     end
     else begin
+      if (step_a && step_b)  //We do not know direction if both inputs triggered on single clock
+        faultn <= 0;
       if (step) begin
-        count <= count + increment;
-        `ifdef FORMAL
-          assert(direction && (increment == multiplier) || (increment == -multiplier));
-        `endif
+        if (direction)
+          count <= count + multiplier;
+        else
+          count <= count - multiplier;
       end
     end
   end

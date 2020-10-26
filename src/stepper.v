@@ -8,8 +8,7 @@ module DualHBridge (
     input        step,
     input        dir,
     input        enable,
-    input  [2:0] microsteps,
-    output reg signed [31:0] step_encoder
+    input  [2:0] microsteps
 );
 
   // TODO: if phase_ct is initialized BRAM does not infer
@@ -17,7 +16,6 @@ module DualHBridge (
   reg [2:0] phase_ct; // needs to be the size of microsteps, for LUT
   wire signed [2:0] phase_inc; // Phase increment per step
   wire [2:0] abs_increment;
-  wire signed [1:0] encoder_increment;
 
   // Table of phases
   reg [31:0] phase_table [0:255]; // Larger to trigger BRAM inference
@@ -29,7 +27,6 @@ module DualHBridge (
 
   assign abs_increment = 3'b100 >> microsteps;
   assign phase_inc = dir ? abs_increment : -abs_increment; // Generate increment, multiple of microsteps\
-  assign encoder_increment = dir ? 1'b1 : -1'b1; // step encoder does not handle microsteps
 
   initial begin
     phase_table[0] = 4'b1010;
@@ -52,7 +49,6 @@ module DualHBridge (
 
     // Traverse the table based on direction, rolls over
     phase_ct <= phase_ct + phase_inc;
-    step_encoder <= step_encoder + encoder_increment;
 
   end
 
