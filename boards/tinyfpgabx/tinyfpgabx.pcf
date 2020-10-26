@@ -49,8 +49,8 @@ set_io --warn-no-port PHASE_A1[1] E2
 set_io --warn-no-port PHASE_A2[1] E1
 set_io --warn-no-port PHASE_B1[1] G2
 set_io --warn-no-port PHASE_B2[1] H1
-set_io --warn-no-port PIN_12 J1
-set_io --warn-no-port PIN_13 H2
+set_io --warn-no-port VREF_A[1] J1 # PIN_12
+set_io --warn-no-port VREF_B[1] H2 # PIN_13
 
 # Right side of board
 set_io --warn-no-port ENC_A[1] H9

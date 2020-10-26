@@ -5,6 +5,8 @@ module DualHBridge (
     output       phase_a2,  // Phase A
     output       phase_b1,  // Phase B
     output       phase_b2,  // Phase B
+    output       vref_a,  // vref - Phase A
+    output       vref_b,  // vref - Phase B
     input        step,
     input        dir,
     input        enable,
@@ -19,6 +21,9 @@ module DualHBridge (
 
   // Table of phases
   reg [31:0] phase_table [0:255]; // Larger to trigger BRAM inference
+
+  assign vref_a = 1;
+  assign vref_b = 1;
 
   assign phase_a1 = (enable) ? phase_table[phase_ct][0] : 0;
   assign phase_a2 = (enable) ? phase_table[phase_ct][1] : 0;

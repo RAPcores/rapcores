@@ -31,6 +31,8 @@ module top (
       output wire [`DUAL_HBRIDGE:1] PHASE_A2,  // Phase A
       output wire [`DUAL_HBRIDGE:1] PHASE_B1,  // Phase B
       output wire [`DUAL_HBRIDGE:1] PHASE_B2,  // Phase B
+      output wire [`DUAL_HBRIDGE:1] VREF_A,  // VRef
+      output wire [`DUAL_HBRIDGE:1] VREF_B,  // VRef
     `endif
     `ifdef QUAD_ENC
       input [`QUAD_ENC:1] ENC_B,
@@ -93,6 +95,8 @@ module top (
                 .phase_a2 (PHASE_A2[1]),
                 .phase_b1 (PHASE_B1[1]),
                 .phase_b2 (PHASE_B2[1]),
+                .vref_a (VREF_A[1]),
+                .vref_b (VREF_B[1]),
                 .step (step),
                 .dir (dir),
                 .enable (enable),
