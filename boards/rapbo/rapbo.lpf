@@ -49,3 +49,18 @@ LOCATE COMP "LED3" SITE "B3";
 # 27 MHz clock
 LOCATE COMP "CLK" SITE "M16" ;
 IOBUF PORT "CLK" IO_TYPE=LVCMOS33 ;
+
+
+LOCATE COMP "analog_out1" SITE "K4" ; //ADC Feedback
+LOCATE COMP "analog_cmp1" SITE "J3" ; //ADC input //J3 - SENSE_A
+LOCATE COMP "analog_out2" SITE "K5" ; //ADC Feedback
+LOCATE COMP "analog_cmp2" SITE "F2" ; //ADC input //F2 - SENSE_B
+
+IOBUF PORT "analog_cmp1" IO_TYPE=LVDS ;
+IOBUF PORT "analog_cmp2" IO_TYPE=LVDS ;
+IOBUF PORT "analog_out1" IO_TYPE=LVCMOS33 DRIVE=8 ;
+IOBUF PORT "analog_out2" IO_TYPE=LVCMOS33 DRIVE=8 ;
+
+
+LOCATE COMP "DUMMY0" SITE "N6";
+LOCATE COMP "DUMMY1" SITE "P6";
