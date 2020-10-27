@@ -6,6 +6,8 @@
 `include "stepper.v"
 `include "spi.v"
 `include "quad_enc.v"
+`include "microstepper/microstepper_top.v"
+//`include "microstepper2/stepper_top.v"
 
 // Hide PLLs from Formal
 `ifndef FORMAL
@@ -15,6 +17,16 @@
 module top (
     input  CLK,  // 16MHz clock
     output LED,  // User/boot LED next to power LED
+    output LED1,
+    output LED2,
+    output LED3,
+    output CHARGEPUMP,
+    input analog_cmp1,	
+    output analog_out1,
+    input analog_cmp2,
+    output analog_out2,
+    output DUMMY0,
+    output DUMMY1,
     `ifdef tinyfpgabx
       output USBPU,  // USB pull-up resistor
     `endif
@@ -29,6 +41,10 @@ module top (
       output wire [`DUAL_HBRIDGE:1] PHASE_A2,  // Phase A
       output wire [`DUAL_HBRIDGE:1] PHASE_B1,  // Phase B
       output wire [`DUAL_HBRIDGE:1] PHASE_B2,  // Phase B
+      output wire [`DUAL_HBRIDGE:1] PHASE_A1_H,  // Phase A
+      output wire [`DUAL_HBRIDGE:1] PHASE_A2_H,  // Phase A
+      output wire [`DUAL_HBRIDGE:1] PHASE_B1_H,  // Phase B
+      output wire [`DUAL_HBRIDGE:1] PHASE_B2_H,  // Phase B
     `endif
     `ifdef QUAD_ENC
       input [`QUAD_ENC:1] ENC_B,
@@ -42,10 +58,9 @@ module top (
     `endif
 );
 
-
   // Global Reset (TODO: Make input pin)
-  wire reset;
-  assign reset = 1;
+  //wire reset;
+  //assign reset = 1;
   `ifdef tinyfpgabx
     // drive USB pull-up resistor to '0' to disable USB
     assign USBPU = 0;
@@ -78,12 +93,52 @@ module top (
                 .word_received(word_received),
                 .word_data_received(word_data_received));
 
+  //Reset
+  wire resetn;
+  reg [7:0] resetn_counter = 0;
+  assign resetn = &resetn_counter;
+  always @(posedge CLK) begin
+    if (!resetn) resetn_counter <= resetn_counter + 1'b1;
+  end
+  wire reset = resetn;
+  
+  /*
+  chargepump cp0 (
+    .clk( CLK),
+    .resetn( resetn), 
+    .chargepump_pin( CHARGEPUMP)
+    );
+  */
+  
+  reg enableEEEE;
+
   // Stepper Setup
   // TODO: Generate statement?
   reg [2:0] microsteps = 2;
   wire step;
   wire dir;
   reg enable;
+
+  reg step222222222222222222;
+  assign DUMMY0 = step;
+  assign DUMMY1 = dir;
+  //assign LED3 = step222222222222222222;
+  
+  reg [15:0] clk_counter;
+  always @(posedge CLK) begin
+  if (!reset) begin
+    clk_counter <= 0;
+    enableEEEE = 1'b1;
+  end else begin
+    clk_counter <= clk_counter + 1'b1;
+    if(&clk_counter) begin
+      step222222222222222222 <= ~step222222222222222222;
+      //clk_counter <= 0;
+     end
+  end
+  end
+  
+  /*
   DualHBridge s0 (.phase_a1 (PHASE_A1[1]),
                 .phase_a2 (PHASE_A2[1]),
                 .phase_b1 (PHASE_B1[1]),
@@ -92,8 +147,37 @@ module top (
                 .dir (dir),
                 .enable (enable),
                 .microsteps (microsteps));
+*/
+/*
+  assign PHASE_A1_H[1] = ~PHASE_A1[1];
+  assign PHASE_A2_H[1] = ~PHASE_A2[1];
+  assign PHASE_B1_H[1] = ~PHASE_B1[1];
+  assign PHASE_B2_H[1] = ~PHASE_B2[1];
+  DualHBridge s0 (.phase_a1 (PHASE_A1[1]),
+                .phase_a2 (PHASE_A2[1]),
+                .phase_b1 (PHASE_B1[1]),
+                .phase_b2 (PHASE_B2[1]),
+                .step (step222222222222222222),
+                .dir (dir),
+                .enable (enableEEEE),
+                .microsteps (microsteps));
+*/
 
-
+microstepper_top microstepper0(
+  .clk( spi_clock),
+  .resetn( resetn),
+  .s_l ({PHASE_A1[1], PHASE_A2[1], PHASE_B1[1], PHASE_B2[1]}),
+  .s_h ({PHASE_A1_H[1], PHASE_A2_H[1], PHASE_B1_H[1], PHASE_B2_H[1]}),
+  .analog_cmp1 (analog_cmp1),
+  .analog_out1 (analog_out1),
+  .analog_cmp2 (analog_cmp2),
+  .analog_out2 (analog_out2),
+  .chargepump_pin (CHARGEPUMP),
+  .step (step222222222222222222),
+  .dir (dir),
+  .enable(enableEEEE),
+  );
+ 
   //
   // Encoder
   //
@@ -122,7 +206,9 @@ module top (
   wire awaiting_more_words = (message_header == `CMD_COORDINATED_STEP) |
                              (message_header == `CMD_API_VERSION);
 
-  always @(posedge word_received) begin
+  always @(posedge word_received) 
+  if(reset == 1)
+  begin
 
     // Zero out send data register
     word_send_data <= 64'b0;
