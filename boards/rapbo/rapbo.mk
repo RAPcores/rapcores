@@ -1,0 +1,7 @@
+PIN_DEF = rapbo.lpf
+ARCH = ecp5
+DEVICE = 25k
+PACKAGE = CABGA256
+FREQ = 27
+PROGRAMMER = fujprog
+SPIFREQ = 64
