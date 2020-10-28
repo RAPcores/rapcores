@@ -166,8 +166,8 @@ module top (
 microstepper_top microstepper0(
   .clk( spi_clock),
   .resetn( resetn),
-  .s_l ({PHASE_A1[1], PHASE_A2[1], PHASE_B1[1], PHASE_B2[1]}),
-  .s_h ({PHASE_A1_H[1], PHASE_A2_H[1], PHASE_B1_H[1], PHASE_B2_H[1]}),
+  .s_l ({PHASE_B2[1], PHASE_B1[1], PHASE_A2[1], PHASE_A1[1]}),
+  .s_h ({PHASE_B2_H[1], PHASE_B1_H[1], PHASE_A2_H[1], PHASE_A1_H[1]}),
   .analog_cmp1 (analog_cmp1),
   .analog_out1 (analog_out1),
   .analog_cmp2 (analog_cmp2),
