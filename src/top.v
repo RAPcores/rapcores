@@ -14,7 +14,9 @@
 
 module top (
     input  CLK,
-    output LED,
+    `ifdef LED
+      output wire [`LED:1] LED,
+    `endif
     `ifdef tinyfpgabx
       output USBPU,  // USB pull-up resistor
     `endif
@@ -104,14 +106,17 @@ module top (
   reg signed [63:0] encoder_store; // Snapshot for SPI comms
   reg [7:0] encoder_multiplier = 1;
   wire encoder_fault;
-  quad_enc encoder0 (
-    .resetn(reset),
-    .clk(CLK),
-    .a(ENC_A[1]),
-    .b(ENC_B[1]),
-    .faultn(encoder_fault),
-    .count(encoder_count),
-    .multiplier(encoder_multiplier));
+  `ifdef QUAD_ENC
+    // TODO: For ... generate
+    quad_enc encoder0 (
+      .resetn(reset),
+      .clk(CLK),
+      .a(ENC_A[1]),
+      .b(ENC_B[1]),
+      .faultn(encoder_fault),
+      .count(encoder_count),
+      .multiplier(encoder_multiplier));
+  `endif
 
   //
   // State Machine for handling SPI Messages
