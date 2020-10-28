@@ -124,7 +124,7 @@ module top (
   assign DUMMY1 = dir;
   //assign LED3 = step222222222222222222;
   
-  reg [15:0] clk_counter;
+  reg [14:0] clk_counter;
   always @(posedge CLK) begin
   if (!reset) begin
     clk_counter <= 0;
