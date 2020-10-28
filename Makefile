@@ -41,7 +41,7 @@ ifeq ($(ARCH), ecp5)
 	ecppll -i $(FREQ) -o $(SPIFREQ) --clkin_name clock_in --clkout0_name clock_out -n spi_pll -f $(GENERATEDDIR)spi_pll.v
 	yosys -ql ./logs/$(BOARD)_yosys.log -p 'synth_ecp5 -top $(PROJ) -abc9 -json $(BUILD).json' $(TOP)
 	nextpnr-ecp5 -ql ./logs/$(BOARD)_nextpnr.log --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --textcfg $(BUILD)_out.config --json $(BUILD).json  --lpf ./boards/$(BOARD)/$(PIN_DEF)
-	ecppack --svf $(PROJ).svf $(BUILD)_out.config $(BOARD).bit
+	ecppack --svf $(BUILD).svf $(BUILD)_out.config $(BUILD).bit
 endif
 
 prog: $(BUILD).bit
