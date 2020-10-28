@@ -44,6 +44,9 @@ wire overCurrent1 = off_timer1 > 0;
 wire fastDecay0 = off_timer0 >= 706;
 wire fastDecay1 = off_timer1 >= 706;
 
+wire slowDecay0 = overCurrent0 && fastDecay0==0;
+wire slowDecay1 = overCurrent1 && fastDecay1==0;
+
 reg [1:0] s1r, s2r, s3r, s4r;
 wire phase_a1_h, phase_a1_l, phase_a2_h, phase_a2_l;
 wire phase_b1_h, phase_b1_l, phase_b2_h, phase_b2_l;
@@ -59,15 +62,15 @@ assign s_h[2] = phase_b1_h;
 assign s_h[3] = phase_b2_h;
 
 
-assign phase_a1_h = fastDecay0 ?  s1r[1] : ~s1r[1];
-assign phase_a1_l = fastDecay0 ? ~s1r[1] :  s1r[1];
-assign phase_a2_h = fastDecay0 ?  s2r[1] : ~s2r[1];
-assign phase_a2_l = fastDecay0 ? ~s2r[1] :  s2r[1];
+assign phase_a1_h = slowDecay0 | (fastDecay0 ?  s1r[1] : ~s1r[1]);
+assign phase_a1_l = fastDecay0 ? ~s1r[1] : (slowDecay0 ? 1'b0 : s1r[1]);
+assign phase_a2_h = slowDecay0 | (fastDecay0 ?  s2r[1] : ~s2r[1]);
+assign phase_a2_l = fastDecay0 ? ~s2r[1] : (slowDecay0 ? 1'b0 : s2r[1]);
 
-assign phase_b1_h = fastDecay1 ?  s3r[1] : ~s3r[1];
-assign phase_b1_l = fastDecay1 ? ~s3r[1] :  s3r[1];
-assign phase_b2_h = fastDecay1 ?  s4r[1] : ~s4r[1];
-assign phase_b2_l = fastDecay1 ? ~s4r[1] :  s4r[1];
+assign phase_b1_h = slowDecay1 | (fastDecay1 ?  s3r[1] : ~s3r[1]);
+assign phase_b1_l = fastDecay1 ? ~s3r[1] : (slowDecay1 ? 1'b0 : s3r[1]);
+assign phase_b2_h = slowDecay1 | (fastDecay1 ?  s4r[1] : ~s4r[1]);
+assign phase_b2_l = fastDecay1 ? ~s4r[1] : (slowDecay1 ? 1'b0 : s4r[1]);
 
 wire s1_starting = s1r == 2'b10;
 wire s2_starting = s2r == 2'b10;
@@ -79,7 +82,7 @@ reg [9:0] off_timer0;
 always @(posedge clk) begin
   if (!resetn) 
     off_timer0 <= 0;
-  else if( analog_cmp1 & blank_timer0==0 )
+  else if( analog_cmp1 & blank_timer0==0 & overCurrent0==0 )
     off_timer0 <= 810;
   else if( off_timer0 > 0 )
     off_timer0 <= off_timer0 - 1'b1;
@@ -90,7 +93,7 @@ reg [9:0] off_timer1;
 always @(posedge clk) begin
   if (!resetn) 
     off_timer1 <= 0;
-  else if( analog_cmp2 & blank_timer1==0 )
+  else if( analog_cmp2 & blank_timer1==0 & overCurrent1==0 )
     off_timer1 <= 810;
   else if( off_timer1 > 0 )
     off_timer1 <= off_timer1 - 1'b1;
