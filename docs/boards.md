@@ -75,12 +75,20 @@ Enables quadrature encoder . Where `<N>` encoders are specified.
 ```
 `define BUFFER_DTR
 ```
+Type: Output
 Active High when move buffer has slots available for send.
 
 ```
 `define MOVE_DONE
 ```
+Type:Output
 Toggles when a move in the buffer has completed.
+
+```
+`define HALT
+```
+Type: Input
+Immediately stops step timing and clears the buffer.
 
 ### Move Buffer
 
@@ -107,6 +115,7 @@ Enabled by `SPI_INTERFACE` in the Verilog config.
 
 - `BUFFER_DTR` - Output active High when move buffer has slots.
 - `MOVE_DONE` - Output toggles when a move in the buffer has finished.
+- `HALT` - Input immediately stops step timing and clears the buffer.
 
 ### Motors
 

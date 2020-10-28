@@ -8,6 +8,9 @@
 // Enable Move Done Pin
 `define MOVE_DONE
 
+// Enable Halt Input
+`define HALT
+
 // Motor Definitions
 `define DUAL_HBRIDGE 1
 

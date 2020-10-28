@@ -13,8 +13,8 @@
 `endif
 
 module top (
-    input  CLK,  // 16MHz clock
-    output LED,  // User/boot LED next to power LED
+    input  CLK,
+    output LED,
     `ifdef tinyfpgabx
       output USBPU,  // USB pull-up resistor
     `endif
@@ -40,6 +40,9 @@ module top (
     `ifdef MOVE_DONE
       output MOVE_DONE,
     `endif
+    `ifdef HALT
+      input HALT,
+    `endif
 );
 
 
@@ -63,8 +66,8 @@ module top (
   `endif
 
   // Word handler
-  // The system operates on 32 bit little endian words
-  // This should make it easier to send 32 bit chunks from the host controller
+  // The system operates on 64 bit little endian words
+  // This should make it easier to send 64 bit chunks from the host controller
   reg [63:0] word_send_data;
   reg [63:0] word_data_received;
   wire word_received;
@@ -215,7 +218,7 @@ module top (
 
   reg [`MOVE_BUFFER_BITS:0] moveind = 0; // Move index cursor
 
-  // Latching mechanism for engaging the move. This is currently unbuffered, so TODO
+  // Latching mechanism for engaging the buffered move.
   reg [`MOVE_BUFFER_SIZE:0] stepready;
   reg [`MOVE_BUFFER_SIZE:0] stepfinished;
 
@@ -252,6 +255,16 @@ module top (
   assign step = (substep_accumulator > 0);
 
   always @(posedge CLK) begin
+
+    // HALT line (active low) then reset buffer latch and index
+    // TODO: Should substep accumulator reset?
+    `ifdef HALT
+      if (!HALT) begin
+        moveind <= writemoveind; // match buffer cursor
+        stepfinished <= stepready; // reset latch
+        finishedmove <= 1; // Puts us back in loading_move
+      end
+    `endif
 
     // Load up the move duration
     if (loading_move) begin
