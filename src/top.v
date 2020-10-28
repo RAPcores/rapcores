@@ -118,6 +118,7 @@ module top (
   wire step;
   wire dir;
   reg enable;
+
   `ifdef DUAL_HBRIDGE
   DualHBridge s0 (.phase_a1 (PHASE_A1[1]),
                 .phase_a2 (PHASE_A2[1]),
@@ -133,22 +134,23 @@ module top (
                 .microsteps (microsteps));
   `endif
 
-  `ifdef rapbo
-  microstepper_top microstepper0(
-    .clk( spi_clock),
-    .resetn( resetn),
-    .s_l ({PHASE_A1[1], PHASE_A2[1], PHASE_B1[1], PHASE_B2[1]}),
-    .s_h ({PHASE_A1_H[1], PHASE_A2_H[1], PHASE_B1_H[1], PHASE_B2_H[1]}),
-    .analog_cmp1 (analog_cmp1),
-    .analog_out1 (analog_out1),
-    .analog_cmp2 (analog_cmp2),
-    .analog_out2 (analog_out2),
-    .chargepump_pin (CHARGEPUMP),
-    .step (step),
-    .dir (dir),
-    .enable(enable),
-    );
+  `ifdef ULTIBRIDGE
+    microstepper_top microstepper0(
+      .clk( spi_clock),
+      .resetn( resetn),
+      .s_l ({PHASE_B2[1], PHASE_B1[1], PHASE_A2[1], PHASE_A1[1]}),
+      .s_h ({PHASE_B2_H[1], PHASE_B1_H[1], PHASE_A2_H[1], PHASE_A1_H[1]}),
+      .analog_cmp1 (analog_cmp1),
+      .analog_out1 (analog_out1),
+      .analog_cmp2 (analog_cmp2),
+      .analog_out2 (analog_out2),
+      .chargepump_pin (CHARGEPUMP),
+      .step (step),
+      .dir (dir),
+      .enable(enable),
+      );
   `endif
+
 
   //
   // Encoder
