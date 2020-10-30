@@ -6,6 +6,7 @@
 `include "stepper.v"
 `include "spi.v"
 `include "quad_enc.v"
+`include "pwm.v"
 
 // Hide PLLs from Formal
 `ifndef FORMAL
@@ -88,10 +89,13 @@ module top (
   // Stepper Setup
   // TODO: Generate statement?
   reg [2:0] microsteps = 2;
+  reg [7:0] current = 140;
   wire step;
   wire dir;
   reg enable;
-  DualHBridge s0 (.phase_a1 (PHASE_A1[1]),
+  DualHBridge s0 (
+                .clk (CLK),
+                .phase_a1 (PHASE_A1[1]),
                 .phase_a2 (PHASE_A2[1]),
                 .phase_b1 (PHASE_B1[1]),
                 .phase_b2 (PHASE_B2[1]),
@@ -100,7 +104,8 @@ module top (
                 .step (step),
                 .dir (dir),
                 .enable (enable),
-                .microsteps (microsteps));
+                .microsteps (microsteps),
+                .current (current));
 
 
   //
@@ -172,8 +177,9 @@ module top (
         end
 
         // Set Microstepping
-        `CMD_MICROSTEPS: begin
+        `CMD_MOTORCONFIG: begin
           // TODO needs to be power of two
+          current[7:0] <= word_data_received[15:8];
           microsteps[2:0] <= word_data_received[2:0];
         end
 
