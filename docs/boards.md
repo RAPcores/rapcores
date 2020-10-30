@@ -72,6 +72,8 @@ Enables quadrature encoder . Where `<N>` encoders are specified.
 
 ### Flow Control and Events
 
+The following Input/Output tied to certain events can be enabled:
+
 ```
 `define BUFFER_DTR
 ```
@@ -95,6 +97,7 @@ Immediately stops step timing and clears the buffer.
 ```
 `define MOVE_BUFFER_SIZE 2
 ```
+Default: 2
 Changes the default move buffer size. Must be a power of two.
 
 ## (.pcf/.lpf) Pin Names
@@ -126,7 +129,8 @@ Enabled by `SPI_INTERFACE` in the Verilog config.
 - `PHASE_A2[N]`
 - `PHASE_B1[N]`
 - `PHASE_B2[N]`
-
+- `VREF_A[N]`
+- `VREF_B[N]`
 
 ### Quadrature Encoders
 
