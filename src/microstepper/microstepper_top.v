@@ -61,7 +61,6 @@ end
   assign s_h[2] = phase_b1_h;
   assign s_h[3] = phase_b2_h;
 
-
   assign phase_a1_h = slowDecay0 | (fastDecay0 ? s1r[1] : ~s1r[1]);
   assign phase_a1_l = fastDecay0 ? ~s1r[1] : (slowDecay0 ? 1'b0 : s1r[1]);
   assign phase_a2_h = slowDecay0 | (fastDecay0 ? s2r[1] : ~s2r[1]);
@@ -77,8 +76,17 @@ end
   wire s3_starting = s3r == 2'b10;
   wire s4_starting = s4r == 2'b10;
 
+`ifdef FORMAL
+  always @(*) begin
+    assert (!(phase_a1_l == 0 && phase_a1_h == 0));
+    assert (!(phase_a2_l == 0 && phase_a2_h == 0));
+    assert (!(phase_b1_l == 0 && phase_b1_h == 0));
+    assert (!(phase_b2_l == 0 && phase_b2_h == 0));
+  end
+`endif
+
   //off timer0
-  reg                              [9:0] off_timer0;
+  reg [9:0] off_timer0;
   always @(posedge clk) begin
   if (!resetn) 
     off_timer0 <= 0;
