@@ -11,9 +11,15 @@ prep -top top
 [files]
 generated/board.v src/generated/board.v
 boards/tinyfpgabx/tinyfpgabx.v boards/tinyfpgabx/tinyfpgabx.v
+boards/rapbo/rapbo.v boards/rapbo/rapbo.v
 src/macro_params.v
 src/constants.v
 src/spi.v
 src/stepper.v
 src/top.v
 src/quad_enc.v
+microstepper/microstepper_top.v src/microstepper/microstepper_top.v
+src/microstepper/analog_out.v
+src/microstepper/chargepump.v
+src/microstepper/cosine.v
+src/microstepper/microstep_counter.v
