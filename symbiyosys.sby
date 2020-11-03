@@ -24,3 +24,4 @@ src/microstepper/analog_out.v
 src/microstepper/chargepump.v
 src/microstepper/cosine.v
 src/microstepper/microstep_counter.v
+src/microstepper/mytimer.v
