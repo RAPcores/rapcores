@@ -7,7 +7,6 @@
 module microstepper_top (
     input        clk,
     input        resetn,
-    //input wire [7:0] position,
     output [3:0] s_l,
     output [3:0] s_h,
     input        analog_cmp1,
@@ -26,7 +25,6 @@ module microstepper_top (
   phase_ct <= phase_ct + (dir ? 1 : -1);
 end
 
-  //wire [17:0] position;
   wire                                               [5:0] cos_index1;
   wire                                               [5:0] cos_index2;
   wire                                                     s1;
@@ -90,6 +88,12 @@ end
   end
 `endif
 
+  always @(posedge clk) begin
+    s1r <= {s1r[0], s1};
+    s2r <= {s2r[0], s2};
+    s3r <= {s3r[0], s3};
+    s4r <= {s4r[0], s4};
+  end
 
   mytimer #(
       .WIDTH(10)
@@ -130,13 +134,6 @@ end
       .start_time  (8'd27),
       .timer       (blank_timer1)
   );
-
-  always @(posedge clk) begin
-    s1r <= {s1r[0], s1};
-    s2r <= {s2r[0], s2};
-    s3r <= {s3r[0], s3};
-    s4r <= {s4r[0], s4};
-  end
 
   chargepump cp0 (
       .clk           (clk),
