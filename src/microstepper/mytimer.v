@@ -1,12 +1,19 @@
 module mytimer (
-    input        clk,
-    input        resetn,
-    input        start_enable,
-    input  [9:0] start_time,
-    output [9:0] timer
+    clk,
+    resetn,
+    start_enable,
+    start_time,
+    timer
 );
+  parameter WIDTH = 10;
 
-  reg [9:0] counter;
+  input clk;
+  input resetn;
+  input start_enable;
+  input [WIDTH-1:0] start_time;
+  output [WIDTH-1:0] timer;
+
+  reg [WIDTH-1:0] counter;
 
   assign timer = counter;
 
