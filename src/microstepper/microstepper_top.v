@@ -111,25 +111,25 @@ end
       .timer       (off_timer1)
   );
 
-  //blank timer0
-  always @(posedge clk) begin
-  if (!resetn) 
-    blank_timer0 <= 0;
-  else if (s1_starting | s2_starting)
-    blank_timer0 <= 27;
-  else if ( blank_timer0 > 0 )
-    blank_timer0 <= blank_timer0 - 1'b1;
-end
+  mytimer #(
+      .WIDTH(8)
+  ) blanktimer0 (
+      .clk         (clk),
+      .resetn      (resetn),
+      .start_enable(s1_starting | s2_starting),
+      .start_time  (8'd27),
+      .timer       (blank_timer0)
+  );
 
-  //blank timer1
-  always @(posedge clk) begin
-  if (!resetn) 
-    blank_timer1 <= 0;
-  else if(s3_starting | s4_starting)
-    blank_timer1 <= 27;
-  else if ( blank_timer1 > 0 )
-    blank_timer1 <= blank_timer1 - 1'b1;
-end
+  mytimer #(
+      .WIDTH(8)
+  ) blanktimer1 (
+      .clk         (clk),
+      .resetn      (resetn),
+      .start_enable(s3_starting | s4_starting),
+      .start_time  (8'd27),
+      .timer       (blank_timer1)
+  );
 
   always @(posedge clk) begin
     s1r <= {s1r[0], s1};
