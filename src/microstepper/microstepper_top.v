@@ -90,7 +90,10 @@ end
   end
 `endif
 
-  mytimer offtimer0 (
+
+  mytimer #(
+      .WIDTH(10)
+  ) offtimer0 (
       .clk         (clk),
       .resetn      (resetn),
       .start_enable(analog_cmp1 & blank_timer0 == 0 & overCurrent0 == 0),
@@ -98,7 +101,9 @@ end
       .timer       (off_timer0)
   );
 
-  mytimer offtimer1 (
+  mytimer #(
+      .WIDTH(10)
+  ) offtimer1 (
       .clk         (clk),
       .resetn      (resetn),
       .start_enable(analog_cmp2 & blank_timer1 == 0 & overCurrent1 == 0),
