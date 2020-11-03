@@ -2,6 +2,7 @@
 `include "cosine.v"
 `include "analog_out.v"
 `include "chargepump.v"
+`include "mytimer.v"
 
 module microstepper_top (
     input        clk,
@@ -37,6 +38,8 @@ end
 
   reg                                                [7:0] blank_timer0;
   reg                                                [7:0] blank_timer1;
+  reg                                                [9:0] off_timer0;
+  reg                                                [9:0] off_timer1;
 
   wire overCurrent0 = off_timer0 > 0;
   wire overCurrent1 = off_timer1 > 0;
@@ -46,6 +49,8 @@ end
 
   wire slowDecay0 = overCurrent0 && fastDecay0 == 0;
   wire slowDecay1 = overCurrent1 && fastDecay1 == 0;
+
+
 
   reg [1:0] s1r, s2r, s3r, s4r;
   wire phase_a1_h, phase_a1_l, phase_a2_h, phase_a2_l;
@@ -85,27 +90,21 @@ end
   end
 `endif
 
-  //off timer0
-  reg [9:0] off_timer0;
-  always @(posedge clk) begin
-  if (!resetn) 
-    off_timer0 <= 0;
-  else if( analog_cmp1 & blank_timer0==0 & overCurrent0==0 )
-    off_timer0 <= 810;
-  else if( off_timer0 > 0 )
-    off_timer0 <= off_timer0 - 1'b1;
-end
+  mytimer offtimer0 (
+      .clk         (clk),
+      .resetn      (resetn),
+      .start_enable(analog_cmp1 & blank_timer0 == 0 & overCurrent0 == 0),
+      .start_time  (10'd810),
+      .timer       (off_timer0)
+  );
 
-  //off timer1
-  reg [9:0] off_timer1;
-  always @(posedge clk) begin
-  if (!resetn) 
-    off_timer1 <= 0;
-  else if( analog_cmp2 & blank_timer1==0 & overCurrent1==0 )
-    off_timer1 <= 810;
-  else if( off_timer1 > 0 )
-    off_timer1 <= off_timer1 - 1'b1;
-end
+  mytimer offtimer1 (
+      .clk         (clk),
+      .resetn      (resetn),
+      .start_enable(analog_cmp2 & blank_timer1 == 0 & overCurrent1 == 0),
+      .start_time  (10'd810),
+      .timer       (off_timer1)
+  );
 
   //blank timer0
   always @(posedge clk) begin
