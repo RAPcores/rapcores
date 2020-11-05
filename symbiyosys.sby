@@ -17,3 +17,4 @@ src/spi.v
 src/stepper.v
 src/top.v
 src/quad_enc.v
+src/pwm.v

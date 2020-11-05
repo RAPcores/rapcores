@@ -1,14 +1,18 @@
 `default_nettype none
 
 module DualHBridge (
+    input clk,
     output       phase_a1,  // Phase A
     output       phase_a2,  // Phase A
     output       phase_b1,  // Phase B
     output       phase_b2,  // Phase B
+    output       vref_a,  // vref - Phase A
+    output       vref_b,  // vref - Phase B
     input        step,
     input        dir,
     input        enable,
-    input  [2:0] microsteps
+    input  [2:0] microsteps,
+    input  [7:0] current
 );
 
   // TODO: if phase_ct is initialized BRAM does not infer
@@ -19,6 +23,15 @@ module DualHBridge (
 
   // Table of phases
   reg [31:0] phase_table [0:255]; // Larger to trigger BRAM inference
+
+  // Vref - A
+  PWM va (.clk(clk),
+          .val(current),
+          .pwm(vref_a));
+  // Vref - B
+  PWM vb (.clk(clk),
+          .val(current),
+          .pwm(vref_b));
 
   assign phase_a1 = (enable) ? phase_table[phase_ct][0] : 0;
   assign phase_a2 = (enable) ? phase_table[phase_ct][1] : 0;
