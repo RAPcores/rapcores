@@ -117,7 +117,8 @@ module top (
   wire encoder_fault;
   `ifdef QUAD_ENC
     // TODO: For ... generate
-    quad_enc encoder0 (
+    quad_enc #(.encbits(64)) encoder0
+    (
       .resetn(reset),
       .clk(CLK),
       .a(ENC_A[1]),
