@@ -2,7 +2,7 @@
 
 ## Build Prerequisites
 
-RAPCores targets the FOSS synthesis, place and route, and bitstream tools. Namely yosys and
+RAPcores targets the FOSS synthesis, place and route, and bitstream tools. Namely yosys and
 nextpnr. We are open to support other flows and open source tool chain. However do note
 that RAPcores does use some SystemVerilog features supported by Yosys.
 
@@ -44,10 +44,10 @@ curl -L https://nixos.org/nix/install | sh
 source $HOME/.nix-profile/etc/profile.d/nix.sh >> ~/.bashrc
 ```
 
-Then restart the terminal. Next, `cd` to the RAPCore directory. Run `nix-shell`, and some
+Then restart the terminal. Next, `cd` to the RAPcore directory. Run `nix-shell`, and some
 packages will be installed. Once complete you should be able to run any of the `make` commands
 below. This environment includes all the tools to synthesis, place, route, program, and
-formally verify the RAPCore project.
+formally verify the RAPcore project.
 
 ## Build Bitstream
 
@@ -56,7 +56,7 @@ formally verify the RAPCore project.
 
 ## Formal Verification
 
-SymbiYosys is used for formal verification of the codebase. It can be run with:
+SymbiYosys is used for formal verification of the code base. It can be run with:
 
 `make formal BOARD=<board>`
 
