@@ -9,7 +9,8 @@
 //`define MOVE_DONE
 
 // Motor Definitions
-`define DUAL_HBRIDGE 1
+//`define DUAL_HBRIDGE 1
+`define ULTIBRIDGE 1
 
 // Encoder Count
 `define QUAD_ENC 1

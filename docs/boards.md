@@ -63,6 +63,13 @@ dual H Bridges are specified.
 
 See: "Dual H Bridge" in Pinouts for name specification.
 
+```
+`define ULTIBRIDGE <N>
+```
+Enables control of the Ultibridge. Where `<N>` Ultibridges are specified.
+
+See: "Ultibridge" in Pinouts for name specification.
+
 ### Encoders
 
 ```
@@ -131,6 +138,22 @@ Enabled by `SPI_INTERFACE` in the Verilog config.
 - `PHASE_B2[N]`
 - `VREF_A[N]`
 - `VREF_B[N]`
+
+#### ULTIBRIDGE
+
+- `CHARGEPUMP`
+- `analog_cmp1`
+- `analog_out1`
+- `analog_cmp2`
+- `analog_out2`
+- `PHASE_A1[N]`
+- `PHASE_A2[N]`
+- `PHASE_B1[N]`
+- `PHASE_B2[N]`
+- `PHASE_A1_H[N]`
+- `PHASE_A2_H[N]`
+- `PHASE_B1_H[N]`
+- `PHASE_B2_H[N]`
 
 ### Quadrature Encoders
 

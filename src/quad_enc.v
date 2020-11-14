@@ -22,13 +22,15 @@
 
 `default_nettype none
 
-module quad_enc(
+module quad_enc #(
+    parameter encbits = 64
+  )(
   input wire resetn,
   input wire  clk,
   input wire  a,
   input wire  b,
   output reg faultn,
-  output reg signed [63:0] count,
+  output reg signed [encbits-1:0] count,
   input [7:0] multiplier
   );
 

@@ -12,7 +12,7 @@ module PWM #(
 );
 
   reg [bits-1:0] accum = 0;
-  assign pwm = (accum <= val);
+  assign pwm = (accum < val);
 
   always @(posedge clk) accum <= accum + 1'b1;
 

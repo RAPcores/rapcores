@@ -14,5 +14,7 @@ jobs:
       run: nix-shell --command 'make BOARD=tinyfpgabx'
     - name: ULX3S Flow
       run: nix-shell --command 'make BOARD=ulx3s'
+    - name: RAPBo Flow
+      run: nix-shell --command 'make BOARD=rapbo'
     - name: Formal Verification
       run: nix-shell --command 'make formal BOARD=tinyfpgabx'
