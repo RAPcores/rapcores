@@ -85,18 +85,21 @@ The following Input/Output tied to certain events can be enabled:
 `define BUFFER_DTR
 ```
 Type: Output
+
 Active High when move buffer has slots available for send.
 
 ```
 `define MOVE_DONE
 ```
 Type:Output
+
 Toggles when a move in the buffer has completed.
 
 ```
 `define HALT
 ```
 Type: Input
+
 Immediately stops step timing and clears the buffer.
 
 ### Move Buffer
@@ -105,7 +108,20 @@ Immediately stops step timing and clears the buffer.
 `define MOVE_BUFFER_SIZE 2
 ```
 Default: 2
+
 Changes the default move buffer size. Must be a power of two.
+
+### LED
+
+```
+`define LED <N>
+```
+
+Type: Output
+
+Default: none/0
+
+Enables LED output. Currently unused, but useful for low-frequency visual debugging.
 
 ## (.pcf/.lpf) Pin Names
 
