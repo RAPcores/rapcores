@@ -32,8 +32,34 @@ SPI controller devices.
 | 0xfe                  | Get Version             | 2                           | 0x...MMmmpp   |
 
 
-### Motor Config - 0x10
+### Set Motor Config - 0x10
 
 | Byte 1 | Byte 2         | Byte 3   | Byte 4   | Byte 5   | Byte 6   | Byte 7  | Byte 8     |
 |--------|----------------|----------|----------|----------|----------|---------|------------|
 | 0x10   | Motor Channel  | Reserved | Reserved | Reserved | Reserved | Current | Microsteps |
+
+### Get API Version - 0xfe
+
+|  | Word 1 |  |  |  |  |  |  |  | Word 2 |  |  |  |  |     |     |     |
+|--|--------|--|--|--|--|--|--|--|--------|--|--|--|--|-----|-----|-----|
+|  | Byte 1 |B2|B3|B4|B5|B6|B7|B8| B1     |B2|B3|B4|B5|B6   |B7   |B8   |
+|TX| 0xfe   |  |  |  |  |  |  |  |        |  |  |  |  |     |     |     |
+|RX| STATUS |  |  |  |  |  |  |  |        |  |  |  |  |MAJOR|MINOR|PATCH|
+
+### Enable/Disable Motors - 0x0a
+
+|  | Word 1 |  |  |  |  |  |  |          |
+|--|--------|--|--|--|--|--|--|----------|
+|  | Byte 1 |B2|B3|B4|B5|B6|B7|B8        |
+|TX| 0xfe   |  |  |  |  |  |  |0b11111111|
+|RX| STATUS |  |  |  |  |  |  |          |
+
+Starting from 0x01 of B8, enable or disable (1/0 respectively) a motor channel.
+This will power up the motors. For example:
+
+|Byte 8||||||||
+|-|-|-|-|-|-|-|-|
+|Bit 8| Bit 7 | Bit 6|Bit 5| Bit 4| Bit 3| Bit 2| Bit 1|
+|Mot 8| Mot 7 | Mot 6|Mot 5| Mot 4| Mot 3| Mot 2| Mot 1|
+| Dis. | Dis.  | Dis.| Dis.| En.  | En.  | En.  | En.  |
+| 0    |  0    | 0   | 0   | 1    | 1    | 1    | 1    |
