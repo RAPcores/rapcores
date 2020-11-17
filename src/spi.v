@@ -94,7 +94,7 @@ module SPIWord (
             .rx_byte_ready(rx_byte_ready));
 
   reg [3:0] byte_count = 0;
-  wire [7:0] word_slice [8:0];
+  wire [7:0] word_slice [8:0]; // slice the register into 8 bits
 
   // Recieve Shift Register
   always @(posedge rx_byte_ready) begin
