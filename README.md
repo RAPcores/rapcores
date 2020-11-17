@@ -38,4 +38,4 @@ See the [dev docs](./docs/dev.md) for more information.
 
 ## License
 
-[ISC License](https://en.wikipedia.org/wiki/ISC_license).
+[Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0.html).
