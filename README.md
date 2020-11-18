@@ -2,6 +2,8 @@
 
 ![RAPcore](https://github.com/RAPcores/Ulticores/workflows/RAPCore/badge.svg)
 
+https://rapcores.github.io/rapcores/
+
 The Robotic Application Processing Core.
 
 RAPcore is a project targeting FPGAs and ASIC devices for the next generation of motor and motion
@@ -31,10 +33,7 @@ See the [dev docs](./docs/dev.md) for more information.
 
 ## Documentation
 
-- [Dev](./docs/dev.md)
-- [SPI Protocol](./docs/spi_spec.md)
-- [Board Parameters](./docs/boards.md)
-- [Motor Control](./docs/motor_control.md)
+https://rapcores.github.io/rapcores/
 
 ## License
 
