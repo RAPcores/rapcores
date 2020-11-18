@@ -1,0 +1,213 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Developer Docs &#8212; RAPcores  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Motor Control" href="motor_control.html" />
+    <link rel="prev" title="Board Definition Structure and Porting Guide" href="boards.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="developer-docs">
+<h1>Developer Docs<a class="headerlink" href="#developer-docs" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="build-prerequisites">
+<h2>Build Prerequisites<a class="headerlink" href="#build-prerequisites" title="Permalink to this headline">¶</a></h2>
+<p>RAPcores targets the FOSS synthesis, place and route, and bitstream tools. Namely yosys and
+nextpnr. We are open to support other flows and open source tool chain. However do note
+that RAPcores does use some SystemVerilog features supported by Yosys.</p>
+<p>We recommend using a relatively recent build of these tools. The ones included in Linux
+distros may be out of date.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/YosysHQ/yosys">Yosys</a></p></li>
+<li><p><a class="reference external" href="https://github.com/YosysHQ/nextpnr">nextpnr</a></p></li>
+<li><p><a class="reference external" href="https://github.com/YosysHQ/icestorm">icestorm</a> (ice40 targets)</p></li>
+<li><p><a class="reference external" href="https://github.com/YosysHQ/prjtrellis">prjtrellis</a> (ECP5 targets)</p></li>
+<li><p><a class="reference external" href="https://github.com/google/verible">verible</a> (Optional, for linting)</p></li>
+<li><p><a class="reference external" href="https://github.com/YosysHQ/SymbiYosys">SymbiYosys</a> (Optional, for formal verification)</p></li>
+</ul>
+<div class="section" id="programming-tools">
+<h3>Programming Tools<a class="headerlink" href="#programming-tools" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="ecp5-devboard">
+<h4>ECP5 Devboard<a class="headerlink" href="#ecp5-devboard" title="Permalink to this headline">¶</a></h4>
+<p>openocd</p>
+</div>
+<div class="section" id="tinyfpga-bx">
+<h4>TinyFPGA BX<a class="headerlink" href="#tinyfpga-bx" title="Permalink to this headline">¶</a></h4>
+<p>The TinyFPGA BX uses tinyprog:</p>
+<p><code class="docutils literal notranslate"><span class="pre">pip3</span> <span class="pre">install</span> <span class="pre">--user</span> <span class="pre">tinyprog</span></code></p>
+</div>
+</div>
+</div>
+<div class="section" id="developing-with-nix">
+<h2>Developing with Nix<a class="headerlink" href="#developing-with-nix" title="Permalink to this headline">¶</a></h2>
+<p>RAPcore includes a <a class="reference external" href="../shell.nix">shell.nix</a> for use with the Nix Package manager.
+This makes it easy to get a development environment with all build requirements installed
+for you.</p>
+<p>To start you will need to install Nix using the instructions <a class="reference external" href="https://nixos.wiki/wiki/Nix_Installation_Guide">here</a>.
+They are reproduced here with some recommendations:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>sudo install -d -m755 -o $(id -u) -g $(id -g) /nix
+curl -L https://nixos.org/nix/install | sh
+source $HOME/.nix-profile/etc/profile.d/nix.sh &gt;&gt; ~/.bashrc
+</pre></div>
+</div>
+<p>Then restart the terminal. Next, <code class="docutils literal notranslate"><span class="pre">cd</span></code> to the RAPcore directory. Run <code class="docutils literal notranslate"><span class="pre">nix-shell</span></code>, and some
+packages will be installed. Once complete you should be able to run any of the <code class="docutils literal notranslate"><span class="pre">make</span></code> commands
+below. This environment includes all the tools to synthesis, place, route, program, and
+formally verify the RAPcore project.</p>
+</div>
+<div class="section" id="build-bitstream">
+<h2>Build Bitstream<a class="headerlink" href="#build-bitstream" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">BOARD=&lt;board&gt;</span></code></p>
+</div>
+<div class="section" id="formal-verification">
+<h2>Formal Verification<a class="headerlink" href="#formal-verification" title="Permalink to this headline">¶</a></h2>
+<p>SymbiYosys is used for formal verification of the code base. It can be run with:</p>
+<p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">formal</span> <span class="pre">BOARD=&lt;board&gt;</span></code></p>
+<p>This command will create a <code class="docutils literal notranslate"><span class="pre">symbiyosys</span></code> directory in the project that
+contains all the logs and data from the verification. If an assert or
+cover fails, a <code class="docutils literal notranslate"><span class="pre">.vcd</span></code> file will be generated that will display the states
+of registers and wires that induced the failure. GTKWave is a useful
+program for viewing the <code class="docutils literal notranslate"><span class="pre">.vcd</span></code> files.</p>
+<p>The config for Symbiyosys is <code class="docutils literal notranslate"><span class="pre">symbiyosys.sby</span></code> in the root of the directory.</p>
+</div>
+<div class="section" id="test-benches">
+<h2>Test Benches<a class="headerlink" href="#test-benches" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">testbench</span></code></p>
+<p>The config for the test bench is <code class="docutils literal notranslate"><span class="pre">sim.ys</span></code> in the root of the directory.</p>
+</div>
+<div class="section" id="formatting">
+<h2>Formatting<a class="headerlink" href="#formatting" title="Permalink to this headline">¶</a></h2>
+<p>All files should have <code class="docutils literal notranslate"><span class="pre">none</span></code> as the default nettype:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`default_nettype none
+</pre></div>
+</div>
+</div>
+<div class="section" id="linting">
+<h2>Linting<a class="headerlink" href="#linting" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">lint</span></code> : Will run Verible to lint the source.</p>
+<p>Optionally this VSCode extension is helpful as well:</p>
+<p><a class="reference external" href="https://github.com/mshr-h/vscode-verilog-hdl-support">https://github.com/mshr-h/vscode-verilog-hdl-support</a></p>
+</div>
+<div class="section" id="helpful-articles">
+<h2>Helpful Articles<a class="headerlink" href="#helpful-articles" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>https://zipcpu.com/blog/2020/01/13/reuse.html</p></li>
+<li><p>https://www.reddit.com/r/yosys/comments/6ulm3m/new_simulation_within_yosys/</p></li>
+</ul>
+</div>
+<div class="section" id="useful-tools">
+<h2>Useful Tools<a class="headerlink" href="#useful-tools" title="Permalink to this headline">¶</a></h2>
+<p>Google’s Verilog formatter and linter:</p>
+<ul class="simple">
+<li><p>https://github.com/google/verible/</p></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">RAPcores</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="spi_spec.html">SPI Specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boards.html">Board Definition Structure and Porting Guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Developer Docs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#build-prerequisites">Build Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#developing-with-nix">Developing with Nix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#build-bitstream">Build Bitstream</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#formal-verification">Formal Verification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#test-benches">Test Benches</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#formatting">Formatting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#linting">Linting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#helpful-articles">Helpful Articles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#useful-tools">Useful Tools</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="motor_control.html">Motor Control</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="boards.html" title="previous chapter">Board Definition Structure and Porting Guide</a></li>
+      <li>Next: <a href="motor_control.html" title="next chapter">Motor Control</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, RAPcore developers.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/dev.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

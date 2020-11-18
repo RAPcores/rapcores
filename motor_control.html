@@ -1,0 +1,304 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Motor Control &#8212; RAPcores  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Developer Docs" href="dev.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="motor-control">
+<h1>Motor Control<a class="headerlink" href="#motor-control" title="Permalink to this headline">¶</a></h1>
+<p>This section describes the principles of motor control at a low level.</p>
+<div class="section" id="definitions">
+<h2>Definitions<a class="headerlink" href="#definitions" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Integrated Driver - A IC taking step/direction signals with onboard logic for commutation and microstepping</p></li>
+<li><p>Commutation - The process of controlling an electrical bridge for</p></li>
+<li><p>Full Bridge - A center-tapped transistor circuit allowing for either high or low (ground) voltage</p></li>
+<li><p>H-Bridge - Two full bridges allowing for bidirectional current flow</p></li>
+</ul>
+</div>
+<div class="section" id="electrical-commutation">
+<h2>Electrical Commutation<a class="headerlink" href="#electrical-commutation" title="Permalink to this headline">¶</a></h2>
+<p>Electrical commutation is the process of timing and controlling electrical current in the
+windings of a motor. In years past you might use a brushed DC or induction motor, plug it
+into you power supply or wall mains outlet and that would be it. The reason the hookup
+for brushed DC is simple is due to electrical contacts called commutators. With induction
+motors your mains AC voltage will generate a rotating potential in the motor making it spin,
+which is also a form of commutation.</p>
+<p>However, modern brushless motors require much more logic and control to perform their best.
+First, since brushless motors (e.g. Steppers, BLDC) do not have electro-mechanical commutation
+(hence the name “brush-less”), we need to digitally switch the motor coils on and off.
+This is accomplished with arrays of transistors called “bridges” that allow for bidirectional
+current flow. By controlling these bridges we can generate alternative voltages that make
+the motor spin.</p>
+<p>In contrast to integrated drivers e.g. that take PWM for BLDC, or step/direction for steppers,
+the approach in RAPcore is to provide higher level APIs tailored for the application or
+action. Some examples:</p>
+<ul class="simple">
+<li><p>“S”-curve stepping algorithms</p></li>
+<li><p>Sensorless homing</p></li>
+<li><p>Torque control</p></li>
+</ul>
+<div class="section" id="commutation-tables">
+<h3>Commutation Tables<a class="headerlink" href="#commutation-tables" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="bipolar-stepper">
+<h4>Bipolar Stepper<a class="headerlink" href="#bipolar-stepper" title="Permalink to this headline">¶</a></h4>
+<table border="1" class="docutils">
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>+</td>
+<td>-</td>
+</tr>
+<tr>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>-</td>
+<td>+</td>
+</tr>
+<tr>
+<td>+</td>
+<td>+</td>
+</tr>
+</tbody>
+</table></div>
+<div class="section" id="three-phase-bldc-induction">
+<h4>Three Phase (BLDC, Induction)<a class="headerlink" href="#three-phase-bldc-induction" title="Permalink to this headline">¶</a></h4>
+<table border="1" class="docutils">
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+<th>C</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>+</td>
+<td>-</td>
+<td></td>
+</tr>
+<tr>
+<td>+</td>
+<td></td>
+<td>-</td>
+</tr>
+<tr>
+<td></td>
+<td>+</td>
+<td>-</td>
+</tr>
+<tr>
+<td>-</td>
+<td>+</td>
+<td></td>
+</tr>
+<tr>
+<td>-</td>
+<td></td>
+<td>+</td>
+</tr>
+<tr>
+<td></td>
+<td>-</td>
+<td>+</td>
+</tr>
+</tbody>
+</table></div>
+<div class="section" id="five-phase-stepper">
+<h4>Five Phase Stepper<a class="headerlink" href="#five-phase-stepper" title="Permalink to this headline">¶</a></h4>
+<table border="1" class="docutils">
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+<th>C</th>
+<th>D</th>
+<th>E</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>+</td>
+<td></td>
+<td>-</td>
+<td>-</td>
+<td></td>
+</tr>
+<tr>
+<td>+</td>
+<td>+</td>
+<td></td>
+<td>-</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>+</td>
+<td></td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td></td>
+<td>+</td>
+<td>+</td>
+<td></td>
+<td>-</td>
+</tr>
+<tr>
+<td>-</td>
+<td></td>
+<td>+</td>
+<td></td>
+<td>-</td>
+</tr>
+<tr>
+<td>-</td>
+<td></td>
+<td>+</td>
+<td>+</td>
+<td></td>
+</tr>
+<tr>
+<td>-</td>
+<td>-</td>
+<td></td>
+<td>+</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>-</td>
+<td></td>
+<td>+</td>
+<td>+</td>
+</tr>
+<tr>
+<td></td>
+<td>-</td>
+<td>-</td>
+<td></td>
+<td>+</td>
+</tr>
+<tr>
+<td>+</td>
+<td></td>
+<td>-</td>
+<td></td>
+<td>+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">RAPcores</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="spi_spec.html">SPI Specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boards.html">Board Definition Structure and Porting Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev.html">Developer Docs</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Motor Control</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#definitions">Definitions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#electrical-commutation">Electrical Commutation</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="dev.html" title="previous chapter">Developer Docs</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, RAPcore developers.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/motor_control.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

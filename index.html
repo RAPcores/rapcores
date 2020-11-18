@@ -1,0 +1,179 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>RAPcore Documentation &#8212; RAPcores  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="SPI Specification" href="spi_spec.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="rapcore-documentation">
+<h1>RAPcore Documentation<a class="headerlink" href="#rapcore-documentation" title="Permalink to this headline">¶</a></h1>
+<p>RAPcore stands for Robotic Application Processing Core, and
+seeks to develop high-performance hardware to enable the next generation
+of robotics application. The project was started by Ultimachine and Synthetos,
+two companies that have innovated technologies such as the RAMPS board, RAMBo, and
+jerk controlled kinematics in low-cost additive and subtractive systems.</p>
+<div class="section" id="objective">
+<h2>Objective<a class="headerlink" href="#objective" title="Permalink to this headline">¶</a></h2>
+<p>3D printers as one of the first ubiquitous robots, but there is far more value in automation
+and digital manufacturing technologies that has yet to be unlocked to the average person.
+We need to enhance the capabilities of motion controllers beyond what is currently available on the market in order to accelerate the transition to environmentally friendly and local production. RAPcore leverages recent advancements in technology to help accomplish this:</p>
+<ul class="simple">
+<li><p>Open Source FPGA synthesis</p></li>
+<li><p>Open Source formal verification</p></li>
+<li><p>Open Source RISC-V CPUs</p></li>
+<li><p>Advanced motor control and kinematic algorithms</p></li>
+</ul>
+<p>To start, the project is focused on FPGA hardware for high performance closed-loop motor
+control. These early iterations will prove-out the hardware and RAPcore gateware. Similarly,
+we will greatly reduce the computational overhead on microcontrollers by coordinating
+step sequences and commutation. This will lead to a suitable middle ground of price
+and performance based upon our analysis. By fusing the step timing and commutation logic
+into a single element (the FPGA) we allow for smaller and more efficient micro controllers,
+and on the drive side we allow for greater flexibility and power output of motor driver
+circuitry.</p>
+</div>
+<div class="section" id="feature-overview">
+<h2>Feature Overview<a class="headerlink" href="#feature-overview" title="Permalink to this headline">¶</a></h2>
+<p>The basic features of RAPcores is as follows:</p>
+<ul class="simple">
+<li><p>Onboard stepper motor commutator</p></li>
+<li><p>Fixed Point Step-Timing Algorithm</p></li>
+<li><p>High-speed Quadrature Encoder Accumulator</p></li>
+<li><p>High-Speed SPI Bus</p></li>
+</ul>
+</div>
+<div class="section" id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="spi_spec.html">SPI Specification</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="spi_spec.html#definitions">Definitions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spi_spec.html#versioning">Versioning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spi_spec.html#overview">Overview</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="boards.html">Board Definition Structure and Porting Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="boards.html#mk-parameters">(.mk) Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boards.html#v-parameters">(.v) Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boards.html#pcf-lpf-pin-names">(.pcf/.lpf) Pin Names</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dev.html">Developer Docs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dev.html#build-prerequisites">Build Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev.html#developing-with-nix">Developing with Nix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev.html#build-bitstream">Build Bitstream</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev.html#formal-verification">Formal Verification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev.html#test-benches">Test Benches</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev.html#formatting">Formatting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev.html#linting">Linting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev.html#helpful-articles">Helpful Articles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev.html#useful-tools">Useful Tools</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="motor_control.html">Motor Control</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="motor_control.html#definitions">Definitions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="motor_control.html#electrical-commutation">Electrical Commutation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">RAPcores</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="spi_spec.html">SPI Specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boards.html">Board Definition Structure and Porting Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev.html">Developer Docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="motor_control.html">Motor Control</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="spi_spec.html" title="next chapter">SPI Specification</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, RAPcore developers.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
