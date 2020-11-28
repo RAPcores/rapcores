@@ -58,21 +58,24 @@ end
 
   wire fault0 = (minimum_on_timer0 > 0) && overCurrent0;
   wire fault1 = (minimum_on_timer1 > 0) && overCurrent1;
-  wire fault = fault0 | fault1;
+  wire fault_active = fault0 | fault1;
+  reg fault;
+  reg resetn_buf;
+  reg enable_buf;
 
   reg [1:0] s1r, s2r, s3r, s4r;
   wire phase_a1_h, phase_a1_l, phase_a2_h, phase_a2_l;
   wire phase_b1_h, phase_b1_l, phase_b2_h, phase_b2_l;
 
-  assign s_l[0] = !(phase_a1_l | fault | enable);
-  assign s_l[1] = !(phase_a2_l | fault | enable);
-  assign s_l[2] = !(phase_b1_l | fault | enable);
-  assign s_l[3] = !(phase_b2_l | fault | enable);
+  assign s_l[0] = !(phase_a1_l | fault | enable_buf) & resetn_buf;
+  assign s_l[1] = !(phase_a2_l | fault | enable_buf) & resetn_buf;
+  assign s_l[2] = !(phase_b1_l | fault | enable_buf) & resetn_buf;
+  assign s_l[3] = !(phase_b2_l | fault | enable_buf) & resetn_buf;
 
-  assign s_h[0] = !(phase_a1_h | fault | enable);
-  assign s_h[1] = !(phase_a2_h | fault | enable);
-  assign s_h[2] = !(phase_b1_h | fault | enable);
-  assign s_h[3] = !(phase_b2_h | fault | enable);
+  assign s_h[0] = !(phase_a1_h | fault | enable_buf) & resetn_buf;
+  assign s_h[1] = !(phase_a2_h | fault | enable_buf) & resetn_buf;
+  assign s_h[2] = !(phase_b1_h | fault | enable_buf) & resetn_buf;
+  assign s_h[3] = !(phase_b2_h | fault | enable_buf) & resetn_buf;
 
   assign phase_a1_h = slowDecay0 | (fastDecay0 ? s1r[1] : ~s1r[1]);
   assign phase_a1_l = fastDecay0 ? ~s1r[1] : (slowDecay0 ? 1'b0 : s1r[1]);
@@ -98,7 +101,18 @@ end
   end
 `endif
 
+  // Fault Conditions
   always @(posedge clk) begin
+    if (!resetn)
+      fault <= 0;
+    else if( fault_active )
+      fault <= 1;
+  end
+
+  // Buffers
+  always @(posedge clk) begin
+    enable_buf <= enable;
+    resetn_buf <= resetn;
     s1r <= {s1r[0], s1};
     s2r <= {s2r[0], s2};
     s3r <= {s3r[0], s3};
