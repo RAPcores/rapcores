@@ -319,6 +319,11 @@ module top (
           config_current_threshold[10:0] <= word_data_received[10:0];
         end
 
+        // Set chargepump period
+        `CMD_CHARGEPUMP: begin
+          config_chargepump_period[7:0] <= word_data_received[7:0];
+        end
+
         // Write to Cosine Table
         `CMD_COSINE_CONFIG: begin
           //config_cosine_table[word_data_received[35:32]] <= word_data_received[31:0];
