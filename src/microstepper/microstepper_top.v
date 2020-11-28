@@ -63,10 +63,10 @@ end
   assign s_l[2] = phase_b1_l | fault;
   assign s_l[3] = phase_b2_l | fault;
 
-  assign s_h[0] = phase_a1_h;
-  assign s_h[1] = phase_a2_h;
-  assign s_h[2] = phase_b1_h;
-  assign s_h[3] = phase_b2_h;
+  assign s_h[0] = phase_a1_h | fault;
+  assign s_h[1] = phase_a2_h | fault;
+  assign s_h[2] = phase_b1_h | fault;
+  assign s_h[3] = phase_b2_h | fault;
 
   assign phase_a1_h = slowDecay0 | (fastDecay0 ? s1r[1] : ~s1r[1]);
   assign phase_a1_l = fastDecay0 ? ~s1r[1] : (slowDecay0 ? 1'b0 : s1r[1]);
