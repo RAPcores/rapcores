@@ -14,6 +14,11 @@ module microstepper_top (
     input        analog_cmp2,
     output       analog_out2,
     output       chargepump_pin,
+    input [9:0]  config_offtime,
+    input [7:0]  config_blanktime,
+    input [9:0]  config_fastdecay_threshold,
+    input [7:0]  config_minimum_on_time,
+    input [10:0] config_current_threshold,
     input        step,
     input        dir,
     input        enable
@@ -44,8 +49,8 @@ end
   wire overCurrent0 = off_timer0 > 0;
   wire overCurrent1 = off_timer1 > 0;
 
-  wire fastDecay0 = off_timer0 >= 706;
-  wire fastDecay1 = off_timer1 >= 706;
+  wire fastDecay0 = off_timer0 >= config_fastdecay_threshold;
+  wire fastDecay1 = off_timer1 >= config_fastdecay_threshold;
 
   wire slowDecay0 = overCurrent0 && fastDecay0 == 0;
   wire slowDecay1 = overCurrent1 && fastDecay1 == 0;
@@ -105,7 +110,7 @@ end
       .clk         (clk),
       .resetn      (resetn),
       .start_enable(analog_cmp1 & blank_timer0 == 0 & overCurrent0 == 0),
-      .start_time  (10'd810),
+      .start_time  (config_offtime),
       .timer       (off_timer0)
   );
 
@@ -115,7 +120,7 @@ end
       .clk         (clk),
       .resetn      (resetn),
       .start_enable(analog_cmp2 & blank_timer1 == 0 & overCurrent1 == 0),
-      .start_time  (10'd810),
+      .start_time  (config_offtime),
       .timer       (off_timer1)
   );
 
@@ -125,7 +130,7 @@ end
       .clk         (clk),
       .resetn      (resetn),
       .start_enable(s1_starting | s2_starting),
-      .start_time  (8'd27),
+      .start_time  (config_blanktime),
       .timer       (blank_timer0)
   );
 
@@ -135,7 +140,7 @@ end
       .clk         (clk),
       .resetn      (resetn),
       .start_enable(s3_starting | s4_starting),
-      .start_time  (8'd27),
+      .start_time  (config_blanktime),
       .timer       (blank_timer1)
   );
 
@@ -145,7 +150,7 @@ end
       .clk         (clk),
       .resetn      (resetn),
       .start_enable(s1_starting | s2_starting),
-      .start_time  (8'd64),
+      .start_time  (config_minimum_on_time),
       .timer       (minimum_on_timer0)
   );
 
@@ -155,7 +160,7 @@ end
       .clk         (clk),
       .resetn      (resetn),
       .start_enable(s3_starting | s4_starting),
-      .start_time  (8'd64),
+      .start_time  (config_minimum_on_time),
       .timer       (minimum_on_timer1)
   );
 
@@ -188,7 +193,8 @@ end
       .pwm1       (pwm1),
       .pwm2       (pwm2),
       .analog_out1(analog_out1),
-      .analog_out2(analog_out2)
+      .analog_out2(analog_out2),
+      .current_threshold (config_current_threshold)
   );
 
 endmodule

@@ -115,6 +115,11 @@ module top (
   // TODO: Generate statement?
   reg [2:0] microsteps = 2;
   reg [7:0] current = 140;
+  reg [9:0] config_offtime = 810;
+  reg [7:0] config_blanktime = 27;
+  reg [9:0] config_fastdecay_threshold = 706;
+  reg [7:0] config_minimum_on_time = 54;
+  reg [10:0] config_current_threshold = 1024;
   wire step;
   wire dir;
   reg enable;
@@ -145,6 +150,11 @@ module top (
       .analog_cmp2 (analog_cmp2),
       .analog_out2 (analog_out2),
       .chargepump_pin (CHARGEPUMP),
+      .config_offtime (config_offtime),
+      .config_blanktime (config_blanktime),
+      .config_fastdecay_threshold (config_fastdecay_threshold),
+      .config_minimum_on_time (config_minimum_on_time),
+      .config_current_threshold (config_current_threshold),
       .step (step),
       .dir (dir),
       .enable(enable),
@@ -228,12 +238,22 @@ module top (
           microsteps[2:0] <= word_data_received[2:0];
         end
 
+        // Set Microstepping Parameters
+        `CMD_MICROSTEPPER_CONFIG: begin
+          config_offtime[9:0] <= word_data_received[39:30];
+          config_blanktime[7:0] <= word_data_received[29:22];
+          config_fastdecay_threshold[9:0] <= word_data_received[21:12];
+          config_minimum_on_time[7:0] <= word_data_received[18:11];
+          config_current_threshold[10:0] <= word_data_received[10:0];
+        end
+
         // API Version
         `CMD_API_VERSION: begin
           word_send_data[7:0] <= `VERSION_PATCH;
           word_send_data[15:8] <= `VERSION_MINOR;
           word_send_data[23:16] <= `VERSION_MAJOR;
         end
+
       endcase
 
     // Addition Word Processing
