@@ -19,6 +19,7 @@ module microstepper_top (
     input [9:0]  config_fastdecay_threshold,
     input [7:0]  config_minimum_on_time,
     input [10:0] config_current_threshold,
+    input [7:0]  config_chargepump_period,
     input [511:0] cos_table,
     input        step,
     input        dir,
@@ -168,6 +169,7 @@ end
   chargepump cp0 (
       .clk           (clk),
       .resetn        (resetn),
+      .period        (config_chargepump_period),
       .chargepump_pin(chargepump_pin)
   );
 

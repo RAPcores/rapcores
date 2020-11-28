@@ -120,6 +120,7 @@ module top (
   reg [9:0] config_fastdecay_threshold = 706;
   reg [7:0] config_minimum_on_time = 54;
   reg [10:0] config_current_threshold = 1024;
+  reg [7:0] config_chargepump_period = 215;
   reg [511:0] cos_table;
 
   initial begin
@@ -224,6 +225,7 @@ module top (
       .config_fastdecay_threshold (config_fastdecay_threshold),
       .config_minimum_on_time (config_minimum_on_time),
       .config_current_threshold (config_current_threshold),
+      .config_chargepump_period (config_chargepump_period),
       .cos_table (cos_table),
       .step (step),
       .dir (dir),
