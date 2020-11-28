@@ -38,6 +38,8 @@ end
   reg                                                [7:0] blank_timer1;
   reg                                                [9:0] off_timer0;
   reg                                                [9:0] off_timer1;
+  reg                                                [7:0] minimum_on_timer0;
+  reg                                                [7:0] minimum_on_timer1;
 
   wire overCurrent0 = off_timer0 > 0;
   wire overCurrent1 = off_timer1 > 0;
@@ -48,16 +50,18 @@ end
   wire slowDecay0 = overCurrent0 && fastDecay0 == 0;
   wire slowDecay1 = overCurrent1 && fastDecay1 == 0;
 
-
+  wire fault0 = (minimum_on_timer0 > 0) && overCurrent0;
+  wire fault1 = (minimum_on_timer1 > 0) && overCurrent1;
+  wire fault = fault0 | fault1;
 
   reg [1:0] s1r, s2r, s3r, s4r;
   wire phase_a1_h, phase_a1_l, phase_a2_h, phase_a2_l;
   wire phase_b1_h, phase_b1_l, phase_b2_h, phase_b2_l;
 
-  assign s_l[0] = phase_a1_l;
-  assign s_l[1] = phase_a2_l;
-  assign s_l[2] = phase_b1_l;
-  assign s_l[3] = phase_b2_l;
+  assign s_l[0] = phase_a1_l | fault;
+  assign s_l[1] = phase_a2_l | fault;
+  assign s_l[2] = phase_b1_l | fault;
+  assign s_l[3] = phase_b2_l | fault;
 
   assign s_h[0] = phase_a1_h;
   assign s_h[1] = phase_a2_h;
@@ -133,6 +137,26 @@ end
       .start_enable(s3_starting | s4_starting),
       .start_time  (8'd27),
       .timer       (blank_timer1)
+  );
+
+  mytimer #(
+      .WIDTH(8)
+  ) minimumontimer0 (
+      .clk         (clk),
+      .resetn      (resetn),
+      .start_enable(s1_starting | s2_starting),
+      .start_time  (8'd64),
+      .timer       (minimum_on_timer0)
+  );
+
+  mytimer #(
+      .WIDTH(8)
+  ) minimumontimer1 (
+      .clk         (clk),
+      .resetn      (resetn),
+      .start_enable(s3_starting | s4_starting),
+      .start_time  (8'd64),
+      .timer       (minimum_on_timer1)
   );
 
   chargepump cp0 (
