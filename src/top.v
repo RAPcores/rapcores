@@ -120,7 +120,7 @@ module top (
   reg [9:0] config_fastdecay_threshold = 706;
   reg [7:0] config_minimum_on_time = 54;
   reg [10:0] config_current_threshold = 1024;
-  reg [7:0] config_chargepump_period = 215;
+  reg [7:0] config_chargepump_period = 91;
   reg [511:0] cos_table;
 
   initial begin
@@ -211,7 +211,7 @@ module top (
 
   `ifdef ULTIBRIDGE
     microstepper_top microstepper0(
-      .clk( spi_clock),
+      .clk(CLK),
       .resetn( resetn),
       .s_l ({PHASE_B2[1], PHASE_B1[1], PHASE_A2[1], PHASE_A1[1]}),
       .s_h ({PHASE_B2_H[1], PHASE_B1_H[1], PHASE_A2_H[1], PHASE_A1_H[1]}),
