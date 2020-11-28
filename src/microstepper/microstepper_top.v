@@ -19,6 +19,7 @@ module microstepper_top (
     input [9:0]  config_fastdecay_threshold,
     input [7:0]  config_minimum_on_time,
     input [10:0] config_current_threshold,
+    input [511:0] cos_table,
     input        step,
     input        dir,
     input        enable
@@ -179,12 +180,14 @@ end
 
   cosine cosine0 (
       .cos_index(cos_index1),
-      .cos_value(pwm1)
+      .cos_value(pwm1),
+      .cos_table(cos_table)
   );
 
   cosine cosine1 (
       .cos_index(cos_index2),
-      .cos_value(pwm2)
+      .cos_value(pwm2),
+      .cos_table(cos_table)
   );
 
   analog_out ao0 (
