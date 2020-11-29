@@ -5,13 +5,24 @@ mode prove
 smtbmc
 
 [script]
+read -formal formal_config.v
+read -formal macro_params.v
+read -formal constants.v
+read -formal spi.v
+read -formal stepper.v
+read -formal quad_enc.v
+read -formal pwm.v
+read -formal microstepper_top.v
+read -formal analog_out.v
+read -formal chargepump.v
+read -formal cosine.v
+read -formal microstep_counter.v
+read -formal mytimer.v
 read -formal top.v
 prep -top top
 
 [files]
-generated/board.v src/generated/board.v
-boards/tinyfpgabx/tinyfpgabx.v boards/tinyfpgabx/tinyfpgabx.v
-boards/rapbo/rapbo.v boards/rapbo/rapbo.v
+boards/formal_config.v
 src/macro_params.v
 src/constants.v
 src/spi.v
@@ -19,7 +30,7 @@ src/stepper.v
 src/top.v
 src/quad_enc.v
 src/pwm.v
-microstepper/microstepper_top.v src/microstepper/microstepper_top.v
+src/microstepper/microstepper_top.v
 src/microstepper/analog_out.v
 src/microstepper/chargepump.v
 src/microstepper/cosine.v

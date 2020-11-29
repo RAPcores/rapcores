@@ -1,8 +1,3 @@
-`include "microstep_counter.v"
-`include "cosine.v"
-`include "analog_out.v"
-`include "chargepump.v"
-`include "mytimer.v"
 
 module microstepper_top (
     input        clk,
