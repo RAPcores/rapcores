@@ -58,32 +58,32 @@ end
   wire fault1 = (minimum_on_timer1 > 0) && overCurrent1;
   wire fault_active = fault0 | fault1;
   reg fault;
-  reg resetn_buf;
+  reg reset_buf;
   reg enable_buf;
 
   reg [1:0] s1r, s2r, s3r, s4r;
   wire phase_a1_h, phase_a1_l, phase_a2_h, phase_a2_l;
   wire phase_b1_h, phase_b1_l, phase_b2_h, phase_b2_l;
 
-  assign s_l[0] = !(phase_a1_l | fault | enable_buf) & resetn_buf;
-  assign s_l[1] = !(phase_a2_l | fault | enable_buf) & resetn_buf;
-  assign s_l[2] = !(phase_b1_l | fault | enable_buf) & resetn_buf;
-  assign s_l[3] = !(phase_b2_l | fault | enable_buf) & resetn_buf;
+  assign s_l[0] = config_invert_lowside ^ (phase_a1_l | fault | enable_buf | reset_buf);
+  assign s_l[1] = config_invert_lowside ^ (phase_a2_l | fault | enable_buf | reset_buf);
+  assign s_l[2] = config_invert_lowside ^ (phase_b1_l | fault | enable_buf | reset_buf);
+  assign s_l[3] = config_invert_lowside ^ (phase_b2_l | fault | enable_buf | reset_buf);
 
-  assign s_h[0] = !(phase_a1_h | fault | enable_buf) & resetn_buf;
-  assign s_h[1] = !(phase_a2_h | fault | enable_buf) & resetn_buf;
-  assign s_h[2] = !(phase_b1_h | fault | enable_buf) & resetn_buf;
-  assign s_h[3] = !(phase_b2_h | fault | enable_buf) & resetn_buf;
+  assign s_h[0] = config_invert_highside ^ (phase_a1_h | fault | enable_buf | reset_buf);
+  assign s_h[1] = config_invert_highside ^ (phase_a2_h | fault | enable_buf | reset_buf);
+  assign s_h[2] = config_invert_highside ^ (phase_b1_h | fault | enable_buf | reset_buf);
+  assign s_h[3] = config_invert_highside ^ (phase_b2_h | fault | enable_buf | reset_buf);
 
-  assign phase_a1_h = config_invert_highside ^ (slowDecay0 | (fastDecay0 ? s1r[1] : ~s1r[1]));
-  assign phase_a1_l = config_invert_lowside ^ (fastDecay0 ? ~s1r[1] : (slowDecay0 ? 1'b0 : s1r[1]));
-  assign phase_a2_h = config_invert_highside ^ (slowDecay0 | (fastDecay0 ? s2r[1] : ~s2r[1]));
-  assign phase_a2_l = config_invert_lowside ^ (fastDecay0 ? ~s2r[1] : (slowDecay0 ? 1'b0 : s2r[1]));
+  assign phase_a1_h = (slowDecay0 | (fastDecay0 ? s1r[1] : ~s1r[1]));
+  assign phase_a1_l = (fastDecay0 ? ~s1r[1] : (slowDecay0 ? 1'b0 : s1r[1]));
+  assign phase_a2_h = (slowDecay0 | (fastDecay0 ? s2r[1] : ~s2r[1]));
+  assign phase_a2_l = (fastDecay0 ? ~s2r[1] : (slowDecay0 ? 1'b0 : s2r[1]));
 
-  assign phase_b1_h = config_invert_highside ^ (slowDecay1 | (fastDecay1 ? s3r[1] : ~s3r[1]));
-  assign phase_b1_l = config_invert_lowside ^ (fastDecay1 ? ~s3r[1] : (slowDecay1 ? 1'b0 : s3r[1]));
-  assign phase_b2_h = config_invert_highside ^ (slowDecay1 | (fastDecay1 ? s4r[1] : ~s4r[1]));
-  assign phase_b2_l = config_invert_lowside ^ (fastDecay1 ? ~s4r[1] : (slowDecay1 ? 1'b0 : s4r[1]));
+  assign phase_b1_h = (slowDecay1 | (fastDecay1 ? s3r[1] : ~s3r[1]));
+  assign phase_b1_l = (fastDecay1 ? ~s3r[1] : (slowDecay1 ? 1'b0 : s3r[1]));
+  assign phase_b2_h = (slowDecay1 | (fastDecay1 ? s4r[1] : ~s4r[1]));
+  assign phase_b2_l = (fastDecay1 ? ~s4r[1] : (slowDecay1 ? 1'b0 : s4r[1]));
 
   wire s1_starting = s1r == 2'b10;
   wire s2_starting = s2r == 2'b10;
@@ -110,7 +110,7 @@ end
   // Buffers
   always @(posedge clk) begin
     enable_buf <= enable;
-    resetn_buf <= resetn;
+    reset_buf <= ~resetn;
     s1r <= {s1r[0], s1};
     s2r <= {s2r[0], s2};
     s3r <= {s3r[0], s3};
