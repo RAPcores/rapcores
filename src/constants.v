@@ -12,3 +12,4 @@
 `define CMD_COSINE_CONFIG 8'h40
 `define CMD_API_VERSION 8'hfe
 `define CMD_CHARGEPUMP 8'h31
+`define CMD_BRIDGEINVERT 8'h32

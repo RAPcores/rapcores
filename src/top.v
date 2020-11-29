@@ -121,6 +121,8 @@ module top (
   reg [7:0] config_minimum_on_time = 54;
   reg [10:0] config_current_threshold = 1024;
   reg [7:0] config_chargepump_period = 91;
+  reg config_invert_highside = 0;
+  reg config_invert_lowside = 0;
   reg [511:0] cos_table;
 
   initial begin
@@ -226,6 +228,8 @@ module top (
       .config_minimum_on_time (config_minimum_on_time),
       .config_current_threshold (config_current_threshold),
       .config_chargepump_period (config_chargepump_period),
+      .config_invert_highside (config_invert_highside),
+      .config_invert_lowside (config_invert_lowside),
       .cos_table (cos_table),
       .step (step),
       .dir (dir),
@@ -322,6 +326,12 @@ module top (
         // Set chargepump period
         `CMD_CHARGEPUMP: begin
           config_chargepump_period[7:0] <= word_data_received[7:0];
+        end
+
+        // Invert Bridge outputs
+        `CMD_BRIDGEINVERT: begin
+          config_invert_highside <= word_data_received[1];
+          config_invert_lowside <= word_data_received[0];
         end
 
         // Write to Cosine Table

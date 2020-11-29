@@ -20,6 +20,8 @@ module microstepper_top (
     input [7:0]  config_minimum_on_time,
     input [10:0] config_current_threshold,
     input [7:0]  config_chargepump_period,
+    input        config_invert_highside,
+    input        config_invert_lowside,
     input [511:0] cos_table,
     input        step,
     input        dir,
@@ -75,15 +77,15 @@ end
   assign s_h[2] = !(phase_b1_h | fault);
   assign s_h[3] = !(phase_b2_h | fault);
 
-  assign phase_a1_h = slowDecay0 | (fastDecay0 ? s1r[1] : ~s1r[1]);
-  assign phase_a1_l = fastDecay0 ? ~s1r[1] : (slowDecay0 ? 1'b0 : s1r[1]);
-  assign phase_a2_h = slowDecay0 | (fastDecay0 ? s2r[1] : ~s2r[1]);
-  assign phase_a2_l = fastDecay0 ? ~s2r[1] : (slowDecay0 ? 1'b0 : s2r[1]);
+  assign phase_a1_h = config_invert_highside ^ (slowDecay0 | (fastDecay0 ? s1r[1] : ~s1r[1]));
+  assign phase_a1_l = config_invert_lowside ^ (fastDecay0 ? ~s1r[1] : (slowDecay0 ? 1'b0 : s1r[1]));
+  assign phase_a2_h = config_invert_highside ^ (slowDecay0 | (fastDecay0 ? s2r[1] : ~s2r[1]));
+  assign phase_a2_l = config_invert_lowside ^ (fastDecay0 ? ~s2r[1] : (slowDecay0 ? 1'b0 : s2r[1]));
 
-  assign phase_b1_h = slowDecay1 | (fastDecay1 ? s3r[1] : ~s3r[1]);
-  assign phase_b1_l = fastDecay1 ? ~s3r[1] : (slowDecay1 ? 1'b0 : s3r[1]);
-  assign phase_b2_h = slowDecay1 | (fastDecay1 ? s4r[1] : ~s4r[1]);
-  assign phase_b2_l = fastDecay1 ? ~s4r[1] : (slowDecay1 ? 1'b0 : s4r[1]);
+  assign phase_b1_h = config_invert_highside ^ (slowDecay1 | (fastDecay1 ? s3r[1] : ~s3r[1]));
+  assign phase_b1_l = config_invert_lowside ^ (fastDecay1 ? ~s3r[1] : (slowDecay1 ? 1'b0 : s3r[1]));
+  assign phase_b2_h = config_invert_highside ^ (slowDecay1 | (fastDecay1 ? s4r[1] : ~s4r[1]));
+  assign phase_b2_l = config_invert_lowside ^ (fastDecay1 ? ~s4r[1] : (slowDecay1 ? 1'b0 : s4r[1]));
 
   wire s1_starting = s1r == 2'b10;
   wire s2_starting = s2r == 2'b10;
