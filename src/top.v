@@ -187,7 +187,7 @@ module top (
 
   wire step;
   wire dir;
-  reg enable;
+  reg enable = 0;
 
   `ifdef DUAL_HBRIDGE
   DualHBridge s0 (.phase_a1 (PHASE_A1[1]),
