@@ -3,10 +3,10 @@
 `define SPI_INTERFACE
 
 // Enable Buffer DTR pin
-//`define BUFFER_DTR
+`define BUFFER_DTR
 
 // Enable Move Done Pin
-//`define MOVE_DONE
+`define MOVE_DONE
 
 // Motor Definitions
 //`define DUAL_HBRIDGE 1
@@ -14,6 +14,12 @@
 
 // Encoder Count
 `define QUAD_ENC 1
+
+// External Step/DIR Input
+`define STEPINPUT
+
+// Output Step/DIR signals
+`define STEPOUTPUT
 
 // Change the Move Buffer Size. Should be power of two
 //`define MOVE_BUFFER_SIZE 4

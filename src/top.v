@@ -50,6 +50,14 @@ module top (
     `ifdef HALT
       input HALT,
     `endif
+    `ifdef STEPINPUT
+      input STEPINPUT,
+      input DIRINPUT,
+    `endif
+    `ifdef STEPOUTPUT
+      output STEPOUTPUT,
+      output DIROUTPUT,
+    `endif
 );
 
   // Global Reset (TODO: Make input pin)
@@ -413,8 +421,19 @@ module top (
       move_done_r = ~move_done_r;
   `endif
 
-  assign dir = dir_r[moveind]; // set direction
-  assign step = (substep_accumulator > 0);
+
+  `ifndef STEPINPUT
+    assign dir = dir_r[moveind]; // set direction
+    assign step = (substep_accumulator > 0);
+  `else
+    assign dir = dir_r[moveind] | DIRINPUT; // set direction
+    assign step = (substep_accumulator > 0) | STEPINPUT;
+  `endif
+
+  `ifdef STEPOUTPUT
+    assign STEPOUTPUT = step;
+    assign DIROUTPUT = dir;
+  `endif
 
   always @(posedge CLK) begin
 
