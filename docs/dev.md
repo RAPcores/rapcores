@@ -58,7 +58,7 @@ formally verify the RAPcore project.
 
 SymbiYosys is used for formal verification of the code base. It can be run with:
 
-`make formal BOARD=<board>`
+`make formal`
 
 This command will create a `symbiyosys` directory in the project that
 contains all the logs and data from the verification. If an assert or
@@ -67,7 +67,7 @@ of registers and wires that induced the failure. GTKWave is a useful
 program for viewing the `.vcd` files.
 
 The config for Symbiyosys is `symbiyosys.sby` in the root of the directory.
-
+The formal verification configuration file is `boards/formal_config.v`.
 
 ## Test Benches
 

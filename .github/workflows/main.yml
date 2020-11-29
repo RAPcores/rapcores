@@ -17,4 +17,4 @@ jobs:
     - name: RAPBo Flow
       run: nix-shell --command 'make BOARD=rapbo'
     - name: Formal Verification
-      run: nix-shell --command 'make formal BOARD=tinyfpgabx'
+      run: nix-shell --command 'make formal'

@@ -1,20 +1,5 @@
 `default_nettype none
 
-`include "generated/board.v"
-`include "macro_params.v"
-`include "constants.v"
-`include "stepper.v"
-`include "spi.v"
-`include "quad_enc.v"
-`include "pwm.v"
-`include "microstepper/microstepper_top.v"
-//`include "microstepper2/stepper_top.v"
-
-// Hide PLLs from Formal
-`ifndef FORMAL
-  `include "generated/spi_pll.v"
-`endif
-
 module top (
     input  CLK,
     `ifdef LED
