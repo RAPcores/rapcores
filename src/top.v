@@ -50,6 +50,14 @@ module top (
     `ifdef HALT
       input HALT,
     `endif
+    `ifdef STEPINPUT
+      input STEPINPUT,
+      input DIRINPUT,
+    `endif
+    `ifdef STEPOUTPUT
+      output STEPOUTPUT,
+      output DIROUTPUT,
+    `endif
 );
 
   // Global Reset (TODO: Make input pin)
@@ -60,14 +68,14 @@ module top (
     assign USBPU = 0;
   `endif
 
-  `ifndef FORMAL
+  `ifdef SPIPLL
     // PLL for SPI Bus
     wire spi_clock;
     wire spipll_locked;
     spi_pll spll (.clock_in(CLK),
                   .clock_out(spi_clock),
                   .locked(spipll_locked));
-  `elsif FORMAL
+  `else
     wire spi_clock = CLK;
   `endif
 
@@ -78,7 +86,7 @@ module top (
   reg [63:0] word_data_received;
   wire word_received;
   SPIWord word_proc (
-                .clk(CLK), //.clk(spi_clock),
+                .clk(spi_clock),
                 .SCK(SCK),
                 .CS(CS),
                 .COPI(COPI),
@@ -413,8 +421,19 @@ module top (
       move_done_r = ~move_done_r;
   `endif
 
-  assign dir = dir_r[moveind]; // set direction
-  assign step = (substep_accumulator > 0);
+
+  `ifndef STEPINPUT
+    assign dir = dir_r[moveind]; // set direction
+    assign step = (substep_accumulator > 0);
+  `else
+    assign dir = dir_r[moveind] | DIRINPUT; // set direction
+    assign step = (substep_accumulator > 0) | STEPINPUT;
+  `endif
+
+  `ifdef STEPOUTPUT
+    assign STEPOUTPUT = step;
+    assign DIROUTPUT = dir;
+  `endif
 
   always @(posedge CLK) begin
 
