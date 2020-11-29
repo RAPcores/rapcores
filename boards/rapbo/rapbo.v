@@ -2,6 +2,9 @@
 // Enable SPI Interface
 `define SPI_INTERFACE
 
+// Use PLL for higher SPI frequencies
+//`define SPIPLL
+
 // Enable Buffer DTR pin
 `define BUFFER_DTR
 

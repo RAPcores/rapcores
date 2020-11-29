@@ -68,14 +68,14 @@ module top (
     assign USBPU = 0;
   `endif
 
-  `ifndef FORMAL
+  `ifdef SPIPLL
     // PLL for SPI Bus
     wire spi_clock;
     wire spipll_locked;
     spi_pll spll (.clock_in(CLK),
                   .clock_out(spi_clock),
                   .locked(spipll_locked));
-  `elsif FORMAL
+  `else
     wire spi_clock = CLK;
   `endif
 
@@ -86,7 +86,7 @@ module top (
   reg [63:0] word_data_received;
   wire word_received;
   SPIWord word_proc (
-                .clk(CLK), //.clk(spi_clock),
+                .clk(spi_clock),
                 .SCK(SCK),
                 .CS(CS),
                 .COPI(COPI),
