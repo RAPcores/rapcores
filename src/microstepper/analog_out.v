@@ -4,9 +4,9 @@ module analog_out (
     input  wire [7:0] pwm1,
     input  wire [7:0] pwm2,
     output wire       analog_out1,
-    output wire       analog_out2
+    output wire       analog_out2,
+    input wire [10:0] current_threshold
 );
-  parameter current_threshold = 1024;
 
   reg [10:0] pwm_counter;
 

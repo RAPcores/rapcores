@@ -1,6 +1,7 @@
 module chargepump (
     input  clk,
     input  resetn,
+    input  [7:0] period,
     output chargepump_pin
 );
 
@@ -14,7 +15,7 @@ module chargepump (
     end else begin
       cp_counter <= cp_counter + 1'b1;
 
-      if (cp_counter == 215) begin
+      if (cp_counter == period) begin
         cp_counter <= 0;
         chargepump <= ~chargepump;
       end
