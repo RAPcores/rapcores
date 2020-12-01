@@ -93,6 +93,7 @@ module spi_state_machine(
   reg [7:0] config_chargepump_period = 91;
   reg config_invert_highside = 0;
   reg config_invert_lowside = 0;
+  
   reg [511:0] cos_table;
 
   initial begin
