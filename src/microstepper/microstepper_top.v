@@ -17,7 +17,7 @@ module microstepper_top (
     input [7:0]  config_chargepump_period,
     input        config_invert_highside,
     input        config_invert_lowside,
-    input [511:0] cos_table,
+    //input [511:0] cos_table,
     input        step,
     input        dir,
     input        enable
@@ -180,13 +180,13 @@ end
   cosine cosine0 (
       .cos_index(cos_index1),
       .cos_value(pwm1),
-      .cos_table(cos_table)
+      //.cos_table(cos_table)
   );
 
   cosine cosine1 (
       .cos_index(cos_index2),
       .cos_value(pwm2),
-      .cos_table(cos_table)
+      //.cos_table(cos_table)
   );
 
   analog_out ao0 (
