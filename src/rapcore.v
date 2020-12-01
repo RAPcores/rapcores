@@ -95,12 +95,7 @@ module rapcore (
   // Stepper control lines
   wire step;
   wire dir;
-  reg enable;
-
-
-  //
-  // Stepper Modules
-  //
+  wire enable;
 
   `ifdef DUAL_HBRIDGE
   DualHBridge s0 (.phase_a1 (PHASE_A1[1]),
@@ -136,7 +131,7 @@ module rapcore (
       .config_chargepump_period (config_chargepump_period),
       .config_invert_highside (config_invert_highside),
       .config_invert_lowside (config_invert_lowside),
-      .cos_table (cos_table),
+      //.cos_table (cos_table),
       .step (step),
       .dir (dir),
       .enable(enable),
