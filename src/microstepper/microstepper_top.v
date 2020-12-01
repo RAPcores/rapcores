@@ -103,7 +103,7 @@ end
     s4r <= {s4r[0], s4};
   end
 
-  mytimer #(
+  mytimer_10 #(
       .WIDTH(10)
   ) offtimer0 (
       .clk         (clk),
@@ -113,7 +113,7 @@ end
       .timer       (off_timer0)
   );
 
-  mytimer #(
+  mytimer_10 #(
       .WIDTH(10)
   ) offtimer1 (
       .clk         (clk),
@@ -123,7 +123,7 @@ end
       .timer       (off_timer1)
   );
 
-  mytimer #(
+  mytimer_8 #(
       .WIDTH(8)
   ) blanktimer0 (
       .clk         (clk),
@@ -133,7 +133,7 @@ end
       .timer       (blank_timer0)
   );
 
-  mytimer #(
+  mytimer_8 #(
       .WIDTH(8)
   ) blanktimer1 (
       .clk         (clk),
@@ -143,7 +143,7 @@ end
       .timer       (blank_timer1)
   );
 
-  mytimer #(
+  mytimer_8 #(
       .WIDTH(8)
   ) minimumontimer0 (
       .clk         (clk),
@@ -153,7 +153,7 @@ end
       .timer       (minimum_on_timer0)
   );
 
-  mytimer #(
+  mytimer_8 #(
       .WIDTH(8)
   ) minimumontimer1 (
       .clk         (clk),
