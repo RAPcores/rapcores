@@ -1,6 +1,6 @@
 `default_nettype none
 
-module top (
+module rapcore (
     input  CLK,
     `ifdef LED
       output wire [`LED:1] LED,
