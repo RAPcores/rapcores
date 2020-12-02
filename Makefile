@@ -18,8 +18,8 @@ ifdef BOARD
 	include ./boards/${BOARD}/${BOARD}.mk
 endif
 
-PROJ = top
-TOP = ./src/top.v
+PROJ = rapcore
+TOP = ./src/rapcore.v
 GENERATEDDIR = ./src/generated/
 SRCDIR = ./src/
 BUILDDIR = ./build/
