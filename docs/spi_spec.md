@@ -16,6 +16,16 @@ project so breaking changes are likely to happen with the SPI protocol. This doc
 serves as the "as-built" reference for the RAPcore, and may deviate from documents outside
 this repository.
 
+# Throughput and Buffering
+
+By default RAPcore uses a double-buffered move queue.
+(See: Boards and Porting: Event Pins for details on monitoring the buffer). Since each transfer
+move transfer is 2+2*N 64-bit words, the troughput over SPI can remain acceptably
+high. The Table below shows the maximal update rate for a given SPI Frequency
+and axis count.
+
+
+
 ## Overview
 
 The SPI bus operated in peripheral mode 0 MSB.The protocol assumes any complete transfer is
