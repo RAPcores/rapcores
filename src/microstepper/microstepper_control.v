@@ -82,7 +82,7 @@ module microstepper_control (
   wire s4_starting = s4r == 2'b10;
 
   assign offtimer_en0 = analog_cmp1 & blank_timer0 == 0 & overCurrent0 == 0;
-  assign offtimer_en0 = analog_cmp2 & blank_timer1 == 0 & overCurrent1 == 0;
+  assign offtimer_en1 = analog_cmp2 & blank_timer1 == 0 & overCurrent1 == 0;
   assign a_starting = s1_starting | s2_starting;
   assign b_starting = s3_starting | s4_starting;
 
