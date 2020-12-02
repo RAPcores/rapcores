@@ -18,8 +18,8 @@ read -formal chargepump.v
 read -formal cosine.v
 read -formal microstep_counter.v
 read -formal mytimer.v
-read -formal top.v
-prep -top top
+read -formal rapcore.v
+prep -top rapcore
 
 [files]
 boards/formal_config.v
@@ -27,7 +27,7 @@ src/macro_params.v
 src/constants.v
 src/spi.v
 src/stepper.v
-src/top.v
+src/rapcore.v
 src/quad_enc.v
 src/pwm.v
 src/microstepper/microstepper_top.v
