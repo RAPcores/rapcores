@@ -7,28 +7,15 @@ module mytimer_8 (
     output [WIDTH-1:0]  timer,
     output              done // single cycle timer done event
 );
-  parameter WIDTH = 8;
 
-  reg done = 0;
-  reg [WIDTH-1:0] counter;
-  reg run = 1;
-  assign timer = counter;
-
-  always @(posedge clk) begin
-  if (!resetn)
-    counter <= 0;
-  else if( start_enable ) begin
-    counter <= start_time;
-    run <= 1;
-  end
-  else if( counter > 0 )
-    counter <= counter - 1'b1;
-  else if (run)
-    done <= 1;
-  if (done) begin
-    run <= 0;
-    done <= 0;
-  end
-end
+  mytimer #(
+      .WIDTH(8)
+  ) mytimer8 (
+      .clk         (clk),
+      .resetn      (resetn),
+      .start_enable(start_enable),
+      .start_time  (start_time),
+      .timer       (timer)
+  );
 
 endmodule
