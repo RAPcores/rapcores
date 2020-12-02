@@ -46,7 +46,10 @@ module microstepper_top (
   wire   [9:0]   off_timer1;
   wire   [7:0]   minimum_on_timer0;
   wire   [7:0]   minimum_on_timer1;
+<<<<<<< HEAD
   wire           off_timer1_done;
+=======
+>>>>>>> timer fixes and missing wires
   
   microstepper_control microstepper_control0(
     .clk(clk),
@@ -74,6 +77,11 @@ module microstepper_top (
     .s4(s4),
     .offtimer_en0(offtimer_en0),
     .offtimer_en1(offtimer_en1),
+<<<<<<< HEAD
+=======
+    .a_starting(a_starting),
+    .b_starting(b_starting),
+>>>>>>> timer fixes and missing wires
     .phase_ct(phase_ct),
     .blank_timer0(blank_timer0),
     .blank_timer1(blank_timer1),
@@ -83,12 +91,16 @@ module microstepper_top (
     .minimum_on_timer1(minimum_on_timer1),
 );
 
+<<<<<<< HEAD
 wire    [10:0]  Woff_timer0_done;
 wire    [10:0]  off_timer0_done;
 
   mytimer_10 #(
       .WIDTH(10)
   ) offtimer0 (
+=======
+  mytimer_10 offtimer0 (
+>>>>>>> timer fixes and missing wires
       .clk         (clk),
       .resetn      (resetn),
       .start_enable(offtimer_en0),
@@ -97,9 +109,7 @@ wire    [10:0]  off_timer0_done;
       .done         (off_timer0_done)
   );
 
-  mytimer_10 #(
-      .WIDTH(10)
-  ) offtimer1 (
+  mytimer_10 offtimer1 (
       .clk         (clk),
       .resetn      (resetn),
       .start_enable(offtimer_en1),
@@ -108,9 +118,7 @@ wire    [10:0]  off_timer0_done;
       .done         (off_timer1_done)
   );
 
-  mytimer_8 #(
-      .WIDTH(8)
-  ) blanktimer0 (
+  mytimer_8 blanktimer0 (
       .clk         (clk),
       .resetn      (resetn),
       .start_enable(off_timer0_done),
@@ -118,9 +126,7 @@ wire    [10:0]  off_timer0_done;
       .timer       (blank_timer0)
   );
 
-  mytimer_8 #(
-      .WIDTH(8)
-  ) blanktimer1 (
+  mytimer_8 blanktimer1 (
       .clk         (clk),
       .resetn      (resetn),
       .start_enable(off_timer1_done),
@@ -128,9 +134,7 @@ wire    [10:0]  off_timer0_done;
       .timer       (blank_timer1)
   );
 
-  mytimer_8 #(
-      .WIDTH(8)
-  ) minimumontimer0 (
+  mytimer_8 minimumontimer0 (
       .clk         (clk),
       .resetn      (resetn),
       .start_enable(off_timer0_done),
@@ -138,9 +142,7 @@ wire    [10:0]  off_timer0_done;
       .timer       (minimum_on_timer0)
   );
 
-  mytimer_8 #(
-      .WIDTH(8)
-  ) minimumontimer1 (
+  mytimer_8 minimumontimer1 (
       .clk         (clk),
       .resetn      (resetn),
       .start_enable(off_timer1_done),

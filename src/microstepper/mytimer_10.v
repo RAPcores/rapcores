@@ -7,10 +7,17 @@ module mytimer_10 (
     output [WIDTH-1:0]  timer,
     output              done // single cycle timer done event
 );
+  localparam WIDTH = 10;
+
+  input clk;
+  input resetn;
+  input start_enable;
+  input [WIDTH-1:0] start_time;
+  output [WIDTH-1:0] timer;
 
   mytimer #(
-      .WIDTH(8)
-  ) mytimer8 (
+      .WIDTH(WIDTH)
+  ) mytimer10 (
       .clk         (clk),
       .resetn      (resetn),
       .start_enable(start_enable),
