@@ -16,7 +16,7 @@ module microstepper_control (
     input           s3,
     input           s4,
     output          offtimer_en0,
-    output          offtimer_en0,
+    output          offtimer_en1,
     output          a_starting,
     output          b_starting,
     output  [7:0]   phase_ct,
@@ -37,6 +37,12 @@ module microstepper_control (
   wire s2;
   wire s3;
   wire s4;
+  wire   [7:0]   blank_timer0;
+  wire   [7:0]   blank_timer1;
+  wire   [9:0]   off_timer0;
+  wire   [9:0]   off_timer1;
+  wire   [7:0]   minimum_on_timer0;
+  wire   [7:0]   minimum_on_timer1;
 
   wire overCurrent0 = off_timer0 > 0;
   wire overCurrent1 = off_timer1 > 0;

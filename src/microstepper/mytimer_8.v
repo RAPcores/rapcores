@@ -1,9 +1,9 @@
 module mytimer_8 (
-    clk,
-    resetn,
-    start_enable,
-    start_time,
-    timer
+    input clk,
+    input resetn,
+    input start_enable,
+    input start_time,
+    output timer
 );
 
   mytimer #(

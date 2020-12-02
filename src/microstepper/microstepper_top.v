@@ -27,7 +27,23 @@ module microstepper_top (
   wire [5:0] cos_index2;
   wire [7:0] pwm1;
   wire [7:0] pwm2;
-  
+  wire s1;
+  wire s2;
+  wire s3;
+  wire s4;
+  wire offtimer_en0;
+  wire offtimer_en1;
+  wire a_starting;
+  wire b_starting;
+  wire  [7:0]   phase_ct;
+  wire   [7:0]   blank_timer0;
+  wire   [7:0]   blank_timer1;
+  wire   [9:0]   off_timer0;
+  wire   [9:0]   off_timer1;
+  wire   [7:0]   minimum_on_timer0;
+  wire   [7:0]   minimum_on_timer1;
+
+
   microstepper_control m_control_0(
     .clk(clk),
     .s_l(s_l),
@@ -46,7 +62,7 @@ module microstepper_top (
     .s3(s3),
     .s4(s4),
     .offtimer_en0(offtimer_en0),
-    .offtimer_en0(offtimer_en0),
+    .offtimer_en0(offtimer_en1),
     .a_starting(a_starting),
     .b_starting(b_starting),
     .phase_ct(phase_ct),
@@ -58,9 +74,7 @@ module microstepper_top (
     .minimum_on_timer1(minimum_on_timer1),
 );
 
-  mytimer_10 #(
-      .WIDTH(10)
-  ) offtimer0 (
+  mytimer_10 offtimer0 (
       .clk         (clk),
       .resetn      (resetn),
       .start_enable(offtimer_en0),
@@ -68,9 +82,7 @@ module microstepper_top (
       .timer       (off_timer0)
   );
 
-  mytimer_10 #(
-      .WIDTH(10)
-  ) offtimer1 (
+  mytimer_10 offtimer1 (
       .clk         (clk),
       .resetn      (resetn),
       .start_enable(offtimer_en1),
@@ -78,9 +90,7 @@ module microstepper_top (
       .timer       (off_timer1)
   );
 
-  mytimer_8 #(
-      .WIDTH(8)
-  ) blanktimer0 (
+  mytimer_8 blanktimer0 (
       .clk         (clk),
       .resetn      (resetn),
       .start_enable(a_starting),
@@ -88,9 +98,7 @@ module microstepper_top (
       .timer       (blank_timer0)
   );
 
-  mytimer_8 #(
-      .WIDTH(8)
-  ) blanktimer1 (
+  mytimer_8 blanktimer1 (
       .clk         (clk),
       .resetn      (resetn),
       .start_enable(b_starting),
@@ -98,9 +106,7 @@ module microstepper_top (
       .timer       (blank_timer1)
   );
 
-  mytimer_8 #(
-      .WIDTH(8)
-  ) minimumontimer0 (
+  mytimer_8 minimumontimer0 (
       .clk         (clk),
       .resetn      (resetn),
       .start_enable(a_starting),
@@ -108,9 +114,7 @@ module microstepper_top (
       .timer       (minimum_on_timer0)
   );
 
-  mytimer_8 #(
-      .WIDTH(8)
-  ) minimumontimer1 (
+  mytimer_8 minimumontimer1 (
       .clk         (clk),
       .resetn      (resetn),
       .start_enable(b_starting),
