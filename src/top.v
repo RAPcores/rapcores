@@ -106,6 +106,7 @@ module top (
 
   // Stepper Setup
   // TODO: Generate statement?
+  // Stepper Config
   reg [2:0] microsteps = 2;
   reg [7:0] current = 140;
   reg [9:0] config_offtime = 810;
@@ -186,9 +187,9 @@ module top (
     cos_table	 [ 	511	 : 	504	 ] = 	6	;
   end
 */
-  wire step;
-  wire dir;
-  reg enable;
+  //
+  // Stepper Modules
+  //
 
   `ifdef DUAL_HBRIDGE
   DualHBridge s0 (.phase_a1 (PHASE_A1[1]),
@@ -251,6 +252,66 @@ module top (
       .count(encoder_count),
       .multiplier(encoder_multiplier));
   `endif
+
+  //
+  // Stepper Timing Setup
+  //
+
+  reg [`MOVE_BUFFER_BITS:0] moveind; // Move index cursor
+
+  // Latching mechanism for engaging the buffered move.
+  reg [`MOVE_BUFFER_SIZE:0] stepready;
+  reg [`MOVE_BUFFER_SIZE:0] stepfinished;
+
+  reg [63:0] move_duration [`MOVE_BUFFER_SIZE:0];
+  reg [`MOVE_BUFFER_SIZE:0] dir_r;
+
+  reg signed [63:0] increment [`MOVE_BUFFER_SIZE:0];
+  reg signed [63:0] incrementincrement [`MOVE_BUFFER_SIZE:0];
+
+  reg [7:0] clock_divisor = 40;  // should be 40 for 400 khz at 16Mhz Clk
+
+  // DDA module input wires determined from buffer
+  wire [63:0] move_duration_w = move_duration[moveind];
+  wire [63:0] increment_w = increment[moveind];
+  wire [63:0] incrementincrement_w = incrementincrement[moveind];
+
+  wire dda_step;
+
+  // Implement flow control and event pins if specified
+  `ifdef BUFFER_DTR
+    assign BUFFER_DTR = ~(~stepfinished == stepready);
+  `endif
+
+  `ifndef STEPINPUT
+    assign dir = dir_r[moveind]; // set direction
+    assign step = dda_step;
+  `else
+    assign dir = dir_r[moveind] | DIRINPUT; // set direction
+    assign step = dda_step | STEPINPUT;
+  `endif
+
+  `ifdef STEPOUTPUT
+    assign STEPOUTPUT = step;
+    assign DIROUTPUT = dir;
+  `endif
+
+  dda_timer dda (.CLK(CLK),
+                .clock_divisor(clock_divisor),
+                .move_duration(move_duration_w),
+                .increment(increment_w),
+                .incrementincrement(incrementincrement_w),
+                .stepready(stepready),
+                .stepfinished(stepfinished),
+                .moveind(moveind),
+                .writemoveind(writemoveind),
+                .step(dda_step),
+                `ifdef HALT
+                  .halt(HALT),
+                `endif
+                `ifdef MOVE_DONE
+                  .move_done(MOVE_DONE),
+                `endif);
 
   //
   // State Machine for handling SPI Messages
@@ -381,108 +442,5 @@ module top (
     end
   end
 
-  //
-  // Stepper Timing Routine
-  //
 
-  // coordinated move execution
-
-  reg [`MOVE_BUFFER_BITS:0] moveind = 0; // Move index cursor
-
-  // Latching mechanism for engaging the buffered move.
-  reg [`MOVE_BUFFER_SIZE:0] stepready;
-  reg [`MOVE_BUFFER_SIZE:0] stepfinished;
-
-  reg [63:0] move_duration [`MOVE_BUFFER_SIZE:0];
-  reg [7:0] clock_divisor = 40;  // should be 40 for 400 khz at 16Mhz Clk
-  reg [`MOVE_BUFFER_SIZE:0] dir_r;
-
-  reg [63:0] tickdowncount;  // move down count (clock cycles)
-  reg [7:0] clkaccum = 8'b1;  // intra-tick accumulator
-
-  reg signed [63:0] substep_accumulator = 0; // typemax(Int64) - 100 for buffer
-  reg signed [63:0] increment_r;
-  reg signed [63:0] increment [`MOVE_BUFFER_SIZE:0];
-  reg signed [63:0] incrementincrement [`MOVE_BUFFER_SIZE:0];
-
-  reg finishedmove = 1; // flag inidicating a move has been finished, so load next
-  wire processing_move = (stepfinished[moveind] ^ stepready[moveind]);
-  wire loading_move = finishedmove & processing_move;
-  wire executing_move = !finishedmove & processing_move;
-
-  // Implement flow control and event pins if specified
-  `ifdef BUFFER_DTR
-    assign BUFFER_DTR = ~(~stepfinished == stepready);
-  `endif
-
-  `ifdef MOVE_DONE
-    reg move_done_r = 0;
-    assign MOVE_DONE = move_done_r;
-    always @(posedge finishedmove)
-      move_done_r = ~move_done_r;
-  `endif
-
-
-  `ifndef STEPINPUT
-    assign dir = dir_r[moveind]; // set direction
-    assign step = (substep_accumulator > 0);
-  `else
-    assign dir = dir_r[moveind] | DIRINPUT; // set direction
-    assign step = (substep_accumulator > 0) | STEPINPUT;
-  `endif
-
-  `ifdef STEPOUTPUT
-    assign STEPOUTPUT = step;
-    assign DIROUTPUT = dir;
-  `endif
-
-  always @(posedge CLK) begin
-
-    // HALT line (active low) then reset buffer latch and index
-    // TODO: Should substep accumulator reset?
-    `ifdef HALT
-      if (!HALT) begin
-        moveind <= writemoveind; // match buffer cursor
-        stepfinished <= stepready; // reset latch
-        finishedmove <= 1; // Puts us back in loading_move
-      end
-    `endif
-
-    // Load up the move duration
-    if (loading_move) begin
-      tickdowncount <= move_duration[moveind];
-      finishedmove <= 0;
-      increment_r <= increment[moveind];
-    end
-
-    // check if this move has been done before
-    if(executing_move) begin
-
-      // Step taken, rollback accumulator
-      if (substep_accumulator > 0) begin
-        substep_accumulator <= substep_accumulator - 64'h7fffffffffffff9b;
-      end
-
-      // DDA clock divisor
-      clkaccum <= clkaccum - 8'b1;
-      if (clkaccum == 8'b0) begin
-
-        increment_r <= increment_r + incrementincrement[moveind];
-        substep_accumulator <= substep_accumulator + increment_r;
-
-        // Increment tick accumulators
-        clkaccum <= clock_divisor;
-        tickdowncount <= tickdowncount - 1'b1;
-        // See if we finished the segment and incrment the buffer
-        if(tickdowncount == 0) begin
-          stepfinished[moveind] <= ~stepfinished[moveind];
-          moveind <= moveind + 1'b1;
-          finishedmove <= 1;
-          `ifdef FORMAL
-            assert(moveind <= `MOVE_BUFFER_SIZE);
-          `endif
-        end
-      end
-    end
-  end
 endmodule

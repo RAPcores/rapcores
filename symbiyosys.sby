@@ -8,6 +8,7 @@ smtbmc
 read -formal formal_config.v
 read -formal macro_params.v
 read -formal constants.v
+read -formal dda_timer.v
 read -formal spi.v
 read -formal stepper.v
 read -formal quad_enc.v
@@ -25,6 +26,7 @@ prep -top rapcore
 boards/formal_config.v
 src/macro_params.v
 src/constants.v
+src/dda_timer.v
 src/spi.v
 src/stepper.v
 src/rapcore.v
