@@ -40,8 +40,9 @@ module microstepper_top (
   wire   [7:0]   minimum_on_timer0;
   wire   [7:0]   minimum_on_timer1;
   
-  microstepper_control m_control_0(
+  microstepper_control microstepper_control0(
     .clk(clk),
+    .resetn(resetn),
     .s_l(s_l),
     .s_h(s_h),
     .config_fastdecay_threshold(config_fastdecay_threshold),
@@ -118,14 +119,14 @@ module microstepper_top (
       .timer       (minimum_on_timer1)
   );
 
-  chargepump cp0 (
+  chargepump chargepump0 (
       .clk           (clk),
       .resetn        (resetn),
       .period        (config_chargepump_period),
       .chargepump_pin(chargepump_pin)
   );
 
-  microstep_counter mc0 (
+  microstep_counter microstep_counter0 (
       .pos       (phase_ct),
       .cos_index1(cos_index1),
       .cos_index2(cos_index2),
@@ -144,7 +145,7 @@ module microstepper_top (
       //.cos_table(cos_table)
   );
 
-  analog_out ao0 (
+  analog_out analog_out0 (
       .clk        (clk),
       .resetn     (resetn),
       .pwm1       (pwm1),
