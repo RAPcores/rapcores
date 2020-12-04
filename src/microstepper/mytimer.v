@@ -5,7 +5,7 @@ module mytimer (
     start_time,
     timer
 );
-  parameter WIDTH = 10;
+  parameter WIDTH = `DEFAULT_TIMER_WIDTH;
 
   input clk;
   input resetn;
