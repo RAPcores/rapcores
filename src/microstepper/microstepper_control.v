@@ -2,6 +2,7 @@
 module microstepper_control (
     input           clk,
     input           resetn,
+<<<<<<< HEAD
     output          phase_a1_l_out,
     output          phase_a2_l_out,
     output          phase_b1_l_out,
@@ -10,6 +11,10 @@ module microstepper_control (
     output          phase_a2_h_out,
     output          phase_b1_h_out,
     output          phase_b2_h_out,
+=======
+    output  [3:0]   s_l,
+    output  [3:0]   s_h,
+>>>>>>> reset logic for analog out, phase_ct, step dir buffer, instantiation name expansion.
     input   [9:0]   config_fastdecay_threshold,
     input           config_invert_highside,
     input           config_invert_lowside,
