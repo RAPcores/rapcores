@@ -62,7 +62,7 @@ module microstepper_top (
     .s3(s3),
     .s4(s4),
     .offtimer_en0(offtimer_en0),
-    .offtimer_en0(offtimer_en1),
+    .offtimer_en1(offtimer_en1),
     .a_starting(a_starting),
     .b_starting(b_starting),
     .phase_ct(phase_ct),
