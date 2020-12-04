@@ -1,5 +1,6 @@
 module microstepper_control (
     input           clk,
+    input           resetn,
     output  [3:0]   s_l,
     output  [3:0]   s_h,
     input   [9:0]   config_fastdecay_threshold,
@@ -26,11 +27,28 @@ module microstepper_control (
     input   [9:0]   off_timer1,
     input   [7:0]   minimum_on_timer0,
     input   [7:0]   minimum_on_timer1,
+//    output step_b_out,
 );
   reg [7:0] phase_ct;
+//  reg [1:0] step_b;
 
-  always @(posedge step) begin
-    phase_ct <= phase_ct + (dir ? 1 : -1);
+//  wire step_edge = (step_b[2] ^ step_b[1]) && step_b[2];
+  // step edge rising falling
+
+  reg [2:0] step_b;
+  reg [1:0] dir_b;
+//  wire step_b_out = step_b[2];
+  wire step_rising = (step_b == 2'b01);
+
+  always @(posedge clk) begin
+    if (!resetn) begin
+      phase_ct <= 0;
+    end
+    else if (step_rising) begin
+        phase_ct <= phase_ct + dir_b[1];
+    end
+    step_b <= {step_b[1:0], step};
+    dir_b <= {dir[0], dir};
   end
 
   wire s1;
