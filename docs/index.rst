@@ -48,3 +48,4 @@ Contents
    boards
    dev
    motor_control
+   interfaces
