@@ -1,0 +1,159 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Interfaces &#8212; RAPcores  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Motor Control" href="motor_control.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="interfaces">
+<h1>Interfaces<a class="headerlink" href="#interfaces" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="interactive-spi-using-raspi-julia">
+<h2>Interactive SPI using RasPi + Julia<a class="headerlink" href="#interactive-spi-using-raspi-julia" title="Permalink to this headline">¶</a></h2>
+<p>You will need a:</p>
+<ul class="simple">
+<li><p>Raspberry Pi (This is tested in RasPi4)</p></li>
+</ul>
+<p>Step 1:
+<a class="reference external" href="https://www.raspberrypi.org/documentation/installation/installing-images/">Install an operating System</a></p>
+<p>Step 2:
+<a class="reference external" href="https://www.raspberrypi-spy.co.uk/2014/08/enabling-the-spi-interface-on-the-raspberry-pi/">Enable SPI + SSH</a></p>
+<p>Step 3:
+Download the Julia ARM binaries:</p>
+<p><a class="reference external" href="https://julialang.org/downloads/">https://julialang.org/downloads/</a></p>
+<p>The most recent version is recommended (though it may only support ARM64 aka AArch64)</p>
+<p>Step 4:
+Wire the SPI from the RasPi pinout to the corresponding pins on the target board</p>
+<p>Step 5:
+Install BaremetalPi</p>
+<p>from the Julia prompt (the Julia binary will be in download location ./bin/julia ):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">julia</span><span class="o">&gt;</span> <span class="n">using</span> <span class="n">Pkg</span>
+
+<span class="n">julia</span><span class="o">&gt;</span> <span class="n">Pkg</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+
+<span class="n">julia</span><span class="o">&gt;</span> <span class="n">Pkg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;BaremetalPi&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Step 6:</p>
+<p>You should be ready to send commands. The full docs to BaremetalPi are avaialble <a class="reference external" href="https://github.com/ronisbr/BaremetalPi.jl">here</a>.</p>
+<p>Some examples:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>julia&gt; using BaremetalPi # import Pkg
+
+julia&gt; buf = zeros(UInt64, 4) # initializer a buffer
+4-element Array{UInt64,1}:
+ 0x0000000000000000
+ 0x0000000000000000
+ 0x0000000000000000
+ 0x0000000000000000
+
+julia&gt; init_spi(&quot;/dev/spidev0.0&quot;, max_speed_hz=1_000_000) # initialize the SPI device
+
+julia&gt; spi_transfer!(1, [0x0a00000000000001], buf) # run the enable motor command
+8
+
+julia&gt; spi_transfer!(1, [0x0100000000000000, 0x0000000001ffffff, 0x0000010000000000, 0x0000000100000000], buf); println(buf); # execute a transfer and print the buffer
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">RAPcores</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="spi_spec.html">SPI Specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boards.html">Board Definition Structure and Porting Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev.html">Developer Docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="motor_control.html">Motor Control</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Interfaces</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#interactive-spi-using-raspi-julia">Interactive SPI using RasPi + Julia</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="motor_control.html" title="previous chapter">Motor Control</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, RAPcore developers.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/interfaces.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
