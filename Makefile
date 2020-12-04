@@ -57,8 +57,12 @@ formal:
 lint:
 	verible-verilog-lint src/*.v
 
-testbench:
+testbench_quad_encoder:
 	yosys sim.ys
+	gtkwave testbench/quad_enc.vcd
+testbench_microstepper:
+	yosys sim_microstepper.ys
+	gtkwave testbench/microstepper.vcd
 
 .SECONDARY:
 .PHONY: all prog clean testbench formal
