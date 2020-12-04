@@ -74,7 +74,7 @@ module testbench(
     end
     faultn <= &fault;
     cnt <= cnt + 1;
-    if (cnt <= 20'h90) begin
+    if (cnt <= 20'h85) begin
       enccntA <= enccntA + 1;
       enc1a <= enccntA[3];
       enccntB <= enccntB - 1;
