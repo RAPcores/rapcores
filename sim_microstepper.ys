@@ -11,4 +11,4 @@ read_verilog -sv testbench/microstepper_tb.v \
 
 prep -top testbench
 show microstepper_top
-sim -n 40000 -clock clk -vcd testbench/microstepper.vcd
+sim -n 400000 -clock clk -vcd testbench/microstepper.vcd
