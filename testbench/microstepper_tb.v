@@ -64,9 +64,11 @@ module testbench(
         else begin
             cnt <= cnt + 1;
             step_clock <= step_clock + 1;
-            step <= step_clock[9];
+            step <= step_clock[11];
             if (current1 > target_current1) analog_cmp1 <= 1;
+            else analog_cmp1 <= 0;
             if (current2 > target_current2) analog_cmp2 <= 1;
+            else analog_cmp2 <= 0;
             if (cnt <= 20'hAEC) begin
                 dir <= 1;
             end
@@ -111,22 +113,22 @@ module testbench(
         .pwm(analog_out2),
         .duty(target_current2)
     );
-    coil coil1(
-        .clk(clk),
-        .resetn(resetn),
-        .s_l1(s_l[0]),
-        .s_l2(s_l[1]),
-        .s_h1(s_h[0]),
-        .s_h2(s_h[1]),
-        .current(current1)
-    );
     coil coil2(
         .clk(clk),
         .resetn(resetn),
-        .s_l1(s_l[2]),
-        .s_l2(s_l[3]),
-        .s_h1(s_h[2]),
-        .s_h2(s_h[3]),
+        .s_l0(s_l[0]),
+        .s_l1(s_l[1]),
+        .s_h0(s_h[0]),
+        .s_h1(s_h[1]),
+        .current(current1)
+    );
+    coil coil1(
+        .clk(clk),
+        .resetn(resetn),
+        .s_l0(s_l[2]),
+        .s_l1(s_l[3]),
+        .s_h0(s_h[2]),
+        .s_h1(s_h[3]),
         .current(current2)
     );
 endmodule
