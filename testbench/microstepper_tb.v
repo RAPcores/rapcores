@@ -113,7 +113,7 @@ module testbench(
         .pwm(analog_out2),
         .duty(target_current2)
     );
-    coil coil2(
+    coil coil1(
         .clk(clk),
         .resetn(resetn),
         .s_l0(s_l[0]),
@@ -122,7 +122,7 @@ module testbench(
         .s_h1(s_h[1]),
         .current(current1)
     );
-    coil coil1(
+    coil coil2(
         .clk(clk),
         .resetn(resetn),
         .s_l0(s_l[2]),
