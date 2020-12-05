@@ -81,6 +81,8 @@ module microstepper_top (
     .off_timer1(off_timer1),
     .minimum_on_timer0(minimum_on_timer0),
     .minimum_on_timer1(minimum_on_timer1),
+//    .off_timer0_done         (off_timer0_done),
+//    .off_timer0_done         (off_timer1_done),
 );
 
 wire    [10:0]  off_timer0_done;
