@@ -45,7 +45,7 @@ module microstepper_control (
       phase_ct <= 0;
     end
     else if (step_rising) begin
-        phase_ct <= phase_ct + dir_b[1];
+        phase_ct <= dir_b[1] ? phase_ct + 1 : phase_ct - 1;
     end
     step_b <= {step_b[1:0], step};
     dir_b <= {dir[0], dir};
@@ -56,8 +56,9 @@ module microstepper_control (
   wire s3;
   wire s4;
 
+  // Off Timer active flag
   wire overCurrent0 = off_timer0 > 0;
-  wire overCurrent1 = off_timer1 > 0;
+  wire overCurrent1 = off_timer1 > 0; 
 
   wire fastDecay0 = off_timer0 >= config_fastdecay_threshold;
   wire fastDecay1 = off_timer1 >= config_fastdecay_threshold;
@@ -73,11 +74,14 @@ module microstepper_control (
   wire phase_a1_h, phase_a1_l, phase_a2_h, phase_a2_l;
   wire phase_b1_h, phase_b1_l, phase_b2_h, phase_b2_l;
 
+  // Switch output Low
+  
   assign s_l[0] = !(phase_a1_l | fault);
   assign s_l[1] = !(phase_a2_l | fault);
   assign s_l[2] = !(phase_b1_l | fault);
   assign s_l[3] = !(phase_b2_l | fault);
 
+  // Switch output High
   assign s_h[0] = !(phase_a1_h | fault);
   assign s_h[1] = !(phase_a2_h | fault);
   assign s_h[2] = !(phase_b1_h | fault);
@@ -93,14 +97,19 @@ module microstepper_control (
   assign phase_b2_h = config_invert_highside ^ (slowDecay1 | (fastDecay1 ? s4r[1] : ~s4r[1]));
   assign phase_b2_l = config_invert_lowside ^ (fastDecay1 ? ~s4r[1] : (slowDecay1 ? 1'b0 : s4r[1]));
  
-
+  // Start on time per half bridge
   wire s1_starting = s1r == 2'b10;
   wire s2_starting = s2r == 2'b10;
   wire s3_starting = s3r == 2'b10;
   wire s4_starting = s4r == 2'b10;
 
+  // start Off Time
+  // Target peak current detected. Blank timer and Off timer not active
   assign offtimer_en0 = analog_cmp1 & blank_timer0 == 0 & overCurrent0 == 0;
   assign offtimer_en1 = analog_cmp2 & blank_timer1 == 0 & overCurrent1 == 0;
+
+  // Bridge On Time start
+  // Blank timer and minimum on timer enable
   assign a_starting = s1_starting | s2_starting;
   assign b_starting = s3_starting | s4_starting;
 
@@ -113,6 +122,8 @@ module microstepper_control (
   end
 `endif
 
+  // Shift register buffer switch output
+  // Triger start on time
   always @(posedge clk) begin
     s1r <= {s1r[0], s1};
     s2r <= {s2r[0], s2};
