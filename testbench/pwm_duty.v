@@ -8,7 +8,7 @@ module pwm_duty(
     reg [1:0] edge_b;
     reg [11:0] cnt_h;
     reg [11:0] cnt_l;
-    wire tc_edge = edge_b[1] ^ edge_b[0];
+    wire s_edge = edge_b[1] ^ edge_b[0];
     wire pwm;
 
     reg   [12:0]   duty;
@@ -20,8 +20,8 @@ module pwm_duty(
             duty <= 0;
         end
         else begin
-            if (tc_edge && edge_b[0]) begin // Rising edge
-                duty <= ( 255 * cnt_h / (cnt_h + cnt_l) );
+            if (s_edge && edge_b[0]) begin // Rising edge
+                duty <=  8191 * cnt_h / (cnt_h + cnt_l) ;
                 cnt_h <= 0;
                 cnt_l <= 0;
             end
