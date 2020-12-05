@@ -12,6 +12,12 @@ module coil (
 );
     reg     [12:0]   current;
 
+    // For each coil of motor
+    // Each coil is driven by s_x1 and s_x2
+    // One side s_x1 or s_x2 must be high when the other is low to be on
+//    wire phase_a_positive = !s_l0 && !s_h1;
+//    wire phase_a_negative = !s_l1 && !s_h0;
+//    wire off = s_l0;
     wire on = (!s_l0 && !s_h1) | (!s_l1 && !s_h0);
     wire positive = (!s_l0 && !s_h1);
     wire negative = (!s_l1 && !s_h0);
