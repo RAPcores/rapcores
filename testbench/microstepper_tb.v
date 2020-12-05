@@ -13,16 +13,16 @@ module testbench(
     output          analog_out2,
     output          chargepump_pin,
     output          fault,
-    output [7:0] target_current1,
+    output [12:0]   target_current1,
 );
 
     reg             step;
     reg             dir;
     reg             enable;
-    reg     [7:0]   target_current1;
-    reg     [7:0]   target_current2;
-    reg     [7:0]   current1;
-    reg     [7:0]   current2;
+    reg     [12:0]  target_current1;
+    reg     [12:0]  target_current2;
+    reg     [12:0]  current1;
+    reg     [12:0]  current2;
     reg     [9:0]   config_offtime;
     reg     [7:0]   config_blanktime;
     reg     [9:0]   config_fastdecay_threshold;
