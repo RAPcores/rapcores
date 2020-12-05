@@ -27,6 +27,8 @@ module microstepper_control (
     input   [9:0]   off_timer1,
     input   [7:0]   minimum_on_timer0,
     input   [7:0]   minimum_on_timer1,
+//    input           off_timer0_done,
+//    input           off_timer1_done,
 //    output step_b_out,
 );
   reg [7:0] phase_ct;
@@ -56,18 +58,18 @@ module microstepper_control (
   wire s3;
   wire s4;
 
-  // Off Timer active flag
-  wire overCurrent0 = off_timer0 > 0;
-  wire overCurrent1 = off_timer1 > 0; 
+  // Off Timer active flag 
+  wire off_timer_active0 = off_timer0 > 0;
+  wire off_timer_active1 = off_timer1 > 0; 
 
   wire fastDecay0 = off_timer0 >= config_fastdecay_threshold;
   wire fastDecay1 = off_timer1 >= config_fastdecay_threshold;
 
-  wire slowDecay0 = overCurrent0 && fastDecay0 == 0;
-  wire slowDecay1 = overCurrent1 && fastDecay1 == 0;
+  wire slowDecay0 = off_timer_active0 && fastDecay0 == 0;
+  wire slowDecay1 = off_timer_active1 && fastDecay1 == 0;
 
-  wire fault0 = (minimum_on_timer0 > 0) && overCurrent0;
-  wire fault1 = (minimum_on_timer1 > 0) && overCurrent1;
+  wire fault0 = (minimum_on_timer0 > 0) && off_timer_active0;
+  wire fault1 = (minimum_on_timer1 > 0) && off_timer_active1;
   wire fault = fault0 | fault1;
 
   reg [1:0] s1r, s2r, s3r, s4r;
@@ -75,7 +77,6 @@ module microstepper_control (
   wire phase_b1_h, phase_b1_l, phase_b2_h, phase_b2_l;
 
   // Switch output Low
-  
   assign s_l[0] = !(phase_a1_l | fault);
   assign s_l[1] = !(phase_a2_l | fault);
   assign s_l[2] = !(phase_b1_l | fault);
@@ -98,20 +99,21 @@ module microstepper_control (
   assign phase_b2_l = config_invert_lowside ^ (fastDecay1 ? ~s4r[1] : (slowDecay1 ? 1'b0 : s4r[1]));
  
   // Start on time per half bridge
+  // todo concatanate config inverting for active high or low
   wire s1_starting = s1r == 2'b10;
   wire s2_starting = s2r == 2'b10;
   wire s3_starting = s3r == 2'b10;
   wire s4_starting = s4r == 2'b10;
 
-  // start Off Time
-  // Target peak current detected. Blank timer and Off timer not active
-  assign offtimer_en0 = analog_cmp1 & blank_timer0 == 0 & overCurrent0 == 0;
-  assign offtimer_en1 = analog_cmp2 & blank_timer1 == 0 & overCurrent1 == 0;
-
   // Bridge On Time start
   // Blank timer and minimum on timer enable
-  assign a_starting = s1_starting | s2_starting;
-  assign b_starting = s3_starting | s4_starting;
+  //assign a_starting = s1_starting | s2_starting;
+  //assign b_starting = s3_starting | s4_starting;
+
+  // start Off Time
+  // Target peak current detected. Blank timer and Off timer not active
+  assign offtimer_en0 = analog_cmp1 & blank_timer0 == 0 & off_timer_active0 == 0;
+  assign offtimer_en1 = analog_cmp2 & blank_timer1 == 0 & off_timer_active1 == 0;
 
 `ifdef FORMAL
   always @(*) begin
@@ -130,5 +132,17 @@ module microstepper_control (
     s3r <= {s3r[0], s3};
     s4r <= {s4r[0], s4};
   end
+//
+//  wire  [1:0]   off_time_b;
+//  reg           a_starting;
+//  reg           b_starting;
+
+//  always @(posedge clk) begin
+    //start on time
+//    if 
+//    a_starting <= ~off_timer0;
+//    b_starting <= ~off_timer1;
+    
+//  end
 
 endmodule

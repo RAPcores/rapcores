@@ -115,8 +115,8 @@ module rapcore (
   reg [7:0] config_minimum_on_time = 54;
   reg [10:0] config_current_threshold = 1024;
   reg [7:0] config_chargepump_period = 91;
-  reg config_invert_highside = 1;
-  reg config_invert_lowside = 1;
+  reg config_invert_highside = 0;
+  reg config_invert_lowside = 0;
   /*
   reg [511:0] cos_table;
 
