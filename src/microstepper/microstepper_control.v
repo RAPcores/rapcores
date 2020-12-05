@@ -62,11 +62,6 @@ module microstepper_control (
   wire off_timer_active0 = off_timer0 > 0;
   wire off_timer_active1 = off_timer1 > 0; 
 
-  wire fastDecay0 = off_timer0 >= config_fastdecay_threshold;
-  wire fastDecay1 = off_timer1 >= config_fastdecay_threshold;
-
-  wire slowDecay0 = off_timer_active0 && fastDecay0 == 0;
-  wire slowDecay1 = off_timer_active1 && fastDecay1 == 0;
 
   wire fault0 = (minimum_on_timer0 > 0) && off_timer_active0;
   wire fault1 = (minimum_on_timer1 > 0) && off_timer_active1;
@@ -77,38 +72,54 @@ module microstepper_control (
   wire phase_b1_h, phase_b1_l, phase_b2_h, phase_b2_l;
 
   // Switch output Low
-  assign s_l[0] = !(phase_a1_l | fault);
-  assign s_l[1] = !(phase_a2_l | fault);
-  assign s_l[2] = !(phase_b1_l | fault);
-  assign s_l[3] = !(phase_b2_l | fault);
+  assign s_l[0] = config_invert_lowside ^ (phase_a1_l | fault);
+  assign s_l[1] = config_invert_lowside ^ (phase_a2_l | fault);
+  assign s_l[2] = config_invert_lowside ^ (phase_b1_l | fault);
+  assign s_l[3] = config_invert_lowside ^ (phase_b2_l | fault);
 
   // Switch output High
-  assign s_h[0] = !(phase_a1_h | fault);
-  assign s_h[1] = !(phase_a2_h | fault);
-  assign s_h[2] = !(phase_b1_h | fault);
-  assign s_h[3] = !(phase_b2_h | fault);
+  assign s_h[0] = config_invert_highside ^ (phase_a1_h | fault);
+  assign s_h[1] = config_invert_highside ^ (phase_a2_h | fault);
+  assign s_h[2] = config_invert_highside ^ (phase_b1_h | fault);
+  assign s_h[3] = config_invert_highside ^ (phase_b2_h | fault);
 
-  assign phase_a1_h = config_invert_highside ^ (slowDecay0 | (fastDecay0 ? s1r[1] : ~s1r[1]));
-  assign phase_a1_l = config_invert_lowside ^ (fastDecay0 ? ~s1r[1] : (slowDecay0 ? 1'b0 : s1r[1]));
-  assign phase_a2_h = config_invert_highside ^ (slowDecay0 | (fastDecay0 ? s2r[1] : ~s2r[1]));
-  assign phase_a2_l = config_invert_lowside ^ (fastDecay0 ? ~s2r[1] : (slowDecay0 ? 1'b0 : s2r[1]));
+  // Fast decay is first x ticks of off time
+  // default fast decay = 706
+  wire fastDecay0 = off_timer0 >= config_fastdecay_threshold;
+  wire fastDecay1 = off_timer1 >= config_fastdecay_threshold;
 
-  assign phase_b1_h = config_invert_highside ^ (slowDecay1 | (fastDecay1 ? s3r[1] : ~s3r[1]));
-  assign phase_b1_l = config_invert_lowside ^ (fastDecay1 ? ~s3r[1] : (slowDecay1 ? 1'b0 : s3r[1]));
-  assign phase_b2_h = config_invert_highside ^ (slowDecay1 | (fastDecay1 ? s4r[1] : ~s4r[1]));
-  assign phase_b2_l = config_invert_lowside ^ (fastDecay1 ? ~s4r[1] : (slowDecay1 ? 1'b0 : s4r[1]));
- 
-  // Start on time per half bridge
-  // todo concatanate config inverting for active high or low
-  wire s1_starting = s1r == 2'b10;
-  wire s2_starting = s2r == 2'b10;
-  wire s3_starting = s3r == 2'b10;
-  wire s4_starting = s4r == 2'b10;
+  // Slow decay remainder of off time
+  wire slowDecay0 = off_timer_active0 && fastDecay0 == 0;
+  wire slowDecay1 = off_timer_active1 && fastDecay1 == 0;
+  
+  // This portion of code sets up output to drive mosfets. Output ON = 0
 
-  // Bridge On Time start
-  // Blank timer and minimum on timer enable
-  //assign a_starting = s1_starting | s2_starting;
-  //assign b_starting = s3_starting | s4_starting;
+  // High side output logic
+  // If in slow decay =1
+    // OR
+    // ( fast decay and commanded to be OFF ) = 1
+    // Then OFF
+  // Else If Not slow decay (Never in slow decay at same time as fast decay)
+    // OR
+    // ( not fast decay )
+    // Then 
+    // Follow commanded output
+  // Else if fast decay
+    // invert commanded polarity
+  assign phase_a1_h = slowDecay0 | ( fastDecay0 ? s1 : ~s1 );
+  // Low side output logic
+  // low side output (invert if configured with XOR)
+  // Invert signal if fast decay commands.
+  // if slow decay the output is low. Else output = as commanded by microstep counter
+  assign phase_a1_l = fastDecay0 ? ~s1 : ( slowDecay0 ? 1'b0 : s1 );
+  assign phase_a2_h = slowDecay0 | ( fastDecay0 ? s2 : ~s2 );
+  assign phase_a2_l = fastDecay0 ? ~s2 : ( slowDecay0 ? 1'b0 : s2 );
+  assign phase_b1_h = slowDecay1 | ( fastDecay1 ? s3 : ~s3 );
+  assign phase_b1_l = fastDecay1 ? ~s3 : ( slowDecay1 ? 1'b0 : s3 );
+  assign phase_b2_h = slowDecay1 | ( fastDecay1 ? s4 : ~s4 );
+  assign phase_b2_l = fastDecay1 ? ~s4 : ( slowDecay1 ? 1'b0 : s4 );
+
+  // NEED DEAD TIME
 
   // start Off Time
   // Target peak current detected. Blank timer and Off timer not active
@@ -123,26 +134,5 @@ module microstepper_control (
     assert (!(phase_b2_l == 0 && phase_b2_h == 0));
   end
 `endif
-
-  // Shift register buffer switch output
-  // Triger start on time
-  always @(posedge clk) begin
-    s1r <= {s1r[0], s1};
-    s2r <= {s2r[0], s2};
-    s3r <= {s3r[0], s3};
-    s4r <= {s4r[0], s4};
-  end
-//
-//  wire  [1:0]   off_time_b;
-//  reg           a_starting;
-//  reg           b_starting;
-
-//  always @(posedge clk) begin
-    //start on time
-//    if 
-//    a_starting <= ~off_timer0;
-//    b_starting <= ~off_timer1;
-    
-//  end
 
 endmodule
