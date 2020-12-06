@@ -53,6 +53,7 @@ module microstepper_control (
     dir_b <= {dir[0], dir};
   end
 
+  // Switch outputs
   wire s1;
   wire s2;
   wire s3;
@@ -67,7 +68,7 @@ module microstepper_control (
   wire fault1 = (minimum_on_timer1 > 0) && off_timer_active1;
   wire fault = fault0 | fault1;
 
-  reg [1:0] s1r, s2r, s3r, s4r;
+  reg [1:0] s1r, s2r, s3r, s4r; // Switch output history [ previous : now ]
   wire phase_a1_h, phase_a1_l, phase_a2_h, phase_a2_l;
   wire phase_b1_h, phase_b1_l, phase_b2_h, phase_b2_l;
 
@@ -95,22 +96,20 @@ module microstepper_control (
   // This portion of code sets up output to drive mosfets. Output ON = 0
 
   // High side output logic
-  // If in slow decay =1
-    // OR
-    // ( fast decay and commanded to be OFF ) = 1
+  // If in slow decay = 1
+    // OR ( fast decay and commanded to be OFF ) = 1
     // Then OFF
   // Else If Not slow decay (Never in slow decay at same time as fast decay)
-    // OR
-    // ( not fast decay )
-    // Then 
-    // Follow commanded output
+    // OR ( not fast decay )
+    // Then Follow commanded output
   // Else if fast decay
     // invert commanded polarity
   assign phase_a1_h = slowDecay0 | ( fastDecay0 ? s1 : ~s1 );
   // Low side output logic
   // low side output (invert if configured with XOR)
   // Invert signal if fast decay commands.
-  // if slow decay the output is low. Else output = as commanded by microstep counter
+  // If slow decay Then the output is low. 
+  // Else output = as commanded by microstep counter
   assign phase_a1_l = fastDecay0 ? ~s1 : ( slowDecay0 ? 1'b0 : s1 );
   assign phase_a2_h = slowDecay0 | ( fastDecay0 ? s2 : ~s2 );
   assign phase_a2_l = fastDecay0 ? ~s2 : ( slowDecay0 ? 1'b0 : s2 );
@@ -121,7 +120,7 @@ module microstepper_control (
 
   // NEED DEAD TIME
 
-  // start Off Time
+  // Start Off Time
   // Target peak current detected. Blank timer and Off timer not active
   assign offtimer_en0 = analog_cmp1 & blank_timer0 == 0 & off_timer_active0 == 0;
   assign offtimer_en1 = analog_cmp2 & blank_timer1 == 0 & off_timer_active1 == 0;
