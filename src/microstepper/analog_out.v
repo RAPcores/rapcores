@@ -1,3 +1,5 @@
+`default_nettype none
+
 module analog_out (
     input  wire       clk,
     input  wire       resetn,
