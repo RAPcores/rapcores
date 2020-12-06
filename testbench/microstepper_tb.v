@@ -1,5 +1,5 @@
 `include "../src/microstepper/microstepper_top.v"
-`include "coil.v"
+`include "hbridge_coil.v"
 `include "pwm_duty.v"
 `timescale 1ns/100ps
 
@@ -12,25 +12,24 @@ module testbench(
     output          analog_cmp2,
     output          analog_out2,
     output          chargepump_pin,
-    output          fault,
-    output [12:0]   target_current1,
+    output          faultn,
 );
 
-    reg             step;
-    reg             dir;
-    reg             enable;
-    reg     [12:0]  target_current1;
-    reg     [12:0]  target_current2;
-    reg     [12:0]  current1;
-    reg     [12:0]  current2;
-    reg     [9:0]   config_offtime;
-    reg     [7:0]   config_blanktime;
-    reg     [9:0]   config_fastdecay_threshold;
-    reg     [7:0]   config_minimum_on_time;
-    reg     [10:0]  config_current_threshold;
-    reg     [7:0]   config_chargepump_period;
-    reg             config_invert_highside;
-    reg             config_invert_lowside;
+    reg                 step;
+    reg                 dir;
+    reg                 enable;
+    reg         [12:0]  target_current1;
+    reg         [12:0]  target_current2;
+    reg signed  [12:0]  current1;
+    reg signed  [12:0]  current2;
+    reg         [9:0]   config_offtime;
+    reg         [7:0]   config_blanktime;
+    reg         [9:0]   config_fastdecay_threshold;
+    reg         [7:0]   config_minimum_on_time;
+    reg         [10:0]  config_current_threshold;
+    reg         [7:0]   config_chargepump_period;
+    reg                 config_invert_highside;
+    reg                 config_invert_lowside;
 
     wire resetn;
     reg [7:0] resetn_counter = 0;
@@ -50,7 +49,7 @@ module testbench(
             analog_cmp1 <= 0;
             analog_cmp2 <= 0;
             step <= 1;
-            enable <= 1;
+            enable_in <= 1;
             config_offtime = 810;
             config_blanktime = 27;
             config_fastdecay_threshold = 706;
@@ -63,11 +62,12 @@ module testbench(
         end
         else begin
             cnt <= cnt + 1;
+            enable_in <= 1;
             step_clock <= step_clock + 1;
             step <= step_clock[11];
-            if (current1 > target_current1) analog_cmp1 <= 1;
+            if (current1[12:0] > target_current1) analog_cmp1 <= 1; // compare unsigned
             else analog_cmp1 <= 0;
-            if (current2 > target_current2) analog_cmp2 <= 1;
+            if (current2[12:0] > target_current2) analog_cmp2 <= 1;
             else analog_cmp2 <= 0;
             if (cnt <= 20'hAEC) begin
                 dir <= 1;
@@ -81,9 +81,15 @@ module testbench(
     microstepper_top stepper(
         .resetn(                        resetn                      ),
         .clk(                           clk                         ),
-        .fault(                           fault                         ),
-        .s_l(                           s_l                         ),
-        .s_h(                           s_h                         ),
+        .faultn(                        faultn                      ),
+        .phase_a1_l(                    phase_a1_l                  ),
+        .phase_a2_l(                    phase_a2_l                  ),
+        .phase_b1_l(                    phase_b1_l                  ),
+        .phase_b2_l(                    phase_b2_l                  ),
+        .phase_a1_h(                    phase_a1_h                  ),
+        .phase_a2_h(                    phase_a2_h                  ),
+        .phase_b1_h(                    phase_b1_h                  ),
+        .phase_b2_h(                    phase_b2_h                  ),
         .analog_cmp1(                   analog_cmp1                 ),
         .analog_out1(                   analog_out1                 ),
         .analog_cmp2(                   analog_cmp2                 ),
@@ -91,7 +97,7 @@ module testbench(
         .chargepump_pin(                chargepump_pin              ),
         .step(                          step                        ),
         .dir(                           dir                         ),
-        .enable(                        enable                      ),
+        .enable_in(                     enable_in                   ),
         .config_offtime(                config_offtime              ),
         .config_blanktime(              config_blanktime            ),
         .config_fastdecay_threshold(    config_fastdecay_threshold  ),
@@ -113,22 +119,22 @@ module testbench(
         .pwm(analog_out2),
         .duty(target_current2)
     );
-    coil coil1(
+    hbridge_coil hbridge_coil1(
         .clk(clk),
         .resetn(resetn),
-        .s_l0(s_l[0]),
-        .s_l1(s_l[1]),
-        .s_h0(s_h[0]),
-        .s_h1(s_h[1]),
+        .low_1(phase_a1_l),
+        .high_1(phase_a1_h),
+        .low_2(phase_a2_l),
+        .high_2(phase_a2_h),
         .current(current1)
     );
-    coil coil2(
+    hbridge_coil hbridge_coil2(
         .clk(clk),
         .resetn(resetn),
-        .s_l0(s_l[2]),
-        .s_l1(s_l[3]),
-        .s_h0(s_h[2]),
-        .s_h1(s_h[3]),
+        .low_1(phase_b1_l),
+        .high_1(phase_b1_h),
+        .low_2(phase_b2_l),
+        .high_2(phase_b2_h),
         .current(current2)
     );
 endmodule
