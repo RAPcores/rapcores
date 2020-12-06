@@ -24,7 +24,7 @@ GENERATEDDIR = ./src/generated/
 SRCDIR = ./src/
 BUILDDIR = ./build/
 BUILD = $(BUILDDIR)$(BOARD)
-RAPCOREFILES := boards/$(BOARD)/$(BOARD).v $(wildcard src/*.v) $(wildcard src/microstepper/*.v)
+RAPCOREFILES := boards/$(BOARD)/$(BOARD).v src/constants.v src/macro_params.v src/pwm.v src/quad_enc.v src/spi.v src/stepper.v src/dda_timer.v src/rapcore.v $(wildcard src/microstepper/*.v)
 
 all: $(BUILD).bit
 
