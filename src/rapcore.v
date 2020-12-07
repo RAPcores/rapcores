@@ -80,89 +80,23 @@ module rapcore (
   // Stepper Setup
   // TODO: Generate statement?
   // Stepper Config
-  reg [2:0] microsteps = 2;
-  reg [7:0] current = 140;
-  reg [9:0] config_offtime = 810;
-  reg [7:0] config_blanktime = 27;
-  reg [9:0] config_fastdecay_threshold = 706;
-  reg [7:0] config_minimum_on_time = 54;
-  reg [10:0] config_current_threshold = 1024;
-  reg [7:0] config_chargepump_period = 91;
-  reg config_invert_highside = 0;
-  reg config_invert_lowside = 0;
-  reg [511:0] cos_table;
+  wire [2:0] microsteps;
+  wire [7:0] current;
+  wire [9:0] config_offtime;
+  wire [7:0] config_blanktime;
+  wire [9:0] config_fastdecay_threshold;
+  wire [7:0] config_minimum_on_time;
+  wire [10:0] config_current_threshold;
+  wire [7:0] config_chargepump_period;
+  wire config_invert_highside;
+  wire config_invert_lowside;
+  wire [511:0] cos_table;
 
   // Stepper control lines
   wire step;
   wire dir;
   reg enable;
 
-  initial begin
-    cos_table	 [ 	7	 : 	0	 ] = 	255	;
-    cos_table	 [ 	15	 : 	8	 ] = 	255	;
-    cos_table	 [ 	23	 : 	16	 ] = 	255	;
-    cos_table	 [ 	31	 : 	24	 ] = 	254	;
-    cos_table	 [ 	39	 : 	32	 ] = 	254	;
-    cos_table	 [ 	47	 : 	40	 ] = 	253	;
-    cos_table	 [ 	55	 : 	48	 ] = 	252	;
-    cos_table	 [ 	63	 : 	56	 ] = 	251	;
-    cos_table	 [ 	71	 : 	64	 ] = 	250	;
-    cos_table	 [ 	79	 : 	72	 ] = 	249	;
-    cos_table	 [ 	87	 : 	80	 ] = 	247	;
-    cos_table	 [ 	95	 : 	88	 ] = 	246	;
-    cos_table	 [ 	103	 : 	96	 ] = 	244	;
-    cos_table	 [ 	111	 : 	104	 ] = 	242	;
-    cos_table	 [ 	119	 : 	112	 ] = 	240	;
-    cos_table	 [ 	127	 : 	120	 ] = 	238	;
-    cos_table	 [ 	135	 : 	128	 ] = 	236	;
-    cos_table	 [ 	143	 : 	136	 ] = 	233	;
-    cos_table	 [ 	151	 : 	144	 ] = 	231	;
-    cos_table	 [ 	159	 : 	152	 ] = 	228	;
-    cos_table	 [ 	167	 : 	160	 ] = 	225	;
-    cos_table	 [ 	175	 : 	168	 ] = 	222	;
-    cos_table	 [ 	183	 : 	176	 ] = 	219	;
-    cos_table	 [ 	191	 : 	184	 ] = 	215	;
-    cos_table	 [ 	199	 : 	192	 ] = 	212	;
-    cos_table	 [ 	207	 : 	200	 ] = 	208	;
-    cos_table	 [ 	215	 : 	208	 ] = 	205	;
-    cos_table	 [ 	223	 : 	216	 ] = 	201	;
-    cos_table	 [ 	231	 : 	224	 ] = 	197	;
-    cos_table	 [ 	239	 : 	232	 ] = 	193	;
-    cos_table	 [ 	247	 : 	240	 ] = 	189	;
-    cos_table	 [ 	255	 : 	248	 ] = 	185	;
-    cos_table	 [ 	263	 : 	256	 ] = 	180	;
-    cos_table	 [ 	271	 : 	264	 ] = 	176	;
-    cos_table	 [ 	279	 : 	272	 ] = 	171	;
-    cos_table	 [ 	287	 : 	280	 ] = 	167	;
-    cos_table	 [ 	295	 : 	288	 ] = 	162	;
-    cos_table	 [ 	303	 : 	296	 ] = 	157	;
-    cos_table	 [ 	311	 : 	304	 ] = 	152	;
-    cos_table	 [ 	319	 : 	312	 ] = 	147	;
-    cos_table	 [ 	327	 : 	320	 ] = 	142	;
-    cos_table	 [ 	335	 : 	328	 ] = 	136	;
-    cos_table	 [ 	343	 : 	336	 ] = 	131	;
-    cos_table	 [ 	351	 : 	344	 ] = 	126	;
-    cos_table	 [ 	359	 : 	352	 ] = 	120	;
-    cos_table	 [ 	367	 : 	360	 ] = 	115	;
-    cos_table	 [ 	375	 : 	368	 ] = 	109	;
-    cos_table	 [ 	383	 : 	376	 ] = 	103	;
-    cos_table	 [ 	391	 : 	384	 ] = 	98	;
-    cos_table	 [ 	399	 : 	392	 ] = 	92	;
-    cos_table	 [ 	407	 : 	400	 ] = 	86	;
-    cos_table	 [ 	415	 : 	408	 ] = 	80	;
-    cos_table	 [ 	423	 : 	416	 ] = 	74	;
-    cos_table	 [ 	431	 : 	424	 ] = 	68	;
-    cos_table	 [ 	439	 : 	432	 ] = 	62	;
-    cos_table	 [ 	447	 : 	440	 ] = 	56	;
-    cos_table	 [ 	455	 : 	448	 ] = 	50	;
-    cos_table	 [ 	463	 : 	456	 ] = 	44	;
-    cos_table	 [ 	471	 : 	464	 ] = 	37	;
-    cos_table	 [ 	479	 : 	472	 ] = 	31	;
-    cos_table	 [ 	487	 : 	480	 ] = 	25	;
-    cos_table	 [ 	495	 : 	488	 ] = 	19	;
-    cos_table	 [ 	503	 : 	496	 ] = 	13	;
-    cos_table	 [ 	511	 : 	504	 ] = 	6	;
-  end
 
   //
   // Stepper Modules
@@ -235,10 +169,12 @@ module rapcore (
 
   spi_state_machine spifsm (
     .CLK(CLK),
+
     .SCK(SCK),
     .CS(CS),
     .COPI(COPI),
     .CIPO(CIPO),
+
     .microsteps(microsteps),
     .current(current),
     .config_offtime(config_offtime),
@@ -249,8 +185,14 @@ module rapcore (
     .config_chargepump_period(config_chargepump_period),
     .config_invert_highside(config_invert_highside),
     .config_invert_lowside(config_invert_lowside),
-    //.cos_table(cos_table), // TODO
+    .cos_table(cos_table),
+
     .encoder_count(encoder_count),
+
+    .step(step),
+    .dir(dir),
+    .enable(enable),
+
     `ifdef BUFFER_DTR
       .BUFFER_DTR(BUFFER_DTR),
     `endif
