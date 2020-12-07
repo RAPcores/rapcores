@@ -1,3 +1,4 @@
+`default_nettype none
 module mytimer_10 (
     input               clk,
     input               resetn,
