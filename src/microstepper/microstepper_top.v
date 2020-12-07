@@ -2,8 +2,14 @@
 module microstepper_top (
     input        clk,
     input        resetn,
-    output [3:0] s_l,
-    output [3:0] s_h,
+    output       phase_a1_l,
+    output       phase_a2_l,
+    output       phase_b1_l,
+    output       phase_b2_l,
+    output       phase_a1_h,
+    output       phase_a2_h,
+    output       phase_b1_h,
+    output       phase_b2_h,
     input        analog_cmp1,
     output       analog_out1,
     input        analog_cmp2,
@@ -11,6 +17,7 @@ module microstepper_top (
     output       chargepump_pin,
     input [9:0]  config_offtime,
     input [7:0]  config_blanktime,
+    input [2:0]  config_deadtime,
     input [9:0]  config_fastdecay_threshold,
     input [7:0]  config_minimum_on_time,
     input [10:0] config_current_threshold,
@@ -20,8 +27,8 @@ module microstepper_top (
     //input [511:0] cos_table,
     input        step,
     input        dir,
-    input        enable,
-    output       fault,
+    input        enable_in,
+    output       faultn,
 );
   wire [5:0] cos_index1;
   wire [5:0] cos_index2;
@@ -43,25 +50,29 @@ module microstepper_top (
   microstepper_control microstepper_control0(
     .clk(clk),
     .resetn(resetn),
-    .s_l(s_l),
-    .s_h(s_h),
+    .phase_a1_l_out(phase_a1_l),
+    .phase_a2_l_out(phase_a2_l),
+    .phase_b1_l_out(phase_b1_l),
+    .phase_b2_l_out(phase_b2_l),
+    .phase_a1_h_out(phase_a1_h),
+    .phase_a2_h_out(phase_a2_h),
+    .phase_b1_h_out(phase_b1_h),
+    .phase_b2_h_out(phase_b2_h),
     .config_fastdecay_threshold(config_fastdecay_threshold),
     .config_invert_highside(config_invert_highside),
     .config_invert_lowside(config_invert_lowside),
     .step(step),
     .dir(dir),
-    .enable(enable),
+    .enable_in(enable_in),
     .analog_cmp1(analog_cmp1),
     .analog_cmp2(analog_cmp2),
-    .fault(fault),
+    .faultn(faultn),
     .s1(s1),
     .s2(s2),
     .s3(s3),
     .s4(s4),
     .offtimer_en0(offtimer_en0),
     .offtimer_en1(offtimer_en1),
-    .a_starting(a_starting),
-    .b_starting(b_starting),
     .phase_ct(phase_ct),
     .blank_timer0(blank_timer0),
     .blank_timer1(blank_timer1),
@@ -69,9 +80,10 @@ module microstepper_top (
     .off_timer1(off_timer1),
     .minimum_on_timer0(minimum_on_timer0),
     .minimum_on_timer1(minimum_on_timer1),
-//    .off_timer0_done         (off_timer0_done),
-//    .off_timer0_done         (off_timer1_done),
 );
+
+wire    [10:0]  Woff_timer0_done;
+wire    [10:0]  off_timer0_done;
 
   mytimer_10 offtimer0 (
       .clk         (clk),
@@ -110,7 +122,7 @@ module microstepper_top (
   mytimer_8 minimumontimer0 (
       .clk         (clk),
       .resetn      (resetn),
-      .start_enable(a_starting),
+      .start_enable(off_timer0_done),
       .start_time  (config_minimum_on_time),
       .timer       (minimum_on_timer0)
   );
@@ -118,7 +130,7 @@ module microstepper_top (
   mytimer_8 minimumontimer1 (
       .clk         (clk),
       .resetn      (resetn),
-      .start_enable(b_starting),
+      .start_enable(off_timer1_done),
       .start_time  (config_minimum_on_time),
       .timer       (minimum_on_timer1)
   );

@@ -13,6 +13,7 @@ module testbench(
     output          analog_out2,
     output          chargepump_pin,
     output          faultn,
+    output          current_sum_polarity,
 );
 
     reg                 step;
@@ -43,11 +44,13 @@ module testbench(
     reg             analog_cmp2;
     reg     [40:0]  step_clock;
     reg     [20:0]  cnt;
+    reg     [12:0]  current_abs1;
+    reg     [12:0]  current_abs2;
     always @(posedge clk) begin
         if (!resetn) begin
             cnt <= 0;
-            analog_cmp1 <= 0;
-            analog_cmp2 <= 0;
+            analog_cmp1 <= 1;
+            analog_cmp2 <= 1;
             step <= 1;
             enable_in <= 1;
             config_offtime = 810;
@@ -56,25 +59,34 @@ module testbench(
             config_minimum_on_time = 54;
             config_current_threshold = 1024;
             config_chargepump_period = 91;
-            config_invert_highside = 0;
-            config_invert_lowside = 0;
+            config_invert_highside = 1;
+            config_invert_lowside = 1;
             step_clock = 0;
         end
         else begin
             cnt <= cnt + 1;
             enable_in <= 1;
+            if (current1[12] == 1'b1) begin
+                current_abs1 = -current;
+            end
+            else begin
+                current_abs1 = current1;
+            end
+            if (current2[12] == 1'b1) begin
+                current_abs2 = -current2;
+            end
+            else begin
+                current_abs2 = current2;
+            end
             step_clock <= step_clock + 1;
-            step <= step_clock[11];
-            if (current1[12:0] > target_current1) analog_cmp1 <= 1; // compare unsigned
-            else analog_cmp1 <= 0;
-            if (current2[12:0] > target_current2) analog_cmp2 <= 1;
-            else analog_cmp2 <= 0;
-            if (cnt <= 20'hAEC) begin
+            step <= step_clock[10];
+            analog_cmp1 <= (current_abs1[11:0] >= target_current1[11:0]); // compare unsigned
+            analog_cmp2 <= (current_abs2[11:0] >= target_current2[11:0]);
+            if (cnt <= 20'h4CA9) begin
                 dir <= 1;
             end
-            else if (cnt <= 20'hEBE) begin
+            else
                 dir <= 0;
-            end
         end
     end
 
@@ -126,7 +138,9 @@ module testbench(
         .high_1(phase_a1_h),
         .low_2(phase_a2_l),
         .high_2(phase_a2_h),
-        .current(current1)
+        .current(current1),
+        .current_sum_polarity(current_sum_polarity),
+        .polarity_invert_config(1)
     );
     hbridge_coil hbridge_coil2(
         .clk(clk),
@@ -135,7 +149,9 @@ module testbench(
         .high_1(phase_b1_h),
         .low_2(phase_b2_l),
         .high_2(phase_b2_h),
-        .current(current2)
+        .current(current2),
+        .current_sum_polarity(current_sum_polarity),
+        .polarity_invert_config(1)
     );
 endmodule
 
