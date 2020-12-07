@@ -1,4 +1,4 @@
-
+`default_nettype none
 module microstepper_top (
     input        clk,
     input        resetn,
@@ -46,6 +46,7 @@ module microstepper_top (
   wire   [9:0]   off_timer1;
   wire   [7:0]   minimum_on_timer0;
   wire   [7:0]   minimum_on_timer1;
+  wire           off_timer1_done;
   
   microstepper_control microstepper_control0(
     .clk(clk),
