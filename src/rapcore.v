@@ -80,7 +80,6 @@ module rapcore (
   // Stepper Setup
   // TODO: Generate statement?
   // Stepper Config
-<<<<<<< HEAD
   wire [2:0] microsteps;
   wire [7:0] current;
   wire [9:0] config_offtime;
@@ -91,21 +90,6 @@ module rapcore (
   wire [7:0] config_chargepump_period;
   wire config_invert_highside;
   wire config_invert_lowside;
-  wire [511:0] cos_table;
-=======
-  reg [2:0] microsteps = 2;
-  reg [7:0] current = 140;
-  reg [9:0] config_offtime = 810;
-  reg [7:0] config_blanktime = 27;
-  reg [9:0] config_fastdecay_threshold = 706;
-  reg [7:0] config_minimum_on_time = 54;
-  reg [10:0] config_current_threshold = 1024;
-  reg [7:0] config_chargepump_period = 91;
-  reg config_invert_highside = 0;
-  reg config_invert_lowside = 0;
-  /*
-  reg [511:0] cos_table;
->>>>>>> merget tb_m
 
   // Stepper control lines
   wire step;
@@ -210,112 +194,9 @@ module rapcore (
 
     .encoder_count(encoder_count),
 
-<<<<<<< HEAD
     .step(step),
     .dir(dir),
     .enable(enable),
-=======
-        // Coordinated Move
-        `CMD_COORDINATED_STEP: begin
-
-          // Get Direction Bits
-          dir_r[writemoveind] <= word_data_received[0];
-
-          // Store encoder values across all axes Now
-          encoder_store <= encoder_count;
-
-        end
-
-        // Motor Enable/disable
-        `CMD_MOTOR_ENABLE: begin
-          enable <= word_data_received[0];
-        end
-
-        // Clock divisor (24 bit)
-        `CMD_CLK_DIVISOR: begin
-          clock_divisor[7:0] <= word_data_received[7:0];
-        end
-
-        // Set Microstepping
-        `CMD_MOTORCONFIG: begin
-          // TODO needs to be power of two
-          current[7:0] <= word_data_received[15:8];
-          microsteps[2:0] <= word_data_received[2:0];
-        end
-
-        // Set Microstepping Parameters
-        `CMD_MICROSTEPPER_CONFIG: begin
-          config_offtime[9:0] <= word_data_received[39:30];
-          config_blanktime[7:0] <= word_data_received[29:22];
-          config_fastdecay_threshold[9:0] <= word_data_received[21:12];
-          config_minimum_on_time[7:0] <= word_data_received[18:11];
-          config_current_threshold[10:0] <= word_data_received[10:0];
-        end
-
-        // Set chargepump period
-        `CMD_CHARGEPUMP: begin
-          config_chargepump_period[7:0] <= word_data_received[7:0];
-        end
-
-        // Invert Bridge outputs
-        `CMD_BRIDGEINVERT: begin
-          config_invert_highside <= word_data_received[1];
-          config_invert_lowside <= word_data_received[0];
-        end
-/*
-        // Write to Cosine Table
-        `CMD_COSINE_CONFIG: begin
-          //config_cosine_table[word_data_received[35:32]] <= word_data_received[31:0];
-          cos_table[word_data_received[37:32]] <= word_data_received[7:0];
-          //cos_table[word_data_received[35:32]+3] <= word_data_received[31:25];
-          //cos_table[word_data_received[35:32]+2] <= word_data_received[24:16];
-          //cos_table[word_data_received[35:32]+1] <= word_data_received[15:8];
-          //cos_table[word_data_received[35:32]] <= word_data_received[7:0];
-        end
-*/
-        // API Version
-        `CMD_API_VERSION: begin
-          word_send_data[7:0] <= `VERSION_PATCH;
-          word_send_data[15:8] <= `VERSION_MINOR;
-          word_send_data[23:16] <= `VERSION_MAJOR;
-        end
-
-      endcase
-
-    // Addition Word Processing
-    end else begin
-
-      message_word_count <= message_word_count + 1;
-
-      case (message_header)
-        // Move Routine
-        `CMD_COORDINATED_STEP: begin
-          // the first non-header word is the move duration
-          case (message_word_count)
-            1: begin
-              move_duration[writemoveind][63:0] <= word_data_received[63:0];
-              //word_send_data[63:0] = last_steps_taken[63:0]; // Prep to send steps
-            end
-            2: begin
-              increment[writemoveind][63:0] <= word_data_received[63:0];
-              word_send_data[63:0] <= encoder_store[63:0]; // Prep to send encoder read
-            end
-            3: begin
-                incrementincrement[writemoveind][63:0] <= word_data_received[63:0];
-                message_word_count <= 0;
-                stepready[writemoveind] <= ~stepready[writemoveind];
-                writemoveind <= writemoveind + 1'b1;
-                message_header <= 8'b0; // Reset Message Header
-                `ifdef FORMAL
-                  assert(writemoveind <= `MOVE_BUFFER_SIZE);
-                `endif
-            end
-          endcase
-        end
-      endcase
-    end
-  end
->>>>>>> merget tb_m
 
     `ifdef BUFFER_DTR
       .BUFFER_DTR(BUFFER_DTR),
