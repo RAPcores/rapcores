@@ -69,8 +69,8 @@ module testbench(
             config_minimum_on_time = 54;
             config_current_threshold = 1024;
             config_chargepump_period = 91;
-            config_invert_highside = 0;
-            config_invert_lowside = 0;
+            config_invert_highside = 1;
+            config_invert_lowside = 1;
             step_clock = 0;
         end
         else begin
