@@ -13,6 +13,7 @@ read -formal spi.v
 read -formal stepper.v
 read -formal quad_enc.v
 read -formal pwm.v
+read -formal spi_state_machine.v
 read -formal microstepper_top.v
 read -formal analog_out.v
 read -formal chargepump.v
@@ -29,6 +30,7 @@ src/constants.v
 src/dda_timer.v
 src/spi.v
 src/stepper.v
+src/spi_state_machine.v
 src/rapcore.v
 src/quad_enc.v
 src/pwm.v
