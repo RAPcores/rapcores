@@ -58,6 +58,7 @@ module rapcore (
       output STEPOUTPUT,
       output DIROUTPUT,
     `endif
+      output ENABLE,
 );
 
   // Global Reset (TODO: Make input pin)
@@ -233,6 +234,7 @@ module rapcore (
   `endif
 
 
+
   //
   // Encoder
   //
@@ -283,18 +285,37 @@ module rapcore (
     assign BUFFER_DTR = ~(~stepfinished == stepready);
   `endif
 
+  // If there are no external (step,dir) inputs or inputs.
   `ifndef STEPINPUT
-    assign dir = dir_r[moveind]; // set direction
-    assign step = dda_step;
-  `else
+    `ifndef STEPOUTPUT
+      assign dir = dir_r[moveind]; // set direction
+      assign step = dda_step;
+    `endif
+  `endif
+  
+  // If there are step inputs but no outputs
+  `ifdef STEPINPUT
+    `ifndef STEPOUTPUT
+      wire step;
+      wire dir;
+    `endif
     assign dir = dir_r[moveind] | DIRINPUT; // set direction
     assign step = dda_step | STEPINPUT;
   `endif
 
+  // If there are step outputs but no inputs
   `ifdef STEPOUTPUT
+     `ifndef STEPINPUT
+        wire step;
+        wire dir;
+      `endif
     assign STEPOUTPUT = step;
     assign DIROUTPUT = dir;
   `endif
+
+  // Enable Output
+  reg enable = 1'b1;
+  assign ENABLE = enable;
 
   dda_timer dda (.CLK(CLK),
                 .clock_divisor(clock_divisor),

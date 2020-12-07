@@ -13,13 +13,13 @@
 
 // Motor Definitions
 //`define DUAL_HBRIDGE 1
-`define ULTIBRIDGE 1
+//`define ULTIBRIDGE 1
 
 // Encoder Count
 `define QUAD_ENC 1
 
 // External Step/DIR Input
-`define STEPINPUT
+//`define STEPINPUT
 
 // Output Step/DIR signals
 `define STEPOUTPUT
