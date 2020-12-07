@@ -192,7 +192,7 @@ module rapcore (
     cos_table	 [ 	503	 : 	496	 ] = 	13	;
     cos_table	 [ 	511	 : 	504	 ] = 	6	;
   end
-
+*/
   //
   // Stepper Modules
   //
