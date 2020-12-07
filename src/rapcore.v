@@ -193,7 +193,6 @@ module rapcore (
     .config_chargepump_period(config_chargepump_period),
     .config_invert_highside(config_invert_highside),
     .config_invert_lowside(config_invert_lowside),
-    .cos_table(cos_table),
 
     .encoder_count(encoder_count),
 

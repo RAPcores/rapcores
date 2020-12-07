@@ -83,8 +83,8 @@ module microstepper_top (
     .minimum_on_timer1(minimum_on_timer1),
 );
 
-wire    [10:0]  off_timer0_done;
-wire    [10:0]  off_timer1_done;
+wire        off_timer0_done;
+wire        off_timer1_done;
 
   mytimer_10 #(
       .WIDTH(10)
