@@ -1,25 +1,29 @@
 module microstepper_control (
     input           clk,
     input           resetn,
-    output  [3:0]   s_l,
-    output  [3:0]   s_h,
+    output          phase_a1_l_out,
+    output          phase_a2_l_out,
+    output          phase_b1_l_out,
+    output          phase_b2_l_out,
+    output          phase_a1_h_out,
+    output          phase_a2_h_out,
+    output          phase_b1_h_out,
+    output          phase_b2_h_out,
     input   [9:0]   config_fastdecay_threshold,
     input           config_invert_highside,
     input           config_invert_lowside,
     input           step,
     input           dir,
-    input           enable,
+    input           enable_in,
     input           analog_cmp1,
     input           analog_cmp2,
-    output          fault,
+    output          faultn,
     input           s1,
     input           s2,
     input           s3,
     input           s4,
     output          offtimer_en0,
     output          offtimer_en1,
-    output          a_starting,
-    output          b_starting,
     output  [7:0]   phase_ct,
     input   [7:0]   blank_timer0,
     input   [7:0]   blank_timer1,
@@ -27,103 +31,110 @@ module microstepper_control (
     input   [9:0]   off_timer1,
     input   [7:0]   minimum_on_timer0,
     input   [7:0]   minimum_on_timer1,
-//    input           off_timer0_done,
-//    input           off_timer1_done,
-//    output step_b_out,
+//    input           mixed_decay_enable,
 );
   reg [7:0] phase_ct;
-//  reg [1:0] step_b;
+  reg [2:0] step_r;
+  reg [1:0] dir_r;
+  
+  reg       enable;
+  
+  always @(posedge clk) begin
+    if (!resetn)
+      enable <= 0;
+    else
+      enable <= enable_in;
+    step_r <= {step_r[1:0], step};
+    dir_r <= {dir_r[0], dir};
+  end
 
-//  wire step_edge = (step_b[2] ^ step_b[1]) && step_b[2];
-  // step edge rising falling
-
-  reg [2:0] step_b;
-  reg [1:0] dir_b;
-//  wire step_b_out = step_b[2];
-  wire step_rising = (step_b == 2'b01);
+  wire step_rising = (step_r == 2'b01);
 
   always @(posedge clk) begin
     if (!resetn) begin
       phase_ct <= 0;
     end
-    else if (step_rising) begin
-        phase_ct <= dir_b[1] ? phase_ct + 1 : phase_ct - 1;
-    end
-    step_b <= {step_b[1:0], step};
-    dir_b <= {dir[0], dir};
+    else if (step_rising)
+        phase_ct <= dir_r[1] ? phase_ct + 1 : phase_ct - 1;
   end
 
-  // Switch outputs
+  // Phase polarity control signal from microstep counter
   wire s1;
   wire s2;
   wire s3;
   wire s4;
 
-  // Off Timer active flag 
-  wire off_timer_active0 = off_timer0 > 0;
-  wire off_timer_active1 = off_timer1 > 0; 
+  // Fault (active low) if off timer starts before minimum on timer expires
+  wire fault0 = off_timer0 && minimum_on_timer0 && enable;
+  wire fault1 = off_timer1 && minimum_on_timer1 && enable;
+  reg faultn;
+  // Fault latches until reset
+  always @(posedge clk) begin
+      if (!resetn) begin
+        fault0 <= 0;
+        fault1 <= 0;
+        faultn <= 1;
+      end
+      else if (faultn) begin
+        faultn <= ( fault0 | fault1 ) && enable;
+      end
+    end
 
-
-  wire fault0 = (minimum_on_timer0 > 0) && off_timer_active0;
-  wire fault1 = (minimum_on_timer1 > 0) && off_timer_active1;
-  wire fault = fault0 | fault1;
-
-  reg [1:0] s1r, s2r, s3r, s4r; // Switch output history [ previous : now ]
   wire phase_a1_h, phase_a1_l, phase_a2_h, phase_a2_l;
   wire phase_b1_h, phase_b1_l, phase_b2_h, phase_b2_l;
 
-  // Switch output Low
-  assign s_l[0] = config_invert_lowside ^ (phase_a1_l | fault);
-  assign s_l[1] = config_invert_lowside ^ (phase_a2_l | fault);
-  assign s_l[2] = config_invert_lowside ^ (phase_b1_l | fault);
-  assign s_l[3] = config_invert_lowside ^ (phase_b2_l | fault);
+  // Low side output polarity, enable, and fault shutdown
+  assign phase_a1_l_out = config_invert_lowside ^ ( phase_a1_l | !enable );
+  assign phase_a2_l_out = config_invert_lowside ^ ( phase_a2_l | !enable );
+  assign phase_b1_l_out = config_invert_lowside ^ ( phase_b1_l | !enable );
+  assign phase_b2_l_out = config_invert_lowside ^ ( phase_b2_l | !enable );
 
-  // Switch output High
-  assign s_h[0] = config_invert_highside ^ (phase_a1_h | fault);
-  assign s_h[1] = config_invert_highside ^ (phase_a2_h | fault);
-  assign s_h[2] = config_invert_highside ^ (phase_b1_h | fault);
-  assign s_h[3] = config_invert_highside ^ (phase_b2_h | fault);
+  // High side
+  assign phase_a1_h_out = config_invert_highside ^  ( phase_a1_h && !faultn && enable );
+  assign phase_a2_h_out = config_invert_highside ^  ( phase_a2_h && !faultn && enable );
+  assign phase_b1_h_out = config_invert_highside ^  ( phase_b1_h && !faultn && enable );
+  assign phase_b2_h_out = config_invert_highside ^  ( phase_b2_h && !faultn && enable );
 
   // Fast decay is first x ticks of off time
   // default fast decay = 706
   wire fastDecay0 = off_timer0 >= config_fastdecay_threshold;
   wire fastDecay1 = off_timer1 >= config_fastdecay_threshold;
 
-  // Slow decay remainder of off time
-  wire slowDecay0 = off_timer_active0 && fastDecay0 == 0;
-  wire slowDecay1 = off_timer_active1 && fastDecay1 == 0;
-  
-  // This portion of code sets up output to drive mosfets. Output ON = 0
+  // Slow decay remainder of off time - Active high
+  wire slowDecay0 = off_timer0 && !fastDecay0;
+  wire slowDecay1 = off_timer1 && !fastDecay1;
 
-  // High side output logic
-  // If in slow decay = 1
-    // OR ( fast decay and commanded to be OFF ) = 1
-    // Then OFF
-  // Else If Not slow decay (Never in slow decay at same time as fast decay)
-    // OR ( not fast decay )
-    // Then Follow commanded output
-  // Else if fast decay
-    // invert commanded polarity
-  assign phase_a1_h = slowDecay0 | ( fastDecay0 ? s1 : ~s1 );
+  // This portion of code sets up output to drive mosfets.
+  // Output ON = 1 when config_invert_lowside and config_invert_highside == 0
+
+  // High side is ON if slow decay is NOT active
+  // AND 
+  // (
+  // In fast decay AND would normally be off this phase
+  // OR
+  // Should be on this phase / polarity
+  assign phase_a1_h = !slowDecay0 && ( fastDecay0 ? !s1 : s1 );
+  assign phase_a2_h = !slowDecay0 && ( fastDecay0 ? !s2 : s2 );
+  assign phase_b1_h = !slowDecay1 && ( fastDecay1 ? !s3 : s3 );
+  assign phase_b2_h = !slowDecay1 && ( fastDecay1 ? !s4 : s4 );
   // Low side output logic
-  // low side output (invert if configured with XOR)
   // Invert signal if fast decay commands.
   // If slow decay Then the output is low. 
   // Else output = as commanded by microstep counter
-  assign phase_a1_l = fastDecay0 ? ~s1 : ( slowDecay0 ? 1'b0 : s1 );
-  assign phase_a2_h = slowDecay0 | ( fastDecay0 ? s2 : ~s2 );
-  assign phase_a2_l = fastDecay0 ? ~s2 : ( slowDecay0 ? 1'b0 : s2 );
-  assign phase_b1_h = slowDecay1 | ( fastDecay1 ? s3 : ~s3 );
-  assign phase_b1_l = fastDecay1 ? ~s3 : ( slowDecay1 ? 1'b0 : s3 );
-  assign phase_b2_h = slowDecay1 | ( fastDecay1 ? s4 : ~s4 );
-  assign phase_b2_l = fastDecay1 ? ~s4 : ( slowDecay1 ? 1'b0 : s4 );
 
-  // NEED DEAD TIME
-
+  // Low side is ON if slow decay is active
+  // OR
+  // Fast decay and would normally be off this phase
+  assign phase_a1_l = slowDecay0 | ( fastDecay0 ? s1 : !s1 );
+  assign phase_a2_l = slowDecay0 | ( fastDecay0 ? s2 : !s2 );
+  assign phase_b1_l = slowDecay1 | ( fastDecay1 ? s3 : !s3 );
+  assign phase_b2_l = slowDecay1 | ( fastDecay1 ? s4 : !s4 );
+  
+  // Fixed off time peak current controller
   // Start Off Time
   // Target peak current detected. Blank timer and Off timer not active
-  assign offtimer_en0 = analog_cmp1 & blank_timer0 == 0 & off_timer_active0 == 0;
-  assign offtimer_en1 = analog_cmp2 & blank_timer1 == 0 & off_timer_active1 == 0;
+  assign offtimer_en0 = analog_cmp1 & !blank_timer0 & !off_timer0;
+  assign offtimer_en1 = analog_cmp2 & !blank_timer1 & !off_timer1;
 
 `ifdef FORMAL
   always @(*) begin
