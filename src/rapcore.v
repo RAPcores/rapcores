@@ -117,6 +117,7 @@ module rapcore (
   reg [7:0] config_chargepump_period = 91;
   reg config_invert_highside = 0;
   reg config_invert_lowside = 0;
+  /*
   reg [511:0] cos_table;
 
   // Stepper control lines
@@ -230,7 +231,7 @@ module rapcore (
       .config_chargepump_period (config_chargepump_period),
       .config_invert_highside (config_invert_highside),
       .config_invert_lowside (config_invert_lowside),
-      .cos_table (cos_table),
+      //.cos_table (cos_table),
       .step (step),
       .dir (dir),
       .enable(enable),
@@ -393,7 +394,7 @@ module rapcore (
           config_invert_highside <= word_data_received[1];
           config_invert_lowside <= word_data_received[0];
         end
-
+/*
         // Write to Cosine Table
         `CMD_COSINE_CONFIG: begin
           //config_cosine_table[word_data_received[35:32]] <= word_data_received[31:0];
@@ -403,7 +404,7 @@ module rapcore (
           //cos_table[word_data_received[35:32]+1] <= word_data_received[15:8];
           //cos_table[word_data_received[35:32]] <= word_data_received[7:0];
         end
-
+*/
         // API Version
         `CMD_API_VERSION: begin
           word_send_data[7:0] <= `VERSION_PATCH;
