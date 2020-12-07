@@ -213,6 +213,9 @@ module rapcore (
   `endif
 
   `ifdef ULTIBRIDGE
+    wire step;
+    wire dir;
+    reg enable;
     microstepper_top microstepper0(
       .clk(CLK),
       .resetn( resetn),
