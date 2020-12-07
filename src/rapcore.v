@@ -240,7 +240,7 @@ module rapcore (
       //.cos_table (cos_table),
       .step (step),
       .dir (dir),
-      .enable(enable),
+      .enable_in(enable),
       );
   `endif
 

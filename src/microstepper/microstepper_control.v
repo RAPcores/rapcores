@@ -1,3 +1,4 @@
+`default_nettype none
 module microstepper_control (
     input           clk,
     input           resetn,
@@ -71,8 +72,8 @@ module microstepper_control (
   // Fault latches until reset
   always @(posedge clk) begin
       if (!resetn) begin
-        fault0 <= 0;
-        fault1 <= 0;
+//        fault0 <= 0;
+//        fault1 <= 0;
         faultn <= 1;
       end
       else if (faultn) begin
@@ -104,35 +105,26 @@ module microstepper_control (
   wire slowDecay0 = off_timer0 && !fastDecay0;
   wire slowDecay1 = off_timer1 && !fastDecay1;
 
-  // This portion of code sets up output to drive mosfets.
-  // Output ON = 1 when config_invert_lowside and config_invert_highside == 0
-
-  // High side is ON if slow decay is NOT active
+  // Half bridge high side is active
+  // WHEN slow decay is NOT active
   // AND 
-  // (
-  // In fast decay AND would normally be off this phase
+  // ( fast decay active AND would normally be off this phase )
   // OR
-  // Should be on this phase / polarity
+  // Should be on to drive this phase / polarity (microstepper_counter)
   assign phase_a1_h = !slowDecay0 && ( fastDecay0 ? !s1 : s1 );
   assign phase_a2_h = !slowDecay0 && ( fastDecay0 ? !s2 : s2 );
   assign phase_b1_h = !slowDecay1 && ( fastDecay1 ? !s3 : s3 );
   assign phase_b2_h = !slowDecay1 && ( fastDecay1 ? !s4 : s4 );
-  // Low side output logic
-  // Invert signal if fast decay commands.
-  // If slow decay Then the output is low. 
-  // Else output = as commanded by microstep counter
-
-  // Low side is ON if slow decay is active
+  // Low side is active
+  // WHEN slow decay is active
   // OR
-  // Fast decay and would normally be off this phase
+  // ( Fast decay active AND would normally be off this phase )
   assign phase_a1_l = slowDecay0 | ( fastDecay0 ? s1 : !s1 );
   assign phase_a2_l = slowDecay0 | ( fastDecay0 ? s2 : !s2 );
   assign phase_b1_l = slowDecay1 | ( fastDecay1 ? s3 : !s3 );
   assign phase_b2_l = slowDecay1 | ( fastDecay1 ? s4 : !s4 );
-  
-  // Fixed off time peak current controller
-  // Start Off Time
-  // Target peak current detected. Blank timer and Off timer not active
+
+  // Fixed off time peak current controller off time start
   assign offtimer_en0 = analog_cmp1 & !blank_timer0 & !off_timer0;
   assign offtimer_en1 = analog_cmp2 & !blank_timer1 & !off_timer1;
 
