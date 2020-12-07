@@ -1,3 +1,4 @@
+`default_nettype none
 `include "../src/microstepper/microstepper_top.v"
 `include "hbridge_coil.v"
 `include "pwm_duty.v"
@@ -18,7 +19,7 @@ module testbench(
 
     reg                 step;
     reg                 dir;
-    reg                 enable;
+    reg                 enable_in;
     reg         [12:0]  target_current1;
     reg         [12:0]  target_current2;
     reg signed  [12:0]  current1;
@@ -46,6 +47,15 @@ module testbench(
     reg     [20:0]  cnt;
     reg     [12:0]  current_abs1;
     reg     [12:0]  current_abs2;
+    wire            phase_a1_l;
+    wire            phase_a2_l;
+    wire            phase_b1_l;
+    wire            phase_b2_l;
+    wire            phase_a1_h;
+    wire            phase_a2_h;
+    wire            phase_b1_h;
+    wire            phase_b2_h;
+
     always @(posedge clk) begin
         if (!resetn) begin
             cnt <= 0;
@@ -59,15 +69,15 @@ module testbench(
             config_minimum_on_time = 54;
             config_current_threshold = 1024;
             config_chargepump_period = 91;
-            config_invert_highside = 1;
-            config_invert_lowside = 1;
+            config_invert_highside = 0;
+            config_invert_lowside = 0;
             step_clock = 0;
         end
         else begin
             cnt <= cnt + 1;
             enable_in <= 1;
             if (current1[12] == 1'b1) begin
-                current_abs1 = -current;
+                current_abs1 = -current1;
             end
             else begin
                 current_abs1 = current1;
@@ -140,7 +150,7 @@ module testbench(
         .high_2(phase_a2_h),
         .current(current1),
         .current_sum_polarity(current_sum_polarity),
-        .polarity_invert_config(1)
+        .polarity_invert_config(0)
     );
     hbridge_coil hbridge_coil2(
         .clk(clk),
@@ -151,7 +161,7 @@ module testbench(
         .high_2(phase_b2_h),
         .current(current2),
         .current_sum_polarity(current_sum_polarity),
-        .polarity_invert_config(1)
+        .polarity_invert_config(0)
     );
 endmodule
 

@@ -1,3 +1,4 @@
+`default_nettype none
 module chargepump (
     input  clk,
     input  resetn,
