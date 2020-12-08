@@ -1,4 +1,5 @@
 `default_nettype none
+
 module microstepper_top (
     input        clk,
     input        resetn,
