@@ -349,7 +349,6 @@ module spi_state_machine(
                 message_word_count <= 0;
                 stepready[writemoveind] <= ~stepready[writemoveind];
                 writemoveind <= writemoveind + 1'b1;
-                enable_r <= 1;
                 message_header <= 8'b0; // Reset Message Header
                 `ifdef FORMAL
                   assert(writemoveind <= `MOVE_BUFFER_SIZE);
