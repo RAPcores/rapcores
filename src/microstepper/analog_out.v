@@ -1,3 +1,4 @@
+`default_nettype none
 module analog_out (
     input  wire       clk,
     input  wire       resetn,
@@ -10,13 +11,17 @@ module analog_out (
 
   reg [10:0] pwm_counter;
 
-  always @(posedge clk)
-  if (resetn)
-  if (pwm_counter <= current_threshold)
-  pwm_counter <= pwm_counter + 1'b1;
-  else
-  pwm_counter <= 0;
-
+  always @(posedge clk) begin
+    if (!resetn) begin
+      pwm_counter <= 0;
+    end
+    else begin
+      if (pwm_counter <= current_threshold)
+        pwm_counter <= pwm_counter + 1'b1;
+      else
+        pwm_counter <= 0;
+    end
+  end
   assign analog_out1 = pwm_counter <= pwm1;
   assign analog_out2 = pwm_counter <= pwm2;
 

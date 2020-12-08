@@ -1,5 +1,5 @@
 `default_nettype none
-module mytimer (
+module mytimer_10 (
     input               clk,
     input               resetn,
     input               start_enable,
@@ -15,8 +15,10 @@ module mytimer (
   assign timer = counter;
 
   always @(posedge clk) begin
-  if (!resetn)
+  if (!resetn) begin
     counter <= 0;
+    done <= 0;
+  end
   else if( start_enable ) begin
     counter <= start_time;
     run <= 1;
