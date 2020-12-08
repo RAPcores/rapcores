@@ -3,8 +3,14 @@
 module microstepper_top (
     input        clk,
     input        resetn,
-    output [3:0] s_l,
-    output [3:0] s_h,
+    output       phase_a1_l,
+    output       phase_a2_l,
+    output       phase_b1_l,
+    output       phase_b2_l,
+    output       phase_a1_h,
+    output       phase_a2_h,
+    output       phase_b1_h,
+    output       phase_b2_h,
     input        analog_cmp1,
     output       analog_out1,
     input        analog_cmp2,
@@ -12,166 +18,135 @@ module microstepper_top (
     output       chargepump_pin,
     input [9:0]  config_offtime,
     input [7:0]  config_blanktime,
+    input [2:0]  config_deadtime,
     input [9:0]  config_fastdecay_threshold,
     input [7:0]  config_minimum_on_time,
     input [10:0] config_current_threshold,
     input [7:0]  config_chargepump_period,
     input        config_invert_highside,
     input        config_invert_lowside,
-    input [511:0] cos_table,
+    //input [511:0] cos_table,
     input        step,
     input        dir,
-    input        enable
+    input        enable_in,
+    output       faultn,
+);
+  wire [5:0] cos_index1;
+  wire [5:0] cos_index2;
+  wire [7:0] pwm1;
+  wire [7:0] pwm2;
+
+  wire s1, s2, s3, s4;
+  wire offtimer_en0, offtimer_en1;
+
+  wire a_starting, b_starting;
+  wire   [7:0]   phase_ct;
+  wire   [7:0]   blank_timer0;
+  wire   [7:0]   blank_timer1;
+  wire   [9:0]   off_timer0;
+  wire   [9:0]   off_timer1;
+  wire   [7:0]   minimum_on_timer0;
+  wire   [7:0]   minimum_on_timer1;
+  wire           off_timer1_done;
+  
+  microstepper_control microstepper_control0(
+    .clk(clk),
+    .resetn(resetn),
+    .phase_a1_l_out(phase_a1_l),
+    .phase_a2_l_out(phase_a2_l),
+    .phase_b1_l_out(phase_b1_l),
+    .phase_b2_l_out(phase_b2_l),
+    .phase_a1_h_out(phase_a1_h),
+    .phase_a2_h_out(phase_a2_h),
+    .phase_b1_h_out(phase_b1_h),
+    .phase_b2_h_out(phase_b2_h),
+    .config_fastdecay_threshold(config_fastdecay_threshold),
+    .config_invert_highside(config_invert_highside),
+    .config_invert_lowside(config_invert_lowside),
+    .step(step),
+    .dir(dir),
+    .enable_in(enable_in),
+    .analog_cmp1(analog_cmp1),
+    .analog_cmp2(analog_cmp2),
+    .faultn(faultn),
+    .s1(s1),
+    .s2(s2),
+    .s3(s3),
+    .s4(s4),
+    .offtimer_en0(offtimer_en0),
+    .offtimer_en1(offtimer_en1),
+    .phase_ct(phase_ct),
+    .blank_timer0(blank_timer0),
+    .blank_timer1(blank_timer1),
+    .off_timer0(off_timer0),
+    .off_timer1(off_timer1),
+    .minimum_on_timer0(minimum_on_timer0),
+    .minimum_on_timer1(minimum_on_timer1),
 );
 
-  reg [7:0] phase_ct;
+wire        off_timer0_done;
+wire        off_timer1_done;
 
-  always @(posedge step) begin
-  phase_ct <= phase_ct + (dir ? 1 : -1);
-end
-
-  wire                                               [5:0] cos_index1;
-  wire                                               [5:0] cos_index2;
-  wire                                                     s1;
-  wire                                                     s2;
-  wire                                                     s3;
-  wire                                                     s4;
-  wire                                               [7:0] pwm1;
-  wire                                               [7:0] pwm2;
-
-  reg                                                [7:0] blank_timer0;
-  reg                                                [7:0] blank_timer1;
-  reg                                                [9:0] off_timer0;
-  reg                                                [9:0] off_timer1;
-  reg                                                [7:0] minimum_on_timer0;
-  reg                                                [7:0] minimum_on_timer1;
-
-  wire overCurrent0 = off_timer0 > 0;
-  wire overCurrent1 = off_timer1 > 0;
-
-  wire fastDecay0 = off_timer0 >= config_fastdecay_threshold;
-  wire fastDecay1 = off_timer1 >= config_fastdecay_threshold;
-
-  wire slowDecay0 = overCurrent0 && fastDecay0 == 0;
-  wire slowDecay1 = overCurrent1 && fastDecay1 == 0;
-
-  wire fault0 = (minimum_on_timer0 > 0) && overCurrent0;
-  wire fault1 = (minimum_on_timer1 > 0) && overCurrent1;
-  wire fault = fault0 | fault1;
-
-  reg [1:0] s1r, s2r, s3r, s4r;
-  wire phase_a1_h, phase_a1_l, phase_a2_h, phase_a2_l;
-  wire phase_b1_h, phase_b1_l, phase_b2_h, phase_b2_l;
-
-  assign s_l[0] = !(phase_a1_l | fault);
-  assign s_l[1] = !(phase_a2_l | fault);
-  assign s_l[2] = !(phase_b1_l | fault);
-  assign s_l[3] = !(phase_b2_l | fault);
-
-  assign s_h[0] = !(phase_a1_h | fault);
-  assign s_h[1] = !(phase_a2_h | fault);
-  assign s_h[2] = !(phase_b1_h | fault);
-  assign s_h[3] = !(phase_b2_h | fault);
-
-  assign phase_a1_h = config_invert_highside ^ (slowDecay0 | (fastDecay0 ? s1r[1] : ~s1r[1]));
-  assign phase_a1_l = config_invert_lowside ^ (fastDecay0 ? ~s1r[1] : (slowDecay0 ? 1'b0 : s1r[1]));
-  assign phase_a2_h = config_invert_highside ^ (slowDecay0 | (fastDecay0 ? s2r[1] : ~s2r[1]));
-  assign phase_a2_l = config_invert_lowside ^ (fastDecay0 ? ~s2r[1] : (slowDecay0 ? 1'b0 : s2r[1]));
-
-  assign phase_b1_h = config_invert_highside ^ (slowDecay1 | (fastDecay1 ? s3r[1] : ~s3r[1]));
-  assign phase_b1_l = config_invert_lowside ^ (fastDecay1 ? ~s3r[1] : (slowDecay1 ? 1'b0 : s3r[1]));
-  assign phase_b2_h = config_invert_highside ^ (slowDecay1 | (fastDecay1 ? s4r[1] : ~s4r[1]));
-  assign phase_b2_l = config_invert_lowside ^ (fastDecay1 ? ~s4r[1] : (slowDecay1 ? 1'b0 : s4r[1]));
-
-  wire s1_starting = s1r == 2'b10;
-  wire s2_starting = s2r == 2'b10;
-  wire s3_starting = s3r == 2'b10;
-  wire s4_starting = s4r == 2'b10;
-
-`ifdef FORMAL
-  always @(*) begin
-    assert (!(phase_a1_l == 0 && phase_a1_h == 0));
-    assert (!(phase_a2_l == 0 && phase_a2_h == 0));
-    assert (!(phase_b1_l == 0 && phase_b1_h == 0));
-    assert (!(phase_b2_l == 0 && phase_b2_h == 0));
-  end
-`endif
-
-  always @(posedge clk) begin
-    s1r <= {s1r[0], s1};
-    s2r <= {s2r[0], s2};
-    s3r <= {s3r[0], s3};
-    s4r <= {s4r[0], s4};
-  end
-
-  mytimer #(
+  mytimer_10 #(
       .WIDTH(10)
   ) offtimer0 (
       .clk         (clk),
       .resetn      (resetn),
-      .start_enable(analog_cmp1 & blank_timer0 == 0 & overCurrent0 == 0),
+      .start_enable(offtimer_en0),
       .start_time  (config_offtime),
-      .timer       (off_timer0)
+      .timer       (off_timer0),
+      .done         (off_timer0_done)
   );
 
-  mytimer #(
-      .WIDTH(10)
-  ) offtimer1 (
+  mytimer_10 offtimer1 (
       .clk         (clk),
       .resetn      (resetn),
-      .start_enable(analog_cmp2 & blank_timer1 == 0 & overCurrent1 == 0),
+      .start_enable(offtimer_en1),
       .start_time  (config_offtime),
-      .timer       (off_timer1)
+      .timer       (off_timer1),
+      .done         (off_timer1_done)
   );
 
-  mytimer #(
-      .WIDTH(8)
-  ) blanktimer0 (
+  mytimer_8 blanktimer0 (
       .clk         (clk),
       .resetn      (resetn),
-      .start_enable(s1_starting | s2_starting),
+      .start_enable(off_timer0_done),
       .start_time  (config_blanktime),
       .timer       (blank_timer0)
   );
 
-  mytimer #(
-      .WIDTH(8)
-  ) blanktimer1 (
+  mytimer_8 blanktimer1 (
       .clk         (clk),
       .resetn      (resetn),
-      .start_enable(s3_starting | s4_starting),
+      .start_enable(off_timer1_done),
       .start_time  (config_blanktime),
       .timer       (blank_timer1)
   );
 
-  mytimer #(
-      .WIDTH(8)
-  ) minimumontimer0 (
+  mytimer_8 minimumontimer0 (
       .clk         (clk),
       .resetn      (resetn),
-      .start_enable(s1_starting | s2_starting),
+      .start_enable(off_timer0_done),
       .start_time  (config_minimum_on_time),
       .timer       (minimum_on_timer0)
   );
 
-  mytimer #(
-      .WIDTH(8)
-  ) minimumontimer1 (
+  mytimer_8 minimumontimer1 (
       .clk         (clk),
       .resetn      (resetn),
-      .start_enable(s3_starting | s4_starting),
+      .start_enable(off_timer1_done),
       .start_time  (config_minimum_on_time),
       .timer       (minimum_on_timer1)
   );
 
-  chargepump cp0 (
+  chargepump chargepump0 (
       .clk           (clk),
       .resetn        (resetn),
       .period        (config_chargepump_period),
       .chargepump_pin(chargepump_pin)
   );
 
-  microstep_counter mc0 (
+  microstep_counter microstep_counter0 (
       .pos       (phase_ct),
       .cos_index1(cos_index1),
       .cos_index2(cos_index2),
@@ -181,16 +156,16 @@ end
   cosine cosine0 (
       .cos_index(cos_index1),
       .cos_value(pwm1),
-      .cos_table(cos_table)
+      //.cos_table(cos_table)
   );
 
   cosine cosine1 (
       .cos_index(cos_index2),
       .cos_value(pwm2),
-      .cos_table(cos_table)
+      //.cos_table(cos_table)
   );
 
-  analog_out ao0 (
+  analog_out analog_out0 (
       .clk        (clk),
       .resetn     (resetn),
       .pwm1       (pwm1),

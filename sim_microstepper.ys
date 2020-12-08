@@ -1,0 +1,14 @@
+
+read_verilog -sv testbench/microstepper_tb.v \
+    src/microstepper/analog_out.v \
+    src/microstepper/chargepump.v \
+    src/microstepper/cosine.v \
+    src/microstepper/microstep_counter.v \
+    src/microstepper/microstepper_control.v \
+    src/microstepper/mytimer_8.v \
+    src/microstepper/mytimer_10.v \
+    src/microstepper/mytimer.v
+
+prep -top testbench
+show microstepper_top
+sim -n 400000 -clock clk -vcd testbench/microstepper.vcd

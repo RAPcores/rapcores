@@ -1,6 +1,5 @@
 `default_nettype none
-
-module mytimer (
+module mytimer_8 (
     input               clk,
     input               resetn,
     input               start_enable,
@@ -8,7 +7,7 @@ module mytimer (
     output [WIDTH-1:0]  timer,
     output              done // single cycle timer done event
 );
-  parameter WIDTH = 10;
+  parameter WIDTH = 8;
 
   reg done = 0;
   reg [WIDTH-1:0] counter;
