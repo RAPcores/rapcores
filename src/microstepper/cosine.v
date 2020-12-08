@@ -1,5 +1,4 @@
 `default_nettype none
-
 module cosine (
     input  wire [5:0] cos_index,
     output wire [7:0] cos_value

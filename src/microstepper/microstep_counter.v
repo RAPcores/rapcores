@@ -1,5 +1,4 @@
 `default_nettype none
-
 module microstep_counter (
     input  [7:0] pos,
     output [5:0] cos_index1,
