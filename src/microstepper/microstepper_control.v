@@ -37,9 +37,9 @@ module microstepper_control (
   reg [7:0] phase_ct;
   reg [2:0] step_r;
   reg [1:0] dir_r;
-  
+
   reg       enable;
-  
+
   always @(posedge clk) begin
     if (!resetn)
       enable <= 0;
@@ -107,7 +107,7 @@ module microstepper_control (
 
   // Half bridge high side is active
   // WHEN slow decay is NOT active
-  // AND 
+  // AND
   // ( fast decay active AND would normally be off this phase )
   // OR
   // Should be on to drive this phase / polarity (microstepper_counter)

@@ -93,7 +93,7 @@ module spi_state_machine(
   reg [7:0] config_chargepump_period = 91;
   reg config_invert_highside = 0;
   reg config_invert_lowside = 0;
-  
+
   reg [511:0] cos_table;
 
   initial begin
@@ -164,14 +164,16 @@ module spi_state_machine(
   end
 
   //
-  // Stepper Timing Setup
+  // Stepper Timing and Buffer Setup
   //
 
-  reg [`MOVE_BUFFER_BITS:0] moveind; // Move index cursor
+  // Move buffer
+  reg [`MOVE_BUFFER_BITS:0] writemoveind = 0;
+  wire [`MOVE_BUFFER_BITS:0] moveind;
 
   // Latching mechanism for engaging the buffered move.
-  reg [`MOVE_BUFFER_SIZE:0] stepready;
-  reg [`MOVE_BUFFER_SIZE:0] stepfinished;
+  reg [`MOVE_BUFFER_SIZE:0] stepready = 0;
+  wire [`MOVE_BUFFER_SIZE:0] stepfinished;
 
   reg [63:0] move_duration [`MOVE_BUFFER_SIZE:0];
   reg [`MOVE_BUFFER_SIZE:0] dir_r;
@@ -188,7 +190,7 @@ module spi_state_machine(
 
   // Step IO
   wire dda_step;
-  reg enable_r;
+  reg enable_r = 0;
   assign enable = enable_r;
 
   // Implement flow control and event pins if specified
@@ -231,8 +233,7 @@ module spi_state_machine(
   //
 
   reg [7:0] message_word_count = 0;
-  reg [7:0] message_header;
-  reg [`MOVE_BUFFER_BITS:0] writemoveind = 0;
+  reg [7:0] message_header = 0;
 
   // Encoder
   reg signed [63:0] encoder_store; // Snapshot for SPI comms
@@ -348,6 +349,7 @@ module spi_state_machine(
                 message_word_count <= 0;
                 stepready[writemoveind] <= ~stepready[writemoveind];
                 writemoveind <= writemoveind + 1'b1;
+                enable_r <= 1;
                 message_header <= 8'b0; // Reset Message Header
                 `ifdef FORMAL
                   assert(writemoveind <= `MOVE_BUFFER_SIZE);

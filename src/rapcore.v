@@ -94,7 +94,7 @@ module rapcore (
   // Stepper control lines
   wire step;
   wire dir;
-  reg enable;
+  wire enable;
 
 
   //
@@ -117,9 +117,6 @@ module rapcore (
   `endif
 
   `ifdef ULTIBRIDGE
-    wire step;
-    wire dir;
-    reg enable;
     microstepper_top microstepper0(
       .clk(CLK),
       .resetn( resetn),
