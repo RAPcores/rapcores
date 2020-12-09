@@ -25,7 +25,7 @@ module spi_state_machine(
   output [7:0] config_chargepump_period,
   output config_invert_highside,
   output config_invert_lowside,
-  output [511:0] cos_table,
+  //output [511:0] cos_table,
 
   // encoder
   input [63:0] encoder_count,
@@ -66,11 +66,11 @@ module spi_state_machine(
   // This should make it easier to send 64 bit chunks from the host controller
   reg [63:0] word_send_data;
   reg [63:0] word_data_received;
-  
+
   wire [63:0] word_data_received_w;
   always @(posedge spi_clock)
     word_data_received <= word_data_received_w;
-  
+
   wire word_received;
   SPIWord word_proc (
                 .clk(spi_clock),
@@ -97,7 +97,7 @@ module spi_state_machine(
   reg [7:0] config_chargepump_period = 91;
   reg config_invert_highside = 0;
   reg config_invert_lowside = 0;
-
+/*
   reg [511:0] cos_table;
 
   initial begin
@@ -166,7 +166,7 @@ module spi_state_machine(
     cos_table	 [ 	503	 : 	496	 ] = 	13	;
     cos_table	 [ 	511	 : 	504	 ] = 	6	;
   end
-
+*/
   //
   // Stepper Timing and Buffer Setup
   //
@@ -315,14 +315,14 @@ module spi_state_machine(
 
           // Write to Cosine Table
           // TODO Cosine Net is broken
-          `CMD_COSINE_CONFIG: begin
-            cos_table[word_data_received[35:32]] <= word_data_received[31:0];
+          //`CMD_COSINE_CONFIG: begin
+            //cos_table[word_data_received[35:32]] <= word_data_received[31:0];
             //cos_table[word_data_received[37:32]] <= word_data_received[7:0];
             //cos_table[word_data_received[35:32]+3] <= word_data_received[31:25];
             //cos_table[word_data_received[35:32]+2] <= word_data_received[24:16];
             //cos_table[word_data_received[35:32]+1] <= word_data_received[15:8];
             //cos_table[word_data_received[35:32]] <= word_data_received[7:0];
-          end
+          //end
 
           // API Version
           `CMD_API_VERSION: begin
