@@ -355,7 +355,11 @@ module spi_state_machine(
                 `endif
             end
           endcase
-        end
+        end // `CMD_COORDINATED_STEP
+
+        // by default reset the message header if it was a two word transaction
+        default: message_header <= 8'b0; // Reset Message Header
+
       endcase
     end
   end
