@@ -9,10 +9,10 @@ module rapcore (
       output USBPU,  // USB pull-up resistor
     `endif
     `ifdef SPI_INTERFACE
-      input  SCK,
-      input  CS,
-      input  COPI,
-      output CIPO,
+      input  wire SCK,
+      input  wire CS,
+      input  wire COPI,
+      output wire CIPO,
     `endif
     `ifdef DUAL_HBRIDGE
       output wire [`DUAL_HBRIDGE:1] PHASE_A1,  // Phase A
@@ -23,11 +23,11 @@ module rapcore (
       output wire [`DUAL_HBRIDGE:1] VREF_B,  // VRef
     `endif
     `ifdef ULTIBRIDGE
-      output CHARGEPUMP,
-      input analog_cmp1,
-      output analog_out1,
-      input analog_cmp2,
-      output analog_out2,
+      output wire CHARGEPUMP,
+      input wire analog_cmp1,
+      output wire analog_out1,
+      input wire analog_cmp2,
+      output wire analog_out2,
       output wire [`ULTIBRIDGE:1] PHASE_A1,  // Phase A
       output wire [`ULTIBRIDGE:1] PHASE_A2,  // Phase A
       output wire [`ULTIBRIDGE:1] PHASE_B1,  // Phase B
@@ -38,25 +38,25 @@ module rapcore (
       output wire [`ULTIBRIDGE:1] PHASE_B2_H,  // Phase B
     `endif
     `ifdef QUAD_ENC
-      input [`QUAD_ENC:1] ENC_B,
-      input [`QUAD_ENC:1] ENC_A,
+      input wire [`QUAD_ENC:1] ENC_B,
+      input wire [`QUAD_ENC:1] ENC_A,
     `endif
     `ifdef BUFFER_DTR
-      output BUFFER_DTR,
+      output wire BUFFER_DTR,
     `endif
     `ifdef MOVE_DONE
-      output MOVE_DONE,
+      output wire MOVE_DONE,
     `endif
     `ifdef HALT
-      input HALT,
+      input wire HALT,
     `endif
     `ifdef STEPINPUT
-      input STEPINPUT,
-      input DIRINPUT,
+      input wire STEPINPUT,
+      input wire DIRINPUT,
     `endif
     `ifdef STEPOUTPUT
-      output STEPOUTPUT,
-      output DIROUTPUT,
+      output wire STEPOUTPUT,
+      output wire DIROUTPUT
     `endif
 );
 
@@ -144,7 +144,7 @@ module rapcore (
       //.cos_table (cos_table),
       .step (step),
       .dir (dir),
-      .enable_in(enable),
+      .enable_in(enable)
       );
   `endif
 
@@ -152,7 +152,7 @@ module rapcore (
   //
   // Encoder
   //
-  reg signed [63:0] encoder_count;
+  wire signed [63:0] encoder_count;
   reg [7:0] encoder_multiplier = 1;
   wire encoder_fault;
   `ifdef QUAD_ENC
@@ -212,7 +212,7 @@ module rapcore (
     `endif
     `ifdef STEPOUTPUT
       .STEPOUTPUT(STEPOUTPUT),
-      .DIROUTPUT(DIROUTPUT),
+      .DIROUTPUT(DIROUTPUT)
     `endif
   );
 
