@@ -41,6 +41,8 @@ module DualHBridge (
   assign abs_increment = 3'b100 >> microsteps;
   assign phase_inc = dir ? abs_increment : -abs_increment; // Generate increment, multiple of microsteps\
 
+  reg [1:0] step_r;
+
   initial begin
     phase_table[0] = 4'b1010;
     phase_table[1] = 4'b0010;
@@ -52,17 +54,18 @@ module DualHBridge (
     phase_table[7] = 4'b1000;
   end
 
-  always @(posedge step) begin
+  always @(posedge clk) begin
+    step_r <= {step_r[0], step};
+    if (step_r == 2'b01) begin
+      // TODO: Need to add safety SPI or here
+      //`ifdef FORMAL
+      //  assert( (microsteps == 3'b010 && phase_inc == 3'b001) ||
+      //          (microsteps == 3'b001 && phase_inc == 3'b010) );
+      //`endif
 
-    // TODO: Need to add safety SPI or here
-    //`ifdef FORMAL
-    //  assert( (microsteps == 3'b010 && phase_inc == 3'b001) ||
-    //          (microsteps == 3'b001 && phase_inc == 3'b010) );
-    //`endif
-
-    // Traverse the table based on direction, rolls over
-    phase_ct <= phase_ct + phase_inc;
-
+      // Traverse the table based on direction, rolls over
+      phase_ct <= phase_ct + phase_inc;
+    end
   end
 
 endmodule
