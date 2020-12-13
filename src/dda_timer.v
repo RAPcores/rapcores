@@ -40,8 +40,12 @@ module dda_timer(
   `ifdef MOVE_DONE
     reg move_done_r = 0;
     assign move_done = move_done_r;
-    always @(posedge finishedmove)
-      move_done_r = ~move_done_r;
+    reg [1:0] finishedmove_r;
+    always @(posedge CLK) begin
+      finishedmove_r <= {finishedmove_r[0], finishedmove};
+      if (finishedmove_r == 2'b01)
+        move_done_r <= ~move_done_r;
+    end
   `endif
 
   // Step Trigger condition
