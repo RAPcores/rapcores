@@ -31,7 +31,7 @@ module microstepper_control (
     input   [9:0]   off_timer0,
     input   [9:0]   off_timer1,
     input   [7:0]   minimum_on_timer0,
-    input   [7:0]   minimum_on_timer1,
+    input   [7:0]   minimum_on_timer1
 //    input           mixed_decay_enable,
 );
   reg [7:0] phase_ct;

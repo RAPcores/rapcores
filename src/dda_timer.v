@@ -15,7 +15,7 @@ module dda_timer(
     input halt,
   `endif
   `ifdef MOVE_DONE
-    output move_done,
+    output move_done
   `endif
 );
 

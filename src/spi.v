@@ -81,8 +81,8 @@ module SPIWord (
 
   // SPI Initialization
   // The standard unit of transfer is 8 bits, MSB
-  reg rx_byte_ready;  // high when a byte has been received
-  reg [7:0] rx_byte;
+  wire rx_byte_ready;  // high when a byte has been received
+  wire [7:0] rx_byte;
   wire [7:0] tx_byte;
   SPI spi0 (.clk(clk),
             .CS(CS),

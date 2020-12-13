@@ -1,6 +1,5 @@
 `default_nettype none
 
-
 module spi_state_machine(
   input CLK,
 
@@ -47,7 +46,7 @@ module spi_state_machine(
   `endif
   `ifdef STEPOUTPUT
     output STEPOUTPUT,
-    output DIROUTPUT,
+    output DIROUTPUT
   `endif
 );
 
@@ -225,8 +224,9 @@ module spi_state_machine(
                   .halt(HALT),
                 `endif
                 `ifdef MOVE_DONE
-                  .move_done(MOVE_DONE),
-                `endif);
+                  .move_done(MOVE_DONE)
+                `endif
+                );
 
   //
   // State Machine for handling SPI Messages

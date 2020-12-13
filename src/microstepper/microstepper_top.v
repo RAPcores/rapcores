@@ -1,35 +1,35 @@
 `default_nettype none
 
 module microstepper_top (
-    input        clk,
-    input        resetn,
-    output       phase_a1_l,
-    output       phase_a2_l,
-    output       phase_b1_l,
-    output       phase_b2_l,
-    output       phase_a1_h,
-    output       phase_a2_h,
-    output       phase_b1_h,
-    output       phase_b2_h,
-    input        analog_cmp1,
-    output       analog_out1,
-    input        analog_cmp2,
-    output       analog_out2,
-    output       chargepump_pin,
-    input [9:0]  config_offtime,
-    input [7:0]  config_blanktime,
-    input [2:0]  config_deadtime,
-    input [9:0]  config_fastdecay_threshold,
-    input [7:0]  config_minimum_on_time,
-    input [10:0] config_current_threshold,
-    input [7:0]  config_chargepump_period,
-    input        config_invert_highside,
-    input        config_invert_lowside,
+    input   wire       clk,
+    input   wire       resetn,
+    output  wire       phase_a1_l,
+    output  wire       phase_a2_l,
+    output  wire       phase_b1_l,
+    output  wire       phase_b2_l,
+    output  wire       phase_a1_h,
+    output  wire     phase_a2_h,
+    output  wire     phase_b1_h,
+    output  wire     phase_b2_h,
+    input   wire     analog_cmp1,
+    output  wire     analog_out1,
+    input   wire     analog_cmp2,
+    output  wire     analog_out2,
+    output  wire     chargepump_pin,
+    input   wire    [9:0]  config_offtime,
+    input   wire    [7:0]  config_blanktime,
+    input   wire    [2:0]  config_deadtime,
+    input   wire    [9:0]  config_fastdecay_threshold,
+    input   wire    [7:0]  config_minimum_on_time,
+    input   wire    [10:0] config_current_threshold,
+    input   wire    [7:0]  config_chargepump_period,
+    input   wire     config_invert_highside,
+    input   wire     config_invert_lowside,
     //input [511:0] cos_table,
-    input        step,
-    input        dir,
-    input        enable_in,
-    output       faultn,
+    input   wire     step,
+    input   wire     dir,
+    input   wire     enable_in,
+    output  wire     faultn
 );
   wire [5:0] cos_index1;
   wire [5:0] cos_index2;
@@ -47,7 +47,6 @@ module microstepper_top (
   wire   [9:0]   off_timer1;
   wire   [7:0]   minimum_on_timer0;
   wire   [7:0]   minimum_on_timer1;
-  wire           off_timer1_done;
   
   microstepper_control microstepper_control0(
     .clk(clk),
@@ -81,7 +80,7 @@ module microstepper_top (
     .off_timer0(off_timer0),
     .off_timer1(off_timer1),
     .minimum_on_timer0(minimum_on_timer0),
-    .minimum_on_timer1(minimum_on_timer1),
+    .minimum_on_timer1(minimum_on_timer1)
 );
 
 wire        off_timer0_done;
@@ -155,13 +154,13 @@ wire        off_timer1_done;
 
   cosine cosine0 (
       .cos_index(cos_index1),
-      .cos_value(pwm1),
+      .cos_value(pwm1)
       //.cos_table(cos_table)
   );
 
   cosine cosine1 (
       .cos_index(cos_index2),
-      .cos_value(pwm2),
+      .cos_value(pwm2)
       //.cos_table(cos_table)
   );
 
