@@ -81,8 +81,8 @@ module SPIWord (
 
   // SPI Initialization
   // The standard unit of transfer is 8 bits, MSB
-  reg rx_byte_ready;  // high when a byte has been received
-  reg [7:0] rx_byte;
+  wire rx_byte_ready;  // high when a byte has been received
+  wire [7:0] rx_byte;
   wire [7:0] tx_byte;
   SPI spi0 (.clk(clk),
             .CS(CS),
@@ -95,11 +95,14 @@ module SPIWord (
 
   reg [3:0] byte_count = 0;
   wire [7:0] word_slice [8:0]; // slice the register into 8 bits
-
+  reg [1:0] rx_byte_ready_r;
   // Recieve Shift Register
-  always @(posedge rx_byte_ready) begin
-    byte_count <= (byte_count == 8) ? 1 : byte_count + 1;
-    word_data_received <= {rx_byte[7:0], word_data_received[63:8]};
+  always @(posedge clk) begin
+    rx_byte_ready_r <= {rx_byte_ready_r[0], rx_byte_ready};
+    if (rx_byte_ready_r == 2'b01) begin
+      byte_count <= (byte_count == 8) ? 1 : byte_count + 1;
+      word_data_received <= {rx_byte[7:0], word_data_received[63:8]};
+    end
   end
 
   assign word_received = (byte_count == 8);
