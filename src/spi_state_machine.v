@@ -69,7 +69,7 @@ module spi_state_machine(
   
   wire [63:0] word_data_received_w;
   always @(posedge spi_clock)
-    word_data_received = word_data_received_w;
+    word_data_received <= word_data_received_w;
   
   wire word_received;
   SPIWord word_proc (
