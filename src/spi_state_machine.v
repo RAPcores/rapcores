@@ -66,6 +66,11 @@ module spi_state_machine(
   // This should make it easier to send 64 bit chunks from the host controller
   reg [63:0] word_send_data;
   reg [63:0] word_data_received;
+  
+  wire [63:0] word_data_received_w;
+  always @(posedge spi_clock)
+  	assign word_data_received = word_data_received_w;
+  
   wire word_received;
   SPIWord word_proc (
                 .clk(spi_clock),
@@ -75,7 +80,7 @@ module spi_state_machine(
                 .CIPO(CIPO),
                 .word_send_data(word_send_data),
                 .word_received(word_received),
-                .word_data_received(word_data_received));
+                .word_data_received(word_data_received_w));
 
 
   //
