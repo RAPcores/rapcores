@@ -11,7 +11,7 @@
 *.tmp/
 *.exp
 *.vlog
-*.json
+build/*.json
 *.config
 *.vcd
 symbiyosys
