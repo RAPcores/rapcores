@@ -148,7 +148,7 @@ module testbench(
         .low_2(phase_a2_l),
         .high_2(phase_a2_h),
         .current(current1),
-        .polarity_invert_config(0)
+        .polarity_invert_config(1'b0)
     );
     hbridge_coil hbridge_coil2(
         .clk(clk),
@@ -158,7 +158,7 @@ module testbench(
         .low_2(phase_b2_l),
         .high_2(phase_b2_h),
         .current(current2),
-        .polarity_invert_config(0)
+        .polarity_invert_config(1'b0)
     );
 endmodule
 
