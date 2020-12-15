@@ -147,6 +147,28 @@ dual H Bridges are specified.</p>
 <p>Default: none/0</p>
 <p>Enables LED output. Currently unused, but useful for low-frequency visual debugging.</p>
 </div>
+<div class="section" id="logic-analyzer">
+<h3>Logic Analyzer<a class="headerlink" href="#logic-analyzer" title="Permalink to this headline">¶</a></h3>
+<p>The Logic Analyzer interface allows for observation and injection of signals
+within the top-level rapcore project without patching the core project.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define LA_OUT &lt;N&gt;
+</pre></div>
+</div>
+<p>Type: Output</p>
+<p>Default: none/0</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define LA_IN &lt;N&gt;
+</pre></div>
+</div>
+<p>Type: Input</p>
+<p>Default: none/0</p>
+<p>Assignments can be done at the <code class="docutils literal notranslate"><span class="pre">BOARD.v</span></code> level
+by making a <code class="docutils literal notranslate"><span class="pre">LOGICANALYZER_MACRO</span></code> like so:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define LOGICANALYZER_MACRO\
+  assign LA_OUT[1] = dir; \
+  assign LA_OUT[2] = analog_cmp2;
+</pre></div>
+</div>
+</div>
 </div>
 <div class="section" id="pcf-lpf-pin-names">
 <h2>(.pcf/.lpf) Pin Names<a class="headerlink" href="#pcf-lpf-pin-names" title="Permalink to this headline">¶</a></h2>

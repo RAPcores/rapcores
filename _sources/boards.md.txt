@@ -123,6 +123,40 @@ Default: none/0
 
 Enables LED output. Currently unused, but useful for low-frequency visual debugging.
 
+
+### Logic Analyzer
+
+The Logic Analyzer interface allows for observation and injection of signals
+within the top-level rapcore project without patching the core project.
+
+```
+`define LA_OUT <N>
+```
+
+Type: Output
+
+Default: none/0
+
+```
+`define LA_IN <N>
+```
+
+Type: Input
+
+Default: none/0
+
+
+
+Assignments can be done at the `BOARD.v` level
+by making a `LOGICANALYZER_MACRO` like so:
+
+```
+`define LOGICANALYZER_MACRO\
+  assign LA_OUT[1] = dir; \
+  assign LA_OUT[2] = analog_cmp2;
+```
+
+
 ## (.pcf/.lpf) Pin Names
 
 The following are pin naming conventions for the RAPCore "top" module:
