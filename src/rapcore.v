@@ -57,14 +57,14 @@ module rapcore (
     `endif
     `ifdef STEPOUTPUT
       output wire STEPOUTPUT,
-      output wire DIROUTPUT,
       output wire ENOUTPUT,
+      output wire DIROUTPUT
     `endif
     `ifdef LA_IN
-      input wire [`LA_IN:1] LA_IN,
+      ,input wire [`LA_IN:1] LA_IN
     `endif
     `ifdef LA_OUT
-      output wire [`LA_OUT:1] LA_OUT
+      ,output wire [`LA_OUT:1] LA_OUT
     `endif
 );
 
