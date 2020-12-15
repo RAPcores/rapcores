@@ -1,0 +1,6 @@
+
+read_verilog -sv testbench/spi_tb.v
+
+prep -top testbench
+show SPIWord
+sim -n 40000 -clock clk -vcd testbench/spi.vcd
