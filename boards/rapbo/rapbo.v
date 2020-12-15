@@ -26,3 +26,14 @@
 
 // Change the Move Buffer Size. Should be power of two
 //`define MOVE_BUFFER_SIZE 4
+
+// Enable Logic Analyzer Out
+`define LA_OUT 2
+
+// Enable Logic Analyzer IN
+//`define LA_IN 2
+
+// Logic Analyzer IO for rapcore.v can be set here
+`define LOGICANALYZER_MACRO\
+  assign LA_OUT[1] = dir; \
+  assign LA_OUT[2] = analog_cmp2;

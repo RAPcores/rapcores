@@ -58,6 +58,12 @@ module rapcore (
       output wire STEPOUTPUT,
       output wire DIROUTPUT
     `endif
+    `ifdef LA_IN
+      input [`LA_IN:1] LA_IN,
+    `endif
+    `ifdef LA_OUT
+      output wire [`LA_OUT:1] LA_OUT,
+    `endif
 );
 
   // Global Reset (TODO: Make input pin)
@@ -215,5 +221,11 @@ module rapcore (
       .DIROUTPUT(DIROUTPUT)
     `endif
   );
+
+
+  // Macro external wiring statements here
+  `ifdef LOGICANALYZER_MACRO
+    `LOGICANALYZER_MACRO
+  `endif
 
 endmodule
