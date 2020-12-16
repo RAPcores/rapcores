@@ -43,7 +43,7 @@ module microstepper_control (
     if (!resetn)
       enable <= 0;
     else
-      enable <= 1;// enable_in;
+      enable <= enable_in;
     step_r <= {step_r[1:0], step};
     dir_r <= {dir_r[0], dir};
   end
