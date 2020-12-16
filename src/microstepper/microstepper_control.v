@@ -49,14 +49,14 @@ module microstepper_control (
     dir_r <= {dir_r[0], dir};
   end
 
-  wire step_rising = (step_r == 2'b01);
+  wire step_rising = (step_r[2:1] == 2'b01);
 
   always @(posedge clk) begin
     if (!resetn) begin
       phase_ct <= 0;
     end
     else if (step_rising)
-        phase_ct <= dir_r[1] ? phase_ct + 1 : phase_ct - 1;
+        phase_ct <= phase_ct + 1;
   end
 
   // Phase polarity control signal from microstep counter

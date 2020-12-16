@@ -150,7 +150,7 @@ module rapcore (
       //.cos_table (cos_table),
       .step (step),
       .dir (dir),
-      .enable_in(enable)
+      .enable_in(1'b1)
       );
   `endif
 
