@@ -66,8 +66,8 @@ module spi_state_machine(
   // Word handler
   // The system operates on 64 bit little endian words
   // This should make it easier to send 64 bit chunks from the host controller
-  reg [63:0] word_send_data;
-  reg [63:0] word_data_received;
+  reg [63:0] word_send_data = 0;
+  reg [63:0] word_data_received = 0;
 
   wire [63:0] word_data_received_w;
   always @(posedge spi_clock)
