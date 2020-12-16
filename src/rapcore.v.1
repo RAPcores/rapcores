@@ -1,8 +1,7 @@
 `default_nettype none
 
 module rapcore (
-    input  CLK,
-    input resetn,
+    input wire CLK,
     `ifdef LED
       output wire [`LED:1] LED,
     `endif
@@ -59,13 +58,6 @@ module rapcore (
       output wire STEPOUTPUT,
       output wire DIROUTPUT
     `endif
-    `ifdef LA_IN
-      ,input wire [`LA_IN:1] LA_IN
-    `endif
-    `ifdef LA_OUT
-      ,output wire [`LA_OUT:1] LA_OUT
-    `endif
-    ,enable_in
 );
 
   // Global Reset (TODO: Make input pin)
@@ -78,14 +70,13 @@ module rapcore (
 
   //Reset
   wire resetn;
-  /*
   reg [7:0] resetn_counter = 0;
   assign resetn = &resetn_counter;
   always @(posedge CLK) begin
     if (!resetn) resetn_counter <= resetn_counter + 1'b1;
   end
   wire reset = resetn;
-  */
+
   // Stepper Setup
   // TODO: Generate statement?
   // Stepper Config
@@ -153,7 +144,7 @@ module rapcore (
       //.cos_table (cos_table),
       .step (step),
       .dir (dir),
-      .enable_in(enable_in)
+      .enable_in(enable)
       );
   `endif
 
@@ -168,7 +159,7 @@ module rapcore (
     // TODO: For ... generate
     quad_enc #(.encbits(64)) encoder0
     (
-      .resetn(resetn),
+      .resetn(reset),
       .clk(CLK),
       .a(ENC_A[1]),
       .b(ENC_B[1]),
