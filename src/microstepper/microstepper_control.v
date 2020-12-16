@@ -66,18 +66,16 @@ module microstepper_control (
   wire s4;
 
   // Fault (active low) if off timer starts before minimum on timer expires
-  wire fault0 = off_timer0 && minimum_on_timer0 && enable;
-  wire fault1 = off_timer1 && minimum_on_timer1 && enable;
+  wire fault0 = off_timer0 && minimum_on_timer0;
+  wire fault1 = off_timer1 && minimum_on_timer1;
   reg faultn;
   // Fault latches until reset
   always @(posedge clk) begin
       if (!resetn) begin
-//        fault0 <= 0;
-//        fault1 <= 0;
         faultn <= 1;
       end
       else if (faultn) begin
-        faultn <= ( fault0 | fault1 ) && enable;
+        faultn <= enable ? !( fault0 | fault1 ) : 1'b1;
       end
     end
 
@@ -91,10 +89,10 @@ module microstepper_control (
   assign phase_b2_l_out = config_invert_lowside ^ ( phase_b2_l | !enable );
 
   // High side
-  assign phase_a1_h_out = config_invert_highside ^  ( phase_a1_h && !faultn && enable );
-  assign phase_a2_h_out = config_invert_highside ^  ( phase_a2_h && !faultn && enable );
-  assign phase_b1_h_out = config_invert_highside ^  ( phase_b1_h && !faultn && enable );
-  assign phase_b2_h_out = config_invert_highside ^  ( phase_b2_h && !faultn && enable );
+  assign phase_a1_h_out = config_invert_highside ^  ( phase_a1_h && faultn && enable );
+  assign phase_a2_h_out = config_invert_highside ^  ( phase_a2_h && faultn && enable );
+  assign phase_b1_h_out = config_invert_highside ^  ( phase_b1_h && faultn && enable );
+  assign phase_b2_h_out = config_invert_highside ^  ( phase_b2_h && faultn && enable );
 
   // Fast decay is first x ticks of off time
   // default fast decay = 706
