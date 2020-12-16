@@ -27,7 +27,6 @@ module testbench(
     output reg [63:0] word_send_data,
     output            word_received,
     output reg [63:0] word_data_received,
-    output COPI_tx
   );
 
   wire CS = 0; // selected
@@ -41,7 +40,8 @@ module testbench(
   always @(posedge clk) SCK_r <= SCK_r + 1'b1;
 
   // COPI trigger 1/4 clk before SCK posedge
-  wire COPI_tx = (SCK_r == 2'b01);
+  wire COPI_tx;
+  assign COPI_tx = (SCK_r == 2'b01);
 
   // Locals
   reg [63:0] word_data_received;
@@ -63,13 +63,15 @@ module testbench(
 
   reg [7:0] tx_byte;
 
+  reg [3:0] bit_count;
+
   initial begin
     word_send_data = 64'h00000000005fffff;
     word_data_tb = 64'hbeefdeaddeadbeef;
     tx_byte = 8'b0;
+    bit_count = 4'b0;
   end
 
-  reg [3:0] bit_count = 4'b0;
   reg [3:0] byte_count = 4'b0;
 
   // slice the register into 8 bit, little endian chunks
@@ -86,16 +88,22 @@ module testbench(
 
   assign COPI = tx_byte[0];
 
-  reg trig = 0;
+  reg trig;
 
-  always @(posedge COPI_tx) begin
-    bit_count <= bit_count + 1'b1;
-    trig = ~trig;
+  always @(posedge clk) begin
+    trig <= ~trig;
+    if (COPI_tx) begin
+      bit_count <= bit_count + 1'b1;
+    end
+  end
+
+  //always @(posedge clk) begin
+    //trig <= ~trig;
     //tx_byte = {1'b0, tx_byte[6:1]};
     //if (bit_count == 4'b111) begin
       //byte_count = byte_count + 1'b1;
       //tx_byte = word_slice[byte_count];
     //end
-  end
+  //end
 
 endmodule
