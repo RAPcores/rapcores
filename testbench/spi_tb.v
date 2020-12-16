@@ -22,15 +22,17 @@ module testbench(
     input             clk,
     output             SCK,
     output             CS,
-    output            COPI,
     output            CIPO,
     output reg [63:0] word_send_data,
     output            word_received,
     output reg [63:0] word_data_received,
+    output COPI_tx,
+    output [3:0] bit_count,
+    output [3:0] tx_byte,
+    output [3:0] byte_count
   );
 
   wire CS = 0; // selected
-  wire COPI = 0;
   wire CIPO; // readback tbd
 
   // SCK can't be faster than every two clocks ~ use 4
@@ -61,7 +63,7 @@ module testbench(
                 .word_received(word_received),
                 .word_data_received(word_data_received));
 
-  reg [7:0] tx_byte;
+  //reg [7:0] tx_byte;
 
   reg [3:0] bit_count;
 
@@ -86,24 +88,15 @@ module testbench(
   assign word_slice[7] = word_data_tb[63:56];
   assign word_slice[8] = word_data_tb[7:0];
 
-  assign COPI = tx_byte[0];
+  wire COPI = word_slice[byte_count][bit_count];
 
-  reg trig;
-
-  always @(posedge clk) begin
-    trig <= ~trig;
-    if (COPI_tx) begin
-      bit_count <= bit_count + 1'b1;
+  always @(posedge COPI_tx) begin
+    bit_count <= bit_count + 1'b1;
+    tx_byte = {1'b0, tx_byte[6:1]};
+    if (bit_count == 4'b0111) begin
+      byte_count <= byte_count + 1'b1;
+      bit_count <= 4'b0000;
     end
   end
-
-  //always @(posedge clk) begin
-    //trig <= ~trig;
-    //tx_byte = {1'b0, tx_byte[6:1]};
-    //if (bit_count == 4'b111) begin
-      //byte_count = byte_count + 1'b1;
-      //tx_byte = word_slice[byte_count];
-    //end
-  //end
 
 endmodule
