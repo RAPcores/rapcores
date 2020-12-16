@@ -20,15 +20,11 @@
 
 module testbench(
     input             clk,
-    output             SCK,
-    output             CS,
-    output            CIPO,
     output reg [63:0] word_send_data,
     output            word_received,
     output reg [63:0] word_data_received,
     output COPI_tx,
     output [3:0] bit_count,
-    output [3:0] tx_byte,
     output [3:0] byte_count
   );
 
@@ -39,18 +35,25 @@ module testbench(
   reg [1:0] SCK_r = 0;
   wire SCK;
   assign SCK = (SCK_r == 2'b11 || SCK_r == 2'b10);
-  always @(posedge clk) SCK_r <= SCK_r + 1'b1;
+  reg initialized = 0;
+  always @(posedge clk) begin
+    SCK_r <= SCK_r + 1'b1;
+    if(SCK_r == 2'b11) initialized <= 1; // we want copi to start shifting after first SCK cycle
+  end
 
   // COPI trigger 1/4 clk before SCK posedge
   wire COPI_tx;
-  assign COPI_tx = (SCK_r == 2'b01);
+  assign COPI_tx = (SCK_r == 2'b01) && initialized;
 
   // Locals
   reg [63:0] word_data_received;
   reg [63:0] word_send_data;
 
+  wire COPI;
+
   // TB data
   reg [63:0] word_data_tb;
+  reg [7:0] tx_byte;
 
   // SPI 64 bit module
   SPIWord word_proc (
@@ -70,33 +73,23 @@ module testbench(
   initial begin
     word_send_data = 64'h00000000005fffff;
     word_data_tb = 64'hbeefdeaddeadbeef;
-    tx_byte = 8'b0;
-    bit_count = 4'b0;
+    tx_byte = word_data_tb[7:0];
   end
 
-  reg [3:0] byte_count = 4'b0;
-
-  // slice the register into 8 bit, little endian chunks
-  wire [7:0] word_slice [8:0];
-  assign word_slice[0] = word_data_tb[7:0]; // This should only hit at initialization
-  assign word_slice[1] = word_data_tb[15:8];
-  assign word_slice[2] = word_data_tb[23:16];
-  assign word_slice[3] = word_data_tb[31:24];
-  assign word_slice[4] = word_data_tb[39:32];
-  assign word_slice[5] = word_data_tb[47:40];
-  assign word_slice[6] = word_data_tb[55:48];
-  assign word_slice[7] = word_data_tb[63:56];
-  assign word_slice[8] = word_data_tb[7:0];
-
-  wire COPI = word_slice[byte_count][bit_count];
+  reg [3:0] bit_count = 4'b0;
+  assign COPI = tx_byte[7];
+  reg started = 0;
 
   always @(posedge COPI_tx) begin
-    bit_count <= bit_count + 1'b1;
-    tx_byte = {1'b0, tx_byte[6:1]};
-    if (bit_count == 4'b0111) begin
-      byte_count <= byte_count + 1'b1;
-      bit_count <= 4'b0000;
-    end
+    //if (started) begin
+      tx_byte = {tx_byte[6:0], 1'b0};
+      bit_count = bit_count + 1'b1;
+      if (bit_count == 4'b1000) begin
+        word_data_tb = {8'b0, word_data_tb[63:8]};
+        tx_byte = word_data_tb[7:0];
+        bit_count = 4'b0;
+      end
+    //end else started = 1;
   end
 
 endmodule
