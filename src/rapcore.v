@@ -53,10 +53,12 @@ module rapcore (
     `ifdef STEPINPUT
       input wire STEPINPUT,
       input wire DIRINPUT,
+      input wire ENINPUT,
     `endif
     `ifdef STEPOUTPUT
       output wire STEPOUTPUT,
       output wire DIROUTPUT,
+      output wire ENOUTPUT,
     `endif
     `ifdef LA_IN
       input wire [`LA_IN:1] LA_IN,
@@ -215,10 +217,12 @@ module rapcore (
     `ifdef STEPINPUT
       .STEPINPUT(STEPINPUT),
       .DIRINPUT(DIRINPUT),
+      .ENINPUT(ENINPUT),
     `endif
     `ifdef STEPOUTPUT
       .STEPOUTPUT(STEPOUTPUT),
-      .DIROUTPUT(DIROUTPUT)
+      .DIROUTPUT(DIROUTPUT),
+      .ENOUTPUT(ENOUTPUT)
     `endif
   );
 

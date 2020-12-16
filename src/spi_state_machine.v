@@ -43,10 +43,12 @@ module spi_state_machine(
   `ifdef STEPINPUT
     input STEPINPUT,
     input DIRINPUT,
+    input ENINPUT,
   `endif
   `ifdef STEPOUTPUT
     output STEPOUTPUT,
-    output DIROUTPUT
+    output DIROUTPUT,
+    output ENOUTPUT
   `endif
 );
 
@@ -195,7 +197,6 @@ module spi_state_machine(
   // Step IO
   wire dda_step;
   reg enable_r = 0;
-  assign enable = enable_r;
 
   // Implement flow control and event pins if specified
   `ifdef BUFFER_DTR
@@ -205,14 +206,17 @@ module spi_state_machine(
   `ifndef STEPINPUT
     assign dir = dir_r[moveind]; // set direction
     assign step = dda_step;
+    assign enable = enable_r;
   `else
     assign dir = dir_r[moveind] | DIRINPUT; // set direction
     assign step = dda_step | STEPINPUT;
+    assign enable = enable_r | ENINPUT;
   `endif
 
   `ifdef STEPOUTPUT
     assign STEPOUTPUT = step;
     assign DIROUTPUT = dir;
+    assign ENOUTPUT = enable;
   `endif
 
   dda_timer dda (.CLK(CLK),
