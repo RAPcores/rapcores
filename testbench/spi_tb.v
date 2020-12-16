@@ -28,7 +28,9 @@ module testbench(
     output [3:0] byte_count
   );
 
-  wire CS = 0; // selected
+  parameter NUMWORDS = 3;
+
+  reg CS = 0; // selected
   wire CIPO; // readback tbd
 
   // SCK can't be faster than every two clocks ~ use 4
@@ -51,6 +53,7 @@ module testbench(
   reg [63:0] word_send_data;
 
   // TB data
+  reg [63:0] word_data_mem [NUMWORDS-1:0];
   reg [63:0] word_data_tb;
   reg [7:0] tx_byte;
 
@@ -67,11 +70,17 @@ module testbench(
 
   initial begin
     word_send_data = 64'h00000000005fffff;
-    word_data_tb = 64'hbeefdeaddeadbeef;
+    word_data_mem[0] = 64'hbeefdeaddeadbeef;
+    word_data_mem[1] = 64'h00000000005fffff;
+    word_data_mem[2] = 64'h00000110a0000000;
+
+    word_data_tb = word_data_mem[0];
     tx_byte = word_data_tb[7:0];
   end
 
   reg [3:0] bit_count = 4'b0;
+  reg [3:0] byte_count = 4'b0;
+  reg [3:0] word_count = 4'b0;
   wire COPI = tx_byte[7]; //MSB mode 0
 
   // shift out the bits
@@ -82,6 +91,16 @@ module testbench(
       word_data_tb = {8'b0, word_data_tb[63:8]};
       tx_byte = word_data_tb[7:0];
       bit_count = 4'b0;
+      byte_count = byte_count + 1'b1;
+      if (byte_count == 4'h08) begin
+        word_count = word_count + 1'b1;
+        if (word_count <= NUMWORDS-1) begin
+          word_data_tb = word_data_mem[word_count];
+        end else begin
+          CS <= 1; // deselect
+        end
+        byte_count = 8'b0;
+      end
     end
   end
 
