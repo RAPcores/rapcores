@@ -65,7 +65,8 @@ module rapcore (
     `ifdef LA_OUT
       ,output wire [`LA_OUT:1] LA_OUT
     `endif
-    ,enable_in
+    ,input enable_in
+    ,input enable_oeb
 );
 
   // Global Reset (TODO: Make input pin)
@@ -86,6 +87,9 @@ module rapcore (
   end
   wire reset = resetn;
   */
+
+  wire selected_enable = (~enable_oeb) ? enable_in : enable;
+
   // Stepper Setup
   // TODO: Generate statement?
   // Stepper Config
@@ -153,7 +157,7 @@ module rapcore (
       //.cos_table (cos_table),
       .step (step),
       .dir (dir),
-      .enable_in(enable_in)
+      .enable_in(selected_enable)
       );
   `endif
 
