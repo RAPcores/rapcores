@@ -9,13 +9,15 @@ module SPI (
     output           CIPO,
     input      [7:0] tx_byte,
     output reg [7:0] rx_byte,
-    output reg       rx_byte_ready
+    output           rx_byte_ready
 );
 
   // Tegisters to sync IO with FPGA clock
-  reg [2:0] SCKr;
-  reg [2:0] CSr;
-  reg [1:0] COPIr;
+  reg [2:0] SCKr = 0;
+  reg [2:0] CSr = 0;
+  reg [1:0] COPIr = 0;
+  reg rx_byte_ready_r = 0;
+  assign rx_byte_ready = rx_byte_ready_r;
 
   // count the number of RX and TX bits RX incrments on rising, TX on falling SCK edge
   reg [2:0] rxbitcnt = 3'b000; // counts up
@@ -44,7 +46,7 @@ module SPI (
         rx_byte <= {rx_byte[6:0], COPI_data};
 
         // Trigger Byte recieved
-        rx_byte_ready <= (rxbitcnt[2:0] == 3'b111);
+        rx_byte_ready_r <= (rxbitcnt[2:0] == 3'b111);
       end
 
       // Transmit increment
@@ -83,7 +85,7 @@ module SPIWord (
   // The standard unit of transfer is 8 bits, MSB
   wire rx_byte_ready;  // high when a byte has been received
   wire [7:0] rx_byte;
-  wire [7:0] tx_byte;
+  wire [7:0] tx_byte = 0;
   SPI spi0 (.clk(clk),
             .CS(CS),
             .SCK(SCK),
@@ -95,7 +97,7 @@ module SPIWord (
 
   reg [3:0] byte_count = 0;
   wire [7:0] word_slice [8:0]; // slice the register into 8 bits
-  reg [1:0] rx_byte_ready_r;
+  reg [1:0] rx_byte_ready_r = 0;
   // Recieve Shift Register
   always @(posedge clk) begin
     rx_byte_ready_r <= {rx_byte_ready_r[0], rx_byte_ready};
