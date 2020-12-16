@@ -82,7 +82,7 @@ module rapcore (
   reg [7:0] resetn_counter = 0;
   assign resetn = resetn_in && &resetn_counter;
   always @(posedge CLK) begin
-    if (!resetn && ~resetn_in) resetn_counter <= resetn_counter + 1'b1;
+    if (!resetn && resetn_in) resetn_counter <= resetn_counter + 1'b1;
   end
 
   // Stepper Setup
