@@ -43,7 +43,7 @@ module microstepper_control (
     if (!resetn)
       enable <= 0;
     else
-      enable <= enable_in;
+      enable <= 1;// enable_in;
     step_r <= {step_r[1:0], step};
     dir_r <= {dir_r[0], dir};
   end
@@ -78,6 +78,7 @@ module microstepper_control (
   wire phase_b1_h, phase_b1_l, phase_b2_h, phase_b2_l;
 
   // Low side output polarity, enable, and fault shutdown
+  // Outputs are active high unless config_invert_**** is set
   assign phase_a1_l_out = config_invert_lowside ^ ( phase_a1_l | !enable );
   assign phase_a2_l_out = config_invert_lowside ^ ( phase_a2_l | !enable );
   assign phase_b1_l_out = config_invert_lowside ^ ( phase_b1_l | !enable );
