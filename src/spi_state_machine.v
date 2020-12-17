@@ -1,6 +1,7 @@
 `default_nettype none
 
 module spi_state_machine(
+  input resetn,
   // SPI pins
   input SCK,
   input CS,
@@ -205,7 +206,7 @@ module spi_state_machine(
 
   // Step IO
   wire dda_step;
-  reg enable_r = 0;
+  reg enable_r;
 
   // Implement flow control and event pins if specified
   `ifdef BUFFER_DTR
@@ -250,8 +251,8 @@ module spi_state_machine(
   // State Machine for handling SPI Messages
   //
 
-  reg [7:0] message_word_count = 0;
-  reg [7:0] message_header = 0;
+  reg [7:0] message_word_count;
+  reg [7:0] message_header;
 
   // Encoder
   reg signed [63:0] encoder_store; // Snapshot for SPI comms
@@ -261,7 +262,24 @@ module spi_state_machine(
                              (message_header == `CMD_API_VERSION);
   reg [1:0] word_received_r;
 
-  always @(posedge CLK) begin
+  always @(posedge CLK) if (!resetn) begin
+    // Stepper Config
+    microsteps = 2;
+    current = 140;
+    config_offtime = 810;
+    config_blanktime = 27;
+    config_fastdecay_threshold = 706;
+    config_minimum_on_time = 54;
+    config_current_threshold = 1024;
+    config_chargepump_period = 91;
+    config_invert_highside = 0;
+    config_invert_lowside = 0;
+    enable_r <= 0;
+
+    message_word_count <= 0;
+    message_header <= 0;
+
+  end else if (resetn) begin
     word_received_r <= {word_received_r[0], word_received};
     if (word_received_r == 2'b01) begin
       // Zero out send data register

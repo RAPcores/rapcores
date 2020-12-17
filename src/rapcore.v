@@ -186,6 +186,7 @@ module rapcore (
 
   spi_state_machine spifsm (
     .CLK(CLK),
+    .resetn(resetn),
 
     .SCK(SCK),
     .CS(CS),
