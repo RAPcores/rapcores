@@ -2,6 +2,7 @@
 
 module DualHBridge (
     input clk,
+    input resetn,
     output       phase_a1,  // Phase A
     output       phase_a2,  // Phase A
     output       phase_b1,  // Phase B
@@ -26,10 +27,12 @@ module DualHBridge (
 
   // Vref - A
   pwm va (.clk(clk),
+          .resetn (resetn),
           .val(current),
           .pwm(vref_a));
   // Vref - B
   pwm vb (.clk(clk),
+          .resetn (resetn),
           .val(current),
           .pwm(vref_b));
 
