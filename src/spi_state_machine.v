@@ -86,22 +86,7 @@ module spi_state_machine(
                 .word_data_received(word_data_received_w));
 
 
-  //
-  // Stepper Config
-  //
 
-  initial begin
-    microsteps = 2;
-    current = 140;
-    config_offtime = 810;
-    config_blanktime = 27;
-    config_fastdecay_threshold = 706;
-    config_minimum_on_time = 54;
-    config_current_threshold = 1024;
-    config_chargepump_period = 91;
-    config_invert_highside = 0;
-    config_invert_lowside = 0;
-  end
 /*
   reg [511:0] cos_table;
 
