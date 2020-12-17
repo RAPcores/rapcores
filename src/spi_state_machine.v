@@ -172,7 +172,7 @@ module spi_state_machine(
   reg [`MOVE_BUFFER_SIZE:0] stepready;
   wire [`MOVE_BUFFER_SIZE:0] stepfinished; // set via DDA
 
-  reg [`MOVE_BUFFER_SIZE:0] dir_r = {(`MOVE_BUFFER_SIZE+1){1'b0}};
+  reg [`MOVE_BUFFER_SIZE:0] dir_r;
 
   reg [63:0] move_duration [`MOVE_BUFFER_SIZE:0];
   reg signed [63:0] increment [`MOVE_BUFFER_SIZE:0];
@@ -271,6 +271,7 @@ module spi_state_machine(
 
     writemoveind = 0;  // Move buffer
     stepready = 0;  // Latching mechanism for engaging the buffered move.
+    dir_r = {(`MOVE_BUFFER_SIZE+1){1'b0}};
 
     clock_divisor <= 40;  // should be 40 for 400 khz at 16Mhz Clk
     message_word_count <= 0;

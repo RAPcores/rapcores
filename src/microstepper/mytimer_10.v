@@ -9,14 +9,15 @@ module mytimer_10 (
 );
   parameter WIDTH = 10;
 
-  initial done = 0;
+  reg run;
   reg [WIDTH-1:0] counter;
-  reg run = 1;
   assign timer = counter;
 
   always @(posedge clk) begin
   if (!resetn) begin
     counter <= 0;
+    done <= 0;
+    run <= 0;
     done <= 0;
   end
   else if( start_enable ) begin

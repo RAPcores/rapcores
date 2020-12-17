@@ -165,7 +165,7 @@ module rapcore (
   // Encoder
   //
   wire signed [63:0] encoder_count;
-  reg [7:0] encoder_multiplier = 1;
+  //reg [7:0] encoder_multiplier = 1;
   wire encoder_fault;
   `ifdef QUAD_ENC
     // TODO: For ... generate
@@ -176,8 +176,9 @@ module rapcore (
       .a(ENC_A[1]),
       .b(ENC_B[1]),
       .faultn(encoder_fault),
-      .count(encoder_count),
-      .multiplier(encoder_multiplier));
+      .count(encoder_count)
+      //.multiplier(encoder_multiplier)
+      );
   `endif
 
   //
