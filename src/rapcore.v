@@ -1,70 +1,70 @@
 `default_nettype none
 
 module rapcore (
-    input  CLK,
+    input CLK
     `ifdef LED
-      output wire [`LED:1] LED,
+      ,output wire [`LED:1] LED
     `endif
     `ifdef tinyfpgabx
-      output USBPU,  // USB pull-up resistor
+      ,output wire USBPU  // USB pull-up resistor
     `endif
     `ifdef SPI_INTERFACE
-      input  wire SCK,
-      input  wire CS,
-      input  wire COPI,
-      output wire CIPO,
+      ,input wire SCK
+      ,input wire CS
+      ,input wire COPI
+      ,output wire CIPO
     `endif
     `ifdef DUAL_HBRIDGE
-      output wire [`DUAL_HBRIDGE:1] PHASE_A1,  // Phase A
-      output wire [`DUAL_HBRIDGE:1] PHASE_A2,  // Phase A
-      output wire [`DUAL_HBRIDGE:1] PHASE_B1,  // Phase B
-      output wire [`DUAL_HBRIDGE:1] PHASE_B2,  // Phase B
-      output wire [`DUAL_HBRIDGE:1] VREF_A,  // VRef
-      output wire [`DUAL_HBRIDGE:1] VREF_B,  // VRef
+      ,output wire [`DUAL_HBRIDGE:1] PHASE_A1  // Phase A
+      ,output wire [`DUAL_HBRIDGE:1] PHASE_A2  // Phase A
+      ,output wire [`DUAL_HBRIDGE:1] PHASE_B1  // Phase B
+      ,output wire [`DUAL_HBRIDGE:1] PHASE_B2  // Phase B
+      ,output wire [`DUAL_HBRIDGE:1] VREF_A  // VRef
+      ,output wire [`DUAL_HBRIDGE:1] VREF_B  // VRef
     `endif
     `ifdef ULTIBRIDGE
-      output wire CHARGEPUMP,
-      input wire analog_cmp1,
-      output wire analog_out1,
-      input wire analog_cmp2,
-      output wire analog_out2,
-      output wire [`ULTIBRIDGE:1] PHASE_A1,  // Phase A
-      output wire [`ULTIBRIDGE:1] PHASE_A2,  // Phase A
-      output wire [`ULTIBRIDGE:1] PHASE_B1,  // Phase B
-      output wire [`ULTIBRIDGE:1] PHASE_B2,  // Phase B
-      output wire [`ULTIBRIDGE:1] PHASE_A1_H,  // Phase A
-      output wire [`ULTIBRIDGE:1] PHASE_A2_H,  // Phase A
-      output wire [`ULTIBRIDGE:1] PHASE_B1_H,  // Phase B
-      output wire [`ULTIBRIDGE:1] PHASE_B2_H,  // Phase B
+      ,output wire CHARGEPUMP
+      ,input wire analog_cmp1
+      ,output wire analog_out1
+      ,input wire analog_cmp2
+      ,output wire analog_out2
+      ,output wire [`ULTIBRIDGE:1] PHASE_A1  // Phase A
+      ,output wire [`ULTIBRIDGE:1] PHASE_A2  // Phase A
+      ,output wire [`ULTIBRIDGE:1] PHASE_B1  // Phase B
+      ,output wire [`ULTIBRIDGE:1] PHASE_B2  // Phase B
+      ,output wire [`ULTIBRIDGE:1] PHASE_A1_H  // Phase A
+      ,output wire [`ULTIBRIDGE:1] PHASE_A2_H  // Phase A
+      ,output wire [`ULTIBRIDGE:1] PHASE_B1_H  // Phase B
+      ,output wire [`ULTIBRIDGE:1] PHASE_B2_H  // Phase B
     `endif
     `ifdef QUAD_ENC
-      input wire [`QUAD_ENC:1] ENC_B,
-      input wire [`QUAD_ENC:1] ENC_A,
+      ,input wire [`QUAD_ENC:1] ENC_B
+      ,input wire [`QUAD_ENC:1] ENC_A
     `endif
     `ifdef BUFFER_DTR
-      output wire BUFFER_DTR,
+      ,output wire BUFFER_DTR
     `endif
     `ifdef MOVE_DONE
-      output wire MOVE_DONE,
+      ,output wire MOVE_DONE
     `endif
     `ifdef HALT
-      input wire HALT,
+      ,input wire HALT
     `endif
     `ifdef STEPINPUT
-      input wire STEPINPUT,
-      input wire DIRINPUT,
-      input wire ENINPUT,
+      ,input wire STEPINPUT
+      ,input wire DIRINPUT
+      ,input wire ENINPUT
     `endif
     `ifdef STEPOUTPUT
-      output wire STEPOUTPUT,
-      output wire DIROUTPUT,
-      output wire ENOUTPUT,
+      ,output wire STEPOUTPUT
+      ,output wire DIROUTPUT
+      ,output wire ENOUTPUT
     `endif
     `ifdef LA_IN
-      input wire [`LA_IN:1] LA_IN,
+      ,input wire [`LA_IN:1] LA_IN
     `endif
     `ifdef LA_OUT
-      output wire [`LA_OUT:1] LA_OUT
+      ,output wire [`LA_OUT:1] LA_OUT
     `endif
 );
 
@@ -203,26 +203,26 @@ module rapcore (
 
     .step(step),
     .dir(dir),
-    .enable(enable),
+    .enable(enable)
 
     `ifdef BUFFER_DTR
-      .BUFFER_DTR(BUFFER_DTR),
+      ,.BUFFER_DTR(BUFFER_DTR)
     `endif
     `ifdef MOVE_DONE
-      .MOVE_DONE(MOVE_DONE),
+      ,.MOVE_DONE(MOVE_DONE)
     `endif
     `ifdef HALT
-      .HALT(HALT),
+      ,.HALT(HALT)
     `endif
     `ifdef STEPINPUT
-      .STEPINPUT(STEPINPUT),
-      .DIRINPUT(DIRINPUT),
-      .ENINPUT(ENINPUT),
+      ,.STEPINPUT(STEPINPUT)
+      ,.DIRINPUT(DIRINPUT)
+      ,.ENINPUT(ENINPUT)
     `endif
     `ifdef STEPOUTPUT
-      .STEPOUTPUT(STEPOUTPUT),
-      .DIROUTPUT(DIROUTPUT),
-      .ENOUTPUT(ENOUTPUT)
+      ,.STEPOUTPUT(STEPOUTPUT)
+      ,.DIROUTPUT(DIROUTPUT)
+      ,.ENOUTPUT(ENOUTPUT)
     `endif
   );
 

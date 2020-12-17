@@ -28,27 +28,27 @@ module spi_state_machine(
   //output [511:0] cos_table,
 
   // encoder
-  input [63:0] encoder_count,
+  input [63:0] encoder_count
 
   // Event IO
   `ifdef BUFFER_DTR
-    output BUFFER_DTR,
+    ,output BUFFER_DTR
   `endif
   `ifdef MOVE_DONE
-    output MOVE_DONE,
+    ,output MOVE_DONE
   `endif
   `ifdef HALT
-    input HALT,
+    ,input HALT
   `endif
   `ifdef STEPINPUT
-    input STEPINPUT,
-    input DIRINPUT,
-    input ENINPUT,
+    ,input STEPINPUT
+    ,input DIRINPUT
+    ,input ENINPUT
   `endif
   `ifdef STEPOUTPUT
-    output STEPOUTPUT,
-    output DIROUTPUT,
-    output ENOUTPUT
+    ,output STEPOUTPUT
+    ,output DIROUTPUT
+    ,output ENOUTPUT
   `endif
 );
 
@@ -189,11 +189,11 @@ module spi_state_machine(
 
   // initialize DDA mem to zero
   // TODO: This doesn't work
-  initial begin
-    increment[`MOVE_BUFFER_SIZE:0] <= {(`MOVE_BUFFER_SIZE){64'b0}};
-    incrementincrement[`MOVE_BUFFER_SIZE:0] <= {(`MOVE_BUFFER_SIZE){64'b0}};
-    move_duration [`MOVE_BUFFER_SIZE:0] <= {(`MOVE_BUFFER_SIZE){64'b0}};
-  end
+  //initial begin
+  //  increment[`MOVE_BUFFER_SIZE:0] <= {(`MOVE_BUFFER_SIZE){64'b0}};
+  //  incrementincrement[`MOVE_BUFFER_SIZE:0] <= {(`MOVE_BUFFER_SIZE){64'b0}};
+  //  move_duration [`MOVE_BUFFER_SIZE:0] <= {(`MOVE_BUFFER_SIZE){64'b0}};
+  //end
 
   reg [7:0] clock_divisor = 40;  // should be 40 for 400 khz at 16Mhz Clk
 
@@ -236,12 +236,12 @@ module spi_state_machine(
                 .stepfinished(stepfinished),
                 .moveind(moveind),
                 .writemoveind(writemoveind),
-                .step(dda_step),
+                .step(dda_step)
                 `ifdef HALT
-                  .halt(HALT),
+                  ,.halt(HALT)
                 `endif
                 `ifdef MOVE_DONE
-                  .move_done(MOVE_DONE)
+                  ,.move_done(MOVE_DONE)
                 `endif
                 );
 

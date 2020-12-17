@@ -15,6 +15,7 @@ build/*.json
 *.config
 *.vcd
 symbiyosys
+a.out
 
 src/generated/*
 build/*

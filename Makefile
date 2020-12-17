@@ -14,6 +14,9 @@
 #  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 #  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+# default board is rapbo
+BOARD ?= rapbo
+
 ifdef BOARD
 	include ./boards/${BOARD}/${BOARD}.mk
 endif
@@ -53,6 +56,17 @@ clean:
 
 formal:
 	sby -f symbiyosys.sby
+
+iverilog-parse: $(RAPCOREFILES)
+	printf '\nIVERILOG PARSE\n'
+	iverilog -tnull $(RAPCOREFILES)
+
+yosys-parse: $(RAPCOREFILES)
+	printf '\nYOSYS PARSE\n'
+	yosys -qp 'read -sv $(RAPCOREFILES)'
+
+vvp: $(RAPCOREFILES)
+	iverilog -tvvp $(RAPCOREFILES)
 
 lint:
 	verible-verilog-lint src/*.v
