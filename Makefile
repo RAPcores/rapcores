@@ -57,12 +57,16 @@ clean:
 formal:
 	sby -f symbiyosys.sby
 
-parser-compat:
-	printf '\nYOSYS PARSE\n'
-	yosys -qp 'read -sv $(RAPCOREFILES)'
+iverilog-parse: $(RAPCOREFILES)
 	printf '\nIVERILOG PARSE\n'
 	iverilog -tnull $(RAPCOREFILES)
 
+yosys-parse: $(RAPCOREFILES)
+	printf '\nYOSYS PARSE\n'
+	yosys -qp 'read -sv $(RAPCOREFILES)'
+
+vvp: $(RAPCOREFILES)
+	iverilog -tvvp $(RAPCOREFILES)
 
 lint:
 	verible-verilog-lint src/*.v
