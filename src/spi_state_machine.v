@@ -229,7 +229,7 @@ module spi_state_machine(
     assign ENOUTPUT = enable;
   `endif
 
-  dda_timer dda (.CLK(CLK),
+  dda_timer dda (
                 .clock_divisor(clock_divisor),
                 .move_duration(move_duration_w),
                 .increment(increment_w),
@@ -243,8 +243,9 @@ module spi_state_machine(
                   .halt(HALT),
                 `endif
                 `ifdef MOVE_DONE
-                  .move_done(MOVE_DONE)
+                  .move_done(MOVE_DONE),
                 `endif
+                .CLK(CLK)
                 );
 
   //
