@@ -66,8 +66,8 @@ module spi_state_machine(
   // Word handler
   // The system operates on 64 bit little endian words
   // This should make it easier to send 64 bit chunks from the host controller
-  reg [63:0] word_send_data = 0;
-  reg [63:0] word_data_received = 0;
+  reg [63:0] word_send_data;
+  reg [63:0] word_data_received;
 
   wire [63:0] word_data_received_w;
   always @(posedge spi_clock)
@@ -162,11 +162,11 @@ module spi_state_machine(
   //
 
   // Move buffer
-  reg [`MOVE_BUFFER_BITS:0] writemoveind = 0;
+  reg [`MOVE_BUFFER_BITS:0] writemoveind;
   wire [`MOVE_BUFFER_BITS:0] moveind; // set via DDA
 
   // Latching mechanism for engaging the buffered move.
-  reg [`MOVE_BUFFER_SIZE:0] stepready = 0;
+  reg [`MOVE_BUFFER_SIZE:0] stepready;
   wire [`MOVE_BUFFER_SIZE:0] stepfinished; // set via DDA
 
   reg [`MOVE_BUFFER_SIZE:0] dir_r = {(`MOVE_BUFFER_SIZE+1){1'b0}};
@@ -183,7 +183,7 @@ module spi_state_machine(
   //  move_duration [`MOVE_BUFFER_SIZE:0] <= {(`MOVE_BUFFER_SIZE){64'b0}};
   //end
 
-  reg [7:0] clock_divisor = 40;  // should be 40 for 400 khz at 16Mhz Clk
+  reg [7:0] clock_divisor;  // should be 40 for 400 khz at 16Mhz Clk
 
   // DDA module input wires determined from buffer
   wire [63:0] move_duration_w = move_duration[moveind];
@@ -263,6 +263,12 @@ module spi_state_machine(
     config_invert_highside <= 0;
     config_invert_lowside <= 0;
     enable_r <= 0;
+
+    word_send_data = 0;
+    word_data_received = 0;
+
+    writemoveind = 0;  // Move buffer
+    stepready = 0;  // Latching mechanism for engaging the buffered move.
 
     clock_divisor <= 40;  // should be 40 for 400 khz at 16Mhz Clk
     message_word_count <= 0;
