@@ -21,7 +21,7 @@ module dda_timer(
 
   // Locals
   reg [63:0] tickdowncount = 64'b0;  // move down count (clock cycles)
-  reg [7:0] clkaccum = 8'b1;  // intra-tick accumulator
+  reg [7:0] clkaccum = 8'h1;  // intra-tick accumulator
 
   reg signed [63:0] substep_accumulator = 64'b0; // typemax(Int64) - 100 for buffer
   reg signed [63:0] increment_r = 64'b0;
@@ -81,7 +81,7 @@ module dda_timer(
       end
 
       // DDA clock divisor
-      clkaccum <= clkaccum - 8'b1;
+      clkaccum <= clkaccum - 8'h1;
       if (clkaccum == 8'b0) begin
 
         increment_r <= increment_r + incrementincrement;

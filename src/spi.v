@@ -14,7 +14,7 @@ module SPI (
 
   // Registers to sync IO with FPGA clock
   reg [2:0] SCKr = 3'b0;
-  reg [2:0] CSr = 3'b1; // active low, init unselected
+  reg [2:0] CSr = 3'h1; // active low, init unselected
   reg [1:0] COPIr = 2'b0;
 
   // Output Byte and ready flag
