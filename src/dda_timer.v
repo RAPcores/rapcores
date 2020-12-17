@@ -1,7 +1,6 @@
 `default_nettype none
 
 module dda_timer(
-  input CLK,
   input [7:0] clock_divisor,
   input [63:0] move_duration,
   input [63:0] increment,
@@ -10,13 +9,14 @@ module dda_timer(
   output reg [`MOVE_BUFFER_SIZE:0] stepfinished,
   output reg [`MOVE_BUFFER_BITS:0] moveind, // DDA buffer index
   input [`MOVE_BUFFER_BITS:0] writemoveind, // State Machine index
-  output step
+  output step,
   `ifdef HALT
-    ,input halt
+    input halt,
   `endif
   `ifdef MOVE_DONE
-    ,output move_done
+    output move_done,
   `endif
+  input CLK
 );
 
   // Locals

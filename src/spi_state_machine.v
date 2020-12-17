@@ -1,8 +1,6 @@
 `default_nettype none
 
 module spi_state_machine(
-  input CLK,
-
   // SPI pins
   input SCK,
   input CS,
@@ -28,28 +26,29 @@ module spi_state_machine(
   //output [511:0] cos_table,
 
   // encoder
-  input [63:0] encoder_count
+  input [63:0] encoder_count,
 
   // Event IO
   `ifdef BUFFER_DTR
-    ,output BUFFER_DTR
+    output BUFFER_DTR,
   `endif
   `ifdef MOVE_DONE
-    ,output MOVE_DONE
+    output MOVE_DONE,
   `endif
   `ifdef HALT
-    ,input HALT
+    input HALT,
   `endif
   `ifdef STEPINPUT
-    ,input STEPINPUT
-    ,input DIRINPUT
-    ,input ENINPUT
+    input STEPINPUT,
+    input DIRINPUT,
+    input ENINPUT,
   `endif
   `ifdef STEPOUTPUT
-    ,output STEPOUTPUT
-    ,output DIROUTPUT
-    ,output ENOUTPUT
+    output STEPOUTPUT,
+    output DIROUTPUT,
+    output ENOUTPUT,
   `endif
+  input CLK
 );
 
   `ifdef SPIPLL
@@ -238,12 +237,12 @@ module spi_state_machine(
                 .stepfinished(stepfinished),
                 .moveind(moveind),
                 .writemoveind(writemoveind),
-                .step(dda_step)
+                .step(dda_step),
                 `ifdef HALT
-                  ,.halt(HALT)
+                  .halt(HALT),
                 `endif
                 `ifdef MOVE_DONE
-                  ,.move_done(MOVE_DONE)
+                  .move_done(MOVE_DONE)
                 `endif
                 );
 
