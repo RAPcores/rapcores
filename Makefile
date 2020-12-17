@@ -58,12 +58,13 @@ formal:
 	sby -f symbiyosys.sby
 
 iverilog-parse: $(RAPCOREFILES)
-	printf '\nIVERILOG PARSE\n'
 	iverilog -tnull $(RAPCOREFILES)
 
 yosys-parse: $(RAPCOREFILES)
-	printf '\nYOSYS PARSE\n'
 	yosys -qp 'read -sv $(RAPCOREFILES)'
+
+verilator-cdc: $(RAPCOREFILES)
+	verilator --top-module rapcore --cdc $(RAPCOREFILES)
 
 vvp: $(RAPCOREFILES)
 	iverilog -tvvp $(RAPCOREFILES)
