@@ -64,7 +64,7 @@ yosys-parse: $(RAPCOREFILES)
 	yosys -qp 'read -sv $(RAPCOREFILES)'
 
 verilator-cdc: $(RAPCOREFILES)
-	verilator --top-module rapcore --cdc $(RAPCOREFILES)
+	verilator --top-module rapcore --clk CLK --cdc $(RAPCOREFILES)
 
 triple-check: yosys-parse iverilog-parse verilator-cdc
 

@@ -59,8 +59,8 @@ module microstepper_control (
   end
 
   // Fault (active low) if off timer starts before minimum on timer expires
-  wire fault0 = off_timer0 && minimum_on_timer0 && enable;
-  wire fault1 = off_timer1 && minimum_on_timer1 && enable;
+  wire fault0 = (off_timer0 != 0) & (minimum_on_timer0 != 0) & enable;
+  wire fault1 = (off_timer1 != 0) & (minimum_on_timer1 != 0) & enable;
 
   // Fault latches until reset
   always @(posedge clk) begin
@@ -95,8 +95,8 @@ module microstepper_control (
   wire fastDecay1 = off_timer1 >= config_fastdecay_threshold;
 
   // Slow decay remainder of off time - Active high
-  wire slowDecay0 = off_timer0 && !fastDecay0;
-  wire slowDecay1 = off_timer1 && !fastDecay1;
+  wire slowDecay0 = (off_timer0 != 0) & (fastDecay0 == 0);
+  wire slowDecay1 = (off_timer1 != 0) & (fastDecay1 == 0);
 
   // Half bridge high side is active
   // WHEN slow decay is NOT active
@@ -118,8 +118,8 @@ module microstepper_control (
   assign phase_b2_l = slowDecay1 | ( fastDecay1 ? s4 : !s4 );
 
   // Fixed off time peak current controller off time start
-  assign offtimer_en0 = analog_cmp1 & !blank_timer0 & !off_timer0;
-  assign offtimer_en1 = analog_cmp2 & !blank_timer1 & !off_timer1;
+  assign offtimer_en0 = analog_cmp1 & (blank_timer0 == 0) & (off_timer0 == 0);
+  assign offtimer_en1 = analog_cmp2 & (blank_timer1 == 0) & (off_timer1 == 0);
 
 `ifdef FORMAL
   always @(*) begin
