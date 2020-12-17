@@ -24,7 +24,9 @@ module spi_state_machine(
   output reg [7:0] config_chargepump_period,
   output reg config_invert_highside,
   output reg config_invert_lowside,
-  //output [511:0] cos_table,
+  output reg config_cosine_write_enable,
+  output reg [5:0] config_cosine_write_index,
+  output reg  [7:0] config_cosine_write_data,
 
   // encoder
   input [63:0] encoder_count,
@@ -343,15 +345,11 @@ module spi_state_machine(
           end
 
           // Write to Cosine Table
-          // TODO Cosine Net is broken
-          //`CMD_COSINE_CONFIG: begin
-            //cos_table[word_data_received[35:32]] <= word_data_received[31:0];
-            //cos_table[word_data_received[37:32]] <= word_data_received[7:0];
-            //cos_table[word_data_received[35:32]+3] <= word_data_received[31:25];
-            //cos_table[word_data_received[35:32]+2] <= word_data_received[24:16];
-            //cos_table[word_data_received[35:32]+1] <= word_data_received[15:8];
-            //cos_table[word_data_received[35:32]] <= word_data_received[7:0];
-          //end
+          `CMD_COSINE_CONFIG: begin
+            config_cosine_write_enable <= word_data_received[16];
+            config_cosine_write_data <= word_data_received[15:8];
+            config_cosine_write_index <= word_data_received[5:0];
+          end
 
           // API Version
           `CMD_API_VERSION: begin

@@ -25,7 +25,9 @@ module microstepper_top (
     input   wire    [7:0]  config_chargepump_period,
     input   wire     config_invert_highside,
     input   wire     config_invert_lowside,
-    //input [511:0] cos_table,
+    input   wire     config_cosine_write_enable,
+    input   wire    [5:0] config_cosine_write_index,
+    input   wire    [7:0] config_cosine_write_data,
     input   wire     step,
     input   wire     dir,
     input   wire     enable_in,
@@ -152,6 +154,18 @@ wire        off_timer1_done;
       .sw        ({s1, s2, s3, s4})
   );
 
+  cosine2 cosine20 (
+      .clk (clk),
+      .resetn (resetn),
+      .cos_index0 (cos_index1),
+      .cos_index1 (cos_index2),
+      .cos_value0 (pwm1),
+      .cos_value1 (pwm2),
+      .i_write_enable (config_cosine_write_enable),
+      .i_write_index (config_cosine_write_index),
+      .i_write_data (config_cosine_write_data)
+  );
+/*
   cosine cosine0 (
       .clk (clk),
       .cos_index(cos_index1),
@@ -165,7 +179,7 @@ wire        off_timer1_done;
       .cos_value(pwm2)
       //.cos_table(cos_table)
   );
-
+*/
   analog_out analog_out0 (
       .clk        (clk),
       .resetn     (resetn),

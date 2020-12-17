@@ -98,6 +98,9 @@ module rapcore (
   wire [7:0] config_chargepump_period;
   wire config_invert_highside;
   wire config_invert_lowside;
+  wire config_cosine_write_enable;
+  wire [5:0] config_cosine_write_index;
+  wire [7:0] config_cosine_write_data;
 
   // Stepper control lines
   wire step;
@@ -152,7 +155,10 @@ module rapcore (
       .config_chargepump_period (config_chargepump_period),
       .config_invert_highside (config_invert_highside),
       .config_invert_lowside (config_invert_lowside),
-      //.cos_table (cos_table),
+      .config_cosine_write_enable (config_cosine_write_enable),
+      .config_cosine_write_index (config_cosine_write_index),
+      .config_cosine_write_data (config_cosine_write_data),
+      
       .step (step),
       .dir (dir),
       .enable_in(enable),
@@ -204,6 +210,10 @@ module rapcore (
     .config_chargepump_period(config_chargepump_period),
     .config_invert_highside(config_invert_highside),
     .config_invert_lowside(config_invert_lowside),
+    .config_cosine_write_enable (config_cosine_write_enable),
+    .config_cosine_write_index (config_cosine_write_index),
+    .config_cosine_write_data (config_cosine_write_data),
+
 
     .encoder_count(encoder_count),
 
