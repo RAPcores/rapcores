@@ -71,6 +71,9 @@ module spi_state_machine(
 
   wire [63:0] word_data_received_w;
   always @(posedge spi_clock)
+  if(!resetn)
+    word_data_received = 0;
+  else
     word_data_received <= word_data_received_w;
 
   wire word_received;
@@ -265,7 +268,6 @@ module spi_state_machine(
     enable_r <= 0;
 
     word_send_data = 0;
-    word_data_received = 0;
 
     writemoveind = 0;  // Move buffer
     stepready = 0;  // Latching mechanism for engaging the buffered move.
