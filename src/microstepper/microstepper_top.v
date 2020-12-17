@@ -47,7 +47,7 @@ module microstepper_top (
   wire   [9:0]   off_timer1;
   wire   [7:0]   minimum_on_timer0;
   wire   [7:0]   minimum_on_timer1;
-  
+
   microstepper_control microstepper_control0(
     .clk(clk),
     .resetn(resetn),
@@ -153,12 +153,14 @@ wire        off_timer1_done;
   );
 
   cosine cosine0 (
+      .clk (clk),
       .cos_index(cos_index1),
       .cos_value(pwm1)
       //.cos_table(cos_table)
   );
 
   cosine cosine1 (
+      .clk (clk),
       .cos_index(cos_index2),
       .cos_value(pwm2)
       //.cos_table(cos_table)

@@ -345,6 +345,8 @@ module spi_state_machine(
             word_send_data[23:16] <= `VERSION_MAJOR;
           end
 
+          default: word_send_data = 64'b0;
+
         endcase
 
       // Addition Word Processing

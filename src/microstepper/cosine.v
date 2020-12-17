@@ -1,12 +1,13 @@
 `default_nettype none
 
 module cosine (
+    input wire clk,
     input  wire [5:0] cos_index,
     output wire [7:0] cos_value
 );
   reg [7:0] cos_r;
   assign cos_value = cos_r;
-  always @(*)
+  always @(posedge clk)
     case (cos_index)
       6'd0: cos_r    <= 8'd255;
       6'd1: cos_r    <= 8'd255;
