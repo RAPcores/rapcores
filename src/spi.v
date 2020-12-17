@@ -3,6 +3,7 @@
 // Mode 0 8Bit transfer SPI Peripheral implementation
 module SPI (
     input            clk,
+    input            resetn,
     input            SCK,
     input            CS,
     input            COPI,
@@ -13,18 +14,17 @@ module SPI (
 );
 
   // Registers to sync IO with FPGA clock
-  reg [2:0] SCKr = 3'b0;
-  reg [2:0] CSr = 3'h1; // active low, init unselected
-  reg [1:0] COPIr = 2'b0;
+  reg [2:0] SCKr;
+  reg [2:0] CSr; // active low, init unselected
+  reg [1:0] COPIr;
 
   // Output Byte and ready flag
-  reg rx_byte_ready_r = 0;
+  reg rx_byte_ready_r;
   assign rx_byte_ready = rx_byte_ready_r;
-  initial rx_byte = 8'b0;
 
   // count the number of RX and TX bits RX incrments on rising, TX on falling SCK edge
-  reg [2:0] rxbitcnt = 3'b000; // counts up
-  reg [2:0] txbitcnt = 3'b111; // counts down
+  reg [2:0] rxbitcnt; // counts up
+  reg [2:0] txbitcnt; // counts down
 
   // Assign wires for SPI events, registers assigned in block below
   wire SCK_risingedge = (SCKr[2:1] == 2'b01);
@@ -34,7 +34,21 @@ module SPI (
   // CIPO pin (tristated per convention)
   assign CIPO = (CS_active) ? tx_byte[txbitcnt] : 1'bZ;
 
-  always @(posedge clk) begin
+
+  always @(posedge clk) if (!resetn) begin
+    // Registers to sync IO with FPGA clock
+    SCKr <= 3'b0;
+    CSr <= 3'h1; // active low, init unselected
+    COPIr <= 2'b0;
+
+    // Output Byte and ready flag
+    rx_byte_ready_r <= 0;
+    rx_byte <= 8'b0;
+
+    // count the number of RX and TX bits RX incrments on rising, TX on falling SCK edge
+    rxbitcnt <= 3'b000; // counts up
+    txbitcnt <= 3'b111; // counts down
+  end else if (resetn) begin
 
     // Use a 3 bit shift register to sync CS, COPI, CIPO, with FPGA clock
     SCKr <= {SCKr[1:0], SCK};

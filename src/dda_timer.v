@@ -39,8 +39,8 @@ module dda_timer(
     assign move_done = move_done_r;
     reg [1:0] finishedmove_r;
     always @(posedge CLK) if (!resetn) begin
-      move_done_r = 0;
-      finishedmove_r = 2'h0;
+      move_done_r <= 0;
+      finishedmove_r <= 2'h0;
     end else if (resetn) begin
       finishedmove_r <= {finishedmove_r[0], finishedmove};
       if (finishedmove_r == 2'b01)
@@ -53,16 +53,16 @@ module dda_timer(
 
   always @(posedge CLK) if (!resetn) begin
     // Locals
-    tickdowncount = 64'b0;  // move down count (clock cycles)
-    clkaccum = 8'h1;  // intra-tick accumulator
+    tickdowncount <= 64'b0;  // move down count (clock cycles)
+    clkaccum <= 8'h1;  // intra-tick accumulator
 
     substep_accumulator = 64'b0; // typemax(Int64) - 100 for buffer
-    increment_r = 64'b0;
-    finishedmove = 1; // flag inidicating a move has been finished, so load next
+    increment_r <= 64'b0;
+    finishedmove <= 1; // flag inidicating a move has been finished, so load next
 
     // Buffer managment
-    moveind = 0; // Move index cursor
-    stepfinished = 0;
+    moveind <= 0; // Move index cursor
+    stepfinished <= 0;
 
   end else if (resetn) begin
 

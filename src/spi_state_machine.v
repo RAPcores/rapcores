@@ -266,18 +266,19 @@ module spi_state_machine(
 
   always @(posedge CLK) if (!resetn) begin
     // Stepper Config
-    microsteps = 2;
-    current = 140;
-    config_offtime = 810;
-    config_blanktime = 27;
-    config_fastdecay_threshold = 706;
-    config_minimum_on_time = 54;
-    config_current_threshold = 1024;
-    config_chargepump_period = 91;
-    config_invert_highside = 0;
-    config_invert_lowside = 0;
+    microsteps <= 2;
+    current <= 140;
+    config_offtime <= 810;
+    config_blanktime <= 27;
+    config_fastdecay_threshold <= 706;
+    config_minimum_on_time <= 54;
+    config_current_threshold <= 1024;
+    config_chargepump_period <= 91;
+    config_invert_highside <= 0;
+    config_invert_lowside <= 0;
     enable_r <= 0;
 
+    clock_divisor <= 40;  // should be 40 for 400 khz at 16Mhz Clk
     message_word_count <= 0;
     message_header <= 0;
 
