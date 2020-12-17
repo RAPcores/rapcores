@@ -61,7 +61,7 @@ parser-compat:
 	printf '\nYOSYS PARSE\n'
 	yosys -qp 'read -sv $(RAPCOREFILES)'
 	printf '\nIVERILOG PARSE\n'
-	iverilog -t null -I $(RAPCOREFILES)
+	iverilog -tnull $(RAPCOREFILES)
 
 
 lint:
