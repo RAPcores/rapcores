@@ -89,9 +89,6 @@ module microstepper_control (
   assign phase_b1_h_out = config_invert_highside ^  ( phase_b1_h && !faultn && enable );
   assign phase_b2_h_out = config_invert_highside ^  ( phase_b2_h && !faultn && enable );
 
-  wire in_off_time0 = off_timer0 > 0;
-  wire in_off_time1 = off_timer1 > 0;
-
   // Fast decay is first x ticks of off time
   // default fast decay = 706
   wire fastDecay0 = off_timer0 >= config_fastdecay_threshold;
