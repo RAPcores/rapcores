@@ -74,6 +74,9 @@ vvp: $(RAPCOREFILES)
 lint:
 	verible-verilog-lint src/*.v
 
+verible:
+	verible-verilog-lint --rules -explicit-parameter-storage-type,-line-length src/*.v
+
 testbench_quad_encoder:
 	yosys sim.ys
 	gtkwave testbench/quad_enc.vcd
