@@ -48,7 +48,7 @@ module microstepper_control (
     dir_r <= {dir_r[0], dir};
   end
 
-  wire step_rising = (step_r == 2'b01);
+  wire step_rising = (step_r == 3'b001);
 
   always @(posedge clk) begin
     if (!resetn) begin

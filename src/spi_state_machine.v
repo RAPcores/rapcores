@@ -183,7 +183,7 @@ module spi_state_machine(
   reg [`MOVE_BUFFER_SIZE:0] stepready = 0;
   wire [`MOVE_BUFFER_SIZE:0] stepfinished; // set via DDA
 
-  reg [`MOVE_BUFFER_SIZE:0] dir_r = {(`MOVE_BUFFER_SIZE){1'b0}};
+  reg [`MOVE_BUFFER_SIZE:0] dir_r = {(`MOVE_BUFFER_SIZE+1){1'b0}};
 
   reg [63:0] move_duration [`MOVE_BUFFER_SIZE:0];
   reg signed [63:0] increment [`MOVE_BUFFER_SIZE:0];

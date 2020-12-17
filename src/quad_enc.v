@@ -34,9 +34,9 @@ module quad_enc #(
         faultn <= 0;
       if (step) begin
         if (direction)
-          count <= count + multiplier;
+          count <= count + { 56'b0, multiplier};
         else
-          count <= count - multiplier;
+          count <= count - { 56'b0, multiplier};
       end
     end
   end

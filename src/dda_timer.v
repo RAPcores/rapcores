@@ -29,8 +29,8 @@ module dda_timer(
 
   // Buffer managment
   initial begin
-    moveind = 10'b0; // Move index cursor
-    stepfinished = 10'b0;
+    moveind = 0; // Move index cursor
+    stepfinished = 0;
   end
 
   // State managment
