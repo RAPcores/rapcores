@@ -22,3 +22,5 @@ jobs:
       run: nix-shell --command 'make iverilog-parse'
     - name: verilator CDC
       run: nix-shell --command 'make verilator-cdc'
+    - name: reg initialization
+      run: ./etc/reginit.sh
