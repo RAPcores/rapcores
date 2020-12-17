@@ -76,6 +76,7 @@ module spi_state_machine(
   wire word_received;
   SPIWord word_proc (
                 .clk(spi_clock),
+                .resetn (resetn),
                 .SCK(SCK),
                 .CS(CS),
                 .COPI(COPI),
