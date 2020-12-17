@@ -175,17 +175,25 @@ module spi_state_machine(
 
   // Move buffer
   reg [`MOVE_BUFFER_BITS:0] writemoveind = 0;
-  wire [`MOVE_BUFFER_BITS:0] moveind;
+  wire [`MOVE_BUFFER_BITS:0] moveind; // set via DDA
 
   // Latching mechanism for engaging the buffered move.
   reg [`MOVE_BUFFER_SIZE:0] stepready = 0;
-  wire [`MOVE_BUFFER_SIZE:0] stepfinished;
+  wire [`MOVE_BUFFER_SIZE:0] stepfinished; // set via DDA
+
+  reg [`MOVE_BUFFER_SIZE:0] dir_r = {(`MOVE_BUFFER_SIZE){1'b0}};
 
   reg [63:0] move_duration [`MOVE_BUFFER_SIZE:0];
-  reg [`MOVE_BUFFER_SIZE:0] dir_r;
-
   reg signed [63:0] increment [`MOVE_BUFFER_SIZE:0];
   reg signed [63:0] incrementincrement [`MOVE_BUFFER_SIZE:0];
+
+  // initialize DDA mem to zero
+  // TODO: This doesn't work
+  initial begin
+    increment[`MOVE_BUFFER_SIZE:0] <= {(`MOVE_BUFFER_SIZE){64'b0}};
+    incrementincrement[`MOVE_BUFFER_SIZE:0] <= {(`MOVE_BUFFER_SIZE){64'b0}};
+    move_duration [`MOVE_BUFFER_SIZE:0] <= {(`MOVE_BUFFER_SIZE){64'b0}};
+  end
 
   reg [7:0] clock_divisor = 40;  // should be 40 for 400 khz at 16Mhz Clk
 
@@ -208,8 +216,8 @@ module spi_state_machine(
     assign step = dda_step;
     assign enable = enable_r;
   `else
-    assign dir = dir_r[moveind] | DIRINPUT; // set direction
-    assign step = dda_step | STEPINPUT;
+    assign dir = dir_r[moveind] ^ DIRINPUT; // set direction
+    assign step = dda_step ^ STEPINPUT;
     assign enable = enable_r | ENINPUT;
   `endif
 

@@ -8,16 +8,19 @@ module SPI (
     input            COPI,
     output           CIPO,
     input      [7:0] tx_byte,
-    output reg [7:0] rx_byte,
+    output     [7:0] rx_byte,
     output           rx_byte_ready
 );
 
-  // Tegisters to sync IO with FPGA clock
-  reg [2:0] SCKr = 0;
-  reg [2:0] CSr = 0;
-  reg [1:0] COPIr = 0;
+  // Registers to sync IO with FPGA clock
+  reg [2:0] SCKr = 3'b0;
+  reg [2:0] CSr = 3'b1; // active low, init unselected
+  reg [1:0] COPIr = 3'b0;
+
+  // Output Byte and ready flag
   reg rx_byte_ready_r = 0;
   assign rx_byte_ready = rx_byte_ready_r;
+  reg [7:0] rx_byte = 8'b0;
 
   // count the number of RX and TX bits RX incrments on rising, TX on falling SCK edge
   reg [2:0] rxbitcnt = 3'b000; // counts up
@@ -76,9 +79,9 @@ module SPIWord (
     input             CS,
     input             COPI,
     output            CIPO,
-    input [63:0]      word_send_data,
+    input      [63:0] word_send_data,
     output            word_received,
-    output reg [63:0] word_data_received
+    output     [63:0] word_data_received
 );
 
   // SPI Initialization
@@ -86,6 +89,7 @@ module SPIWord (
   wire rx_byte_ready;  // high when a byte has been received
   wire [7:0] rx_byte;
   wire [7:0] tx_byte = 0;
+
   SPI spi0 (.clk(clk),
             .CS(CS),
             .SCK(SCK),
@@ -95,9 +99,11 @@ module SPIWord (
             .rx_byte(rx_byte),
             .rx_byte_ready(rx_byte_ready));
 
+  reg [63:0] word_data_received = 64'b0;
   reg [3:0] byte_count = 0;
   wire [7:0] word_slice [8:0]; // slice the register into 8 bits
-  reg [1:0] rx_byte_ready_r = 0;
+  reg [1:0] rx_byte_ready_r = 2'b0;
+
   // Recieve Shift Register
   always @(posedge clk) begin
     rx_byte_ready_r <= {rx_byte_ready_r[0], rx_byte_ready};

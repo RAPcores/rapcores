@@ -78,19 +78,14 @@ module testbench(
   wire config_invert_highside;
   wire config_invert_lowside;
 
-  // Stepper control lines
-  wire step;
-  wire dir;
-  wire enable;
-
   wire [63:0] encoder_count;
 
   wire BUFFER_DTR;
   wire MOVE_DONE;
   wire HALT;
-  wire STEPINPUT;
-  wire DIRINPUT;
-  wire ENINPUT;
+  reg STEPINPUT = 0;
+  reg DIRINPUT = 0;
+  reg ENINPUT = 0;
   wire STEPOUTPUT;
   wire DIROUTPUT;
   wire ENOUTPUT;

@@ -20,16 +20,16 @@ module dda_timer(
 );
 
   // Locals
-  reg [63:0] tickdowncount;  // move down count (clock cycles)
+  reg [63:0] tickdowncount = 64'b0;  // move down count (clock cycles)
   reg [7:0] clkaccum = 8'b1;  // intra-tick accumulator
 
-  reg signed [63:0] substep_accumulator = 0; // typemax(Int64) - 100 for buffer
-  reg signed [63:0] increment_r;
+  reg signed [63:0] substep_accumulator = 64'b0; // typemax(Int64) - 100 for buffer
+  reg signed [63:0] increment_r = 64'b0;
   reg finishedmove = 1; // flag inidicating a move has been finished, so load next
 
   // Buffer managment
-  reg [`MOVE_BUFFER_BITS:0] moveind = 0; // Move index cursor
-  reg [`MOVE_BUFFER_SIZE:0] stepfinished = 0;
+  reg [`MOVE_BUFFER_BITS:0] moveind = {(`MOVE_BUFFER_BITS){1'b0}}; // Move index cursor
+  reg [`MOVE_BUFFER_SIZE:0] stepfinished = {(`MOVE_BUFFER_SIZE){1'b0}};
 
   // State managment
   wire processing_move = (stepfinished[moveind] ^ stepready[moveind]);
@@ -40,7 +40,7 @@ module dda_timer(
   `ifdef MOVE_DONE
     reg move_done_r = 0;
     assign move_done = move_done_r;
-    reg [1:0] finishedmove_r;
+    reg [1:0] finishedmove_r = 2'b0;
     always @(posedge CLK) begin
       finishedmove_r <= {finishedmove_r[0], finishedmove};
       if (finishedmove_r == 2'b01)
