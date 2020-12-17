@@ -25,11 +25,11 @@ module DualHBridge (
   reg [31:0] phase_table [0:255]; // Larger to trigger BRAM inference
 
   // Vref - A
-  PWM va (.clk(clk),
+  pwm va (.clk(clk),
           .val(current),
           .pwm(vref_a));
   // Vref - B
-  PWM vb (.clk(clk),
+  pwm vb (.clk(clk),
           .val(current),
           .pwm(vref_b));
 

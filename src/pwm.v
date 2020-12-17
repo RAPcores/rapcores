@@ -3,7 +3,7 @@
 /*
  Simple PWM module
 */
-module PWM #(
+module pwm #(
     parameter bits = 8
 ) (
     input  clk,
