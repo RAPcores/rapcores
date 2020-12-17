@@ -230,6 +230,7 @@ module spi_state_machine(
   `endif
 
   dda_timer dda (
+                .resetn(resetn),
                 .clock_divisor(clock_divisor),
                 .move_duration(move_duration_w),
                 .increment(increment_w),
