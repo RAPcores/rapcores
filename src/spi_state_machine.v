@@ -15,16 +15,16 @@ module spi_state_machine(
   output enable,
 
   // Stepper Config
-  output [2:0] microsteps,
-  output [7:0] current,
-  output [9:0] config_offtime,
-  output [7:0] config_blanktime,
-  output [9:0] config_fastdecay_threshold,
-  output [7:0] config_minimum_on_time,
-  output [10:0] config_current_threshold,
-  output [7:0] config_chargepump_period,
-  output config_invert_highside,
-  output config_invert_lowside,
+  output reg [2:0] microsteps,
+  output reg [7:0] current,
+  output reg [9:0] config_offtime,
+  output reg [7:0] config_blanktime,
+  output reg [9:0] config_fastdecay_threshold,
+  output reg [7:0] config_minimum_on_time,
+  output reg [10:0] config_current_threshold,
+  output reg [7:0] config_chargepump_period,
+  output reg config_invert_highside,
+  output reg config_invert_lowside,
   //output [511:0] cos_table,
 
   // encoder
@@ -89,16 +89,18 @@ module spi_state_machine(
   // Stepper Config
   //
 
-  reg [2:0] microsteps = 2;
-  reg [7:0] current = 140;
-  reg [9:0] config_offtime = 810;
-  reg [7:0] config_blanktime = 27;
-  reg [9:0] config_fastdecay_threshold = 706;
-  reg [7:0] config_minimum_on_time = 54;
-  reg [10:0] config_current_threshold = 1024;
-  reg [7:0] config_chargepump_period = 91;
-  reg config_invert_highside = 0;
-  reg config_invert_lowside = 0;
+  initial begin
+    microsteps = 2;
+    current = 140;
+    config_offtime = 810;
+    config_blanktime = 27;
+    config_fastdecay_threshold = 706;
+    config_minimum_on_time = 54;
+    config_current_threshold = 1024;
+    config_chargepump_period = 91;
+    config_invert_highside = 0;
+    config_invert_lowside = 0;
+  end
 /*
   reg [511:0] cos_table;
 

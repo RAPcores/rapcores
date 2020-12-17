@@ -7,8 +7,8 @@ module dda_timer(
   input [63:0] increment,
   input [63:0] incrementincrement,
   input [`MOVE_BUFFER_SIZE:0] stepready,
-  output [`MOVE_BUFFER_SIZE:0] stepfinished,
-  output [`MOVE_BUFFER_BITS:0] moveind, // DDA buffer index
+  output reg [`MOVE_BUFFER_SIZE:0] stepfinished,
+  output reg [`MOVE_BUFFER_BITS:0] moveind, // DDA buffer index
   input [`MOVE_BUFFER_BITS:0] writemoveind, // State Machine index
   output step
   `ifdef HALT
@@ -28,8 +28,10 @@ module dda_timer(
   reg finishedmove = 1; // flag inidicating a move has been finished, so load next
 
   // Buffer managment
-  reg [`MOVE_BUFFER_BITS:0] moveind = `MOVE_BUFFER_BITS'b0; // Move index cursor
-  reg [`MOVE_BUFFER_SIZE:0] stepfinished = `MOVE_BUFFER_SIZE'b0;
+  initial begin
+    moveind = 10'b0; // Move index cursor
+    stepfinished = 10'b0;
+  end
 
   // State managment
   wire processing_move = (stepfinished[moveind] ^ stepready[moveind]);
@@ -49,7 +51,7 @@ module dda_timer(
   `endif
 
   // Step Trigger condition
-  wire step = (substep_accumulator > 0);
+  assign step = (substep_accumulator > 0);
 
   always @(posedge CLK) begin
 

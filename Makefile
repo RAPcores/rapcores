@@ -66,6 +66,8 @@ yosys-parse: $(RAPCOREFILES)
 verilator-cdc: $(RAPCOREFILES)
 	verilator --top-module rapcore --cdc $(RAPCOREFILES)
 
+triple-check: yosys-parse iverilog-parse verilator-cdc
+
 vvp: $(RAPCOREFILES)
 	iverilog -tvvp $(RAPCOREFILES)
 

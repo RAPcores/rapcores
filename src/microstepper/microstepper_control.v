@@ -18,23 +18,22 @@ module microstepper_control (
     input           enable_in,
     input           analog_cmp1,
     input           analog_cmp2,
-    output          faultn,
-    input           s1,
-    input           s2,
-    input           s3,
-    input           s4,
+    output reg      faultn,
+    input  wire     s1,
+    input  wire     s2,
+    input  wire     s3,
+    input  wire     s4,
     output          offtimer_en0,
     output          offtimer_en1,
-    output  [7:0]   phase_ct,
-    input   [7:0]   blank_timer0,
-    input   [7:0]   blank_timer1,
-    input   [9:0]   off_timer0,
-    input   [9:0]   off_timer1,
-    input   [7:0]   minimum_on_timer0,
-    input   [7:0]   minimum_on_timer1
+    output reg [7:0] phase_ct,
+    input      [7:0] blank_timer0,
+    input      [7:0] blank_timer1,
+    input      [9:0] off_timer0,
+    input      [9:0] off_timer1,
+    input      [7:0] minimum_on_timer0,
+    input      [7:0]   minimum_on_timer1
 //    input           mixed_decay_enable,
 );
-  reg [7:0] phase_ct;
   reg [2:0] step_r;
   reg [1:0] dir_r;
 
@@ -59,16 +58,10 @@ module microstepper_control (
         phase_ct <= dir_r[1] ? phase_ct + 1 : phase_ct - 1;
   end
 
-  // Phase polarity control signal from microstep counter
-  wire s1;
-  wire s2;
-  wire s3;
-  wire s4;
-
   // Fault (active low) if off timer starts before minimum on timer expires
   wire fault0 = off_timer0 && minimum_on_timer0 && enable;
   wire fault1 = off_timer1 && minimum_on_timer1 && enable;
-  reg faultn;
+
   // Fault latches until reset
   always @(posedge clk) begin
       if (!resetn) begin

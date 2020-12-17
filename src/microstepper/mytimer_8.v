@@ -5,11 +5,12 @@ module mytimer_8 (
     input               start_enable,
     input  [WIDTH-1:0]  start_time,
     output [WIDTH-1:0]  timer,
-    output              done // single cycle timer done event
+    output        reg   done // single cycle timer done event
 );
   parameter WIDTH = 8;
 
-  reg done = 0;
+  initial done = 0;
+
   reg [WIDTH-1:0] counter;
   reg run = 1;
   assign timer = counter;
