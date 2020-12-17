@@ -267,11 +267,11 @@ module spi_state_machine(
     config_invert_lowside <= 0;
     enable_r <= 0;
 
-    word_send_data = 0;
+    word_send_data <= 0;
 
-    writemoveind = 0;  // Move buffer
-    stepready = 0;  // Latching mechanism for engaging the buffered move.
-    dir_r = {(`MOVE_BUFFER_SIZE+1){1'b0}};
+    writemoveind <= 0;  // Move buffer
+    stepready <= 0;  // Latching mechanism for engaging the buffered move.
+    dir_r <= {(`MOVE_BUFFER_SIZE+1){1'b0}};
 
     clock_divisor <= 40;  // should be 40 for 400 khz at 16Mhz Clk
     message_word_count <= 0;

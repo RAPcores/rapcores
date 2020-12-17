@@ -17,7 +17,7 @@ module pwm #(
 
   always @(posedge clk)
   if(!resetn)
-    accum = 0;
+    accum <= 0;
   else
     accum <= accum + 1'b1;
 

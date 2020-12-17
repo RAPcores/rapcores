@@ -61,8 +61,8 @@ module dda_timer(
     finishedmove <= 1; // flag inidicating a move has been finished, so load next
 
     // Buffer managment
-    moveind <= 0; // Move index cursor
-    stepfinished <= 0;
+    moveind <= {(`MOVE_BUFFER_BITS+1){1'b0}}; // Move index cursor
+    stepfinished <= {(`MOVE_BUFFER_SIZE+1){1'b0}};
 
   end else if (resetn) begin
 
