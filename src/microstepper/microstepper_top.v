@@ -18,7 +18,7 @@ module microstepper_top (
     output  wire     chargepump_pin,
     input   wire    [9:0]  config_offtime,
     input   wire    [7:0]  config_blanktime,
-    input   wire    [2:0]  config_deadtime,
+    //input   wire    [2:0]  config_deadtime,
     input   wire    [9:0]  config_fastdecay_threshold,
     input   wire    [7:0]  config_minimum_on_time,
     input   wire    [10:0] config_current_threshold,

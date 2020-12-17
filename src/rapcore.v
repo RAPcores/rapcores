@@ -104,6 +104,9 @@ module rapcore (
   wire dir;
   wire enable;
 
+  // Stepper status outputs
+  wire faultn;
+
 
   //
   // Stepper Modules
@@ -152,7 +155,8 @@ module rapcore (
       //.cos_table (cos_table),
       .step (step),
       .dir (dir),
-      .enable_in(enable)
+      .enable_in(enable),
+      .faultn(faultn)
       );
   `endif
 
