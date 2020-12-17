@@ -3,7 +3,7 @@ module pwm_duty(
     input           clk,
     input           pwm,
     input           resetn,
-    output  [12:0]  duty,
+    output  [12:0]  duty
     );
     reg [1:0] edge_b;
     reg [11:0] cnt_h;
