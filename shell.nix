@@ -18,7 +18,7 @@ let
   buildInputs = with pkgs;
     # these are generally useful packages for tests, verification, synthesis
     # and deployment, etc
-    [ yosys symbiyosys nextpnr icestorm trellis
+    [ yosys verilog symbiyosys nextpnr icestorm trellis
       z3 boolector yices tinyprog fujprog
     ];
 
