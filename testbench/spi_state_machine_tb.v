@@ -48,9 +48,17 @@ module testbench(
   assign SCK = (SCK_r == 2'b11 || SCK_r == 2'b10); // even out the wave
 
   reg initialized = 0;
+  wire resetn;
+  reg [7:0] resetn_counter = 0;
+  assign resetn = (resetn_counter == 8'hff);
   always @(posedge clk) begin
-    SCK_r <= SCK_r + 1'b1;
-    if(SCK_r == 2'b11) initialized <= 1; // we want copi to start shifting after first SCK cycle
+    if (!resetn) resetn_counter <= resetn_counter + 1'b1;
+  end
+  always @(posedge clk) begin
+    if (resetn) begin // out of reset load times
+      SCK_r <= SCK_r + 1'b1;
+      if(SCK_r == 2'b11) initialized <= 1; // we want copi to start shifting after first SCK cycle
+    end
   end
 
   // COPI trigger 1/4 clk before SCK posedge
@@ -93,7 +101,7 @@ module testbench(
   // SPI 64 bit module
   spi_state_machine spifsm (
     .CLK(clk),
-
+    .resetn(resetn),
     .SCK(SCK),
     .CS(CS),
     .COPI(COPI),

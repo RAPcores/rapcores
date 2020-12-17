@@ -20,3 +20,5 @@ jobs:
       run: nix-shell --command 'make formal'
     - name: iverilog parse compat
       run: nix-shell --command 'make iverilog-parse'
+    - name: verilator CDC
+      run: nix-shell --command 'make verilator-cdc'

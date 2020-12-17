@@ -1,8 +1,7 @@
 `default_nettype none
 
 module spi_state_machine(
-  input CLK,
-
+  input resetn,
   // SPI pins
   input SCK,
   input CS,
@@ -15,41 +14,42 @@ module spi_state_machine(
   output enable,
 
   // Stepper Config
-  output [2:0] microsteps,
-  output [7:0] current,
-  output [9:0] config_offtime,
-  output [7:0] config_blanktime,
-  output [9:0] config_fastdecay_threshold,
-  output [7:0] config_minimum_on_time,
-  output [10:0] config_current_threshold,
-  output [7:0] config_chargepump_period,
-  output config_invert_highside,
-  output config_invert_lowside,
+  output reg [2:0] microsteps,
+  output reg [7:0] current,
+  output reg [9:0] config_offtime,
+  output reg [7:0] config_blanktime,
+  output reg [9:0] config_fastdecay_threshold,
+  output reg [7:0] config_minimum_on_time,
+  output reg [10:0] config_current_threshold,
+  output reg [7:0] config_chargepump_period,
+  output reg config_invert_highside,
+  output reg config_invert_lowside,
   //output [511:0] cos_table,
 
   // encoder
-  input [63:0] encoder_count
+  input [63:0] encoder_count,
 
   // Event IO
   `ifdef BUFFER_DTR
-    ,output BUFFER_DTR
+    output BUFFER_DTR,
   `endif
   `ifdef MOVE_DONE
-    ,output MOVE_DONE
+    output MOVE_DONE,
   `endif
   `ifdef HALT
-    ,input HALT
+    input HALT,
   `endif
   `ifdef STEPINPUT
-    ,input STEPINPUT
-    ,input DIRINPUT
-    ,input ENINPUT
+    input STEPINPUT,
+    input DIRINPUT,
+    input ENINPUT,
   `endif
   `ifdef STEPOUTPUT
-    ,output STEPOUTPUT
-    ,output DIROUTPUT
-    ,output ENOUTPUT
+    output STEPOUTPUT,
+    output DIROUTPUT,
+    output ENOUTPUT,
   `endif
+  input CLK
 );
 
   `ifdef SPIPLL
@@ -66,16 +66,20 @@ module spi_state_machine(
   // Word handler
   // The system operates on 64 bit little endian words
   // This should make it easier to send 64 bit chunks from the host controller
-  reg [63:0] word_send_data = 0;
-  reg [63:0] word_data_received = 0;
+  reg [63:0] word_send_data;
+  reg [63:0] word_data_received;
 
   wire [63:0] word_data_received_w;
   always @(posedge spi_clock)
+  if(!resetn)
+    word_data_received = 0;
+  else
     word_data_received <= word_data_received_w;
 
   wire word_received;
   SPIWord word_proc (
                 .clk(spi_clock),
+                .resetn (resetn),
                 .SCK(SCK),
                 .CS(CS),
                 .COPI(COPI),
@@ -85,20 +89,7 @@ module spi_state_machine(
                 .word_data_received(word_data_received_w));
 
 
-  //
-  // Stepper Config
-  //
 
-  reg [2:0] microsteps = 2;
-  reg [7:0] current = 140;
-  reg [9:0] config_offtime = 810;
-  reg [7:0] config_blanktime = 27;
-  reg [9:0] config_fastdecay_threshold = 706;
-  reg [7:0] config_minimum_on_time = 54;
-  reg [10:0] config_current_threshold = 1024;
-  reg [7:0] config_chargepump_period = 91;
-  reg config_invert_highside = 0;
-  reg config_invert_lowside = 0;
 /*
   reg [511:0] cos_table;
 
@@ -174,14 +165,14 @@ module spi_state_machine(
   //
 
   // Move buffer
-  reg [`MOVE_BUFFER_BITS:0] writemoveind = 0;
+  reg [`MOVE_BUFFER_BITS:0] writemoveind;
   wire [`MOVE_BUFFER_BITS:0] moveind; // set via DDA
 
   // Latching mechanism for engaging the buffered move.
-  reg [`MOVE_BUFFER_SIZE:0] stepready = 0;
+  reg [`MOVE_BUFFER_SIZE:0] stepready;
   wire [`MOVE_BUFFER_SIZE:0] stepfinished; // set via DDA
 
-  reg [`MOVE_BUFFER_SIZE:0] dir_r = {(`MOVE_BUFFER_SIZE){1'b0}};
+  reg [`MOVE_BUFFER_SIZE:0] dir_r;
 
   reg [63:0] move_duration [`MOVE_BUFFER_SIZE:0];
   reg signed [63:0] increment [`MOVE_BUFFER_SIZE:0];
@@ -195,7 +186,7 @@ module spi_state_machine(
   //  move_duration [`MOVE_BUFFER_SIZE:0] <= {(`MOVE_BUFFER_SIZE){64'b0}};
   //end
 
-  reg [7:0] clock_divisor = 40;  // should be 40 for 400 khz at 16Mhz Clk
+  reg [7:0] clock_divisor;  // should be 40 for 400 khz at 16Mhz Clk
 
   // DDA module input wires determined from buffer
   wire [63:0] move_duration_w = move_duration[moveind];
@@ -204,7 +195,7 @@ module spi_state_machine(
 
   // Step IO
   wire dda_step;
-  reg enable_r = 0;
+  reg enable_r;
 
   // Implement flow control and event pins if specified
   `ifdef BUFFER_DTR
@@ -227,7 +218,8 @@ module spi_state_machine(
     assign ENOUTPUT = enable;
   `endif
 
-  dda_timer dda (.CLK(CLK),
+  dda_timer dda (
+                .resetn(resetn),
                 .clock_divisor(clock_divisor),
                 .move_duration(move_duration_w),
                 .increment(increment_w),
@@ -236,21 +228,22 @@ module spi_state_machine(
                 .stepfinished(stepfinished),
                 .moveind(moveind),
                 .writemoveind(writemoveind),
-                .step(dda_step)
+                .step(dda_step),
                 `ifdef HALT
-                  ,.halt(HALT)
+                  .halt(HALT),
                 `endif
                 `ifdef MOVE_DONE
-                  ,.move_done(MOVE_DONE)
+                  .move_done(MOVE_DONE),
                 `endif
+                .CLK(CLK)
                 );
 
   //
   // State Machine for handling SPI Messages
   //
 
-  reg [7:0] message_word_count = 0;
-  reg [7:0] message_header = 0;
+  reg [7:0] message_word_count;
+  reg [7:0] message_header;
 
   // Encoder
   reg signed [63:0] encoder_store; // Snapshot for SPI comms
@@ -260,7 +253,31 @@ module spi_state_machine(
                              (message_header == `CMD_API_VERSION);
   reg [1:0] word_received_r;
 
-  always @(posedge CLK) begin
+  always @(posedge CLK) if (!resetn) begin
+    // Stepper Config
+    microsteps <= 2;
+    current <= 140;
+    config_offtime <= 810;
+    config_blanktime <= 27;
+    config_fastdecay_threshold <= 706;
+    config_minimum_on_time <= 54;
+    config_current_threshold <= 1024;
+    config_chargepump_period <= 91;
+    config_invert_highside <= 0;
+    config_invert_lowside <= 0;
+    enable_r <= 0;
+
+    word_send_data <= 0;
+
+    writemoveind <= 0;  // Move buffer
+    stepready <= 0;  // Latching mechanism for engaging the buffered move.
+    dir_r <= {(`MOVE_BUFFER_SIZE+1){1'b0}};
+
+    clock_divisor <= 40;  // should be 40 for 400 khz at 16Mhz Clk
+    message_word_count <= 0;
+    message_header <= 0;
+
+  end else if (resetn) begin
     word_received_r <= {word_received_r[0], word_received};
     if (word_received_r == 2'b01) begin
       // Zero out send data register
@@ -342,6 +359,8 @@ module spi_state_machine(
             word_send_data[15:8] <= `VERSION_MINOR;
             word_send_data[23:16] <= `VERSION_MAJOR;
           end
+
+          default: word_send_data = 64'b0;
 
         endcase
 

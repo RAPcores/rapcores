@@ -18,23 +18,22 @@ module microstepper_control (
     input           enable_in,
     input           analog_cmp1,
     input           analog_cmp2,
-    output          faultn,
-    input           s1,
-    input           s2,
-    input           s3,
-    input           s4,
+    output reg      faultn,
+    input  wire     s1,
+    input  wire     s2,
+    input  wire     s3,
+    input  wire     s4,
     output          offtimer_en0,
     output          offtimer_en1,
-    output  [7:0]   phase_ct,
-    input   [7:0]   blank_timer0,
-    input   [7:0]   blank_timer1,
-    input   [9:0]   off_timer0,
-    input   [9:0]   off_timer1,
-    input   [7:0]   minimum_on_timer0,
-    input   [7:0]   minimum_on_timer1
+    output reg [7:0] phase_ct,
+    input      [7:0] blank_timer0,
+    input      [7:0] blank_timer1,
+    input      [9:0] off_timer0,
+    input      [9:0] off_timer1,
+    input      [7:0] minimum_on_timer0,
+    input      [7:0]   minimum_on_timer1
 //    input           mixed_decay_enable,
 );
-  reg [7:0] phase_ct;
   reg [2:0] step_r;
   reg [1:0] dir_r;
 
@@ -49,7 +48,7 @@ module microstepper_control (
     dir_r <= {dir_r[0], dir};
   end
 
-  wire step_rising = (step_r == 2'b01);
+  wire step_rising = (step_r == 3'b001);
 
   always @(posedge clk) begin
     if (!resetn) begin
@@ -59,16 +58,10 @@ module microstepper_control (
         phase_ct <= dir_r[1] ? phase_ct + 1 : phase_ct - 1;
   end
 
-  // Phase polarity control signal from microstep counter
-  wire s1;
-  wire s2;
-  wire s3;
-  wire s4;
-
   // Fault (active low) if off timer starts before minimum on timer expires
-  wire fault0 = off_timer0 && minimum_on_timer0 && enable;
-  wire fault1 = off_timer1 && minimum_on_timer1 && enable;
-  reg faultn;
+  wire fault0 = (off_timer0 != 0) & (minimum_on_timer0 != 0) & enable;
+  wire fault1 = (off_timer1 != 0) & (minimum_on_timer1 != 0) & enable;
+
   // Fault latches until reset
   always @(posedge clk) begin
       if (!resetn) begin
@@ -102,8 +95,8 @@ module microstepper_control (
   wire fastDecay1 = off_timer1 >= config_fastdecay_threshold;
 
   // Slow decay remainder of off time - Active high
-  wire slowDecay0 = off_timer0 && !fastDecay0;
-  wire slowDecay1 = off_timer1 && !fastDecay1;
+  wire slowDecay0 = (off_timer0 != 0) & (fastDecay0 == 0);
+  wire slowDecay1 = (off_timer1 != 0) & (fastDecay1 == 0);
 
   // Half bridge high side is active
   // WHEN slow decay is NOT active
@@ -125,8 +118,8 @@ module microstepper_control (
   assign phase_b2_l = slowDecay1 | ( fastDecay1 ? s4 : !s4 );
 
   // Fixed off time peak current controller off time start
-  assign offtimer_en0 = analog_cmp1 & !blank_timer0 & !off_timer0;
-  assign offtimer_en1 = analog_cmp2 & !blank_timer1 & !off_timer1;
+  assign offtimer_en0 = analog_cmp1 & (blank_timer0 == 0) & (off_timer0 == 0);
+  assign offtimer_en1 = analog_cmp2 & (blank_timer1 == 0) & (off_timer1 == 0);
 
 `ifdef FORMAL
   always @(*) begin

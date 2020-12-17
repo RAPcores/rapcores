@@ -5,18 +5,19 @@ module mytimer_10 (
     input               start_enable,
     input  [WIDTH-1:0]  start_time,
     output [WIDTH-1:0]  timer,
-    output              done // single cycle timer done event
+    output         reg  done // single cycle timer done event
 );
   parameter WIDTH = 10;
 
-  reg done = 0;
+  reg run;
   reg [WIDTH-1:0] counter;
-  reg run = 1;
   assign timer = counter;
 
   always @(posedge clk) begin
   if (!resetn) begin
     counter <= 0;
+    done <= 0;
+    run <= 0;
     done <= 0;
   end
   else if( start_enable ) begin

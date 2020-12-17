@@ -18,7 +18,7 @@ module microstepper_top (
     output  wire     chargepump_pin,
     input   wire    [9:0]  config_offtime,
     input   wire    [7:0]  config_blanktime,
-    input   wire    [2:0]  config_deadtime,
+    //input   wire    [2:0]  config_deadtime,
     input   wire    [9:0]  config_fastdecay_threshold,
     input   wire    [7:0]  config_minimum_on_time,
     input   wire    [10:0] config_current_threshold,
@@ -47,7 +47,7 @@ module microstepper_top (
   wire   [9:0]   off_timer1;
   wire   [7:0]   minimum_on_timer0;
   wire   [7:0]   minimum_on_timer1;
-  
+
   microstepper_control microstepper_control0(
     .clk(clk),
     .resetn(resetn),
@@ -153,12 +153,14 @@ wire        off_timer1_done;
   );
 
   cosine cosine0 (
+      .clk (clk),
       .cos_index(cos_index1),
       .cos_value(pwm1)
       //.cos_table(cos_table)
   );
 
   cosine cosine1 (
+      .clk (clk),
       .cos_index(cos_index2),
       .cos_value(pwm2)
       //.cos_table(cos_table)

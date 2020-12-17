@@ -8,8 +8,8 @@ module quad_enc #(
   input wire  a,
   input wire  b,
   output reg faultn,
-  output reg signed [encbits-1:0] count,
-  input [7:0] multiplier
+  output reg signed [encbits-1:0] count
+  //input [7:0] multiplier
   );
 
 //  wire faultn;
@@ -34,9 +34,9 @@ module quad_enc #(
         faultn <= 0;
       if (step) begin
         if (direction)
-          count <= count + multiplier;
+          count <= count + 64'd1; //{ 56'b0, multiplier};
         else
-          count <= count - multiplier;
+          count <= count - 64'd1; //{ 56'b0, multiplier};
       end
     end
   end

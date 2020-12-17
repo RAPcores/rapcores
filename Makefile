@@ -58,18 +58,24 @@ formal:
 	sby -f symbiyosys.sby
 
 iverilog-parse: $(RAPCOREFILES)
-	printf '\nIVERILOG PARSE\n'
 	iverilog -tnull $(RAPCOREFILES)
 
 yosys-parse: $(RAPCOREFILES)
-	printf '\nYOSYS PARSE\n'
 	yosys -qp 'read -sv $(RAPCOREFILES)'
+
+verilator-cdc: $(RAPCOREFILES)
+	verilator --top-module rapcore --clk CLK --cdc $(RAPCOREFILES)
+
+triple-check: yosys-parse iverilog-parse verilator-cdc
 
 vvp: $(RAPCOREFILES)
 	iverilog -tvvp $(RAPCOREFILES)
 
 lint:
 	verible-verilog-lint src/*.v
+
+verible:
+	verible-verilog-lint --rules -explicit-parameter-storage-type,-line-length src/*.v
 
 testbench_quad_encoder:
 	yosys sim.ys

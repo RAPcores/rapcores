@@ -3,28 +3,28 @@
 // Mode 0 8Bit transfer SPI Peripheral implementation
 module SPI (
     input            clk,
+    input            resetn,
     input            SCK,
     input            CS,
     input            COPI,
     output           CIPO,
     input      [7:0] tx_byte,
-    output     [7:0] rx_byte,
+    output reg [7:0] rx_byte,
     output           rx_byte_ready
 );
 
   // Registers to sync IO with FPGA clock
-  reg [2:0] SCKr = 3'b0;
-  reg [2:0] CSr = 3'b1; // active low, init unselected
-  reg [1:0] COPIr = 3'b0;
+  reg [2:0] SCKr;
+  reg [2:0] CSr; // active low, init unselected
+  reg [1:0] COPIr;
 
   // Output Byte and ready flag
-  reg rx_byte_ready_r = 0;
+  reg rx_byte_ready_r;
   assign rx_byte_ready = rx_byte_ready_r;
-  reg [7:0] rx_byte = 8'b0;
 
   // count the number of RX and TX bits RX incrments on rising, TX on falling SCK edge
-  reg [2:0] rxbitcnt = 3'b000; // counts up
-  reg [2:0] txbitcnt = 3'b111; // counts down
+  reg [2:0] rxbitcnt; // counts up
+  reg [2:0] txbitcnt; // counts down
 
   // Assign wires for SPI events, registers assigned in block below
   wire SCK_risingedge = (SCKr[2:1] == 2'b01);
@@ -34,7 +34,21 @@ module SPI (
   // CIPO pin (tristated per convention)
   assign CIPO = (CS_active) ? tx_byte[txbitcnt] : 1'bZ;
 
-  always @(posedge clk) begin
+
+  always @(posedge clk) if (!resetn) begin
+    // Registers to sync IO with FPGA clock
+    SCKr <= 3'b0;
+    CSr <= 3'h1; // active low, init unselected
+    COPIr <= 2'b0;
+
+    // Output Byte and ready flag
+    rx_byte_ready_r <= 0;
+    rx_byte <= 8'b0;
+
+    // count the number of RX and TX bits RX incrments on rising, TX on falling SCK edge
+    rxbitcnt <= 3'b000; // counts up
+    txbitcnt <= 3'b111; // counts down
+  end else if (resetn) begin
 
     // Use a 3 bit shift register to sync CS, COPI, CIPO, with FPGA clock
     SCKr <= {SCKr[1:0], SCK};
@@ -75,22 +89,24 @@ endmodule
 //
 module SPIWord (
     input             clk,
+    input             resetn,
     input             SCK,
     input             CS,
     input             COPI,
     output            CIPO,
     input      [63:0] word_send_data,
     output            word_received,
-    output     [63:0] word_data_received
+    output reg [63:0] word_data_received
 );
 
   // SPI Initialization
   // The standard unit of transfer is 8 bits, MSB
   wire rx_byte_ready;  // high when a byte has been received
   wire [7:0] rx_byte;
-  wire [7:0] tx_byte = 0;
+  wire [7:0] tx_byte;
 
   SPI spi0 (.clk(clk),
+            .resetn (resetn),
             .CS(CS),
             .SCK(SCK),
             .CIPO(CIPO),
@@ -99,13 +115,16 @@ module SPIWord (
             .rx_byte(rx_byte),
             .rx_byte_ready(rx_byte_ready));
 
-  reg [63:0] word_data_received = 64'b0;
-  reg [3:0] byte_count = 0;
+  reg [3:0] byte_count;
   wire [7:0] word_slice [8:0]; // slice the register into 8 bits
-  reg [1:0] rx_byte_ready_r = 2'b0;
+  reg [1:0] rx_byte_ready_r;
 
   // Recieve Shift Register
-  always @(posedge clk) begin
+  always @(posedge clk) if (!resetn) begin
+    word_data_received <= 64'b0;
+    byte_count <= 0;
+    rx_byte_ready_r <= 2'b0;
+  end else if (resetn) begin
     rx_byte_ready_r <= {rx_byte_ready_r[0], rx_byte_ready};
     if (rx_byte_ready_r == 2'b01) begin
       byte_count <= (byte_count == 8) ? 1 : byte_count + 1;

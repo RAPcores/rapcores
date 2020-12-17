@@ -8,11 +8,13 @@
 `define VERSION_PATCH 0
 
 // Default move buffer if not specified
-`ifndef MOVE_BUFFER_SIZE
-`define MOVE_BUFFER_SIZE 2
+`ifndef BUFFER_SIZE
+`define BUFFER_SIZE 2
 `endif
 
-`define MOVE_BUFFER_BITS $clog2(`MOVE_BUFFER_SIZE) - 1 // number of bits to index given size
+`define MOVE_BUFFER_SIZE `BUFFER_SIZE - 1 //This is the zero-indexed end index
+
+`define MOVE_BUFFER_BITS $clog2(`BUFFER_SIZE)-1 // number of bits to index given size
 
 `define MOTOR_COUNT DUAL_HBRIDGE // + other supported topologies in the future.
 
