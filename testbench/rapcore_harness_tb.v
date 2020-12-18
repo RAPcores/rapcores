@@ -158,5 +158,70 @@ module rapcore_harness (
     end
   end
 
+  reg         [12:0]  target_current1;
+  reg         [12:0]  target_current2;
+  reg                 analog_cmp1;
+  reg                 analog_cmp2;
+  reg         [12:0]  current_abs1;
+  reg         [12:0]  current_abs2;
+  reg signed  [12:0]  current1;
+  reg signed  [12:0]  current2;
+
+  always @(posedge CLK) begin
+    if (!resetn) begin
+      analog_cmp1 <= 1;
+      analog_cmp2 <= 1;
+    end
+    else begin
+      if (current1[12] == 1'b1) begin
+        current_abs1 = -current1;
+      end
+      else begin
+        current_abs1 = current1;
+      end
+      if (current2[12] == 1'b1) begin
+        current_abs2 = -current2;
+      end
+      else begin
+        current_abs2 = current2;
+      end
+      analog_cmp1 <= (current_abs1[11:0] >= target_current1[11:0]); // compare unsigned
+      analog_cmp2 <= (current_abs2[11:0] >= target_current2[11:0]);
+    end
+  end
+
+  pwm_duty duty1(
+      .clk(CLK),
+      .resetn(resetn),
+      .pwm(analog_out1),
+      .duty(target_current1)
+  );
+  pwm_duty duty2(
+      .clk(CLK),
+      .resetn(resetn),
+      .pwm(analog_out2),
+      .duty(target_current2)
+  );
+  hbridge_coil hbridge_coil1(
+      .clk(CLK),
+      .resetn(resetn),
+      .low_1(PHASE_A1[1]),
+      .high_1(PHASE_A1_H[1]),
+      .low_2(PHASE_A2[1]),
+      .high_2(PHASE_A2_H[1]),
+      .current(current1),
+      .polarity_invert_config(1'b0)
+  );
+  hbridge_coil hbridge_coil2(
+      .clk(CLK),
+      .resetn(resetn),
+      .low_1(PHASE_B1[1]),
+      .high_1(PHASE_B1_H[1]),
+      .low_2(PHASE_B2[1]),
+      .high_2(PHASE_B2_H[1]),
+      .current(current2),
+      .polarity_invert_config(1'b0)
+  );
+
 
 endmodule
