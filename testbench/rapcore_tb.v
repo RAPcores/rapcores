@@ -22,6 +22,8 @@
 
 module rapcore_tb (
     input             CLK,
+    output CIPO,
+
   );
 
   `ifdef SPI_INTERFACE
