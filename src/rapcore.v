@@ -80,18 +80,18 @@ module rapcore (
   `endif
 
   //Reset
+  wire resetn;
+  assign resetn = &resetn_counter;
   `ifdef RESETN
-    wire resetn;
-    reg [7:0] resetn_counter = 0;
-    assign resetn = resetn_in && &resetn_counter;
-    always @(posedge CLK) begin
-      if (!resetn && resetn_in) resetn_counter <= resetn_counter + 1'b1;
-    end
+    reg [7:0] resetn_counter;
+    always @(posedge CLK)
+    if(!resetn_in)
+      resetn_counter <= 0;
+    else
+      if (!resetn) resetn_counter <= resetn_counter + 1'b1;
   `endif
   `ifndef RESETN
-    wire resetn;
     reg [7:0] resetn_counter = 0;
-    assign resetn = &resetn_counter;
     always @(posedge CLK) begin
       if (!resetn) resetn_counter <= resetn_counter + 1'b1;
     end
