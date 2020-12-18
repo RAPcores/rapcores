@@ -46,7 +46,7 @@ module rapcore_harness (
       input wire MOVE_DONE,
     `endif
     `ifdef HALT
-      output reg HALT,
+      output wire HALT,
     `endif
     `ifdef STEPINPUT
       output wire STEPINPUT,
