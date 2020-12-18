@@ -23,7 +23,7 @@ module analog_out (
         pwm_counter <= 0;
     end
   end
-  assign analog_out1 = pwm_counter <= {3'b0, pwm1};
-  assign analog_out2 = pwm_counter <= {3'b0, pwm2};
+  assign analog_out1 = (resetn) ? pwm_counter <= {3'b0, pwm1} : 0;
+  assign analog_out2 = (resetn) ? pwm_counter <= {3'b0, pwm2} : 0;
 
 endmodule
