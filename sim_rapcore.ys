@@ -1,0 +1,5 @@
+
+read_verilog -sv testbench/rapcore_tb.v
+
+prep -top rapcore_tb
+sim -n 40000 -clock CLK -vcd testbench/rapcore.vcd
