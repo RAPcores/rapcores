@@ -8,7 +8,7 @@ module rapcore_harness (
     `endif
     `ifdef SPI_INTERFACE
       output wire SCK,
-      output wire CS,
+      output reg CS,
       output wire COPI,
       input wire CIPO,
     `endif
@@ -72,16 +72,16 @@ module rapcore_harness (
 
   parameter NUMWORDS = 5;
 
-  reg STEPINPUT = 0;
-  reg DIRINPUT = 0;
-  reg ENINPUT = 0;
-  reg HALT = 1;
-  reg CS = 0; // selected
-  wire CIPO; // readback tbd
+  reg hi = 1;
+  reg lo = 0;
+
+  assign STEPINPUT = lo;
+  assign DIRINPUT = lo;
+  assign ENINPUT = lo;
+  assign HALT = hi;
 
   // SCK can't be faster than every two clocks ~ use 4
   reg [1:0] SCK_r = 0;
-  wire SCK;
   assign SCK = (SCK_r == 2'b11 || SCK_r == 2'b10); // even out the wave
 
   reg initialized = 0;
@@ -133,7 +133,9 @@ module rapcore_harness (
   reg [3:0] bit_count = 4'b0;
   reg [3:0] byte_count = 4'b0;
   reg [3:0] word_count = 4'b0;
-  wire COPI = tx_byte[7]; //MSB mode 0
+  assign COPI = tx_byte[7]; //MSB mode 0
+
+  initial CS <= 0;
 
   // shift out the bits
   always @(posedge COPI_tx) begin
