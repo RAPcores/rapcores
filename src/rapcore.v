@@ -1,8 +1,6 @@
 `default_nettype none
 
 module rapcore (
-    input  CLK,
-    input resetn_in,
     `ifdef LED
       output wire [`LED:1] LED,
     `endif
@@ -59,14 +57,18 @@ module rapcore (
     `ifdef STEPOUTPUT
       output wire STEPOUTPUT,
       output wire ENOUTPUT,
-      output wire DIROUTPUT
+      output wire DIROUTPUT,
     `endif
     `ifdef LA_IN
-      ,input wire [`LA_IN:1] LA_IN
+      input wire [`LA_IN:1] LA_IN,
     `endif
     `ifdef LA_OUT
-      ,output wire [`LA_OUT:1] LA_OUT
+      output wire [`LA_OUT:1] LA_OUT,
     `endif
+    `ifdef RESETN
+      input resetn_in,
+    `endif
+    input CLK
 );
 
   // Global Reset (TODO: Make input pin)
@@ -78,12 +80,23 @@ module rapcore (
   `endif
 
   //Reset
-  wire resetn;
-  reg [7:0] resetn_counter = 0;
-  assign resetn = resetn_in && &resetn_counter;
-  always @(posedge CLK) begin
-    if (!resetn && resetn_in) resetn_counter <= resetn_counter + 1'b1;
-  end
+  `ifdef RESETN
+    wire resetn;
+    reg [7:0] resetn_counter = 0;
+    assign resetn = resetn_in && &resetn_counter;
+    always @(posedge CLK) begin
+      if (!resetn && resetn_in) resetn_counter <= resetn_counter + 1'b1;
+    end
+  `endif
+  `ifndef RESETN
+    wire resetn;
+    reg [7:0] resetn_counter = 0;
+    assign resetn = &resetn_counter;
+    always @(posedge CLK) begin
+      if (!resetn) resetn_counter <= resetn_counter + 1'b1;
+    end
+  `endif
+  wire reset = resetn;
 
   // Stepper Setup
   // TODO: Generate statement?

@@ -61,7 +61,7 @@ module microstepper_control (
   // Fault (active low) if off timer starts before minimum on timer expires
   wire fault0 = (off_timer0 != 0) & (minimum_on_timer0 != 0);
   wire fault1 = (off_timer1 != 0) & (minimum_on_timer1 != 0);
-  reg faultn;
+
   // Fault latches until reset
   always @(posedge clk) begin
       if (!resetn) begin
