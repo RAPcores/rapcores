@@ -70,7 +70,7 @@ module microstepper_control (
         faultn <= 1;
       end
       else if (faultn) begin
-        faultn <= ~( ( fault0 | fault1 ) && enable );
+        faultn <= enable ? !( fault0 | fault1 ) : 1'b1;
       end
     end
 
