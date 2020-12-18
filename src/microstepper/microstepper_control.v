@@ -59,8 +59,8 @@ module microstepper_control (
   end
 
   // Fault (active low) if off timer starts before minimum on timer expires
-  wire fault0 = (off_timer0 != 0) & (minimum_on_timer0 != 0) & enable;
-  wire fault1 = (off_timer1 != 0) & (minimum_on_timer1 != 0) & enable;
+  wire fault0 = (off_timer0 != 0) & (minimum_on_timer0 != 0);
+  wire fault1 = (off_timer1 != 0) & (minimum_on_timer1 != 0);
 
   // Fault latches until reset
   always @(posedge clk) begin
@@ -70,7 +70,7 @@ module microstepper_control (
         faultn <= 1;
       end
       else if (faultn) begin
-        faultn <= ( fault0 | fault1 ) && enable;
+        faultn <= enable ? !( fault0 | fault1 ) : 1'b1;
       end
     end
 
@@ -78,16 +78,17 @@ module microstepper_control (
   wire phase_b1_h, phase_b1_l, phase_b2_h, phase_b2_l;
 
   // Low side output polarity, enable, and fault shutdown
+  // Outputs are active high unless config_invert_**** is set
   assign phase_a1_l_out = config_invert_lowside ^ ( phase_a1_l | !enable );
   assign phase_a2_l_out = config_invert_lowside ^ ( phase_a2_l | !enable );
   assign phase_b1_l_out = config_invert_lowside ^ ( phase_b1_l | !enable );
   assign phase_b2_l_out = config_invert_lowside ^ ( phase_b2_l | !enable );
 
   // High side
-  assign phase_a1_h_out = config_invert_highside ^  ( phase_a1_h && !faultn && enable );
-  assign phase_a2_h_out = config_invert_highside ^  ( phase_a2_h && !faultn && enable );
-  assign phase_b1_h_out = config_invert_highside ^  ( phase_b1_h && !faultn && enable );
-  assign phase_b2_h_out = config_invert_highside ^  ( phase_b2_h && !faultn && enable );
+  assign phase_a1_h_out = config_invert_highside ^  ( phase_a1_h && faultn && enable );
+  assign phase_a2_h_out = config_invert_highside ^  ( phase_a2_h && faultn && enable );
+  assign phase_b1_h_out = config_invert_highside ^  ( phase_b1_h && faultn && enable );
+  assign phase_b2_h_out = config_invert_highside ^  ( phase_b2_h && faultn && enable );
 
   // Fast decay is first x ticks of off time
   // default fast decay = 706

@@ -8,7 +8,7 @@ module hbridge_coil (
     input                   high_2,
     output signed   [12:0]  current,
     output                  current_sum_polarity,
-    input                   polarity_invert_config,
+    input                   polarity_invert_config
 );
     reg signed      [12:0]  current;
     reg                     polarity; // arbitrary polarity
@@ -20,7 +20,7 @@ module hbridge_coil (
     reg signed      [3:0]   slow_decay_cnt;
     reg signed      [1:0]   fast_decay_cnt;
     reg                     open; // coils not connected. Should never occur?
-    wire                    current_sum_polarity;
+    //wire                    current_sum_polarity;
 
     assign  current_sum_polarity = (current >= 0);
     // For each coil of motor
