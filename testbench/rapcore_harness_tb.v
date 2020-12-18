@@ -1,5 +1,4 @@
-
-
+`timescale 1ns/100ps
 module rapcore_harness (
     `ifdef LED
       input wire [`LED:1] LED,
@@ -47,7 +46,7 @@ module rapcore_harness (
       input wire MOVE_DONE,
     `endif
     `ifdef HALT
-      output wire HALT,
+      output reg HALT,
     `endif
     `ifdef STEPINPUT
       output wire STEPINPUT,
@@ -71,9 +70,12 @@ module rapcore_harness (
     input CLK
 );
 
-
   parameter NUMWORDS = 5;
 
+  reg STEPINPUT = 0;
+  reg DIRINPUT = 0;
+  reg ENINPUT = 0;
+  reg HALT = 1;
   reg CS = 0; // selected
   wire CIPO; // readback tbd
 
@@ -84,13 +86,17 @@ module rapcore_harness (
 
   reg initialized = 0;
   wire resetn;
+  wire SCKready;
   reg [7:0] resetn_counter = 0;
-  assign resetn = (resetn_counter == 8'hff);
+  reg [8:0] sck_counter = 0;
+  assign resetn = resetn_counter == 8'h0f;
+  assign SCKready = sck_counter == 9'h1ff;
   always @(posedge CLK) begin
     if (!resetn) resetn_counter <= resetn_counter + 1'b1;
+    if (!SCKready) sck_counter <= sck_counter + 1'b1;
   end
   always @(posedge CLK) begin
-    if (resetn) begin // out of reset load times
+    if (SCKready) begin // out of reset load times
       SCK_r <= SCK_r + 1'b1;
       if(SCK_r == 2'b11) initialized <= 1; // we want copi to start shifting after first SCK cycle
     end
@@ -138,7 +144,7 @@ module rapcore_harness (
       tx_byte = word_data_tb[7:0];
       bit_count = 4'b0;
       byte_count = byte_count + 1'b1;
-      if (byte_count == 4'h08) begin
+      if (byte_count == 4'h8) begin
         word_count = word_count + 1'b1;
         if (word_count <= NUMWORDS-1) begin
           word_data_tb = word_data_mem[word_count];

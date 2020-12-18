@@ -56,7 +56,7 @@ module dda_timer(
     tickdowncount <= 64'b0;  // move down count (clock cycles)
     clkaccum <= 8'h1;  // intra-tick accumulator
 
-    substep_accumulator = 64'b0; // typemax(Int64) - 100 for buffer
+    substep_accumulator <= 64'b0; // typemax(Int64) - 100 for buffer
     increment_r <= 64'b0;
     finishedmove <= 1; // flag inidicating a move has been finished, so load next
 
