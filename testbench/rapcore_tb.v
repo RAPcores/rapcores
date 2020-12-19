@@ -24,7 +24,7 @@
 
 module rapcore_tb (
     input             CLK,
-    output CIPO,
+    output CIPO
 
   );
 
@@ -95,6 +95,7 @@ module rapcore_tb (
         .CS(CS),
         .COPI(COPI),
         .CIPO(CIPO),
+        .BOOT_DONE_IN(1'b1),
       `endif
       `ifdef ULTIBRIDGE
         .CHARGEPUMP(CHARGEPUMP),

@@ -11,6 +11,7 @@ module rapcore_harness (
       output reg CS,
       output wire COPI,
       input wire CIPO,
+      input wire BOOT_DONE_IN,
     `endif
     `ifdef DUAL_HBRIDGE
       input wire [`DUAL_HBRIDGE:1] PHASE_A1,  // Phase A
@@ -91,12 +92,14 @@ module rapcore_harness (
   reg [8:0] sck_counter = 0;
   assign resetn = resetn_counter == 8'h0f;
   assign SCKready = sck_counter == 9'h1ff;
+  reg BOOT_DONE = 0;
   always @(posedge CLK) begin
     if (!resetn) resetn_counter <= resetn_counter + 1'b1;
     if (!SCKready) sck_counter <= sck_counter + 1'b1;
+    if (BOOT_DONE_IN) BOOT_DONE <= 1'b1;
   end
   always @(posedge CLK) begin
-    if (SCKready) begin // out of reset load times
+    if (BOOT_DONE_IN && SCKready) begin // out of reset load times
       SCK_r <= SCK_r + 1'b1;
       if(SCK_r == 2'b11) initialized <= 1; // we want copi to start shifting after first SCK cycle
     end
