@@ -168,7 +168,7 @@ wire        off_timer1_done;
 
   analog_out analog_out0 (
       .clk        (clk),
-      .resetn     (resetn),
+      .resetn     (enable_in),
       .pwm1       (pwm1),
       .pwm2       (pwm2),
       .analog_out1(analog_out1),

@@ -18,6 +18,8 @@
 `include "../src/microstepper/mytimer_8.v"
 `include "../src/microstepper/mytimer_10.v"
 `include "rapcore_harness_tb.v"
+`include "pwm_duty.v"
+`include "hbridge_coil.v"
 `timescale 1ns/100ps
 
 module rapcore_tb (

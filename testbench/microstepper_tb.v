@@ -4,10 +4,8 @@
 `include "pwm_duty.v"
 `timescale 1ns/100ps
 
-module testbench(
+module microstepper_tb(
     input           clk,
-    output  [3:0]   s_l,
-    output  [3:0]   s_h,
     output          analog_cmp1,
     output          analog_out1,
     output          analog_cmp2,
