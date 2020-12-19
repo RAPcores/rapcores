@@ -53,6 +53,7 @@ module rapcore (
       input wire STEPINPUT,
       input wire DIRINPUT,
       input wire ENINPUT,
+      input wire ENABLE_OEB,
     `endif
     `ifdef STEPOUTPUT
       output wire STEPOUTPUT,
@@ -97,6 +98,7 @@ module rapcore (
     end
   `endif
   wire reset = resetn;
+  wire selected_enable = (~ENABLE_OEB) ? ENINPUT : enable;
 
   // Stepper Setup
   // TODO: Generate statement?
@@ -168,7 +170,7 @@ module rapcore (
       //.cos_table (cos_table),
       .step (step),
       .dir (dir),
-      .enable_in(enable),
+      .enable_in(selected_enable),
       .faultn(faultn)
       );
   `endif
