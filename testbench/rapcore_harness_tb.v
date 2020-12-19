@@ -94,9 +94,9 @@ module rapcore_harness (
   assign SCKready = sck_counter == 9'h1ff;
   reg BOOT_DONE = 0;
   always @(posedge CLK) begin
-      if (!resetn) resetn_counter <= resetn_counter + 1'b1;
-      if (!SCKready) sck_counter <= sck_counter + 1'b1;
-    if (BOOT_DONE_IN) BOOT_DONE <= 1'b1; 
+    if (!resetn) resetn_counter <= resetn_counter + 1'b1;
+    if (!SCKready) sck_counter <= sck_counter + 1'b1;
+    if (BOOT_DONE_IN) BOOT_DONE <= 1'b1;
   end
   always @(posedge CLK) begin
     if (BOOT_DONE_IN && SCKready) begin // out of reset load times
