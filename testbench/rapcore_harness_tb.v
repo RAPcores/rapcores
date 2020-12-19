@@ -22,9 +22,9 @@ module rapcore_harness (
     `endif
     `ifdef ULTIBRIDGE
       input wire CHARGEPUMP,
-      output wire analog_cmp1,
+      output reg analog_cmp1,
       input wire analog_out1,
-      output wire analog_cmp2,
+      output reg analog_cmp2,
       input wire analog_out2,
       input wire [`ULTIBRIDGE:1] PHASE_A1,  // Phase A
       input wire [`ULTIBRIDGE:1] PHASE_A2,  // Phase A
@@ -158,14 +158,12 @@ module rapcore_harness (
     end
   end
 
-  reg         [12:0]  target_current1;
-  reg         [12:0]  target_current2;
-  reg                 analog_cmp1;
-  reg                 analog_cmp2;
+  wire         [12:0]  target_current1;
+  wire         [12:0]  target_current2;
   reg         [12:0]  current_abs1;
   reg         [12:0]  current_abs2;
-  reg signed  [12:0]  current1;
-  reg signed  [12:0]  current2;
+  wire signed  [12:0]  current1;
+  wire signed  [12:0]  current2;
 
   always @(posedge CLK) begin
     if (!resetn) begin
