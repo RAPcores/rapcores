@@ -142,6 +142,12 @@ module rapcore (
 
   `ifdef ULTIBRIDGE
     microstepper_top microstepper0(
+      `ifdef LA_IN
+        .LA_IN(LA_IN),
+      `endif
+      `ifdef LA_OUT
+        .LA_OUT(LA_OUT),
+      `endif
       .clk(CLK),
       .resetn( resetn),
       .phase_a1_l(PHASE_A1),
@@ -199,6 +205,12 @@ module rapcore (
   //
 
   spi_state_machine spifsm (
+    `ifdef LA_IN
+      .LA_IN(LA_IN),
+    `endif
+    `ifdef LA_OUT
+      .LA_OUT(LA_OUT),
+    `endif
     .CLK(CLK),
     .resetn(resetn),
 
@@ -247,8 +259,8 @@ module rapcore (
 
 
   // Macro external wiring statements here
-  `ifdef LOGICANALYZER_MACRO
-    `LOGICANALYZER_MACRO
+  `ifdef TOP_LA
+    `TOP_LA
   `endif
 
 endmodule

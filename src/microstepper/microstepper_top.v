@@ -1,6 +1,12 @@
 `default_nettype none
 
 module microstepper_top (
+    `ifdef LA_IN
+      input wire [`LA_IN:1] LA_IN,
+    `endif
+    `ifdef LA_OUT
+      output wire [`LA_OUT:1] LA_OUT,
+    `endif
     input   wire       clk,
     input   wire       resetn,
     output  wire       phase_a1_l,
@@ -175,5 +181,10 @@ wire        off_timer1_done;
       .analog_out2(analog_out2),
       .current_threshold (config_current_threshold)
   );
+
+  // Macro external wiring statements here
+  `ifdef MICROSTEPPER_LA
+    `MICROSTEPPER_LA
+  `endif
 
 endmodule
