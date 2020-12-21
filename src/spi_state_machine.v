@@ -72,7 +72,7 @@ module spi_state_machine(
   wire [63:0] word_data_received_w;
   always @(posedge spi_clock)
   if(!resetn)
-    word_data_received = 0;
+    word_data_received <= 0;
   else
     word_data_received <= word_data_received_w;
 
@@ -360,7 +360,7 @@ module spi_state_machine(
             word_send_data[23:16] <= `VERSION_MAJOR;
           end
 
-          default: word_send_data = 64'b0;
+          default: word_send_data <= 64'b0;
 
         endcase
 
