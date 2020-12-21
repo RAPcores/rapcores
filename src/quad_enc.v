@@ -22,14 +22,16 @@ module quad_enc #(
   wire direction = a_stable[1] ^ b_stable[2];  //Direction determined by comparing current sample to last
 
   always @(posedge clk) begin
-    a_stable <= {a_stable[1:0], a};  //Shift new a in. Last 2 samples shift to bits 2 and 1
-    b_stable <= {b_stable[1:0], b};  //Shift new b in
-
     if (!resetn) begin
       count <= 0;  //reset count
-      faultn <= 1; //reset faultn
+      faultn <= 1'b1; //reset faultn
+      a_stable <= 3'b0;
+      b_stable <= 3'b0;
     end
     else begin
+      a_stable <= {a_stable[1:0], a};  //Shift new a in. Last 2 samples shift to bits 2 and 1
+      b_stable <= {b_stable[1:0], b};  //Shift new b in
+
       if (step_a && step_b)  //We do not know direction if both inputs triggered on single clock
         faultn <= 0;
       if (step) begin

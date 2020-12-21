@@ -72,7 +72,7 @@ module spi_state_machine(
   wire [63:0] word_data_received_w;
   always @(posedge spi_clock)
   if(!resetn)
-    word_data_received = 0;
+    word_data_received <= 0;
   else
     word_data_received <= word_data_received_w;
 
@@ -277,6 +277,17 @@ module spi_state_machine(
     message_word_count <= 0;
     message_header <= 0;
 
+    word_received_r <= 2'b0;
+
+    // TODO change to for loops
+    move_duration[0] <= 64'b0;
+    move_duration[1] <= 64'b0;
+    increment[0] <= 64'b0;
+    increment[1] <= 64'b0;
+    incrementincrement[0] <= 64'b0;
+    incrementincrement[1] <= 64'b0;
+    encoder_store <= 64'b0;
+
   end else if (resetn) begin
     word_received_r <= {word_received_r[0], word_received};
     if (word_received_r == 2'b01) begin
@@ -360,7 +371,7 @@ module spi_state_machine(
             word_send_data[23:16] <= `VERSION_MAJOR;
           end
 
-          default: word_send_data = 64'b0;
+          default: word_send_data <= 64'b0;
 
         endcase
 
