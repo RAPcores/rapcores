@@ -225,4 +225,27 @@ module rapcore_harness (
   );
 
 
+  //
+  // ENCODER
+  //
+
+  reg enca_r, encb_r;
+  reg [3:0] encct;
+  initial begin
+    enca_r <= 0;
+    encb_r <= 1;
+    encct <= 0;
+  end
+
+  assign ENC_B = encb_r;
+  assign ENC_A = enca_r;
+
+  // This is not tied to reality whatso ever
+  // just a quadrature wave for test
+  always @(posedge CLK) begin
+      encct <= encct + 1'b1; // slow it down a bit
+      if (&encct) enca_r <= ~enca_r;
+      if (encct == 4'b1000) encb_r <= ~encb_r;
+  end
+
 endmodule
