@@ -15,11 +15,14 @@ read -formal quad_enc.v
 read -formal pwm.v
 read -formal spi_state_machine.v
 read -formal microstepper_top.v
+read -formal microstepper_control.v
 read -formal analog_out.v
 read -formal chargepump.v
 read -formal cosine.v
 read -formal microstep_counter.v
 read -formal mytimer.v
+read -formal mytimer_8.v
+read -formal mytimer_10.v
 read -formal rapcore.v
 prep -top rapcore
 
@@ -35,8 +38,11 @@ src/rapcore.v
 src/quad_enc.v
 src/pwm.v
 src/microstepper/microstepper_top.v
+src/microstepper/microstepper_control.v
 src/microstepper/analog_out.v
 src/microstepper/chargepump.v
 src/microstepper/cosine.v
 src/microstepper/microstep_counter.v
 src/microstepper/mytimer.v
+src/microstepper/mytimer_8.v
+src/microstepper/mytimer_10.v
