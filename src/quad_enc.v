@@ -23,7 +23,7 @@ module quad_enc #(
 
   always @(posedge clk) begin
     if (!resetn) begin
-      count <= 1'b0;  //reset count
+      count <= 0;  //reset count
       faultn <= 1'b1; //reset faultn
       a_stable <= 3'b0;
       b_stable <= 3'b0;
