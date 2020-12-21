@@ -263,8 +263,8 @@ module spi_state_machine(
     config_minimum_on_time <= 54;
     config_current_threshold <= 1024;
     config_chargepump_period <= 91;
-    config_invert_highside <= 0;
-    config_invert_lowside <= 0;
+    config_invert_highside <= `DEFAULT_BRIDGE_INVERTING;
+    config_invert_lowside <= `DEFAULT_BRIDGE_INVERTING;
     enable_r <= 0;
 
     word_send_data <= 0;

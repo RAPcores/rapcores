@@ -37,3 +37,6 @@
 `define LOGICANALYZER_MACRO\
   assign LA_OUT[1] = dir; \
   assign LA_OUT[2] = analog_cmp2;
+
+// Default Mosfet Active Polarity
+`define DEFAULT_BRIDGE_INVERTING 1

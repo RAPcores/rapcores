@@ -32,3 +32,6 @@
 
 // Change the Move Buffer Size. Should be power of two
 //`define MOVE_BUFFER_SIZE 4
+
+// Default Mosfet Active Polarity
+`define DEFAULT_BRIDGE_INVERTING 0
