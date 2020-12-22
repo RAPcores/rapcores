@@ -21,3 +21,8 @@
 `ifndef DEFAULT_TIMER_WIDTH
 `define DEFAULT_TIMER_WIDTH 8
 `endif
+
+// Default Mosfet Active Polarity
+`ifndef DEFAULT_BRIDGE_INVERTING
+`define DEFAULT_BRIDGE_INVERTING 1
+`endif
