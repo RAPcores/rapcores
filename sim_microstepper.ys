@@ -8,6 +8,6 @@ read_verilog -sv testbench/microstepper_tb.v \
     src/microstepper/mytimer_8.v \
     src/microstepper/mytimer_10.v
 
-prep -top testbench
+prep -top microstepper_tb
 show microstepper_top
 sim -n 400000 -clock clk -vcd testbench/microstepper.vcd

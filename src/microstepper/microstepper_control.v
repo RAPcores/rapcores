@@ -80,9 +80,9 @@ module microstepper_control (
   // Low side output polarity, enable, and fault shutdown
   // Outputs are active high unless config_invert_**** is set
   assign phase_a1_l_out = config_invert_lowside ^ ( phase_a1_l | !enable );
-  assign phase_a2_l_out = config_invert_lowside ^ ( phase_a2_l | !enable );
+  assign phase_a2_l_out = config_invert_lowside ^ ( phase_a2_l && faultn && enable );
   assign phase_b1_l_out = config_invert_lowside ^ ( phase_b1_l | !enable );
-  assign phase_b2_l_out = config_invert_lowside ^ ( phase_b2_l | !enable );
+  assign phase_b2_l_out = config_invert_lowside ^ ( phase_b2_l && faultn && enable );
 
   // High side
   assign phase_a1_h_out = config_invert_highside ^  ( phase_a1_h && faultn && enable );
