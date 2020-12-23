@@ -123,11 +123,12 @@ module microstepper_control (
   assign offtimer_en1 = analog_cmp2 & (blank_timer1 == 0) & (off_timer1 == 0);
 
 `ifdef FORMAL
+  `define ON !(`DEFAULT_BRIDGE_INVERTING)
   always @(*) begin
-    assert (!(phase_a1_l == 0 && phase_a1_h == 0));
-    assert (!(phase_a2_l == 0 && phase_a2_h == 0));
-    assert (!(phase_b1_l == 0 && phase_b1_h == 0));
-    assert (!(phase_b2_l == 0 && phase_b2_h == 0));
+    assert (!(phase_a1_l_out == `ON && phase_a1_h_out == `ON));
+    assert (!(phase_a2_l_out == `ON && phase_a2_h_out == `ON));
+    assert (!(phase_b1_l_out == `ON && phase_b1_h_out == `ON));
+    assert (!(phase_b2_l_out == `ON && phase_b2_h_out == `ON));
   end
 `endif
 
