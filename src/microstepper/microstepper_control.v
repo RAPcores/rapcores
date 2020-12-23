@@ -77,18 +77,29 @@ module microstepper_control (
   wire phase_a1_h, phase_a1_l, phase_a2_h, phase_a2_l;
   wire phase_b1_h, phase_b1_l, phase_b2_h, phase_b2_l;
 
-  // Low side output polarity, enable, and fault shutdown
   // Outputs are active high unless config_invert_**** is set
-  assign phase_a1_l_out = config_invert_lowside ^ ( phase_a1_l | !enable );
-  assign phase_a2_l_out = config_invert_lowside ^ ( phase_a2_l | !enable );
-  assign phase_b1_l_out = config_invert_lowside ^ ( phase_b1_l | !enable );
-  assign phase_b2_l_out = config_invert_lowside ^ ( phase_b2_l | !enable );
-
+  // Low side
+  assign phase_a1_l_out = config_invert_lowside ^ phase_a1_l_control;
+  assign phase_a2_l_out = config_invert_lowside ^ phase_a2_l_control;
+  assign phase_b1_l_out = config_invert_lowside ^ phase_b1_l_control;
+  assign phase_b2_l_out = config_invert_lowside ^ phase_b2_l_control;
   // High side
-  assign phase_a1_h_out = config_invert_highside ^  ( phase_a1_h && faultn && enable );
-  assign phase_a2_h_out = config_invert_highside ^  ( phase_a2_h && faultn && enable );
-  assign phase_b1_h_out = config_invert_highside ^  ( phase_b1_h && faultn && enable );
-  assign phase_b2_h_out = config_invert_highside ^  ( phase_b2_h && faultn && enable );
+  assign phase_a1_h_out = config_invert_highside ^  phase_a1_h_control;
+  assign phase_a2_h_out = config_invert_highside ^  phase_a2_h_control;
+  assign phase_b1_h_out = config_invert_highside ^  phase_b1_h_control;
+  assign phase_b2_h_out = config_invert_highside ^  phase_b2_h_control;
+
+
+  // Low Side - enable
+  wire phase_a1_l_control = phase_a1_l | !enable;
+  wire phase_a2_l_control = phase_a2_l | !enable;
+  wire phase_b1_l_control = phase_b1_l | !enable;
+  wire phase_b2_l_control = phase_b2_l | !enable;
+  // High side - enable, and fault shutdown
+  wire phase_a1_h_control = phase_a1_h && faultn && enable;
+  wire phase_a2_h_control = phase_a2_h && faultn && enable;
+  wire phase_b1_h_control = phase_b1_h && faultn && enable;
+  wire phase_b2_h_control = phase_b2_h && faultn && enable;
 
   // Fast decay is first x ticks of off time
   // default fast decay = 706
@@ -123,12 +134,12 @@ module microstepper_control (
   assign offtimer_en1 = analog_cmp2 & (blank_timer1 == 0) & (off_timer1 == 0);
 
 `ifdef FORMAL
-  `define ON !(`DEFAULT_BRIDGE_INVERTING)
+  `define ON 1'b1
   always @(*) begin
-    assert (!(phase_a1_l_out == `ON && phase_a1_h_out == `ON));
-    assert (!(phase_a2_l_out == `ON && phase_a2_h_out == `ON));
-    assert (!(phase_b1_l_out == `ON && phase_b1_h_out == `ON));
-    assert (!(phase_b2_l_out == `ON && phase_b2_h_out == `ON));
+    assert (!(phase_a1_l_control == `ON && phase_a1_h_control == `ON));
+    assert (!(phase_a2_l_control == `ON && phase_a2_h_control == `ON));
+    assert (!(phase_b1_l_control == `ON && phase_b1_h_control == `ON));
+    assert (!(phase_b2_l_control == `ON && phase_b2_h_control == `ON));
   end
 `endif
 
