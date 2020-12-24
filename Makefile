@@ -82,12 +82,10 @@ triple-check: yosys-parse iverilog-parse verilator-cdc
 vvp: $(RAPCOREFILES)
 	iverilog -tvvp $(RAPCOREFILES)
 
-testbench_quad_encoder:
-	yosys sim.ys
-	gtkwave testbench/quad_enc.vcd
-testbench_microstepper:
-	yosys sim_microstepper.ys
-	gtkwave testbench/microstepper.vcd
+yosys-%:
+	mkdir -p testbench/vcd
+	yosys testbench/yosys/$*.ys
+	gtkwave testbench/vcd/$*.vcd
 
 .SECONDARY:
 .PHONY: all prog clean formal
