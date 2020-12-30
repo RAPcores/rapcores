@@ -2,4 +2,4 @@
 read_verilog -sv testbench/spi_state_machine_tb.v
 
 prep -top testbench
-sim -n 100000 -clock clk -vcd testbench/fsm.vcd
+sim -n 100000 -clock clk -vcd testbench/vcd/spifsm.vcd

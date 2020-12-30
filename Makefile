@@ -27,7 +27,18 @@ GENERATEDDIR = ./src/generated/
 SRCDIR = ./src/
 BUILDDIR = ./build/
 BUILD = $(BUILDDIR)$(BOARD)
-RAPCOREFILES := boards/$(BOARD)/$(BOARD).v src/constants.v src/macro_params.v src/spi_state_machine.v src/pwm.v src/quad_enc.v src/spi.v src/stepper.v src/dda_timer.v src/rapcore.v $(wildcard src/microstepper/*.v)
+RAPCOREFILES := boards/$(BOARD)/$(BOARD).v \
+								$(addprefix src/, constants.v \
+													  macro_params.v \
+														spi_state_machine.v \
+														pwm.v \
+														quad_enc.v \
+														spi.v \
+														stepper.v \
+														dda_timer.v \
+														rapcore.v) \
+								$(wildcard src/microstepper/*.v)
+GENERATEDFILES := src/generated/spi_pll.v src/generated/board.v
 
 all: $(BUILD).bit
 
@@ -36,14 +47,14 @@ $(BUILD).bit: $(RAPCOREFILES)
 	printf '`define $(BOARD)\n' > $(GENERATEDDIR)board.v
 ifeq ($(ARCH), ice40)
 	icepll -i $(FREQ) -o $(SPIFREQ) -m -n spi_pll -f $(GENERATEDDIR)spi_pll.v
-	yosys -ql ./logs/$(BOARD)_yosys.log -p 'synth_ice40 -top $(PROJ) -abc9 -dsp -json $(BUILD).json' $(RAPCOREFILES) src/generated/spi_pll.v src/generated/board.v
+	yosys -ql ./logs/$(BOARD)_yosys.log -p 'synth_ice40 -top $(PROJ) -abc9 -dsp -json $(BUILD).json' $(RAPCOREFILES) $(GENERATEDFILES)
 	nextpnr-ice40 -ql ./logs/$(BOARD)_nextpnr.log --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --json $(BUILD).json --asc $(BUILD).asc --pcf ./boards/$(BOARD)/$(PIN_DEF)
 	icetime -d $(DEVICE) -c $(FREQ) -mtr $(BUILD).rpt $(BUILD).asc
 	icepack $(BUILD).asc $(BUILD).bit
 endif
 ifeq ($(ARCH), ecp5)
 	ecppll -i $(FREQ) -o $(SPIFREQ) --clkin_name clock_in --clkout0_name clock_out -n spi_pll -f $(GENERATEDDIR)spi_pll.v
-	yosys -ql ./logs/$(BOARD)_yosys.log -p 'synth_ecp5 -top $(PROJ) -abc9 -json $(BUILD).json' $(RAPCOREFILES) src/generated/spi_pll.v src/generated/board.v
+	yosys -ql ./logs/$(BOARD)_yosys.log -p 'synth_ecp5 -top $(PROJ) -abc9 -json $(BUILD).json' $(RAPCOREFILES) $(GENERATEDFILES)
 	nextpnr-ecp5 -ql ./logs/$(BOARD)_nextpnr.log --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --textcfg $(BUILD)_out.config --json $(BUILD).json  --lpf ./boards/$(BOARD)/$(PIN_DEF)
 	ecppack --svf $(BUILD).svf $(BUILD)_out.config $(BUILD).bit
 endif
@@ -71,18 +82,10 @@ triple-check: yosys-parse iverilog-parse verilator-cdc
 vvp: $(RAPCOREFILES)
 	iverilog -tvvp $(RAPCOREFILES)
 
-lint:
-	verible-verilog-lint src/*.v
-
-verible:
-	verible-verilog-lint --rules -explicit-parameter-storage-type,-line-length src/*.v
-
-testbench_quad_encoder:
-	yosys sim.ys
-	gtkwave testbench/quad_enc.vcd
-testbench_microstepper:
-	yosys sim_microstepper.ys
-	gtkwave testbench/microstepper.vcd
+yosys-%:
+	mkdir -p testbench/vcd
+	yosys testbench/yosys/$*.ys
+	gtkwave testbench/vcd/$*.vcd
 
 .SECONDARY:
-.PHONY: all prog clean testbench formal
+.PHONY: all prog clean formal
