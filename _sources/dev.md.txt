@@ -71,9 +71,15 @@ The formal verification configuration file is `boards/formal_config.v`.
 
 ## Test Benches
 
-`make testbench`
+RAPCores is tested against Yosys, IVerilog, and Verilator.
+The yosys test benches can be executed with:
 
-The config for the test bench is `sim.ys` in the root of the directory.
+`make yosys-<sim name>`
+
+For example:
+
+`make yosys-spi` will run the `spi.ys` simulation located in `testbench/yosys`.
+
 
 ## Formatting
 
@@ -85,12 +91,13 @@ All files should have `none` as the default nettype:
 
 ## Linting
 
-`make lint` : Will run Verible to lint the source.
+For parser compatibility and linting one can use:
 
-Optionally this VSCode extension is helpful as well:
+```
+make triple-check
+```
 
-[https://github.com/mshr-h/vscode-verilog-hdl-support](https://github.com/mshr-h/vscode-verilog-hdl-support)
-
+which will parse the source using Yosys, IVerilog, and Verilator.
 
 ## Helpful Articles
 

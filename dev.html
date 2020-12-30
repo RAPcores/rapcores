@@ -97,8 +97,11 @@ The formal verification configuration file is <code class="docutils literal notr
 </div>
 <div class="section" id="test-benches">
 <h2>Test Benches<a class="headerlink" href="#test-benches" title="Permalink to this headline">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">testbench</span></code></p>
-<p>The config for the test bench is <code class="docutils literal notranslate"><span class="pre">sim.ys</span></code> in the root of the directory.</p>
+<p>RAPCores is tested against Yosys, IVerilog, and Verilator.
+The yosys test benches can be executed with:</p>
+<p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">yosys-&lt;sim</span> <span class="pre">name&gt;</span></code></p>
+<p>For example:</p>
+<p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">yosys-spi</span></code> will run the <code class="docutils literal notranslate"><span class="pre">spi.ys</span></code> simulation located in <code class="docutils literal notranslate"><span class="pre">testbench/yosys</span></code>.</p>
 </div>
 <div class="section" id="formatting">
 <h2>Formatting<a class="headerlink" href="#formatting" title="Permalink to this headline">¶</a></h2>
@@ -109,9 +112,11 @@ The formal verification configuration file is <code class="docutils literal notr
 </div>
 <div class="section" id="linting">
 <h2>Linting<a class="headerlink" href="#linting" title="Permalink to this headline">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">lint</span></code> : Will run Verible to lint the source.</p>
-<p>Optionally this VSCode extension is helpful as well:</p>
-<p><a class="reference external" href="https://github.com/mshr-h/vscode-verilog-hdl-support">https://github.com/mshr-h/vscode-verilog-hdl-support</a></p>
+<p>For parser compatibility and linting one can use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">triple</span><span class="o">-</span><span class="n">check</span>
+</pre></div>
+</div>
+<p>which will parse the source using Yosys, IVerilog, and Verilator.</p>
 </div>
 <div class="section" id="helpful-articles">
 <h2>Helpful Articles<a class="headerlink" href="#helpful-articles" title="Permalink to this headline">¶</a></h2>
