@@ -5,18 +5,24 @@ module analog_out (
     input  wire       resetn,
     input  wire [7:0] pwm1,
     input  wire [7:0] pwm2,
+    input  wire [7:0] pwm3,
     output wire       analog_out1,
     output wire       analog_out2,
+    output wire       analog_out3,
     input wire [10:0] current_threshold
 );
 
   reg [10:0] pwm_counter;
   reg [7:0] pwm1_r;
   reg [7:0] pwm2_r;
+  reg [7:0] pwm3_r;
 
   always @(posedge clk) begin
     if (!resetn) begin
       pwm_counter <= 0;
+      pwm1_r <= 0;
+      pwm2_r <= 0;
+      pwm3_r <= 0;
     end
     else begin
       if (pwm_counter <= current_threshold)
@@ -25,10 +31,12 @@ module analog_out (
         pwm_counter <= 0;
         pwm1_r <= pwm1;
         pwm2_r <= pwm2;
+        pwm3_r <= pwm3;
       end
     end
   end
   assign analog_out1 = (resetn) ? pwm_counter <= {3'b0, pwm1_r} : 0;
   assign analog_out2 = (resetn) ? pwm_counter <= {3'b0, pwm2_r} : 0;
+  assign analog_out3 = (resetn) ? pwm_counter <= {3'b0, pwm3_r} : 0;
 
 endmodule

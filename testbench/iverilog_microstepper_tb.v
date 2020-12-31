@@ -13,14 +13,17 @@ module microstepper_tb(
     output          chargepump_pin,
     output          faultn
 );
+    wire analog_out3;
 
     reg                 step;
     reg                 dir;
     reg                 enable_in;
     wire         [12:0]  target_current1;
     wire         [12:0]  target_current2;
+    wire         [12:0]  target_current3;
     wire signed  [12:0]  current1;
     wire signed  [12:0]  current2;
+    wire signed  [12:0]  current3;
     reg         [9:0]   config_offtime;
     reg         [7:0]   config_blanktime;
     reg         [9:0]   config_fastdecay_threshold;
@@ -40,18 +43,23 @@ module microstepper_tb(
 
     reg             analog_cmp1;
     reg             analog_cmp2;
+    reg             analog_cmp3;
     reg     [40:0]  step_clock;
     reg     [20:0]  cnt;
-    reg     [12:0]  current_abs1;
-    reg     [12:0]  current_abs2;
+    reg     [12:0]  current_abs1, current_abs2, current_abs3;
     wire            phase_a1_l;
     wire            phase_a2_l;
     wire            phase_b1_l;
     wire            phase_b2_l;
+    wire            phase_c1_l;
+    wire            phase_c2_l;
+
     wire            phase_a1_h;
     wire            phase_a2_h;
     wire            phase_b1_h;
     wire            phase_b2_h;
+    wire            phase_c1_h;
+    wire            phase_c2_h;
 
     reg clk;
 	always #12.5 clk <= (clk === 1'b0);
@@ -88,6 +96,7 @@ module microstepper_tb(
             cnt <= 0;
             analog_cmp1 <= 1;
             analog_cmp2 <= 1;
+            analog_cmp3 <= 1;
             step <= 1;
             enable_in <= 1;
             config_offtime = 810;
@@ -103,25 +112,28 @@ module microstepper_tb(
         else begin
             cnt <= cnt + 1;
             enable_in <= 1;
-            if (current1[12] == 1'b1) begin
+            if (current1[12] == 1'b1)
                 current_abs1 = -current1;
-            end
-            else begin
+            else
                 current_abs1 = current1;
-            end
-            if (current2[12] == 1'b1) begin
+
+            if (current2[12] == 1'b1)
                 current_abs2 = -current2;
-            end
-            else begin
+            else
                 current_abs2 = current2;
-            end
+
+            if (current3[12] == 1'b1)
+                current_abs3 = -current3;
+            else
+                current_abs3 = current3;
+
             step_clock <= step_clock + 1;
             step <= step_clock[10];
             analog_cmp1 <= (current_abs1[11:0] >= target_current1[11:0]); // compare unsigned
             analog_cmp2 <= (current_abs2[11:0] >= target_current2[11:0]);
-            if (cnt <= 20'h4CA9) begin
+            analog_cmp3 <= (current_abs3[11:0] >= target_current3[11:0]);
+            if (cnt <= 20'h4CA9)
                 dir <= 1;
-            end
             else
                 dir <= 0;
         end
@@ -135,14 +147,20 @@ module microstepper_tb(
         .phase_a2_l(                    phase_a2_l                  ),
         .phase_b1_l(                    phase_b1_l                  ),
         .phase_b2_l(                    phase_b2_l                  ),
+        .phase_c1_l(                    phase_c1_l                  ),
+        .phase_c2_l(                    phase_c2_l                  ),
         .phase_a1_h(                    phase_a1_h                  ),
         .phase_a2_h(                    phase_a2_h                  ),
         .phase_b1_h(                    phase_b1_h                  ),
         .phase_b2_h(                    phase_b2_h                  ),
+        .phase_c1_h(                    phase_c1_h                  ),
+        .phase_c2_h(                    phase_c2_h                  ),
         .analog_cmp1(                   analog_cmp1                 ),
         .analog_out1(                   analog_out1                 ),
         .analog_cmp2(                   analog_cmp2                 ),
         .analog_out2(                   analog_out2                 ),
+        .analog_cmp3(                   analog_cmp3                 ),
+        .analog_out3(                   analog_out3                 ),
         .chargepump_pin(                chargepump_pin              ),
         .step(                          step                        ),
         .dir(                           dir                         ),
@@ -168,6 +186,12 @@ module microstepper_tb(
         .pwm(analog_out2),
         .duty(target_current2)
     );
+    pwm_duty duty3(
+        .clk(clk),
+        .resetn(resetn),
+        .pwm(analog_out3),
+        .duty(target_current3)
+    );
     hbridge_coil hbridge_coil1(
         .clk(clk),
         .resetn(resetn),
@@ -186,6 +210,17 @@ module microstepper_tb(
         .low_2(phase_b2_l),
         .high_2(phase_b2_h),
         .current(current2),
+        .polarity_invert_config(1'b0)
+    );
+
+    hbridge_coil hbridge_coil3(
+        .clk(clk),
+        .resetn(resetn),
+        .low_1(phase_c1_l),
+        .high_1(phase_c1_h),
+        .low_2(phase_c2_l),
+        .high_2(phase_c2_h),
+        .current(current3),
         .polarity_invert_config(1'b0)
     );
 endmodule
