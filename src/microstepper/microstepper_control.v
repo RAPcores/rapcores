@@ -72,9 +72,9 @@ module microstepper_control (
       phase_ct_C <= 128;
     end else if (step_rising)
       if (dir_r[1]) begin
-        phase_ct <= phase_ct < 192 ? phase_ct + 1 : 0;
-        phase_ct_B <= phase_ct_B < 192 ? phase_ct_B + 1 : 0;
-        phase_ct_C <= phase_ct_C < 192 ? phase_ct_C + 1 : 0;
+        phase_ct <= phase_ct < 191 ? phase_ct + 1 : 0;
+        phase_ct_B <= phase_ct_B < 191 ? phase_ct_B + 1 : 0;
+        phase_ct_C <= phase_ct_C < 191 ? phase_ct_C + 1 : 0;
       end else begin
         phase_ct <= phase_ct > 0 ? phase_ct - 1 : 191;
         phase_ct_B <= phase_ct_B > 0 ? phase_ct_B - 1 : 191;

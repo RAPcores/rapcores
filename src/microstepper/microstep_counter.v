@@ -22,15 +22,15 @@ module microstep_counter (
   //assign sw[4] = pos[7:0] > 15 || pos[7:0] < 112 ? 1'b1 : 1'b0;  //16-111
   //assign sw[5] = pos[7:0] < 16 || pos[7:0] > 111 ? 1'b0 : 1'b1;  //0-15 112-191
 
-  always @(posedge clk) begin
-    if(pos < 48)
-      cos_index <= pos [5:0];
-    else if(pos < 96)
-      cos_index <= 96 - pos;
-    else if(pos < 144)
-      cos_index  <= pos - 96;
-    else 
-      cos_index  <= 192 - pos;
+  always @(posedge clk) begin  // Result Min-Max  // Phase Count
+    if(pos < 48)                                  // 0-47
+      cos_index <= pos [5:0];  // 0-47
+    else if(pos < 96)                             // 48 - 95
+      cos_index <= 95 - pos;   // 47-0
+    else if(pos < 144)                            // 96 - 143
+      cos_index  <= pos - 96;  // 0-47
+    else                                          // 144 - 191+
+      cos_index  <= 191 - pos; // 47-0
     /*
     if(pos < 192)
       cos_index  <= 192 - pos;
