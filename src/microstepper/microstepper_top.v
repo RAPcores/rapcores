@@ -82,7 +82,7 @@ module microstepper_top (
     .s2(s2),
     .s3(s3),
     .s4(s4),
-    .s5(s6),
+    .s5(s5),
     .s6(s6),
 
     .offtimer_en0(offtimer_en0),
