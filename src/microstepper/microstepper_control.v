@@ -26,6 +26,7 @@ module microstepper_control (
     output          offtimer_en0,
     output          offtimer_en1,
     output reg [7:0] phase_ct,
+    output reg [7:0] phase_ct_B,
     input      [7:0] blank_timer0,
     input      [7:0] blank_timer1,
     input      [9:0] off_timer0,
@@ -53,9 +54,15 @@ module microstepper_control (
   always @(posedge clk) begin
     if (!resetn) begin
       phase_ct <= 0;
-    end
-    else if (step_rising)
-        phase_ct <= dir_r[1] ? phase_ct + 1 : phase_ct - 1;
+      phase_ct_B <= 48;
+    end else if (step_rising)
+      if (dir_r[1]) begin
+        phase_ct <= phase_ct < 191 ? phase_ct + 1 : 0;
+        phase_ct_B <= phase_ct_B < 191 ? phase_ct_B + 1 : 0;
+      end else begin
+        phase_ct <= phase_ct > 0 ? phase_ct - 1 : 191;
+        phase_ct_B <= phase_ct_B > 0 ? phase_ct_B - 1 : 191;
+      end
   end
 
   // Fault (active low) if off timer starts before minimum on timer expires
@@ -70,7 +77,7 @@ module microstepper_control (
         faultn <= 1;
       end
       else if (faultn) begin
-        faultn <= enable ? !( fault0 | fault1 ) : 1'b1;
+        faultn <= 1'b1; //enable ? !( fault0 | fault1 ) : 1'b1;
       end
     end
 

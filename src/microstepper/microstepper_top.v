@@ -41,6 +41,7 @@ module microstepper_top (
 
   wire a_starting, b_starting;
   wire   [7:0]   phase_ct;
+  wire   [7:0]   phase_ct_B;
   wire   [7:0]   blank_timer0;
   wire   [7:0]   blank_timer1;
   wire   [9:0]   off_timer0;
@@ -74,7 +75,8 @@ module microstepper_top (
     .s4(s4),
     .offtimer_en0(offtimer_en0),
     .offtimer_en1(offtimer_en1),
-    .phase_ct(phase_ct),
+    .phase_ct (phase_ct),
+    .phase_ct_B (phase_ct_B),
     .blank_timer0(blank_timer0),
     .blank_timer1(blank_timer1),
     .off_timer0(off_timer0),
@@ -146,10 +148,19 @@ wire        off_timer1_done;
   );
 
   microstep_counter microstep_counter0 (
-      .pos       (phase_ct),
-      .cos_index1(cos_index1),
-      .cos_index2(cos_index2),
-      .sw        ({s1, s2, s3, s4})
+      .clk        (clk),
+      .resetn     (resetn),
+      .pos        (phase_ct),
+      .cos_index  (cos_index1),
+      .sw         ({s2, s1})
+  );
+
+  microstep_counter microstep_counter1 (
+      .clk        (clk),
+      .resetn     (resetn),
+      .pos        (phase_ct_B),
+      .cos_index  (cos_index2),
+      .sw         ({s4, s3})
   );
 
   cosine cosine0 (

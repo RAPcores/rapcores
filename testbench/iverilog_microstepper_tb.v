@@ -120,10 +120,10 @@ module microstepper_tb(
             analog_cmp1 <= (current_abs1[11:0] >= target_current1[11:0]); // compare unsigned
             analog_cmp2 <= (current_abs2[11:0] >= target_current2[11:0]);
             if (cnt <= 20'h4CA9) begin
-                dir <= 1;
+                dir <= 0;
             end
             else
-                dir <= 0;
+                dir <= 1;
         end
     end
 
