@@ -17,3 +17,11 @@ count=`echo "$regs" | wc -l`
 printf "\n"
 echo Synchronous count: $synccount
 echo Register initialization count: $count
+
+
+if [ $synccount -eq 0 ] && [ $count -eq 0 ]
+  then
+    exit 0
+  else
+    exit 1
+fi
