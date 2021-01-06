@@ -27,6 +27,10 @@
 // Change the Move Buffer Size. Should be power of two
 //`define MOVE_BUFFER_SIZE 4
 
+// Default Mosfet Active Polarity
+`define DEFAULT_BRIDGE_INVERTING 1
+
+
 // Enable Logic Analyzer Out
 `define LA_OUT 2
 
@@ -34,9 +38,16 @@
 //`define LA_IN 2
 
 // Logic Analyzer IO for rapcore.v can be set here
-`define LOGICANALYZER_MACRO\
+`define TOP_LA\
   assign LA_OUT[1] = dir; \
   assign LA_OUT[2] = analog_cmp2;
 
-// Default Mosfet Active Polarity
-`define DEFAULT_BRIDGE_INVERTING 1
+// Logic Analyzer IO for microstepper_top.v can be set here
+//`define MICROSTEPPER_LA\
+//  assign LA_OUT[1] = dir; \
+//  assign LA_OUT[2] = analog_cmp2;
+
+// Logic Analyzer IO for spi_state_machine.v can be set here
+//`define STATE_MACHINE_LA\
+//  assign LA_OUT[1] = dir; \
+//  assign LA_OUT[2] = analog_cmp2;

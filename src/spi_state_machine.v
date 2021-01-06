@@ -1,6 +1,13 @@
 `default_nettype none
 
 module spi_state_machine(
+  `ifdef LA_IN
+    input wire [`LA_IN:1] LA_IN,
+  `endif
+  `ifdef LA_OUT
+    output wire [`LA_OUT:1] LA_OUT,
+  `endif
+
   input resetn,
   // SPI pins
   input SCK,
@@ -412,6 +419,10 @@ module spi_state_machine(
     end
   end
 
+  // Macro external wiring statements here
+  `ifdef STATE_MACHINE_LA
+    `STATE_MACHINE_LA
+  `endif
 
 
 endmodule
