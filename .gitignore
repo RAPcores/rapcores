@@ -18,5 +18,5 @@ symbiyosys
 a.out
 
 src/generated/*
-build/*
-logs/*
+build
+logs
