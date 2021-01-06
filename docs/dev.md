@@ -49,6 +49,20 @@ packages will be installed. Once complete you should be able to run any of the `
 below. This environment includes all the tools to synthesis, place, route, program, and
 formally verify the RAPcore project.
 
+## Overview of Make targets
+
+| Target         | Arguments | Description |
+|----------------|-----------|-------------|
+| clean          | BOARD     | remove build artifacts  |
+| prog           | BOARD     | build and program BOARD |
+| formal         | BOARD     | run formal verification |
+| iverilog-parse |           | parse the src directory with iverilog |
+| yosys-parse    |           | parse the src directory with yosys |
+| verilator-cdc  |           | parse the src directory and run CDC checks with verilator |
+| triple-check   |           | parse the srec directory with yosys, iverilog, and verilator |
+| yosys-{test}   |           | run the testbench recipe in `testbench/yosys` | 
+
+
 ## Build Bitstream
 
 `make BOARD=<board>`
