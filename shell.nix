@@ -19,8 +19,11 @@ let
     # these are generally useful packages for tests, verification, synthesis
     # and deployment, etc
     [ yosys verilog verilator symbiyosys nextpnr icestorm trellis
-      z3 boolector yices tinyprog fujprog
+      yices tinyprog fujprog
     ];
+
+# For other formal modes, may need:
+# z3 boolector
 
 # Export a usable shell environment
 in runCommand "rapcore-shell" { inherit buildInputs; } ""
