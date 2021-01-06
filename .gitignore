@@ -20,3 +20,4 @@ a.out
 src/generated/*
 build
 logs
+testbench/vcd

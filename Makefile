@@ -71,6 +71,9 @@ prog: $(BUILD).bit
 clean:
 	rm -f $(BUILD).blif $(BUILD).asc $(BUILD).rpt  $(BUILD).json $(BUILD).bin $(BUILD).bit ./src/generated/*.v
 
+cleanall:
+	rm -rf build logs ./src/generated/*.v
+
 formal:
 	sby -f symbiyosys.sby
 
@@ -88,8 +91,10 @@ triple-check: yosys-parse iverilog-parse verilator-cdc
 vvp: $(RAPCOREFILES)
 	iverilog -tvvp $(RAPCOREFILES)
 
-yosys-%:
+testbench/vcd:
 	mkdir -p testbench/vcd
+
+yosys-%: testbench/vcd
 	yosys testbench/yosys/$*.ys
 	gtkwave testbench/vcd/$*.vcd
 
