@@ -42,7 +42,7 @@ GENERATEDFILES := src/generated/spi_pll.v src/generated/board.v
 
 all: $(BUILD).bit
 
-$(BUILD).bit: $(RAPCOREFILES)
+$(BUILD).bit: logs build $(RAPCOREFILES)
 # set board define for Verilog and include the board specific verilog file
 	printf '`define $(BOARD)\n' > $(GENERATEDDIR)board.v
 ifeq ($(ARCH), ice40)
@@ -58,6 +58,12 @@ ifeq ($(ARCH), ecp5)
 	nextpnr-ecp5 -ql ./logs/$(BOARD)_nextpnr.log --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --textcfg $(BUILD)_out.config --json $(BUILD).json  --lpf ./boards/$(BOARD)/$(PIN_DEF)
 	ecppack --svf $(BUILD).svf $(BUILD)_out.config $(BUILD).bit
 endif
+
+logs:
+	mkdir -p logs
+
+build:
+	mkdir -p build
 
 prog: $(BUILD).bit
 	$(PROGRAMMER) $<
