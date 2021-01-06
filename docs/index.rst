@@ -12,7 +12,7 @@ Objective
 
 3D printers as one of the first ubiquitous robots, but there is far more value in automation
 and digital manufacturing technologies that has yet to be unlocked to the average person.
-We need to enhance the capabilities of motion controllers beyond what is currently available on the market in order to accelerate the transition to environmentally friendly and local production. RAPcore leverages recent advancements in technology to help accomplish this:
+RAPcore leverages recent advancements in technology to help accomplish this:
 
 * Open Source FPGA synthesis
 * Open Source formal verification
@@ -44,8 +44,10 @@ Contents
 .. toctree::
    :maxdepth: 2
 
+   releases
    spi_spec
    boards
    dev
    motor_control
    interfaces
+   asic
