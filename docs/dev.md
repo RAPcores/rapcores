@@ -7,7 +7,8 @@ nextpnr. We are open to support other flows and open source tool chain. However 
 that RAPcores does use some SystemVerilog features supported by Yosys.
 
 We recommend using a relatively recent build of these tools. The ones included in Linux
-distros may be out of date.
+distros may be out of date. Using the Nix package manager with the included `shell.nix` is
+recommended.
 
 - [Yosys](https://github.com/YosysHQ/yosys)
 - [nextpnr](https://github.com/YosysHQ/nextpnr)
@@ -60,7 +61,7 @@ formally verify the RAPcore project.
 | yosys-parse    |           | parse the src directory with yosys |
 | verilator-cdc  |           | parse the src directory and run CDC checks with verilator |
 | triple-check   |           | parse the srec directory with yosys, iverilog, and verilator |
-| yosys-{test}   |           | run the testbench recipe in `testbench/yosys` | 
+| yosys-{test}   |           | run the testbench recipe in `testbench/yosys/{test}` |
 
 
 ## Build Bitstream
@@ -92,7 +93,7 @@ The yosys test benches can be executed with:
 
 For example:
 
-`make yosys-spi` will run the `spi.ys` simulation located in `testbench/yosys`.
+`make yosys-spi` will run the `spi.ys` simulation located in `testbench/yosys/<sim name>`.
 
 
 ## Formatting
