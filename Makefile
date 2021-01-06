@@ -101,5 +101,11 @@ yosys-%: testbench/vcd
 	yosys testbench/yosys/$*.ys
 	gtkwave testbench/vcd/$*.vcd
 
+cxxrtl-%: testbench/vcd
+	yosys testbench/cxxrtl/$*.ys
+	clang++ -g -O3 -std=c++14 -I `yosys-config --datdir`/include testbench/cxxrtl/$*.cpp -o testbench/cxxrtl/$*.bin
+	./testbench/cxxrtl/$*.bin
+	gtkwave testbench/vcd/$*_cxxrtl.vcd
+
 .SECONDARY:
 .PHONY: all prog clean formal
