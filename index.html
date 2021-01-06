@@ -14,7 +14,7 @@
     <script src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="SPI Specification" href="spi_spec.html" />
+    <link rel="next" title="Release Notes" href="releases.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -42,7 +42,7 @@ jerk controlled kinematics in low-cost additive and subtractive systems.</p>
 <h2>Objective<a class="headerlink" href="#objective" title="Permalink to this headline">¶</a></h2>
 <p>3D printers as one of the first ubiquitous robots, but there is far more value in automation
 and digital manufacturing technologies that has yet to be unlocked to the average person.
-We need to enhance the capabilities of motion controllers beyond what is currently available on the market in order to accelerate the transition to environmentally friendly and local production. RAPcore leverages recent advancements in technology to help accomplish this:</p>
+RAPcore leverages recent advancements in technology to help accomplish this:</p>
 <ul class="simple">
 <li><p>Open Source FPGA synthesis</p></li>
 <li><p>Open Source formal verification</p></li>
@@ -72,10 +72,16 @@ circuitry.</p>
 <h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="releases.html#current-development">0.2.0 - (Current Development)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="releases.html#pathfinder">0.1.0 - “Pathfinder”</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="spi_spec.html">SPI Specification</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="spi_spec.html#definitions">Definitions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="spi_spec.html#versioning">Versioning</a></li>
 <li class="toctree-l2"><a class="reference internal" href="spi_spec.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spi_spec.html#coordinated-step-timer-0x01">Coordinated Step Timer - 0x01</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="boards.html">Board Definition Structure and Porting Guide</a><ul>
@@ -87,6 +93,7 @@ circuitry.</p>
 <li class="toctree-l1"><a class="reference internal" href="dev.html">Developer Docs</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="dev.html#build-prerequisites">Build Prerequisites</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dev.html#developing-with-nix">Developing with Nix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev.html#overview-of-make-targets">Overview of Make targets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dev.html#build-bitstream">Build Bitstream</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dev.html#formal-verification">Formal Verification</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dev.html#test-benches">Test Benches</a></li>
@@ -103,6 +110,10 @@ circuitry.</p>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="interfaces.html">Interfaces</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="interfaces.html#interactive-spi-using-raspi-julia">Interactive SPI using RasPi + Julia</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="asic.html">RAPcores on ASIC</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="asic.html#mpw-one">MPW-one</a></li>
 </ul>
 </li>
 </ul>
@@ -128,18 +139,20 @@ circuitry.</p>
 
 <h3>Navigation</h3>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="spi_spec.html">SPI Specification</a></li>
 <li class="toctree-l1"><a class="reference internal" href="boards.html">Board Definition Structure and Porting Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev.html">Developer Docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="motor_control.html">Motor Control</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interfaces.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="asic.html">RAPcores on ASIC</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="#">Documentation overview</a><ul>
-      <li>Next: <a href="spi_spec.html" title="next chapter">SPI Specification</a></li>
+      <li>Next: <a href="releases.html" title="next chapter">Release Notes</a></li>
   </ul></li>
 </ul>
 </div>
