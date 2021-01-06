@@ -21,3 +21,4 @@ src/generated/*
 build
 logs
 testbench/vcd
+testbench/cxxrtl/*_tb.cpp

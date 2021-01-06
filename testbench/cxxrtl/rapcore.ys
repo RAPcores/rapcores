@@ -1,0 +1,3 @@
+
+read_verilog -sv testbench/rapcore_tb.v
+write_cxxrtl testbench/cxxrtl/rapcore_tb.cpp
