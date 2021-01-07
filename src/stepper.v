@@ -46,15 +46,15 @@ module DualHBridge (
 
   reg [1:0] step_r;
 
-  initial begin
-    phase_table[0] = 4'b1010;
-    phase_table[1] = 4'b0010;
-    phase_table[2] = 4'b0110;
-    phase_table[3] = 4'b0100;
-    phase_table[4] = 4'b0101;
-    phase_table[5] = 4'b0001;
-    phase_table[6] = 4'b1001;
-    phase_table[7] = 4'b1000;
+  always @(negedge resetn) begin
+    phase_table[0] <= 4'b1010;
+    phase_table[1] <= 4'b0010;
+    phase_table[2] <= 4'b0110;
+    phase_table[3] <= 4'b0100;
+    phase_table[4] <= 4'b0101;
+    phase_table[5] <= 4'b0001;
+    phase_table[6] <= 4'b1001;
+    phase_table[7] <= 4'b1000;
   end
 
   always @(posedge step) begin

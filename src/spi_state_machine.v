@@ -89,77 +89,6 @@ module spi_state_machine(
                 .word_data_received(word_data_received_w));
 
 
-
-/*
-  reg [511:0] cos_table;
-
-  initial begin
-    cos_table	 [ 	7	 : 	0	 ] = 	255	;
-    cos_table	 [ 	15	 : 	8	 ] = 	255	;
-    cos_table	 [ 	23	 : 	16	 ] = 	255	;
-    cos_table	 [ 	31	 : 	24	 ] = 	254	;
-    cos_table	 [ 	39	 : 	32	 ] = 	254	;
-    cos_table	 [ 	47	 : 	40	 ] = 	253	;
-    cos_table	 [ 	55	 : 	48	 ] = 	252	;
-    cos_table	 [ 	63	 : 	56	 ] = 	251	;
-    cos_table	 [ 	71	 : 	64	 ] = 	250	;
-    cos_table	 [ 	79	 : 	72	 ] = 	249	;
-    cos_table	 [ 	87	 : 	80	 ] = 	247	;
-    cos_table	 [ 	95	 : 	88	 ] = 	246	;
-    cos_table	 [ 	103	 : 	96	 ] = 	244	;
-    cos_table	 [ 	111	 : 	104	 ] = 	242	;
-    cos_table	 [ 	119	 : 	112	 ] = 	240	;
-    cos_table	 [ 	127	 : 	120	 ] = 	238	;
-    cos_table	 [ 	135	 : 	128	 ] = 	236	;
-    cos_table	 [ 	143	 : 	136	 ] = 	233	;
-    cos_table	 [ 	151	 : 	144	 ] = 	231	;
-    cos_table	 [ 	159	 : 	152	 ] = 	228	;
-    cos_table	 [ 	167	 : 	160	 ] = 	225	;
-    cos_table	 [ 	175	 : 	168	 ] = 	222	;
-    cos_table	 [ 	183	 : 	176	 ] = 	219	;
-    cos_table	 [ 	191	 : 	184	 ] = 	215	;
-    cos_table	 [ 	199	 : 	192	 ] = 	212	;
-    cos_table	 [ 	207	 : 	200	 ] = 	208	;
-    cos_table	 [ 	215	 : 	208	 ] = 	205	;
-    cos_table	 [ 	223	 : 	216	 ] = 	201	;
-    cos_table	 [ 	231	 : 	224	 ] = 	197	;
-    cos_table	 [ 	239	 : 	232	 ] = 	193	;
-    cos_table	 [ 	247	 : 	240	 ] = 	189	;
-    cos_table	 [ 	255	 : 	248	 ] = 	185	;
-    cos_table	 [ 	263	 : 	256	 ] = 	180	;
-    cos_table	 [ 	271	 : 	264	 ] = 	176	;
-    cos_table	 [ 	279	 : 	272	 ] = 	171	;
-    cos_table	 [ 	287	 : 	280	 ] = 	167	;
-    cos_table	 [ 	295	 : 	288	 ] = 	162	;
-    cos_table	 [ 	303	 : 	296	 ] = 	157	;
-    cos_table	 [ 	311	 : 	304	 ] = 	152	;
-    cos_table	 [ 	319	 : 	312	 ] = 	147	;
-    cos_table	 [ 	327	 : 	320	 ] = 	142	;
-    cos_table	 [ 	335	 : 	328	 ] = 	136	;
-    cos_table	 [ 	343	 : 	336	 ] = 	131	;
-    cos_table	 [ 	351	 : 	344	 ] = 	126	;
-    cos_table	 [ 	359	 : 	352	 ] = 	120	;
-    cos_table	 [ 	367	 : 	360	 ] = 	115	;
-    cos_table	 [ 	375	 : 	368	 ] = 	109	;
-    cos_table	 [ 	383	 : 	376	 ] = 	103	;
-    cos_table	 [ 	391	 : 	384	 ] = 	98	;
-    cos_table	 [ 	399	 : 	392	 ] = 	92	;
-    cos_table	 [ 	407	 : 	400	 ] = 	86	;
-    cos_table	 [ 	415	 : 	408	 ] = 	80	;
-    cos_table	 [ 	423	 : 	416	 ] = 	74	;
-    cos_table	 [ 	431	 : 	424	 ] = 	68	;
-    cos_table	 [ 	439	 : 	432	 ] = 	62	;
-    cos_table	 [ 	447	 : 	440	 ] = 	56	;
-    cos_table	 [ 	455	 : 	448	 ] = 	50	;
-    cos_table	 [ 	463	 : 	456	 ] = 	44	;
-    cos_table	 [ 	471	 : 	464	 ] = 	37	;
-    cos_table	 [ 	479	 : 	472	 ] = 	31	;
-    cos_table	 [ 	487	 : 	480	 ] = 	25	;
-    cos_table	 [ 	495	 : 	488	 ] = 	19	;
-    cos_table	 [ 	503	 : 	496	 ] = 	13	;
-    cos_table	 [ 	511	 : 	504	 ] = 	6	;
-  end
-*/
   //
   // Stepper Timing and Buffer Setup
   //
@@ -387,7 +316,7 @@ module spi_state_machine(
             case (message_word_count)
               1: begin
                 move_duration[writemoveind][63:0] <= word_data_received[63:0];
-                //word_send_data[63:0] = last_steps_taken[63:0]; // Prep to send steps
+                //word_send_data[63:0] <= last_steps_taken[63:0]; // Prep to send steps
               end
               2: begin
                 increment[writemoveind][63:0] <= word_data_received[63:0];
