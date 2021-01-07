@@ -1,18 +1,18 @@
 #! /usr/bin/env bash
 
 # Synchronous assigns 
-syncs="$(grep -nrP '(.*)([=<])(.*)(;)' src/* | grep -v 'assign' | grep -v 'wire' | grep -v 'parameter' | grep -v '==' | grep -v '<=')"
+syncs="$(grep -nrP '(.*)([=<])(.*)(;)' src/* | grep -v 'assign' | grep -v 'wire' | grep -v 'reg' | grep -v 'parameter' | grep -v '==' | grep -v '<=')"
 printf "Synchronous assigns:\n"
 echo "$syncs"
 
-# Reg initialization - disallowed
-regs="$(grep -nrP '(reg)(.*)([=<])(.*)(;)' src/*)"
+# Reg initialization - disallowed unless tagged "FPGA ONLY"
+regs="$(grep -nrP '(reg)(.*)([=<])(.*)(;)' src/* | grep -v 'FPGA ONLY')"
 printf "\nRegister initializations:\n"
 echo "$regs"
 
 # Stats
-synccount=`echo "$syncs" | wc -l`
-count=`echo "$regs" | wc -l`
+synccount=`printf "$syncs" | wc -l`
+count=`printf "$regs" | wc -l`
 
 printf "\n"
 echo Synchronous count: $synccount

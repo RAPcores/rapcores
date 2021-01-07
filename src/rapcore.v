@@ -71,9 +71,6 @@ module rapcore (
     input CLK
 );
 
-  // Global Reset (TODO: Make input pin)
-  //wire reset;
-  //assign reset = 1;
   `ifdef tinyfpgabx
     // drive USB pull-up resistor to '0' to disable USB
     assign USBPU = 0;
@@ -91,7 +88,7 @@ module rapcore (
       if (!resetn) resetn_counter <= resetn_counter + 1'b1;
   `endif
   `ifndef RESETN
-    reg [7:0] resetn_counter = 0;
+    reg [7:0] resetn_counter = 0; // FPGA ONLY
     always @(posedge CLK) begin
       if (!resetn) resetn_counter <= resetn_counter + 1'b1;
     end
@@ -184,7 +181,6 @@ module rapcore (
   // Encoder
   //
   wire signed [63:0] encoder_count;
-  //reg [7:0] encoder_multiplier = 1;
   wire encoder_fault;
   `ifdef QUAD_ENC
     // TODO: For ... generate
