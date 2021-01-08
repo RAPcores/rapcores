@@ -18,9 +18,9 @@ module spi_state_machine #(
   output CIPO,
 
   // Step IO
-  output step,
-  output dir,
-  output enable,
+  output [motor_count:1] step,
+  output [motor_count:1] dir,
+  output [motor_count:1] enable,
 
   // Stepper Config
   output reg [2:0] microsteps,
@@ -110,30 +110,30 @@ module spi_state_machine #(
   reg [`MOVE_BUFFER_SIZE:0] stepready;
   wire [`MOVE_BUFFER_SIZE:0] stepfinished; // set via DDA
 
-  reg [`MOVE_BUFFER_SIZE:0] dir_r;
+  reg [`MOVE_BUFFER_SIZE:0] dir_r [motor_count:1];
 
-  reg [63:0] move_duration [`MOVE_BUFFER_SIZE:0];
-  reg signed [63:0] increment [`MOVE_BUFFER_SIZE:0];
-  reg signed [63:0] incrementincrement [`MOVE_BUFFER_SIZE:0];
-
-  // initialize DDA mem to zero
-  // TODO: This doesn't work
-  //initial begin
-  //  increment[`MOVE_BUFFER_SIZE:0] <= {(`MOVE_BUFFER_SIZE){64'b0}};
-  //  incrementincrement[`MOVE_BUFFER_SIZE:0] <= {(`MOVE_BUFFER_SIZE){64'b0}};
-  //  move_duration [`MOVE_BUFFER_SIZE:0] <= {(`MOVE_BUFFER_SIZE){64'b0}};
-  //end
-
-  reg [7:0] clock_divisor;  // should be 40 for 400 khz at 16Mhz Clk
+  reg [63:0] move_duration [`MOVE_BUFFER_SIZE:0][motor_count:1];
+  reg signed [63:0] increment [`MOVE_BUFFER_SIZE:0][motor_count:1];
+  reg signed [63:0] incrementincrement [`MOVE_BUFFER_SIZE:0][motor_count:1];
 
   // DDA module input wires determined from buffer
   wire [63:0] move_duration_w = move_duration[moveind];
-  wire [63:0] increment_w = increment[moveind];
-  wire [63:0] incrementincrement_w = incrementincrement[moveind];
+
+  // Per-axis DDA parameters
+  wire [63:0] increment_w [motor_count:1];
+  wire [63:0] incrementincrement_w [motor_count:1];
+
+  genvar i;
+  for (i=1; i<=motor_count; i=i+1) begin
+    assign increment_w[i] = increment[moveind][i];
+    assign incrementincrement_w[i] = incrementincrement[moveind][i];
+  end
+
+  reg [7:0] clock_divisor;  // should be 40 for 400 khz at 16Mhz Clk
 
   // Step IO
-  wire dda_step;
-  reg enable_r;
+  wire [motor_count:1] dda_step;
+  reg [motor_count:1] enable_r;
 
   // Implement flow control and event pins if specified
   `ifdef BUFFER_DTR
@@ -156,25 +156,28 @@ module spi_state_machine #(
     assign ENOUTPUT = enable;
   `endif
 
-  dda_timer dda (
-                .resetn(resetn),
-                .clock_divisor(clock_divisor),
-                .move_duration(move_duration_w),
-                .increment(increment_w),
-                .incrementincrement(incrementincrement_w),
-                .stepready(stepready),
-                .stepfinished(stepfinished),
-                .moveind(moveind),
-                .writemoveind(writemoveind),
-                .step(dda_step),
-                `ifdef HALT
-                  .halt(HALT),
-                `endif
-                `ifdef MOVE_DONE
-                  .move_done(MOVE_DONE),
-                `endif
-                .CLK(CLK)
-                );
+  genvar i;
+  for (i=1; i<=motor_count; i=i+1) begin
+    dda_timer dda (
+                  .resetn(resetn),
+                  .clock_divisor(clock_divisor),
+                  .move_duration(move_duration_w),
+                  .increment(increment_w[i]),
+                  .incrementincrement(incrementincrement_w[i]),
+                  .stepready(stepready),
+                  .stepfinished(stepfinished),
+                  .moveind(moveind),
+                  .writemoveind(writemoveind),
+                  .step(dda_step[i]),
+                  `ifdef HALT
+                    .halt(HALT),
+                  `endif
+                  `ifdef MOVE_DONE
+                    .move_done(MOVE_DONE),
+                  `endif
+                  .CLK(CLK)
+                  );
+  end
 
   //
   // State Machine for handling SPI Messages
@@ -209,7 +212,12 @@ module spi_state_machine #(
 
     writemoveind <= 0;  // Move buffer
     stepready <= 0;  // Latching mechanism for engaging the buffered move.
-    dir_r <= {(`MOVE_BUFFER_SIZE+1){1'b0}};
+
+    // TODO
+    //genvar i;
+    //for (i=1; i<=motor_count; i=i+1) begin
+    //  dir_r[i] <= {(`MOVE_BUFFER_SIZE+1){1'b0}};
+    //end
 
     clock_divisor <= 40;  // should be 40 for 400 khz at 16Mhz Clk
     message_word_count <= 0;
@@ -328,11 +336,11 @@ module spi_state_machine #(
                 //word_send_data[63:0] <= last_steps_taken[63:0]; // Prep to send steps
               end
               2: begin
-                increment[writemoveind][63:0] <= word_data_received[63:0];
+                increment[writemoveind][1][63:0] <= word_data_received[63:0];
                 word_send_data[63:0] <= encoder_store[63:0]; // Prep to send encoder read
               end
               3: begin
-                incrementincrement[writemoveind][63:0] <= word_data_received[63:0];
+                incrementincrement[writemoveind][1][63:0] <= word_data_received[63:0];
                 message_word_count <= 0;
                 stepready[writemoveind] <= ~stepready[writemoveind];
                 writemoveind <= writemoveind + 1'b1;
