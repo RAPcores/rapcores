@@ -110,9 +110,9 @@ module rapcore (
   wire config_invert_lowside;
 
   // Stepper control lines
-  wire step;
-  wire dir;
-  wire enable;
+  wire [1:`MOTOR_COUNT] step;
+  wire [1:`MOTOR_COUNT] dir;
+  wire [1:`MOTOR_COUNT] enable;
 
   // Stepper status outputs
   wire faultn;
@@ -123,18 +123,20 @@ module rapcore (
   //
 
   `ifdef DUAL_HBRIDGE
-  DualHBridge s0 (.phase_a1 (PHASE_A1[1]),
-                .phase_a2 (PHASE_A2[1]),
-                .phase_b1 (PHASE_B1[1]),
-                .phase_b2 (PHASE_B2[1]),
-                .vref_a (VREF_A[1]),
-                .vref_b (VREF_B[1]),
-                .step (step),
-                .dir (dir),
-                .enable (enable),
-                .microsteps (microsteps),
-                .current (current),
-                .microsteps (microsteps));
+    genvar i;
+    for (i=1; i<=`MOTOR_COUNT; i=i+1) begin
+      DualHBridge s0 (.phase_a1 (PHASE_A1[i]),
+                    .phase_a2 (PHASE_A2[i]),
+                    .phase_b1 (PHASE_B1[i]),
+                    .phase_b2 (PHASE_B2[i]),
+                    .vref_a (VREF_A[i]),
+                    .vref_b (VREF_B[i]),
+                    .step (step[i]),
+                    .dir (dir[i]),
+                    .enable (enable[i]),
+                    .microsteps (microsteps),
+                    .current (current));
+    end
   `endif
 
   `ifdef ULTIBRIDGE
@@ -200,7 +202,8 @@ module rapcore (
   // SPI State Machine
   //
 
-  spi_state_machine spifsm (
+  spi_state_machine #(.motor_count(`MOTOR_COUNT)) spifsm
+  (
     `ifdef LA_IN
       .LA_IN(LA_IN),
     `endif

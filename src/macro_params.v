@@ -16,7 +16,7 @@
 
 `define MOVE_BUFFER_BITS $clog2(`BUFFER_SIZE)-1 // number of bits to index given size
 
-`define MOTOR_COUNT DUAL_HBRIDGE // + other supported topologies in the future.
+`define MOTOR_COUNT `DUAL_HBRIDGE // + other supported topologies in the future.
 
 `ifndef DEFAULT_TIMER_WIDTH
 `define DEFAULT_TIMER_WIDTH 8

@@ -1,6 +1,8 @@
 `default_nettype none
 
-module spi_state_machine(
+module spi_state_machine #(
+    parameter motor_count = 1
+  )(
   `ifdef LA_IN
     input wire [`LA_IN:1] LA_IN,
   `endif
