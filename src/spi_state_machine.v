@@ -156,7 +156,6 @@ module spi_state_machine #(
     assign ENOUTPUT = enable;
   `endif
 
-  genvar i;
   for (i=1; i<=motor_count; i=i+1) begin
     dda_timer dda (
                   .resetn(resetn),
@@ -193,6 +192,8 @@ module spi_state_machine #(
   wire awaiting_more_words = (message_header == `CMD_COORDINATED_STEP) |
                              (message_header == `CMD_API_VERSION);
   reg [1:0] word_received_r;
+
+  reg [4:0] nmot;
 
   always @(posedge CLK) if (!resetn) begin
     // Stepper Config
@@ -329,30 +330,36 @@ module spi_state_machine #(
         case (message_header)
           // Move Routine
           `CMD_COORDINATED_STEP: begin
-            // the first non-header word is the move duration
-            case (message_word_count)
-              1: begin
-                move_duration[writemoveind][63:0] <= word_data_received[63:0];
-                //word_send_data[63:0] <= last_steps_taken[63:0]; // Prep to send steps
+            // Multiaxis
+            for (nmot=1; nmot<=motor_count; nmot=nmot+1) begin
+              // the first non-header word is the move duration
+              if (nmot == 1) begin
+                if (message_word_count == 1) begin
+                  move_duration[writemoveind][63:0] <= word_data_received[63:0];
+                  //word_send_data[63:0] <= last_steps_taken[63:0]; // Prep to send steps
+                end
               end
-              2: begin
-                increment[writemoveind][1][63:0] <= word_data_received[63:0];
+
+              if (message_word_count == nmot*2) begin
+                increment[writemoveind][nmot][63:0] <= word_data_received[63:0];
                 word_send_data[63:0] <= encoder_store[63:0]; // Prep to send encoder read
               end
-              3: begin
-                incrementincrement[writemoveind][1][63:0] <= word_data_received[63:0];
+              if (message_word_count == nmot*2+1) begin
+                incrementincrement[writemoveind][nmot][63:0] <= word_data_received[63:0];
                 message_word_count <= 0;
                 stepready[writemoveind] <= ~stepready[writemoveind];
                 writemoveind <= writemoveind + 1'b1;
-                message_header <= 8'b0; // Reset Message Header
+
+                if (nmot == motor_count) message_header <= 8'b0; // Reset Message Header at the end
+
                 `ifdef FORMAL
                   assert(writemoveind <= `MOVE_BUFFER_SIZE);
                 `endif
               end
-            endcase
+            end
           end // `CMD_COORDINATED_STEP
-            // by default reset the message header if it was a two word transaction
-            default: message_header <= 8'b0; // Reset Message Header
+          // by default reset the message header if it was a two word transaction
+          default: message_header <= 8'b0; // Reset Message Header
         endcase
       end
     end
