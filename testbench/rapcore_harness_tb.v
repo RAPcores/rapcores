@@ -76,10 +76,14 @@ module rapcore_harness (
   reg hi = 1;
   reg lo = 0;
 
-  assign STEPINPUT = lo;
-  assign DIRINPUT = lo;
-  assign ENINPUT = lo;
-  assign HALT = hi;
+  `ifdef STEPINPUT
+    assign STEPINPUT = lo;
+    assign DIRINPUT = lo;
+    assign ENINPUT = lo;
+  `endif
+  `ifdef HALT
+    assign HALT = hi;
+  `endif
 
   // SCK can't be faster than every two clocks ~ use 4
   reg [1:0] SCK_r = 0;
@@ -104,7 +108,9 @@ module rapcore_harness (
       if(SCK_r == 2'b11) initialized <= 1; // we want copi to start shifting after first SCK cycle
     end
   end
-  assign resetn_in = resetn;
+  `ifdef RESETN
+    assign resetn_in = resetn;
+  `endif
 
   // COPI trigger 1/4 clk before SCK posedge
   wire COPI_tx;
