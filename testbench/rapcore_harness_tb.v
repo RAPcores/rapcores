@@ -130,7 +130,7 @@ module rapcore_harness (
     //enable
     word_data_mem[0] = 64'h0a00000000000011;
     //move
-    word_data_mem[1] = 64'h0100000000000001;
+    word_data_mem[1] = 64'h0100000000000011;
     word_data_mem[2] = 64'h00000000005fffff;
     word_data_mem[3] = 64'h0100000000000000;
     word_data_mem[4] = 64'h0000000000000000;
