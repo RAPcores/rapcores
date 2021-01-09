@@ -16,12 +16,12 @@ module rapcore #(
       output wire CIPO,
     `endif
     `ifdef DUAL_HBRIDGE
-      output wire [`DUAL_HBRIDGE:1] PHASE_A1,  // Phase A
-      output wire [`DUAL_HBRIDGE:1] PHASE_A2,  // Phase A
-      output wire [`DUAL_HBRIDGE:1] PHASE_B1,  // Phase B
-      output wire [`DUAL_HBRIDGE:1] PHASE_B2,  // Phase B
-      output wire [`DUAL_HBRIDGE:1] VREF_A,  // VRef
-      output wire [`DUAL_HBRIDGE:1] VREF_B,  // VRef
+      output wire [`DUAL_HBRIDGE-1:0] PHASE_A1,  // Phase A
+      output wire [`DUAL_HBRIDGE-1:0] PHASE_A2,  // Phase A
+      output wire [`DUAL_HBRIDGE-1:0] PHASE_B1,  // Phase B
+      output wire [`DUAL_HBRIDGE-1:0] PHASE_B2,  // Phase B
+      output wire [`DUAL_HBRIDGE-1:0] VREF_A,  // VRef
+      output wire [`DUAL_HBRIDGE-1:0] VREF_B,  // VRef
     `endif
     `ifdef ULTIBRIDGE
       output wire CHARGEPUMP,
@@ -29,18 +29,18 @@ module rapcore #(
       output wire analog_out1,
       input wire analog_cmp2,
       output wire analog_out2,
-      output wire [`ULTIBRIDGE:1] PHASE_A1,  // Phase A
-      output wire [`ULTIBRIDGE:1] PHASE_A2,  // Phase A
-      output wire [`ULTIBRIDGE:1] PHASE_B1,  // Phase B
-      output wire [`ULTIBRIDGE:1] PHASE_B2,  // Phase B
-      output wire [`ULTIBRIDGE:1] PHASE_A1_H,  // Phase A
-      output wire [`ULTIBRIDGE:1] PHASE_A2_H,  // Phase A
-      output wire [`ULTIBRIDGE:1] PHASE_B1_H,  // Phase B
-      output wire [`ULTIBRIDGE:1] PHASE_B2_H,  // Phase B
+      output wire [`ULTIBRIDGE-1:0] PHASE_A1,  // Phase A
+      output wire [`ULTIBRIDGE-1:0] PHASE_A2,  // Phase A
+      output wire [`ULTIBRIDGE-1:0] PHASE_B1,  // Phase B
+      output wire [`ULTIBRIDGE-1:0] PHASE_B2,  // Phase B
+      output wire [`ULTIBRIDGE-1:0] PHASE_A1_H,  // Phase A
+      output wire [`ULTIBRIDGE-1:0] PHASE_A2_H,  // Phase A
+      output wire [`ULTIBRIDGE-1:0] PHASE_B1_H,  // Phase B
+      output wire [`ULTIBRIDGE-1:0] PHASE_B2_H,  // Phase B
     `endif
     `ifdef QUAD_ENC
-      input wire [`QUAD_ENC:1] ENC_B,
-      input wire [`QUAD_ENC:1] ENC_A,
+      input wire [`QUAD_ENC-1:0] ENC_B,
+      input wire [`QUAD_ENC-1:0] ENC_A,
     `endif
     `ifdef BUFFER_DTR
       output wire BUFFER_DTR,
@@ -112,9 +112,9 @@ module rapcore #(
   wire config_invert_lowside;
 
   // Stepper control lines
-  wire [1:motor_count] step;
-  wire [1:motor_count] dir;
-  wire [1:motor_count] enable;
+  wire [motor_count-1:0] step;
+  wire [motor_count-1:0] dir;
+  wire [motor_count-1:0] enable;
 
   // Stepper status outputs
   wire faultn;
@@ -127,7 +127,7 @@ module rapcore #(
   `ifdef DUAL_HBRIDGE
     genvar i;
     generate
-      for (i=1; i<=motor_count; i=i+1) begin
+      for (i=0; i<motor_count; i=i+1) begin
         DualHBridge s0 (.phase_a1 (PHASE_A1[i]),
                       .phase_a2 (PHASE_A2[i]),
                       .phase_b1 (PHASE_B1[i]),
@@ -194,8 +194,8 @@ module rapcore #(
     (
       .resetn(resetn),
       .clk(CLK),
-      .a(ENC_A[1]),
-      .b(ENC_B[1]),
+      .a(ENC_A[0]),
+      .b(ENC_B[0]),
       .faultn(encoder_fault),
       .count(encoder_count)
       //.multiplier(encoder_multiplier)

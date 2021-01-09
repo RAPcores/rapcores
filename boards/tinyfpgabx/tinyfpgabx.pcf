@@ -53,14 +53,14 @@ set_io --warn-no-port VREF_A[1] J1 # PIN_12
 set_io --warn-no-port VREF_B[1] H2 # PIN_13
 
 # Right side of board
-set_io --warn-no-port VREF_B[2] H9
-set_io --warn-no-port PHASE_B2[2] D9
-set_io --warn-no-port PHASE_B1[2] D8
-set_io --warn-no-port PHASE_A1[2] C9
-set_io --warn-no-port PHASE_A2[2] A9
-set_io --warn-no-port VREF_A[2] B8
-set_io --warn-no-port ENC_A[1] A8
-set_io --warn-no-port ENC_B[1] B7
+set_io --warn-no-port VREF_B[0] H9
+set_io --warn-no-port PHASE_B2[0] D9
+set_io --warn-no-port PHASE_B1[0] D8
+set_io --warn-no-port PHASE_A1[0] C9
+set_io --warn-no-port PHASE_A2[0] A9
+set_io --warn-no-port VREF_A[0] B8
+set_io --warn-no-port ENC_A A8
+set_io --warn-no-port ENC_B B7
 set_io --warn-no-port BUFFER_DTR A7 # PIN_22
 set_io --warn-no-port MOVE_DONE B6 # PIN_23
 set_io --warn-no-port -pullup yes HALT A6 # PIN_24

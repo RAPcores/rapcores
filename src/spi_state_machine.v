@@ -18,9 +18,9 @@ module spi_state_machine #(
   output CIPO,
 
   // Step IO
-  output wire [motor_count:1] step,
-  output wire [motor_count:1] dir,
-  output wire [motor_count:1] enable,
+  output wire [motor_count-1:0] step,
+  output wire [motor_count-1:0] dir,
+  output wire [motor_count-1:0] enable,
 
   // Stepper Config
   output reg [2:0] microsteps,
@@ -113,18 +113,18 @@ module spi_state_machine #(
   reg [motor_count:1] dir_r [`MOVE_BUFFER_SIZE:0];
 
   reg [63:0] move_duration [`MOVE_BUFFER_SIZE:0];
-  reg signed [63:0] increment [`MOVE_BUFFER_SIZE:0][motor_count:1];
-  reg signed [63:0] incrementincrement [`MOVE_BUFFER_SIZE:0][motor_count:1];
+  reg signed [63:0] increment [`MOVE_BUFFER_SIZE:0][motor_count-1:0];
+  reg signed [63:0] incrementincrement [`MOVE_BUFFER_SIZE:0][motor_count-1:0];
 
   // DDA module input wires determined from buffer
   wire [63:0] move_duration_w = move_duration[moveind];
 
   // Per-axis DDA parameters
-  wire [63:0] increment_w [motor_count:1];
-  wire [63:0] incrementincrement_w [motor_count:1];
+  wire [63:0] increment_w [motor_count-1:0];
+  wire [63:0] incrementincrement_w [motor_count-1:0];
 
   genvar i;
-  for (i=1; i<=motor_count; i=i+1) begin
+  for (i=0; i<motor_count; i=i+1) begin
     assign increment_w[i] = increment[moveind][i];
     assign incrementincrement_w[i] = incrementincrement[moveind][i];
   end
@@ -132,8 +132,8 @@ module spi_state_machine #(
   reg [7:0] clock_divisor;  // should be 40 for 400 khz at 16Mhz Clk
 
   // Step IO
-  wire [motor_count:1] dda_step;
-  reg [motor_count:1] enable_r;
+  wire [motor_count-1:0] dda_step;
+  reg [motor_count-1:0] enable_r;
 
   // Implement flow control and event pins if specified
   `ifdef BUFFER_DTR
@@ -141,17 +141,13 @@ module spi_state_machine #(
   `endif
 
   `ifndef STEPINPUT
-    generate 
-      for (i=1; i<=motor_count; i=i+1) begin
-        assign dir = dir_r[moveind]; // set direction
-      end
-    endgenerate
-    assign step = dda_step;
-    assign enable = enable_r;
+    assign dir[motor_count-1:0] = dir_r[moveind]; // set direction
+    assign step[motor_count-1:0] = dda_step;
+    assign enable[motor_count-1:0] = enable_r;
   `else
-    assign dir = dir_r[moveind] ^ DIRINPUT; // set direction
-    assign step = dda_step ^ STEPINPUT;
-    assign enable = enable_r | ENINPUT;
+    assign dir[motor_count-1:0] = dir_r[moveind] ^ DIRINPUT; // set direction
+    assign step[motor_count-1:0] = dda_step ^ STEPINPUT;
+    assign enable[motor_count-1:0] = enable_r | ENINPUT;
   `endif
 
   `ifdef STEPOUTPUT
@@ -161,8 +157,8 @@ module spi_state_machine #(
   `endif
 
   generate
-    for (i=1; i<=motor_count; i=i+1) begin
-      if (i == 1) begin
+    for (i=0; i<motor_count; i=i+1) begin
+      if (i == 0) begin
         dda_timer dda0 (
                       .resetn(resetn),
                       .clock_divisor(clock_divisor),
@@ -252,7 +248,7 @@ module spi_state_machine #(
     move_duration[0] <= 64'b0;
     move_duration[1] <= 64'b0;
 
-    for (nmot=1; nmot<=motor_count; nmot=nmot+1) begin
+    for (nmot=0; nmot<motor_count; nmot=nmot+1) begin
       increment[0][nmot] <= 64'b0;
       increment[1][nmot] <= 64'b0;
       incrementincrement[0][nmot] <= 64'b0;
@@ -291,7 +287,7 @@ module spi_state_machine #(
 
           // Motor Enable/disable
           `CMD_MOTOR_ENABLE: begin
-            enable_r <= word_data_received[motor_count-1:0];
+            enable_r[motor_count-1:0] <= word_data_received[motor_count-1:0];
           end
 
           // Clock divisor (24 bit)
@@ -357,23 +353,23 @@ module spi_state_machine #(
           // Move Routine
           `CMD_COORDINATED_STEP: begin
             // Multiaxis
-            for (nmot=1; nmot<=motor_count; nmot=nmot+1) begin
+            for (nmot=0; nmot<motor_count; nmot=nmot+1) begin
               // the first non-header word is the move duration
-              if (nmot == 1) begin
+              if (nmot == 0) begin
                 if (message_word_count == 1) begin
                   move_duration[writemoveind][63:0] <= word_data_received[63:0];
                   //word_send_data[63:0] <= last_steps_taken[63:0]; // Prep to send steps
                 end
               end
 
-              if (message_word_count == nmot*2) begin
+              if (message_word_count == (nmot+1)*2) begin
                 increment[writemoveind][nmot][63:0] <= word_data_received[63:0];
                 word_send_data[63:0] <= encoder_store[63:0]; // Prep to send encoder read
               end
-              if (message_word_count == nmot*2+1) begin
+              if (message_word_count == (nmot+1)*2+1) begin
                 incrementincrement[writemoveind][nmot][63:0] <= word_data_received[63:0];
 
-                if (nmot == motor_count) begin
+                if (nmot == motor_count-1) begin
                   writemoveind <= writemoveind + 1'b1;
                   stepready[writemoveind] <= ~stepready[writemoveind];
                   message_header <= 8'b0; // Reset Message Header at the end
