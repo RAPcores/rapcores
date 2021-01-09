@@ -23,9 +23,16 @@
 `timescale 1ns/100ps
 
 module rapcore_tb (
+    `ifdef DUAL_HBRIDGE
+      output wire [`DUAL_HBRIDGE:1] PHASE_A1,  // Phase A
+      output wire [`DUAL_HBRIDGE:1] PHASE_A2,  // Phase A
+      output wire [`DUAL_HBRIDGE:1] PHASE_B1,  // Phase B
+      output wire [`DUAL_HBRIDGE:1] PHASE_B2,  // Phase B
+      output wire [`DUAL_HBRIDGE:1] VREF_A,  // VRef
+      output wire [`DUAL_HBRIDGE:1] VREF_B,  // VRef
+    `endif
     input             CLK,
     output CIPO
-
   );
 
   `ifdef SPI_INTERFACE
@@ -33,6 +40,14 @@ module rapcore_tb (
     wire CS;
     wire COPI;
     wire CIPO;
+  `endif
+  `ifdef DUAL_HBRIDGE
+    wire [`DUAL_HBRIDGE:1] PHASE_A1;  // Phase A
+    wire [`DUAL_HBRIDGE:1] PHASE_A2;  // Phase A
+    wire [`DUAL_HBRIDGE:1] PHASE_B1;  // Phase B
+    wire [`DUAL_HBRIDGE:1] PHASE_B2;  // Phase B
+    wire [`DUAL_HBRIDGE:1] VREF_A;  // VRef
+    wire [`DUAL_HBRIDGE:1] VREF_B;  // VRef
   `endif
   `ifdef ULTIBRIDGE
     wire CHARGEPUMP;
@@ -160,6 +175,14 @@ module rapcore_tb (
         .CS(CS),
         .COPI(COPI),
         .CIPO(CIPO),
+      `endif
+      `ifdef DUAL_HBRIDGE
+        .PHASE_A1(PHASE_A1),  // Phase A
+        .PHASE_A2(PHASE_A2),  // Phase A
+        .PHASE_B1(PHASE_B1),  // Phase B
+        .PHASE_B2(PHASE_B2),  // Phase B
+        .VREF_A(VREF_A),  // VRef
+        .VREF_B(VREF_B),  // VRef
       `endif
       `ifdef ULTIBRIDGE
         .CHARGEPUMP(CHARGEPUMP),
