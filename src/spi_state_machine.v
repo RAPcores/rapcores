@@ -110,7 +110,7 @@ module spi_state_machine #(
   reg [`MOVE_BUFFER_SIZE:0] stepready;
   wire [`MOVE_BUFFER_SIZE:0] stepfinished; // set via DDA
 
-  reg [`MOVE_BUFFER_SIZE:0] dir_r [motor_count:1];
+  reg [motor_count:1] dir_r [`MOVE_BUFFER_SIZE:0];
 
   reg [63:0] move_duration [`MOVE_BUFFER_SIZE:0];
   reg signed [63:0] increment [`MOVE_BUFFER_SIZE:0][motor_count:1];
@@ -143,11 +143,11 @@ module spi_state_machine #(
   `ifndef STEPINPUT
     generate 
       for (i=1; i<=motor_count; i=i+1) begin
-        assign dir[i] = dir_r[i][moveind]; // set direction
+        assign dir = dir_r[moveind]; // set direction
       end
     endgenerate
-    assign step[motor_count:1] = dda_step[motor_count:1];
-    assign enable[motor_count:1] = enable_r[motor_count:1];
+    assign step = dda_step;
+    assign enable = enable_r;
   `else
     assign dir = dir_r[moveind] ^ DIRINPUT; // set direction
     assign step = dda_step ^ STEPINPUT;
@@ -238,9 +238,9 @@ module spi_state_machine #(
     writemoveind <= 0;  // Move buffer
     stepready <= 0;  // Latching mechanism for engaging the buffered move.
 
-    for (nmot=1; nmot<=motor_count; nmot=nmot+1) begin
-      dir_r[nmot] <= {(`MOVE_BUFFER_SIZE+1){1'b0}};
-    end
+    // TODO fix this
+    dir_r[0] <= {(motor_count){1'b0}};
+    dir_r[1] <= {(motor_count){1'b0}};
 
     clock_divisor <= 40;  // should be 40 for 400 khz at 16Mhz Clk
     message_word_count <= 0;
@@ -282,7 +282,7 @@ module spi_state_machine #(
           `CMD_COORDINATED_STEP: begin
 
             // Get Direction Bits
-            dir_r[writemoveind] <= word_data_received[motor_count:0];
+            dir_r[writemoveind] <= word_data_received[motor_count-1:0];
 
             // Store encoder values across all axes Now
             encoder_store <= encoder_count;
