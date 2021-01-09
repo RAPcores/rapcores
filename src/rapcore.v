@@ -1,6 +1,8 @@
 `default_nettype none
 
-module rapcore (
+module rapcore #(
+  parameter motor_count = `MOTOR_COUNT
+  )(
     `ifdef LED
       output wire [`LED:1] LED,
     `endif

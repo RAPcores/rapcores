@@ -6,13 +6,16 @@
 `define BUFFER_DTR
 
 // Enable Move Done Pin
-`define MOVE_DONE
+//`define MOVE_DONE
+// TODO MOVE_DONE BROKEN ON MULTIAXIS
 
 // Enable Halt Input
 `define HALT
 
 // Motor Definitions
-`define DUAL_HBRIDGE 1
+`define DUAL_HBRIDGE 2
+
+`define MOTOR_COUNT 2
 
 // Encoder Count
 `define QUAD_ENC 1
