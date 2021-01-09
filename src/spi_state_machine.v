@@ -141,9 +141,11 @@ module spi_state_machine #(
   `endif
 
   `ifndef STEPINPUT
-    assign dir = dir_r[moveind]; // set direction
-    assign step = dda_step;
-    assign enable = enable_r;
+    for (i=1; i<=motor_count; i=i+1) begin
+      assign dir[i] = dir_r[i][moveind]; // set direction
+    end
+    assign step[motor_count:1] = dda_step[motor_count:1];
+    assign enable[motor_count:1] = enable_r[motor_count:1];
   `else
     assign dir = dir_r[moveind] ^ DIRINPUT; // set direction
     assign step = dda_step ^ STEPINPUT;
@@ -156,27 +158,47 @@ module spi_state_machine #(
     assign ENOUTPUT = enable;
   `endif
 
-  for (i=1; i<=motor_count; i=i+1) begin
-    dda_timer dda (
-                  .resetn(resetn),
-                  .clock_divisor(clock_divisor),
-                  .move_duration(move_duration_w),
-                  .increment(increment_w[i]),
-                  .incrementincrement(incrementincrement_w[i]),
-                  .stepready(stepready),
-                  .stepfinished(stepfinished),
-                  .moveind(moveind),
-                  .writemoveind(writemoveind),
-                  .step(dda_step[i]),
-                  `ifdef HALT
-                    .halt(HALT),
-                  `endif
-                  `ifdef MOVE_DONE
-                    .move_done(MOVE_DONE),
-                  `endif
-                  .CLK(CLK)
-                  );
-  end
+  generate
+    for (i=1; i<=motor_count; i=i+1) begin
+      if (i == 1) begin
+        dda_timer dda0 (
+                      .resetn(resetn),
+                      .clock_divisor(clock_divisor),
+                      .move_duration(move_duration_w),
+                      .increment(increment_w[i]),
+                      .incrementincrement(incrementincrement_w[i]),
+                      .stepready(stepready),
+                      .stepfinished(stepfinished), // only need on one mod
+                      .moveind(moveind),
+                      .writemoveind(writemoveind),
+                      .step(dda_step[i]),
+                      `ifdef HALT
+                        .halt(HALT),
+                      `endif
+                      `ifdef MOVE_DONE
+                        .move_done(MOVE_DONE),
+                      `endif
+                      .CLK(CLK)
+                      );
+      end else begin
+        // only drive MOVE_DONE and moveind from the first DDA
+        dda_timer ddan (
+                      .resetn(resetn),
+                      .clock_divisor(clock_divisor),
+                      .move_duration(move_duration_w),
+                      .increment(increment_w[i]),
+                      .incrementincrement(incrementincrement_w[i]),
+                      .stepready(stepready),
+                      .writemoveind(writemoveind),
+                      .step(dda_step[i]),
+                      `ifdef HALT
+                        .halt(HALT),
+                      `endif
+                      .CLK(CLK)
+                      );
+      end
+    end
+  endgenerate
 
   //
   // State Machine for handling SPI Messages
@@ -207,7 +229,7 @@ module spi_state_machine #(
     config_chargepump_period <= 91;
     config_invert_highside <= `DEFAULT_BRIDGE_INVERTING;
     config_invert_lowside <= `DEFAULT_BRIDGE_INVERTING;
-    enable_r <= 0;
+    enable_r <= motor_count'b0;
 
     word_send_data <= 0;
 
@@ -265,7 +287,7 @@ module spi_state_machine #(
 
           // Motor Enable/disable
           `CMD_MOTOR_ENABLE: begin
-            enable_r <= word_data_received[0];
+            enable_r[motor_count:1] <= word_data_received[(motor_count-1):0];
           end
 
           // Clock divisor (24 bit)
@@ -346,12 +368,13 @@ module spi_state_machine #(
               end
               if (message_word_count == nmot*2+1) begin
                 incrementincrement[writemoveind][nmot][63:0] <= word_data_received[63:0];
-                message_word_count <= 0;
                 stepready[writemoveind] <= ~stepready[writemoveind];
                 writemoveind <= writemoveind + 1'b1;
 
-                if (nmot == motor_count) message_header <= 8'b0; // Reset Message Header at the end
-
+                if (nmot == motor_count) begin
+                  message_header <= 8'b0; // Reset Message Header at the end
+                  message_word_count <= 0;
+                end
                 `ifdef FORMAL
                   assert(writemoveind <= `MOVE_BUFFER_SIZE);
                 `endif

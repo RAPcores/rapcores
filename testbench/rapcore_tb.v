@@ -1,4 +1,4 @@
-`include "../boards/mpw_one_defines.v"
+`include "../boards/tinyfpgabx/tinyfpgabx.v"
 `include "../src/macro_params.v"
 `include "../src/constants.v"
 `include "../src/pwm.v"

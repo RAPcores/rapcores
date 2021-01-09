@@ -3,14 +3,14 @@
 `define SPI_INTERFACE
 
 // Enable Buffer DTR pin
-`define BUFFER_DTR
+//`define BUFFER_DTR
 
 // Enable Move Done Pin
 //`define MOVE_DONE
 // TODO MOVE_DONE BROKEN ON MULTIAXIS
 
 // Enable Halt Input
-`define HALT
+//`define HALT
 
 // Motor Definitions
 `define DUAL_HBRIDGE 2
