@@ -18,9 +18,9 @@ module spi_state_machine #(
   output CIPO,
 
   // Step IO
-  output [motor_count:1] step,
-  output [motor_count:1] dir,
-  output [motor_count:1] enable,
+  output wire [motor_count:1] step,
+  output wire [motor_count:1] dir,
+  output wire [motor_count:1] enable,
 
   // Stepper Config
   output reg [2:0] microsteps,
@@ -112,7 +112,7 @@ module spi_state_machine #(
 
   reg [`MOVE_BUFFER_SIZE:0] dir_r [motor_count:1];
 
-  reg [63:0] move_duration [`MOVE_BUFFER_SIZE:0][motor_count:1];
+  reg [63:0] move_duration [`MOVE_BUFFER_SIZE:0];
   reg signed [63:0] increment [`MOVE_BUFFER_SIZE:0][motor_count:1];
   reg signed [63:0] incrementincrement [`MOVE_BUFFER_SIZE:0][motor_count:1];
 
@@ -141,9 +141,11 @@ module spi_state_machine #(
   `endif
 
   `ifndef STEPINPUT
-    for (i=1; i<=motor_count; i=i+1) begin
-      assign dir[i] = dir_r[i][moveind]; // set direction
-    end
+    generate 
+      for (i=1; i<=motor_count; i=i+1) begin
+        assign dir[i] = dir_r[i][moveind]; // set direction
+      end
+    endgenerate
     assign step[motor_count:1] = dda_step[motor_count:1];
     assign enable[motor_count:1] = enable_r[motor_count:1];
   `else
@@ -229,18 +231,16 @@ module spi_state_machine #(
     config_chargepump_period <= 91;
     config_invert_highside <= `DEFAULT_BRIDGE_INVERTING;
     config_invert_lowside <= `DEFAULT_BRIDGE_INVERTING;
-    enable_r <= motor_count'b0;
+    enable_r <= {(motor_count){1'b0}};
 
     word_send_data <= 0;
 
     writemoveind <= 0;  // Move buffer
     stepready <= 0;  // Latching mechanism for engaging the buffered move.
 
-    // TODO
-    //genvar i;
-    //for (i=1; i<=motor_count; i=i+1) begin
-    //  dir_r[i] <= {(`MOVE_BUFFER_SIZE+1){1'b0}};
-    //end
+    for (nmot=1; nmot<=motor_count; nmot=nmot+1) begin
+      dir_r[nmot] <= {(`MOVE_BUFFER_SIZE+1){1'b0}};
+    end
 
     clock_divisor <= 40;  // should be 40 for 400 khz at 16Mhz Clk
     message_word_count <= 0;
@@ -248,13 +248,17 @@ module spi_state_machine #(
 
     word_received_r <= 2'b0;
 
-    // TODO change to for loops
+    // TODO change to for loops for buffer
     move_duration[0] <= 64'b0;
     move_duration[1] <= 64'b0;
-    increment[0] <= 64'b0;
-    increment[1] <= 64'b0;
-    incrementincrement[0] <= 64'b0;
-    incrementincrement[1] <= 64'b0;
+
+    for (nmot=1; nmot<=motor_count; nmot=nmot+1) begin
+      increment[0][nmot] <= 64'b0;
+      increment[1][nmot] <= 64'b0;
+      incrementincrement[0][nmot] <= 64'b0;
+      incrementincrement[1][nmot] <= 64'b0;
+    end
+
     encoder_store <= 64'b0;
 
   end else if (resetn) begin
@@ -278,7 +282,7 @@ module spi_state_machine #(
           `CMD_COORDINATED_STEP: begin
 
             // Get Direction Bits
-            dir_r[writemoveind] <= word_data_received[0];
+            dir_r[writemoveind] <= word_data_received[motor_count:0];
 
             // Store encoder values across all axes Now
             encoder_store <= encoder_count;
@@ -287,7 +291,7 @@ module spi_state_machine #(
 
           // Motor Enable/disable
           `CMD_MOTOR_ENABLE: begin
-            enable_r[motor_count:1] <= word_data_received[(motor_count-1):0];
+            enable_r <= word_data_received[motor_count-1:0];
           end
 
           // Clock divisor (24 bit)
@@ -368,10 +372,10 @@ module spi_state_machine #(
               end
               if (message_word_count == nmot*2+1) begin
                 incrementincrement[writemoveind][nmot][63:0] <= word_data_received[63:0];
-                stepready[writemoveind] <= ~stepready[writemoveind];
-                writemoveind <= writemoveind + 1'b1;
 
                 if (nmot == motor_count) begin
+                  writemoveind <= writemoveind + 1'b1;
+                  stepready[writemoveind] <= ~stepready[writemoveind];
                   message_header <= 8'b0; // Reset Message Header at the end
                   message_word_count <= 0;
                 end

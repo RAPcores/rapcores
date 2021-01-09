@@ -71,7 +71,7 @@ module rapcore_harness (
     input CLK
 );
 
-  parameter NUMWORDS = 5;
+  parameter NUMWORDS = 7;
 
   reg hi = 1;
   reg lo = 0;
@@ -128,12 +128,14 @@ module rapcore_harness (
 
   initial begin
     //enable
-    word_data_mem[0] = 64'h0a00000000000001;
+    word_data_mem[0] = 64'h0a00000000000011;
     //move
     word_data_mem[1] = 64'h0100000000000001;
     word_data_mem[2] = 64'h00000000005fffff;
     word_data_mem[3] = 64'h0100000000000000;
     word_data_mem[4] = 64'h0000000000000000;
+    word_data_mem[5] = 64'h0100000000000000;
+    word_data_mem[6] = 64'h0000000000000000;
 
     word_data_tb = word_data_mem[0];
     tx_byte = word_data_tb[7:0];
@@ -167,69 +169,71 @@ module rapcore_harness (
     end
   end
 
-  wire         [12:0]  target_current1;
-  wire         [12:0]  target_current2;
-  reg         [12:0]  current_abs1;
-  reg         [12:0]  current_abs2;
-  wire signed  [12:0]  current1;
-  wire signed  [12:0]  current2;
+  `ifdef ULTIBRIDGE
 
-  always @(posedge CLK) begin
-    if (!resetn) begin
-      analog_cmp1 <= 1;
-      analog_cmp2 <= 1;
-    end
-    else begin
-      if (current1[12] == 1'b1) begin
-        current_abs1 = -current1;
+    wire         [12:0]  target_current1;
+    wire         [12:0]  target_current2;
+    reg         [12:0]  current_abs1;
+    reg         [12:0]  current_abs2;
+    wire signed  [12:0]  current1;
+    wire signed  [12:0]  current2;
+
+    always @(posedge CLK) begin
+      if (!resetn) begin
+        analog_cmp1 <= 1;
+        analog_cmp2 <= 1;
       end
       else begin
-        current_abs1 = current1;
+        if (current1[12] == 1'b1) begin
+          current_abs1 = -current1;
+        end
+        else begin
+          current_abs1 = current1;
+        end
+        if (current2[12] == 1'b1) begin
+          current_abs2 = -current2;
+        end
+        else begin
+          current_abs2 = current2;
+        end
+        analog_cmp1 <= (current_abs1[11:0] >= target_current1[11:0]); // compare unsigned
+        analog_cmp2 <= (current_abs2[11:0] >= target_current2[11:0]);
       end
-      if (current2[12] == 1'b1) begin
-        current_abs2 = -current2;
-      end
-      else begin
-        current_abs2 = current2;
-      end
-      analog_cmp1 <= (current_abs1[11:0] >= target_current1[11:0]); // compare unsigned
-      analog_cmp2 <= (current_abs2[11:0] >= target_current2[11:0]);
     end
-  end
 
-  pwm_duty duty1(
-      .clk(CLK),
-      .resetn(resetn),
-      .pwm(analog_out1),
-      .duty(target_current1)
-  );
-  pwm_duty duty2(
-      .clk(CLK),
-      .resetn(resetn),
-      .pwm(analog_out2),
-      .duty(target_current2)
-  );
-  hbridge_coil hbridge_coil1(
-      .clk(CLK),
-      .resetn(resetn),
-      .low_1(PHASE_A1[1]),
-      .high_1(PHASE_A1_H[1]),
-      .low_2(PHASE_A2[1]),
-      .high_2(PHASE_A2_H[1]),
-      .current(current1),
-      .polarity_invert_config(1'b0)
-  );
-  hbridge_coil hbridge_coil2(
-      .clk(CLK),
-      .resetn(resetn),
-      .low_1(PHASE_B1[1]),
-      .high_1(PHASE_B1_H[1]),
-      .low_2(PHASE_B2[1]),
-      .high_2(PHASE_B2_H[1]),
-      .current(current2),
-      .polarity_invert_config(1'b0)
-  );
-
+    pwm_duty duty1(
+        .clk(CLK),
+        .resetn(resetn),
+        .pwm(analog_out1),
+        .duty(target_current1)
+    );
+    pwm_duty duty2(
+        .clk(CLK),
+        .resetn(resetn),
+        .pwm(analog_out2),
+        .duty(target_current2)
+    );
+    hbridge_coil hbridge_coil1(
+        .clk(CLK),
+        .resetn(resetn),
+        .low_1(PHASE_A1[1]),
+        .high_1(PHASE_A1_H[1]),
+        .low_2(PHASE_A2[1]),
+        .high_2(PHASE_A2_H[1]),
+        .current(current1),
+        .polarity_invert_config(1'b0)
+    );
+    hbridge_coil hbridge_coil2(
+        .clk(CLK),
+        .resetn(resetn),
+        .low_1(PHASE_B1[1]),
+        .high_1(PHASE_B1_H[1]),
+        .low_2(PHASE_B2[1]),
+        .high_2(PHASE_B2_H[1]),
+        .current(current2),
+        .polarity_invert_config(1'b0)
+    );
+  `endif
 
   //
   // ENCODER
