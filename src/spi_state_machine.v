@@ -180,6 +180,8 @@ module spi_state_machine #(
                       );
       end else begin
         // only drive MOVE_DONE and moveind from the first DDA
+        // TODO
+        /* verilator lint_off PINMISSING */
         dda_timer ddan (
                       .resetn(resetn),
                       .clock_divisor(clock_divisor),
@@ -194,6 +196,7 @@ module spi_state_machine #(
                       `endif
                       .CLK(CLK)
                       );
+        /* verilator lint_off PINMISSING */
       end
     end
   endgenerate
@@ -213,7 +216,7 @@ module spi_state_machine #(
                              (message_header == `CMD_API_VERSION);
   reg [1:0] word_received_r;
 
-  reg [4:0] nmot;
+  reg [7:0] nmot;
 
   always @(posedge CLK) if (!resetn) begin
     // Stepper Config
@@ -248,12 +251,14 @@ module spi_state_machine #(
     move_duration[0] <= 64'b0;
     move_duration[1] <= 64'b0;
 
+    /* verilator lint_off WIDTH */
     for (nmot=0; nmot<motor_count; nmot=nmot+1) begin
       increment[0][nmot] <= 64'b0;
       increment[1][nmot] <= 64'b0;
       incrementincrement[0][nmot] <= 64'b0;
       incrementincrement[1][nmot] <= 64'b0;
     end
+    /* verilator lint_off WIDTH */
 
     encoder_store <= 64'b0;
 
