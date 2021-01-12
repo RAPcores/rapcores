@@ -12,5 +12,7 @@
 `define DUAL_HBRIDGE 1
 //`define ULTIBRIDGE 1
 
+`define MOTOR_COUNT 1
+
 // Encoder Count
 `define QUAD_ENC 1
