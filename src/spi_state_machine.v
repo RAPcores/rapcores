@@ -49,14 +49,14 @@ module spi_state_machine #(
     input HALT,
   `endif
   `ifdef STEPINPUT
-    input STEPINPUT,
-    input DIRINPUT,
-    input ENINPUT,
+    input wire [motor_count-1:0] STEPINPUT,
+    input wire [motor_count-1:0] DIRINPUT,
+    input wire [motor_count-1:0] ENINPUT,
   `endif
   `ifdef STEPOUTPUT
-    output STEPOUTPUT,
-    output DIROUTPUT,
-    output ENOUTPUT,
+    output wire [motor_count-1:0] STEPOUTPUT,
+    output wire [motor_count-1:0] DIROUTPUT,
+    output wire [motor_count-1:0] ENOUTPUT,
   `endif
   input CLK
 );
