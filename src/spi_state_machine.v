@@ -129,6 +129,7 @@ module spi_state_machine #(
     assign incrementincrement_w[i] = incrementincrement[moveind][i];
   end
 
+  wire dda_tick;
   reg [7:0] clock_divisor;  // should be 40 for 400 khz at 16Mhz Clk
 
   // Step IO
@@ -156,12 +157,20 @@ module spi_state_machine #(
     assign ENOUTPUT = enable;
   `endif
 
+  clock_divider #(.divider_bits(8)) cd0
+  (
+    .resetn(resetn),
+    .divider(clock_divisor),
+    .tick(dda_tick),
+    .clk(CLK)
+  );
+
   generate
     for (i=0; i<motor_count; i=i+1) begin
       if (i == 0) begin
         dda_timer dda0 (
                       .resetn(resetn),
-                      .clock_divisor(clock_divisor),
+                      .dda_tick(dda_tick),
                       .move_duration(move_duration_w),
                       .increment(increment_w[i]),
                       .incrementincrement(incrementincrement_w[i]),
@@ -184,7 +193,7 @@ module spi_state_machine #(
         /* verilator lint_off PINMISSING */
         dda_timer ddan (
                       .resetn(resetn),
-                      .clock_divisor(clock_divisor),
+                      .dda_tick(dda_tick),
                       .move_duration(move_duration_w),
                       .increment(increment_w[i]),
                       .incrementincrement(incrementincrement_w[i]),

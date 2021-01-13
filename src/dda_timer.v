@@ -2,7 +2,6 @@
 
 module dda_timer(
   input resetn,
-  input [7:0] clock_divisor,
   input [63:0] move_duration,
   input [63:0] increment,
   input [63:0] incrementincrement,
@@ -17,6 +16,7 @@ module dda_timer(
   `ifdef MOVE_DONE
     output move_done,
   `endif
+  input dda_tick,
   input CLK
 );
 
@@ -54,7 +54,6 @@ module dda_timer(
   always @(posedge CLK) if (!resetn) begin
     // Locals
     tickdowncount <= 64'b0;  // move down count (clock cycles)
-    clkaccum <= 8'h1;  // intra-tick accumulator
 
     substep_accumulator <= 64'b0; // typemax(Int64) - 100 for buffer
     increment_r <= 64'b0;
@@ -91,15 +90,12 @@ module dda_timer(
         substep_accumulator <= substep_accumulator - 64'h7fffffffffffff9b;
       end
 
-      // DDA clock divisor
-      clkaccum <= clkaccum - 8'h1;
-      if (clkaccum == 8'b0) begin
+      if (dda_tick) begin
 
         increment_r <= increment_r + incrementincrement;
         substep_accumulator <= substep_accumulator + increment_r;
 
         // Increment tick accumulators
-        clkaccum <= clock_divisor;
         tickdowncount <= tickdowncount - 1'b1;
         // See if we finished the segment and incrment the buffer
         if(tickdowncount == 0) begin
