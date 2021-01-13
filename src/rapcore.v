@@ -52,14 +52,14 @@ module rapcore #(
       input wire HALT,
     `endif
     `ifdef STEPINPUT
-      input wire STEPINPUT,
-      input wire DIRINPUT,
-      input wire ENINPUT,
+      input wire [motor_count-1:0] STEPINPUT,
+      input wire [motor_count-1:0] DIRINPUT,
+      input wire [motor_count-1:0] ENINPUT,
     `endif
     `ifdef STEPOUTPUT
-      output wire STEPOUTPUT,
-      output wire ENOUTPUT,
-      output wire DIROUTPUT,
+      output wire [motor_count-1:0] STEPOUTPUT,
+      output wire [motor_count-1:0] ENOUTPUT,
+      output wire [motor_count-1:0] DIROUTPUT,
     `endif
     `ifdef LA_IN
       input wire [`LA_IN:1] LA_IN,
