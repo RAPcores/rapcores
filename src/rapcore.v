@@ -117,7 +117,7 @@ module rapcore #(
   wire [motor_count-1:0] enable;
 
   // Stepper status outputs
-  wire faultn;
+  wire [motor_count-1:0] faultn;
 
 
   //
@@ -144,42 +144,47 @@ module rapcore #(
   `endif
 
   `ifdef ULTIBRIDGE
-    microstepper_top microstepper0(
-      `ifdef LA_IN
-        .LA_IN(LA_IN),
-      `endif
-      `ifdef LA_OUT
-        .LA_OUT(LA_OUT),
-      `endif
-      .clk(CLK),
-      .resetn( resetn),
-      .phase_a1_l(PHASE_A1),
-      .phase_a2_l(PHASE_A2),
-      .phase_b1_l(PHASE_B1),
-      .phase_b2_l(PHASE_B2),
-      .phase_a1_h(PHASE_A1_H),
-      .phase_a2_h(PHASE_A2_H),
-      .phase_b1_h(PHASE_B1_H),
-      .phase_b2_h(PHASE_B2_H),
-      .analog_cmp1 (analog_cmp1),
-      .analog_out1 (analog_out1),
-      .analog_cmp2 (analog_cmp2),
-      .analog_out2 (analog_out2),
-      .chargepump_pin (CHARGEPUMP),
-      .config_offtime (config_offtime),
-      .config_blanktime (config_blanktime),
-      .config_fastdecay_threshold (config_fastdecay_threshold),
-      .config_minimum_on_time (config_minimum_on_time),
-      .config_current_threshold (config_current_threshold),
-      .config_chargepump_period (config_chargepump_period),
-      .config_invert_highside (config_invert_highside),
-      .config_invert_lowside (config_invert_lowside),
-      //.cos_table (cos_table),
-      .step (step),
-      .dir (dir),
-      .enable_in(enable),
-      .faultn(faultn)
-      );
+    genvar i;
+    generate
+      for (i=0; i<motor_count; i=i+1) begin
+        microstepper_top microstepper0(
+          `ifdef LA_IN
+            .LA_IN(LA_IN),
+          `endif
+          `ifdef LA_OUT
+            .LA_OUT(LA_OUT),
+          `endif
+          .clk(CLK),
+          .resetn( resetn),
+          .phase_a1_l(PHASE_A1[i]),
+          .phase_a2_l(PHASE_A2[i]),
+          .phase_b1_l(PHASE_B1[i]),
+          .phase_b2_l(PHASE_B2[i]),
+          .phase_a1_h(PHASE_A1_H[i]),
+          .phase_a2_h(PHASE_A2_H[i]),
+          .phase_b1_h(PHASE_B1_H[i]),
+          .phase_b2_h(PHASE_B2_H[i]),
+          .analog_cmp1 (analog_cmp1[i]),
+          .analog_out1 (analog_out1[i]),
+          .analog_cmp2 (analog_cmp2[i]),
+          .analog_out2 (analog_out2[i]),
+          .chargepump_pin (CHARGEPUMP),
+          .config_offtime (config_offtime),
+          .config_blanktime (config_blanktime),
+          .config_fastdecay_threshold (config_fastdecay_threshold),
+          .config_minimum_on_time (config_minimum_on_time),
+          .config_current_threshold (config_current_threshold),
+          .config_chargepump_period (config_chargepump_period),
+          .config_invert_highside (config_invert_highside),
+          .config_invert_lowside (config_invert_lowside),
+          //.cos_table (cos_table),
+          .step (step[i]),
+          .dir (dir[i]),
+          .enable_in(enable[i]),
+          .faultn(faultn[i])
+          );
+      end
+    endgenerate
   `endif
 
 
