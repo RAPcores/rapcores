@@ -1,5 +1,7 @@
 `timescale 1ns/100ps
-module rapcore_harness (
+module rapcore_harness #(
+  parameter motor_count = `MOTOR_COUNT
+  )(
     `ifdef LED
       input wire [`LED:1] LED,
     `endif
@@ -14,12 +16,12 @@ module rapcore_harness (
       input wire BOOT_DONE_IN,
     `endif
     `ifdef DUAL_HBRIDGE
-      input wire [`DUAL_HBRIDGE:1] PHASE_A1,  // Phase A
-      input wire [`DUAL_HBRIDGE:1] PHASE_A2,  // Phase A
-      input wire [`DUAL_HBRIDGE:1] PHASE_B1,  // Phase B
-      input wire [`DUAL_HBRIDGE:1] PHASE_B2,  // Phase B
-      input wire [`DUAL_HBRIDGE:1] VREF_A,  // VRef
-      input wire [`DUAL_HBRIDGE:1] VREF_B,  // VRef
+      input wire [`DUAL_HBRIDGE-1:0] PHASE_A1,  // Phase A
+      input wire [`DUAL_HBRIDGE-1:0] PHASE_A2,  // Phase A
+      input wire [`DUAL_HBRIDGE-1:0] PHASE_B1,  // Phase B
+      input wire [`DUAL_HBRIDGE-1:0] PHASE_B2,  // Phase B
+      input wire [`DUAL_HBRIDGE-1:0] VREF_A,  // VRef
+      input wire [`DUAL_HBRIDGE-1:0] VREF_B,  // VRef
     `endif
     `ifdef ULTIBRIDGE
       input wire CHARGEPUMP,
@@ -27,18 +29,18 @@ module rapcore_harness (
       input wire analog_out1,
       output reg analog_cmp2,
       input wire analog_out2,
-      input wire [`ULTIBRIDGE:1] PHASE_A1,  // Phase A
-      input wire [`ULTIBRIDGE:1] PHASE_A2,  // Phase A
-      input wire [`ULTIBRIDGE:1] PHASE_B1,  // Phase B
-      input wire [`ULTIBRIDGE:1] PHASE_B2,  // Phase B
-      input wire [`ULTIBRIDGE:1] PHASE_A1_H,  // Phase A
-      input wire [`ULTIBRIDGE:1] PHASE_A2_H,  // Phase A
-      input wire [`ULTIBRIDGE:1] PHASE_B1_H,  // Phase B
-      input wire [`ULTIBRIDGE:1] PHASE_B2_H,  // Phase B
+      input wire [`ULTIBRIDGE-1:0] PHASE_A1,  // Phase A
+      input wire [`ULTIBRIDGE-1:0] PHASE_A2,  // Phase A
+      input wire [`ULTIBRIDGE-1:0] PHASE_B1,  // Phase B
+      input wire [`ULTIBRIDGE-1:0] PHASE_B2,  // Phase B
+      input wire [`ULTIBRIDGE-1:0] PHASE_A1_H,  // Phase A
+      input wire [`ULTIBRIDGE-1:0] PHASE_A2_H,  // Phase A
+      input wire [`ULTIBRIDGE-1:0] PHASE_B1_H,  // Phase B
+      input wire [`ULTIBRIDGE-1:0] PHASE_B2_H,  // Phase B
     `endif
     `ifdef QUAD_ENC
-      output wire [`QUAD_ENC:1] ENC_B,
-      output wire [`QUAD_ENC:1] ENC_A,
+      output wire [`QUAD_ENC-1:0] ENC_B,
+      output wire [`QUAD_ENC-1:0] ENC_A,
     `endif
     `ifdef BUFFER_DTR
       input wire BUFFER_DTR,
@@ -128,9 +130,9 @@ module rapcore_harness (
 
   initial begin
     //enable
-    word_data_mem[0] = 64'h0a00000000000011;
+    word_data_mem[0] = 64'h0a000000000000ff;
     //move
-    word_data_mem[1] = 64'h0100000000000011;
+    word_data_mem[1] = 64'h01000000000000aa;
     word_data_mem[2] = 64'h00000000005fffff;
     word_data_mem[3] = 64'h0100000000000000;
     word_data_mem[4] = 64'h0000000000000000;

@@ -1,4 +1,10 @@
-`include "../boards/tinyfpgabx/tinyfpgabx.v"
+
+
+// Your config here
+`include "../boards/mpw_one_defines.v"
+//`include "../boards/tinyfpgabx/tinyfpgabx.v"
+
+
 `include "../src/macro_params.v"
 `include "../src/constants.v"
 `include "../src/pwm.v"
@@ -22,14 +28,16 @@
 `include "hbridge_coil.v"
 `timescale 1ns/100ps
 
-module rapcore_tb (
+module rapcore_tb #(
+  parameter motor_count = `MOTOR_COUNT
+  )(
     `ifdef DUAL_HBRIDGE
-      output wire [`DUAL_HBRIDGE:1] PHASE_A1,  // Phase A
-      output wire [`DUAL_HBRIDGE:1] PHASE_A2,  // Phase A
-      output wire [`DUAL_HBRIDGE:1] PHASE_B1,  // Phase B
-      output wire [`DUAL_HBRIDGE:1] PHASE_B2,  // Phase B
-      output wire [`DUAL_HBRIDGE:1] VREF_A,  // VRef
-      output wire [`DUAL_HBRIDGE:1] VREF_B,  // VRef
+      output wire [`DUAL_HBRIDGE-1:0] PHASE_A1,  // Phase A
+      output wire [`DUAL_HBRIDGE-1:0] PHASE_A2,  // Phase A
+      output wire [`DUAL_HBRIDGE-1:0] PHASE_B1,  // Phase B
+      output wire [`DUAL_HBRIDGE-1:0] PHASE_B2,  // Phase B
+      output wire [`DUAL_HBRIDGE-1:0] VREF_A,  // VRef
+      output wire [`DUAL_HBRIDGE-1:0] VREF_B,  // VRef
     `endif
     input             CLK,
     output CIPO
@@ -42,12 +50,12 @@ module rapcore_tb (
     wire CIPO;
   `endif
   `ifdef DUAL_HBRIDGE
-    wire [`DUAL_HBRIDGE:1] PHASE_A1;  // Phase A
-    wire [`DUAL_HBRIDGE:1] PHASE_A2;  // Phase A
-    wire [`DUAL_HBRIDGE:1] PHASE_B1;  // Phase B
-    wire [`DUAL_HBRIDGE:1] PHASE_B2;  // Phase B
-    wire [`DUAL_HBRIDGE:1] VREF_A;  // VRef
-    wire [`DUAL_HBRIDGE:1] VREF_B;  // VRef
+    wire [`DUAL_HBRIDGE-1:0] PHASE_A1;  // Phase A
+    wire [`DUAL_HBRIDGE-1:0] PHASE_A2;  // Phase A
+    wire [`DUAL_HBRIDGE-1:0] PHASE_B1;  // Phase B
+    wire [`DUAL_HBRIDGE-1:0] PHASE_B2;  // Phase B
+    wire [`DUAL_HBRIDGE-1:0] VREF_A;  // VRef
+    wire [`DUAL_HBRIDGE-1:0] VREF_B;  // VRef
   `endif
   `ifdef ULTIBRIDGE
     wire CHARGEPUMP;
