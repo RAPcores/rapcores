@@ -70,6 +70,13 @@ Enables control of the Ultibridge. Where `<N>` Ultibridges are specified.
 
 See: "Ultibridge" in Pinouts for name specification.
 
+
+In addition to device-specific counts, a motor count must be dfines as so:
+
+```
+`define MOTOR_COUNT <N>
+```
+
 ### Encoders
 
 ```
