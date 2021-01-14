@@ -25,10 +25,10 @@ module rapcore #(
     `endif
     `ifdef ULTIBRIDGE
       output wire CHARGEPUMP,
-      input wire analog_cmp1,
-      output wire analog_out1,
-      input wire analog_cmp2,
-      output wire analog_out2,
+      input  wire [`ULTIBRIDGE-1:0] analog_cmp1,
+      output wire [`ULTIBRIDGE-1:0] analog_out1,
+      input  wire [`ULTIBRIDGE-1:0] analog_cmp2,
+      output wire [`ULTIBRIDGE-1:0] analog_out2,
       output wire [`ULTIBRIDGE-1:0] PHASE_A1,  // Phase A
       output wire [`ULTIBRIDGE-1:0] PHASE_A2,  // Phase A
       output wire [`ULTIBRIDGE-1:0] PHASE_B1,  // Phase B
