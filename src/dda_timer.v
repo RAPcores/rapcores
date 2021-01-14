@@ -49,7 +49,8 @@ module dda_timer(
   `endif
 
   // Step Trigger condition
-  assign step = (substep_accumulator > 0);
+  reg step_r;
+  assign step = step_r;
 
   always @(posedge CLK) if (!resetn) begin
     // Locals
@@ -58,6 +59,7 @@ module dda_timer(
     substep_accumulator <= 64'b0; // typemax(Int64) - 100 for buffer
     increment_r <= 64'b0;
     finishedmove <= 1; // flag inidicating a move has been finished, so load next
+    step_r <= 0;
 
     // Buffer managment
     moveind <= {(`MOVE_BUFFER_BITS+1){1'b0}}; // Move index cursor
@@ -85,12 +87,15 @@ module dda_timer(
     // check if this move has been done before
     if(executing_move) begin
 
-      // Step taken, rollback accumulator
-      if (substep_accumulator > 0) begin
-        substep_accumulator <= substep_accumulator - 64'h7fffffffffffff9b;
-      end
-
       if (dda_tick) begin
+
+        step_r <= 0;
+
+        // Step taken, rollback accumulator
+        if (substep_accumulator > 0) begin
+          step_r <= 1;
+          substep_accumulator <= substep_accumulator - 64'h7fffffffffffff9b;
+        end
 
         increment_r <= increment_r + incrementincrement;
         substep_accumulator <= substep_accumulator + increment_r;
