@@ -5,10 +5,10 @@ module dda_timer(
   input [63:0] move_duration,
   input [63:0] increment,
   input [63:0] incrementincrement,
-  input [`MOVE_BUFFER_SIZE:0] stepready,
-  output reg [`MOVE_BUFFER_SIZE:0] stepfinished,
-  output reg [`MOVE_BUFFER_BITS:0] moveind, // DDA buffer index
-  input [`MOVE_BUFFER_BITS:0] writemoveind, // State Machine index
+  input processing_move,
+  input loading_move,
+  input executing_move,
+  output finishedmove,
   output step,
   `ifdef HALT
     input halt,
@@ -28,26 +28,6 @@ module dda_timer(
   reg signed [63:0] increment_r;
   reg finishedmove; // flag inidicating a move has been finished, so load next
 
-  // State managment
-  wire processing_move = (stepfinished[moveind] ^ stepready[moveind]);
-  wire loading_move = finishedmove & processing_move;
-  wire executing_move = !finishedmove & processing_move;
-
-  // Move done signal (alternates)
-  `ifdef MOVE_DONE
-    reg move_done_r;
-    assign move_done = move_done_r;
-    reg [1:0] finishedmove_r;
-    always @(posedge CLK) if (!resetn) begin
-      move_done_r <= 0;
-      finishedmove_r <= 2'h0;
-    end else if (resetn) begin
-      finishedmove_r <= {finishedmove_r[0], finishedmove};
-      if (finishedmove_r == 2'b01)
-        move_done_r <= ~move_done_r;
-    end
-  `endif
-
   // Step Trigger condition
   reg step_r;
   assign step = step_r;
@@ -61,18 +41,14 @@ module dda_timer(
     finishedmove <= 1; // flag inidicating a move has been finished, so load next
     step_r <= 0;
 
-    // Buffer managment
-    moveind <= {(`MOVE_BUFFER_BITS+1){1'b0}}; // Move index cursor
-    stepfinished <= {(`MOVE_BUFFER_SIZE+1){1'b0}};
-
   end else if (resetn) begin
 
     // HALT line (active low) then reset buffer latch and index
     // TODO: Should substep accumulator reset?
     `ifdef HALT
       if (!halt) begin
-        moveind <= writemoveind; // match buffer cursor
-        stepfinished <= stepready; // reset latch
+        //moveind <= writemoveind; // match buffer cursor
+        //stepfinished <= stepready; // reset latch
         finishedmove <= 1; // Puts us back in loading_move
       end
     `endif
@@ -104,12 +80,7 @@ module dda_timer(
         tickdowncount <= tickdowncount - 1'b1;
         // See if we finished the segment and incrment the buffer
         if(tickdowncount == 0) begin
-          stepfinished[moveind] <= ~stepfinished[moveind];
-          moveind <= moveind + 1'b1;
           finishedmove <= 1;
-          `ifdef FORMAL
-            assert(moveind <= `MOVE_BUFFER_SIZE);
-          `endif
         end
       end
     end

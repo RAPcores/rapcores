@@ -157,6 +157,11 @@ module spi_state_machine #(
     assign ENOUTPUT = enable;
   `endif
 
+
+  //
+  // DDA Setup
+  //
+
   clock_divider #(.divider_bits(8)) cd0
   (
     .resetn(resetn),
@@ -164,6 +169,31 @@ module spi_state_machine #(
     .tick(dda_tick),
     .clk(CLK)
   );
+
+  // State managment
+  wire finishedmove;
+  wire processing_move = (stepfinished[moveind] ^ stepready[moveind]);
+  wire loading_move = finishedmove & processing_move;
+  wire executing_move = !finishedmove & processing_move;
+
+  reg [1:0] finishedmove_r;
+  reg move_done_r;
+  reg [1:0] finishedmove_r;
+  always @(posedge CLK) if (!resetn) begin
+    move_done_r <= 0;
+    finishedmove_r <= 2'h0;
+  end else if (resetn) begin
+    finishedmove_r <= {finishedmove_r[0], finishedmove};
+    if (finishedmove_r == 2'b01) begin
+      move_done_r <= ~move_done_r;
+      stepfinished[moveind] <= ~stepfinished[moveind];
+      moveind <= moveind + 1'b1;
+    end
+  end
+
+  `ifdef MOVE_DONE
+    assign move_done = move_done_r;
+  `endif
 
   generate
     for (i=0; i<motor_count; i=i+1) begin
@@ -174,10 +204,10 @@ module spi_state_machine #(
                       .move_duration(move_duration_w),
                       .increment(increment_w[i]),
                       .incrementincrement(incrementincrement_w[i]),
-                      .stepready(stepready),
-                      .stepfinished(stepfinished), // only need on one mod
-                      .moveind(moveind),
-                      .writemoveind(writemoveind),
+                      .processing_move(processing_move),
+                      .loading_move(loading_move),
+                      .executing_move(executing_move),
+                      .finishedmove(finishedmove),
                       .step(dda_step[i]),
                       `ifdef HALT
                         .halt(HALT),
@@ -197,8 +227,9 @@ module spi_state_machine #(
                       .move_duration(move_duration_w),
                       .increment(increment_w[i]),
                       .incrementincrement(incrementincrement_w[i]),
-                      .stepready(stepready),
-                      .writemoveind(writemoveind),
+                      .processing_move(processing_move),
+                      .loading_move(loading_move),
+                      .executing_move(executing_move),
                       .step(dda_step[i]),
                       `ifdef HALT
                         .halt(HALT),
