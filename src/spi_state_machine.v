@@ -22,6 +22,7 @@ module spi_state_machine #(
   output wire [motor_count-1:0] step,
   output wire [motor_count-1:0] dir,
   output wire [motor_count-1:0] enable,
+  output wire [motor_count-1:0] brake,
 
   // Stepper Config
   output reg [2:0] microsteps,
@@ -136,6 +137,15 @@ module spi_state_machine #(
   // Step IO
   wire [motor_count-1:0] dda_step;
   reg [motor_count-1:0] enable_r;
+
+  // Motor Brake
+  reg [motor_count-1:0] brake_r;
+  assign brake[motor_count-1:0] = brake_r;
+
+  // Implement flow control and event pins if specified
+  `ifdef BUFFER_DTR
+    assign BUFFER_DTR = ~(~stepfinished == stepready);
+  `endif
 
   `ifndef STEPINPUT
     assign dir[motor_count-1:0] = dir_r[moveind]; // set direction
@@ -272,6 +282,8 @@ module spi_state_machine #(
     dir_r[0] <= {(motor_count){1'b0}};
     dir_r[1] <= {(motor_count){1'b0}};
 
+    brake_r <= 0;
+
     clock_divisor <= 40;  // should be 40 for 400 khz at 16Mhz Clk
     message_word_count <= 0;
     message_header <= 0;
@@ -328,6 +340,11 @@ module spi_state_machine #(
           // Motor Enable/disable
           `CMD_MOTOR_ENABLE: begin
             enable_r[motor_count-1:0] <= word_data_received[motor_count-1:0];
+          end
+
+          // Motor Brake on Disable
+          `CMD_MOTOR_BRAKE: begin
+            brake_r[motor_count-1:0] <= word_data_received[motor_count-1:0];
           end
 
           // Clock divisor (24 bit)
