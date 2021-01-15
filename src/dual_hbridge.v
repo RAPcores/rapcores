@@ -1,6 +1,6 @@
 `default_nettype none
 
-module DualHBridge (
+module dual_hbridge (
     input clk,
     input resetn,
     output       phase_a1,  // Phase A
