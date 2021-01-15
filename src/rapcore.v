@@ -129,7 +129,7 @@ module rapcore #(
     genvar i;
     generate
       for (i=0; i<motor_count; i=i+1) begin
-        DualHBridge s0 (.phase_a1 (PHASE_A1[i]),
+        dual_hbridge s0 (.phase_a1 (PHASE_A1[i]),
                       .phase_a2 (PHASE_A2[i]),
                       .phase_b1 (PHASE_B1[i]),
                       .phase_b2 (PHASE_B2[i]),
