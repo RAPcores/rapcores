@@ -52,7 +52,7 @@ SPI controller devices.
 |  | Word 1 |  |  |  |  |  |  |          |
 |--|--------|--|--|--|--|--|--|----------|
 |  | Byte 1 |B2|B3|B4|B5|B6|B7|B8        |
-|TX| 0xfe   |  |  |  |  |  |  |0b11111111|
+|TX| 0x0a   |  |  |  |  |  |  |0b11111111|
 |RX| STATUS |  |  |  |  |  |  |          |
 
 Starting from 0x01 of B8, enable or disable (1/0 respectively) a motor channel.
@@ -64,6 +64,16 @@ This will power up the motors. For example:
 |Mot 8| Mot 7 | Mot 6|Mot 5| Mot 4| Mot 3| Mot 2| Mot 1|
 | Dis. | Dis.  | Dis.| Dis.| En.  | En.  | En.  | En.  |
 | 0    |  0    | 0   | 0   | 1    | 1    | 1    | 1    |
+
+### Brake motors on Disable - 0x0b
+
+|  | Word 1 |  |  |  |  |  |  |          |
+|--|--------|--|--|--|--|--|--|----------|
+|  | Byte 1 |B2|B3|B4|B5|B6|B7|B8        |
+|TX| 0x0b   |  |  |  |  |  |  |0b11111111|
+|RX| STATUS |  |  |  |  |  |  |          |
+
+Starting from 0x01 of B8, brake a motor channel on disable.
 
 ## Coordinated Step Timer - 0x01
 This message type specifies a move segment to be clocked out of the core. It uses 64bit words to specify the DDA values, and returns 32bit precision encoder readings.
