@@ -116,6 +116,7 @@ module rapcore #(
   wire [motor_count-1:0] step;
   wire [motor_count-1:0] dir;
   wire [motor_count-1:0] enable;
+  wire [motor_count-1:0] brake;
 
   // Stepper status outputs
   wire [motor_count-1:0] faultn;
@@ -138,6 +139,7 @@ module rapcore #(
                       .step (step[i]),
                       .dir (dir[i]),
                       .enable (enable[i]),
+                      .brake  (brake[i]),
                       .microsteps (microsteps),
                       .current (current));
       end
@@ -245,6 +247,7 @@ module rapcore #(
     .step(step),
     .dir(dir),
     .enable(enable),
+    .brake(brake),
 
     `ifdef BUFFER_DTR
       .BUFFER_DTR(BUFFER_DTR),

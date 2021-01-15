@@ -12,6 +12,7 @@ module dual_hbridge (
     input        step,
     input        dir,
     input        enable,
+    input        brake,
     input  [2:0] microsteps,
     input  [7:0] current
 );
@@ -36,10 +37,10 @@ module dual_hbridge (
           .val(current),
           .pwm(vref_b));
 
-  assign phase_a1 = (enable) ? phase_table[phase_ct][0] : 0;
-  assign phase_a2 = (enable) ? phase_table[phase_ct][1] : 0;
-  assign phase_b1 = (enable) ? phase_table[phase_ct][2] : 0;
-  assign phase_b2 = (enable) ? phase_table[phase_ct][3] : 0;
+  assign phase_a1 = (enable) ? phase_table[phase_ct][0] : brake;
+  assign phase_a2 = (enable) ? phase_table[phase_ct][1] : brake;
+  assign phase_b1 = (enable) ? phase_table[phase_ct][2] : brake;
+  assign phase_b2 = (enable) ? phase_table[phase_ct][3] : brake;
 
   assign abs_increment = 3'b100 >> microsteps;
   assign phase_inc = dir ? abs_increment : -abs_increment; // Generate increment, multiple of microsteps\
