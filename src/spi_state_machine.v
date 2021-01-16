@@ -104,11 +104,11 @@ module spi_state_machine #(
 
   // Move buffer
   reg [`MOVE_BUFFER_BITS:0] writemoveind;
-  wire [`MOVE_BUFFER_BITS:0] moveind; // set via DDA
+  reg [`MOVE_BUFFER_BITS:0] moveind; // set via DDA Manager
 
   // Latching mechanism for engaging the buffered move.
   reg [`MOVE_BUFFER_SIZE:0] stepready;
-  wire [`MOVE_BUFFER_SIZE:0] stepfinished; // set via DDA
+  reg [`MOVE_BUFFER_SIZE:0] stepfinished; // set via DDA
 
   reg [motor_count:1] dir_r [`MOVE_BUFFER_SIZE:0];
 
@@ -171,74 +171,58 @@ module spi_state_machine #(
   );
 
   // State managment
-  wire finishedmove;
+  wire finishedmove = finishedmove_r;
   wire processing_move = (stepfinished[moveind] ^ stepready[moveind]);
   wire loading_move = finishedmove & processing_move;
   wire executing_move = !finishedmove & processing_move;
 
-  reg [1:0] finishedmove_r;
+  reg [63:0] tickdowncount;
   reg move_done_r;
-  reg [1:0] finishedmove_r;
+  reg finishedmove_r;
+  reg finishedmove_rising;
+  reg [1:0] dda_tick_r;
   always @(posedge CLK) if (!resetn) begin
     move_done_r <= 0;
-    finishedmove_r <= 2'h0;
+    finishedmove_r <= 1; // set 1 init so we are in 'loading_move'
+    stepfinished <= 0;
   end else if (resetn) begin
-    finishedmove_r <= {finishedmove_r[0], finishedmove};
-    if (finishedmove_r == 2'b01) begin
+
+    if (loading_move) begin
+      tickdowncount <= move_duration[moveind];
+      finishedmove_r <= 0;
+    end
+
+    dda_tick_r <= {dda_tick_r[0], dda_tick};
+    if (dda_tick_r == 2'b01 && executing_move) begin
+      tickdowncount <= tickdowncount - 1'b1;
+    end
+
+    // Trigger move finished
+    if (tickdowncount == 0 && executing_move) begin
+      finishedmove_r <= 1;
       move_done_r <= ~move_done_r;
-      stepfinished[moveind] <= ~stepfinished[moveind];
       moveind <= moveind + 1'b1;
+      stepfinished[moveind] <= ~stepfinished[moveind];
     end
   end
 
   `ifdef MOVE_DONE
-    assign move_done = move_done_r;
+    assign MOVE_DONE = move_done_r;
   `endif
 
   generate
     for (i=0; i<motor_count; i=i+1) begin
-      if (i == 0) begin
-        dda_timer dda0 (
-                      .resetn(resetn),
-                      .dda_tick(dda_tick),
-                      .move_duration(move_duration_w),
-                      .increment(increment_w[i]),
-                      .incrementincrement(incrementincrement_w[i]),
-                      .processing_move(processing_move),
-                      .loading_move(loading_move),
-                      .executing_move(executing_move),
-                      .finishedmove(finishedmove),
-                      .step(dda_step[i]),
-                      `ifdef HALT
-                        .halt(HALT),
-                      `endif
-                      `ifdef MOVE_DONE
-                        .move_done(MOVE_DONE),
-                      `endif
-                      .CLK(CLK)
-                      );
-      end else begin
-        // only drive MOVE_DONE and moveind from the first DDA
-        // TODO
-        /* verilator lint_off PINMISSING */
-        dda_timer ddan (
-                      .resetn(resetn),
-                      .dda_tick(dda_tick),
-                      .move_duration(move_duration_w),
-                      .increment(increment_w[i]),
-                      .incrementincrement(incrementincrement_w[i]),
-                      .processing_move(processing_move),
-                      .loading_move(loading_move),
-                      .executing_move(executing_move),
-                      .step(dda_step[i]),
-                      `ifdef HALT
-                        .halt(HALT),
-                      `endif
-                      .CLK(CLK)
-                      );
-        /* verilator lint_off PINMISSING */
-      end
-    end
+      dda_timer ddan (
+                    .resetn(resetn),
+                    .dda_tick(dda_tick),
+                    .increment(increment_w[i]),
+                    .incrementincrement(incrementincrement_w[i]),
+                    .loading_move(loading_move),
+                    .executing_move(executing_move),
+                    .step(dda_step[i]),
+                    .CLK(CLK)
+                    );
+  end
   endgenerate
 
   //
