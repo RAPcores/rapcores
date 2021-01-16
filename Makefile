@@ -36,6 +36,7 @@ RAPCOREFILES := boards/$(BOARD)/$(BOARD).v \
 														quad_enc.v \
 														spi.v \
 														stepper.v \
+														dda_fsm.v \
 														dda_timer.v \
 														rapcore.v) \
 								$(wildcard src/microstepper/*.v)

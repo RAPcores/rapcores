@@ -104,11 +104,11 @@ module spi_state_machine #(
 
   // Move buffer
   reg [`MOVE_BUFFER_BITS:0] writemoveind;
-  reg [`MOVE_BUFFER_BITS:0] moveind; // set via DDA Manager
+  wire [`MOVE_BUFFER_BITS:0] moveind; // set via DDA FSM
 
   // Latching mechanism for engaging the buffered move.
+  // the DDA side is internal to dda_fsm
   reg [`MOVE_BUFFER_SIZE:0] stepready;
-  reg [`MOVE_BUFFER_SIZE:0] stepfinished; // set via DDA
 
   reg [motor_count:1] dir_r [`MOVE_BUFFER_SIZE:0];
 
@@ -136,11 +136,6 @@ module spi_state_machine #(
   wire [motor_count-1:0] dda_step;
   reg [motor_count-1:0] enable_r;
 
-  // Implement flow control and event pins if specified
-  `ifdef BUFFER_DTR
-    assign BUFFER_DTR = ~(~stepfinished == stepready);
-  `endif
-
   `ifndef STEPINPUT
     assign dir[motor_count-1:0] = dir_r[moveind]; // set direction
     assign step[motor_count-1:0] = dda_step;
@@ -157,11 +152,24 @@ module spi_state_machine #(
     assign ENOUTPUT = enable;
   `endif
 
+  wire loading_move;
+  wire executing_move;
+  wire move_done;
+  wire buffer_dtr;
+
+  // Buffer sync events
+  `ifdef MOVE_DONE
+    assign MOVE_DONE = move_done;
+  `endif
+  `ifdef
+    assign BUFFER_DTR = buffer_dtr;
+  `endif
 
   //
   // DDA Setup
   //
 
+  // Clock divider used to continually make DDA ticks
   clock_divider #(.divider_bits(8)) cd0
   (
     .resetn(resetn),
@@ -170,46 +178,22 @@ module spi_state_machine #(
     .clk(CLK)
   );
 
-  // State managment
-  wire finishedmove = finishedmove_r;
-  wire processing_move = (stepfinished[moveind] ^ stepready[moveind]);
-  wire loading_move = finishedmove & processing_move;
-  wire executing_move = !finishedmove & processing_move;
+  // DDA FSM for duration and buffer state managment
+  dda_fsm #(.buffer_bits(`MOVE_BUFFER_BITS+1), .buffer_size(`MOVE_BUFFER_SIZE+1)) ddam0
+  (
+    .clk(CLK),
+    .resetn(resetn),
+    .dda_tick(dda_tick),
+    .loading_move(loading_move),
+    .move_duration(move_duration_w),
+    .executing_move(executing_move),
+    .move_done(move_done),
+    .stepready(stepready),
+    .buffer_dtr(buffer_dtr),
+    .moveind(moveind)
+  );
 
-  reg [63:0] tickdowncount;
-  reg move_done_r;
-  reg finishedmove_r;
-  reg finishedmove_rising;
-  reg [1:0] dda_tick_r;
-  always @(posedge CLK) if (!resetn) begin
-    move_done_r <= 0;
-    finishedmove_r <= 1; // set 1 init so we are in 'loading_move'
-    stepfinished <= 0;
-  end else if (resetn) begin
-
-    if (loading_move) begin
-      tickdowncount <= move_duration[moveind];
-      finishedmove_r <= 0;
-    end
-
-    dda_tick_r <= {dda_tick_r[0], dda_tick};
-    if (dda_tick_r == 2'b01 && executing_move) begin
-      tickdowncount <= tickdowncount - 1'b1;
-    end
-
-    // Trigger move finished
-    if (tickdowncount == 0 && executing_move) begin
-      finishedmove_r <= 1;
-      move_done_r <= ~move_done_r;
-      moveind <= moveind + 1'b1;
-      stepfinished[moveind] <= ~stepfinished[moveind];
-    end
-  end
-
-  `ifdef MOVE_DONE
-    assign MOVE_DONE = move_done_r;
-  `endif
-
+  // N dda timers per axis
   generate
     for (i=0; i<motor_count; i=i+1) begin
       dda_timer ddan (
