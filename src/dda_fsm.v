@@ -4,12 +4,13 @@
 Manage move buffers and DDA timing length
 */
 module dda_fsm #(parameter buffer_bits = 2,
-                 parameter buffer_size = 1)
+                 parameter buffer_size = 1,
+                 parameter move_duration_bits = 32)
 (
   input clk,
   input resetn,
   input dda_tick,
-  input [63:0] move_duration,
+  input [move_duration_bits-1:0] move_duration,
   output loading_move,
   output executing_move,
   output move_done,
@@ -31,7 +32,7 @@ module dda_fsm #(parameter buffer_bits = 2,
   assign loading_move = finishedmove & processing_move;
   assign executing_move = !finishedmove & processing_move;
 
-  reg [63:0] tickdowncount;
+  reg [move_duration_bits-1:0] tickdowncount;
   reg move_done_r;
   reg finishedmove_r;
   reg [1:0] dda_tick_r;
