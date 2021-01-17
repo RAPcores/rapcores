@@ -18,6 +18,8 @@ jobs:
       run: nix-shell --command 'make BOARD=ulx3s'
     - name: RAPBo Flow
       run: nix-shell --command 'make BOARD=rapbo'
+    - name: ECP5 Eval Flow
+      run: nix-shell --command 'make BOARD=ecp5evn'
     - name: Formal Verification
       run: nix-shell --command 'make formal'
     - name: iverilog parse compat
