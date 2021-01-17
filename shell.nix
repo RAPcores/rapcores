@@ -19,7 +19,7 @@ let
     # these are generally useful packages for tests, verification, synthesis
     # and deployment, etc
     [ yosys verilog verilator symbiyosys nextpnr icestorm trellis
-      yices tinyprog fujprog
+      yices tinyprog fujprog openocd
     ];
 
 # For other formal modes, may need:
