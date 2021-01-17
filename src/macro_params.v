@@ -20,6 +20,11 @@
 `define DEFAULT_TIMER_WIDTH 8
 `endif
 
+// Set the unsigned int size of the move duration register
+`ifndef MOVE_DURATION_BITS
+`define MOVE_DURATION_BITS 32
+`endif
+
 // Default Mosfet Active Polarity
 `ifndef DEFAULT_BRIDGE_INVERTING
 `define DEFAULT_BRIDGE_INVERTING 1

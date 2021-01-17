@@ -1,7 +1,8 @@
 `default_nettype none
 
 module rapcore #(
-  parameter motor_count = `MOTOR_COUNT
+  parameter motor_count = `MOTOR_COUNT,
+  parameter move_duration_bits = `MOVE_DURATION_BITS
   )(
     `ifdef LED
       output wire [`LED:1] LED,
@@ -211,7 +212,8 @@ module rapcore #(
   // SPI State Machine
   //
 
-  spi_state_machine #(.motor_count(motor_count)) spifsm
+  spi_state_machine #(.motor_count(motor_count),
+                      .move_duration_bits(move_duration_bits)) spifsm
   (
     `ifdef LA_IN
       .LA_IN(LA_IN),

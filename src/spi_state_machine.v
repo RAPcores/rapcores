@@ -1,7 +1,8 @@
 `default_nettype none
 
 module spi_state_machine #(
-    parameter motor_count = 1
+    parameter motor_count = 1,
+    parameter move_duration_bits = 32
   )(
   `ifdef LA_IN
     input wire [`LA_IN:1] LA_IN,
@@ -112,12 +113,12 @@ module spi_state_machine #(
 
   reg [motor_count:1] dir_r [`MOVE_BUFFER_SIZE:0];
 
-  reg [63:0] move_duration [`MOVE_BUFFER_SIZE:0];
+  reg [move_duration_bits-1:0] move_duration [`MOVE_BUFFER_SIZE:0];
   reg signed [63:0] increment [`MOVE_BUFFER_SIZE:0][motor_count-1:0];
   reg signed [63:0] incrementincrement [`MOVE_BUFFER_SIZE:0][motor_count-1:0];
 
   // DDA module input wires determined from buffer
-  wire [63:0] move_duration_w = move_duration[moveind];
+  wire [move_duration_bits-1:0] move_duration_w = move_duration[moveind];
 
   // Per-axis DDA parameters
   wire [63:0] increment_w [motor_count-1:0];
@@ -179,8 +180,9 @@ module spi_state_machine #(
   );
 
   // DDA FSM for duration and buffer state managment
-  dda_fsm #(.buffer_bits(`MOVE_BUFFER_BITS+1), .buffer_size(`MOVE_BUFFER_SIZE+1)) ddam0
-  (
+  dda_fsm #(.buffer_bits(`MOVE_BUFFER_BITS+1),
+            .buffer_size(`MOVE_BUFFER_SIZE+1),
+            .move_duration_bits(move_duration_bits)) ddam0 (
     .clk(CLK),
     .resetn(resetn),
     .dda_tick(dda_tick),
@@ -256,8 +258,8 @@ module spi_state_machine #(
     word_received_r <= 2'b0;
 
     // TODO change to for loops for buffer
-    move_duration[0] <= 64'b0;
-    move_duration[1] <= 64'b0;
+    move_duration[0] <= 0;
+    move_duration[1] <= 0;
 
     /* verilator lint_off WIDTH */
     for (nmot=0; nmot<motor_count; nmot=nmot+1) begin
@@ -370,7 +372,7 @@ module spi_state_machine #(
               // the first non-header word is the move duration
               if (nmot == 0) begin
                 if (message_word_count == 1) begin
-                  move_duration[writemoveind][63:0] <= word_data_received[63:0];
+                  move_duration[writemoveind][move_duration_bits-1:0] <= word_data_received[move_duration_bits-1:0];
                   //word_send_data[63:0] <= last_steps_taken[63:0]; // Prep to send steps
                 end
               end
