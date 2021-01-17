@@ -12,10 +12,11 @@ processing on the microcontroller and greatly simplify the motor driver.
 
 ## Features
 
-- Onboard stepper motor commutator
-- Fixed Point Step-Timing Algorithm
-- High-speed Quadrature Encoder Accumulator
-- High-Speed SPI Bus
+- Onboard stepper motor commutator (64x microstepping)
+- High precision Fixed Point Step-Timing Algorithm
+- High speed Quadrature Encoder Accumulator
+- High Speed SPI Bus
+- Multi-channel control with protocol support up to 56 motors
 
 ## Target Hardware
 
@@ -29,7 +30,7 @@ We welcome ports to other architectures.
 ## Build Requirements
 
 RAPcore uses the free and open source Yosys and nextpnr tool chains.
-See the [dev docs](./docs/dev.md) for more information.
+See the [dev docs](https://rapcores.github.io/rapcores/dev.html) for more information.
 
 ## Documentation
 
