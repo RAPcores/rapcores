@@ -13,6 +13,7 @@ read -formal dda_fsm.v
 read -formal dda_timer.v
 read -formal spi.v
 read -formal stepper.v
+read -formal step_counter.v
 read -formal quad_enc.v
 read -formal pwm.v
 read -formal spi_state_machine.v
@@ -37,6 +38,7 @@ src/dda_fsm.v
 src/dda_timer.v
 src/spi.v
 src/stepper.v
+src/step_counter.v
 src/spi_state_machine.v
 src/rapcore.v
 src/quad_enc.v

@@ -162,7 +162,7 @@ module spi_state_machine #(
   `ifdef MOVE_DONE
     assign MOVE_DONE = move_done;
   `endif
-  `ifdef
+  `ifdef BUFFER_DTR
     assign BUFFER_DTR = buffer_dtr;
   `endif
 
@@ -212,6 +212,26 @@ module spi_state_machine #(
   endgenerate
 
   //
+  // Encoders
+  //
+
+  wire [31:0] step_encoder [motor_count-1:0];
+
+  generate
+    for (i=0; i<motor_count; i=i+1) begin
+      step_encoder #(.width(32)) senc0 (
+                    .resetn(resetn),
+                    .clk(CLK),
+                    .step(step[i]),
+                    .dir(dir[i]),
+                    .count(step_encoder[i])
+                    );
+  end
+  endgenerate
+
+
+
+  //
   // State Machine for handling SPI Messages
   //
 
@@ -219,7 +239,8 @@ module spi_state_machine #(
   reg [7:0] message_header;
 
   // Encoder
-  reg signed [63:0] encoder_store; // Snapshot for SPI comms
+  reg signed [63:0] encoder_store [motor_count-1:0]; // Snapshot for SPI comms
+  reg signed [63:0] step_encoder_store [motor_count-1:0]; // Snapshot for SPI comms
 
   // check if the Header indicated multi-word transfer
   wire awaiting_more_words = (message_header == `CMD_COORDINATED_STEP) |
@@ -267,10 +288,12 @@ module spi_state_machine #(
       increment[1][nmot] <= 64'b0;
       incrementincrement[0][nmot] <= 64'b0;
       incrementincrement[1][nmot] <= 64'b0;
+  
+      // Encoders
+      step_encoder_store[nmot] <= 0;
+      encoder_store[nmot] <= 0;
     end
     /* verilator lint_off WIDTH */
-
-    encoder_store <= 64'b0;
 
   end else if (resetn) begin
     word_received_r <= {word_received_r[0], word_received};
@@ -295,8 +318,10 @@ module spi_state_machine #(
             // Get Direction Bits
             dir_r[writemoveind] <= word_data_received[motor_count-1:0];
 
-            // Store encoder values across all axes Now
-            encoder_store <= encoder_count;
+            // Store encoder values across all axes
+            for (nmot=0; nmot<motor_count; nmot=nmot+1) begin
+              step_encoder_store[nmot] <= step_encoder[nmot];
+            end
 
           end
 
@@ -373,16 +398,17 @@ module spi_state_machine #(
               if (nmot == 0) begin
                 if (message_word_count == 1) begin
                   move_duration[writemoveind][move_duration_bits-1:0] <= word_data_received[move_duration_bits-1:0];
-                  //word_send_data[63:0] <= last_steps_taken[63:0]; // Prep to send steps
+                  word_send_data <= step_encoder_store[0]; // Prep to send steps
                 end
               end
 
               if (message_word_count == (nmot+1)*2) begin
                 increment[writemoveind][nmot][63:0] <= word_data_received[63:0];
-                word_send_data[63:0] <= encoder_store[63:0]; // Prep to send encoder read
+                word_send_data <= encoder_store[nmot]; // Prep to send steps
               end
               if (message_word_count == (nmot+1)*2+1) begin
                 incrementincrement[writemoveind][nmot][63:0] <= word_data_received[63:0];
+                if (nmot != motor_count-1) word_send_data <= step_encoder_store[nmot+1]; // Prep to send steps
 
                 if (nmot == motor_count-1) begin
                   writemoveind <= writemoveind + 1'b1;
