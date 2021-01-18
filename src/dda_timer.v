@@ -32,17 +32,17 @@ module dda_timer(
     end
 
     // check if this move has been done before
-    if(executing_move) begin
+    if(dda_tick) begin
 
-      if (dda_tick) begin
-
+      // Step taken, rollback accumulator
+      if (substep_accumulator > 0) begin
+        step_r <= 1;
+        substep_accumulator <= substep_accumulator - 64'h7fffffffffffff9b;
+      end else begin
         step_r <= 0;
+      end
 
-        // Step taken, rollback accumulator
-        if (substep_accumulator > 0) begin
-          step_r <= 1;
-          substep_accumulator <= substep_accumulator - 64'h7fffffffffffff9b;
-        end
+      if (executing_move) begin
 
         increment_r <= increment_r + incrementincrement;
         substep_accumulator <= substep_accumulator + increment_r;
