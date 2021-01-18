@@ -21,7 +21,7 @@
 `define QUAD_ENC 1
 
 // External Step/DIR Input
-`define STEPINPUT
+//`define STEPINPUT
 
 // Output Step/DIR signals
 `define STEPOUTPUT
