@@ -18,6 +18,8 @@ module dda_timer(
   reg step_r;
   assign step = step_r;
 
+  reg [1:0] tick_r;
+
   always @(posedge CLK) if (!resetn) begin
 
     substep_accumulator <= 64'b0; // typemax(Int64) - 100 for buffer
@@ -31,8 +33,10 @@ module dda_timer(
       increment_r <= increment;
     end
 
-    // check if this move has been done before
-    if(dda_tick) begin
+    // catch tick rising edge
+    tick_r <= {tick_r[1], dda_tick};
+
+    if(tick_r == 2'b01) begin
 
       // Step taken, rollback accumulator
       if (substep_accumulator > 0) begin
@@ -43,7 +47,6 @@ module dda_timer(
       end
 
       if (executing_move) begin
-
         increment_r <= increment_r + incrementincrement;
         substep_accumulator <= substep_accumulator + increment_r;
       end
