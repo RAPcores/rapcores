@@ -14,21 +14,9 @@ recommended.
 - [nextpnr](https://github.com/YosysHQ/nextpnr)
 - [icestorm](https://github.com/YosysHQ/icestorm) (ice40 targets)
 - [prjtrellis](https://github.com/YosysHQ/prjtrellis) (ECP5 targets)
-- [verible](https://github.com/google/verible) (Optional, for linting)
+- [verilator](https://github.com/verilator/verilator) (Optional, for linting/testbenches)
+- [iverilog](https://github.com/steveicarus/iverilog) (Optional, for linting/testbenches)
 - [SymbiYosys](https://github.com/YosysHQ/SymbiYosys) (Optional, for formal verification)
-
-### Programming Tools
-
-#### ECP5 Devboard
-
-openocd
-
-#### TinyFPGA BX
-
-The TinyFPGA BX uses tinyprog:
-
-`pip3 install --user tinyprog`
-
 
 ## Developing with Nix
 
@@ -49,6 +37,32 @@ Then restart the terminal. Next, `cd` to the RAPcore directory. Run `nix-shell`,
 packages will be installed. Once complete you should be able to run any of the `make` commands
 below. This environment includes all the tools to synthesis, place, route, program, and
 formally verify the RAPcore project.
+
+### Packages included in Nix environment
+
+Verilog frontends:
+
+- yosys
+- verilog 
+- verilator
+
+Place and route/databases:
+
+- nextpnr
+- icestorm
+- trellis
+
+Formal verification:
+
+- symbiyosys
+- yices
+
+Programmers:
+
+- tinyprog
+- fujprog
+- openocd
+
 
 ## Overview of Make targets
 
