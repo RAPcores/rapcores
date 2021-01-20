@@ -86,7 +86,11 @@ The formal verification configuration file is `boards/formal_config.v`.
 
 ## Test Benches
 
-RAPCores is tested against Yosys, IVerilog, and Verilator.
+The main RAPCore source is tested for compatibility against Yosys, IVerilog, and Verilator.
+In-tree testbenches use the Yosys suite with either the default 'sim' or 'cxxrtl' backends.
+
+### Yosys Sim Bench
+
 The yosys test benches can be executed with:
 
 `make yosys-<sim name>`
@@ -95,6 +99,17 @@ For example:
 
 `make yosys-spi` will run the `spi.ys` simulation located in `testbench/yosys/<sim name>`.
 
+### Yosys CXXRTL Bench (experimental)
+
+CXXRTL text benches are Verilog to C++ transpiled testbenches. To run these a compiler and C++ driver
+program is required. 
+The yosys CXXRTL test benches can be executed with:
+
+`make cxxrtl-<sim name>`
+
+For example:
+
+`make cxxrtl-rapcore` will run the `rapcore.ys` simulation located in `testbench/cxxrtl/<sim name>`.
 
 ## Formatting
 
