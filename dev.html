@@ -151,11 +151,24 @@ The formal verification configuration file is <code class="docutils literal notr
 </div>
 <div class="section" id="test-benches">
 <h2>Test Benches<a class="headerlink" href="#test-benches" title="Permalink to this headline">¶</a></h2>
-<p>RAPCores is tested against Yosys, IVerilog, and Verilator.
-The yosys test benches can be executed with:</p>
+<p>The main RAPCore source is tested for compatibility against Yosys, IVerilog, and Verilator.
+In-tree testbenches use the Yosys suite with either the default ‘sim’ or ‘cxxrtl’ backends.</p>
+<div class="section" id="yosys-sim-bench">
+<h3>Yosys Sim Bench<a class="headerlink" href="#yosys-sim-bench" title="Permalink to this headline">¶</a></h3>
+<p>The yosys test benches can be executed with:</p>
 <p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">yosys-&lt;sim</span> <span class="pre">name&gt;</span></code></p>
 <p>For example:</p>
 <p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">yosys-spi</span></code> will run the <code class="docutils literal notranslate"><span class="pre">spi.ys</span></code> simulation located in <code class="docutils literal notranslate"><span class="pre">testbench/yosys/&lt;sim</span> <span class="pre">name&gt;</span></code>.</p>
+</div>
+<div class="section" id="yosys-cxxrtl-bench-experimental">
+<h3>Yosys CXXRTL Bench (experimental)<a class="headerlink" href="#yosys-cxxrtl-bench-experimental" title="Permalink to this headline">¶</a></h3>
+<p>CXXRTL text benches are Verilog to C++ transpiled testbenches. To run these a compiler and C++ driver
+program is required.
+The yosys CXXRTL test benches can be executed with:</p>
+<p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">cxxrtl-&lt;sim</span> <span class="pre">name&gt;</span></code></p>
+<p>For example:</p>
+<p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">cxxrtl-rapcore</span></code> will run the <code class="docutils literal notranslate"><span class="pre">rapcore.ys</span></code> simulation located in <code class="docutils literal notranslate"><span class="pre">testbench/cxxrtl/&lt;sim</span> <span class="pre">name&gt;</span></code>.</p>
+</div>
 </div>
 <div class="section" id="formatting">
 <h2>Formatting<a class="headerlink" href="#formatting" title="Permalink to this headline">¶</a></h2>
