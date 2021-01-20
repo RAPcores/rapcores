@@ -26,7 +26,7 @@ current flow. By controlling these bridges we can generate alternative voltages 
 the motor spin.
 
 In contrast to integrated drivers e.g. that take PWM for BLDC, or step/direction for steppers,
-the approach in RAPcore is to provide higher level APIs tailored for the application or
+the approach in RAPcores is to provide higher level APIs tailored for the application or
 action. Some examples:
 
 - "S"-curve stepping algorithms

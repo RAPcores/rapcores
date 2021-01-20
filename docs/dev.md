@@ -20,7 +20,7 @@ recommended.
 
 ## Developing with Nix
 
-RAPcore includes a [shell.nix](../shell.nix) for use with the Nix Package manager.
+RAPcores includes a [shell.nix](../shell.nix) for use with the Nix Package manager.
 This makes it easy to get a development environment with all build requirements installed
 for you.
 
@@ -33,10 +33,10 @@ curl -L https://nixos.org/nix/install | sh
 source $HOME/.nix-profile/etc/profile.d/nix.sh >> ~/.bashrc
 ```
 
-Then restart the terminal. Next, `cd` to the RAPcore directory. Run `nix-shell`, and some
+Then restart the terminal. Next, `cd` to the RAPcores directory. Run `nix-shell`, and some
 packages will be installed. Once complete you should be able to run any of the `make` commands
 below. This environment includes all the tools to synthesis, place, route, program, and
-formally verify the RAPcore project.
+formally verify the RAPcores project.
 
 ### Packages included in Nix environment
 
@@ -74,7 +74,7 @@ Programmers:
 | iverilog-parse |           | parse the src directory with iverilog |
 | yosys-parse    |           | parse the src directory with yosys |
 | verilator-cdc  |           | parse the src directory and run CDC checks with verilator |
-| triple-check   |           | parse the srec directory with yosys, iverilog, and verilator |
+| triple-check   |           | parse the src directory with yosys, iverilog, and verilator |
 | yosys-{test}   |           | run the testbench recipe in `testbench/yosys/{test}` |
 | cxxrtl-{test}  |           | run the testbench recipe in `testbench/cxxrtl/{test}` |
 
@@ -101,7 +101,7 @@ The formal verification configuration file is `boards/formal_config.v`.
 
 ## Test Benches
 
-The main RAPCore source is tested for compatibility against Yosys, IVerilog, and Verilator.
+The main RAPcores source is tested for compatibility against Yosys, IVerilog, and Verilator.
 In-tree testbenches use the Yosys suite with either the default 'sim' or 'cxxrtl' backends.
 
 ### Yosys Sim Bench

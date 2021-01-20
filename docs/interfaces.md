@@ -36,7 +36,7 @@ julia> Pkg.add("BaremetalPi")
 
 Step 6:
 
-You should be ready to send commands. The full docs to BaremetalPi are avaialble [here](https://github.com/ronisbr/BaremetalPi.jl).
+You should be ready to send commands. The full docs to BaremetalPi are available [here](https://github.com/ronisbr/BaremetalPi.jl).
 
 Some examples:
 
