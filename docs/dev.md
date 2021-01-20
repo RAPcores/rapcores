@@ -62,6 +62,7 @@ formally verify the RAPcore project.
 | verilator-cdc  |           | parse the src directory and run CDC checks with verilator |
 | triple-check   |           | parse the srec directory with yosys, iverilog, and verilator |
 | yosys-{test}   |           | run the testbench recipe in `testbench/yosys/{test}` |
+| cxxrtl-{test}  |           | run the testbench recipe in `testbench/cxxrtl/{test}` |
 
 
 ## Build Bitstream
