@@ -1,4 +1,4 @@
-# Board Definition Structure and Porting Guide
+# Board Configuration
 
 Each board should have the following three files in the name equal to the `BOARD`
 parameter sent to make:
@@ -7,10 +7,10 @@ parameter sent to make:
 - [.v] Verilog configuration parameters
 - [.pcf/.lpf] Pin out and pin name information
 
-## (.mk) Parameters
+## Makefile (.mk) Parameters
 
 The following parameters are passed to place and route (nextpnr) and timing analysis
-tools to generate the bitstream of the RAPCore for FPGAs.
+tools to generate the bitstream of the RAPcores for FPGAs.
 
 ### ARCH
 ```
@@ -71,7 +71,7 @@ Enables control of the Ultibridge. Where `<N>` Ultibridges are specified.
 See: "Ultibridge" in Pinouts for name specification.
 
 
-In addition to device-specific counts, a motor count must be dfines as so:
+In addition to device-specific counts, a motor count must be defines as so:
 
 ```
 `define MOTOR_COUNT <N>
@@ -134,7 +134,7 @@ Enables LED output. Currently unused, but useful for low-frequency visual debugg
 ### Logic Analyzer
 
 The Logic Analyzer interface allows for observation and injection of signals
-within the top-level rapcore project without patching the core project.
+within the top-level RAPcores project without patching the core project.
 
 ```
 `define LA_OUT <N>
@@ -166,7 +166,7 @@ by making a `LOGICANALYZER_MACRO` like so:
 
 ## (.pcf/.lpf) Pin Names
 
-The following are pin naming conventions for the RAPCore "top" module:
+The following are pin naming conventions for the RAPcores "top" module:
 
 ### SPI Pin Names
 
@@ -174,7 +174,7 @@ Enabled by `SPI_INTERFACE` in the Verilog config.
 
 - `SCK` - SPI Clock
 - `CS` - SPI Chip Select
-- `COPI` - SPI Controller Out Peripheral In (RAPCore is the Peripheral)
+- `COPI` - SPI Controller Out Peripheral In (RAPcores is the Peripheral)
 - `CIPO` - SPI Controller In Peripheral Out
 
 ### Flow Control and Events

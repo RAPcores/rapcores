@@ -11,9 +11,9 @@
 
 ## Versioning
 
-RAPCores follows [Semantic Versioning](https://semver.org/). This is still a pre-1.0
+RAPcores follows [Semantic Versioning](https://semver.org/). This is still a pre-1.0
 project so breaking changes are likely to happen with the SPI protocol. This document
-serves as the "as-built" reference for the RAPcore, and may deviate from documents outside
+serves as the "as-built" reference for the RAPcores, and may deviate from documents outside
 this repository.
 
 ## Overview

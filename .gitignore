@@ -11,6 +11,7 @@
 *.tmp/
 *.exp
 *.vlog
+*.bak
 build/*.json
 *.config
 *.vcd
