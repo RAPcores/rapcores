@@ -46,7 +46,7 @@ Contents
 
    releases
    spi_spec
-   boards
+   configuration
    dev
    motor_control
    interfaces
