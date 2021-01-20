@@ -11,9 +11,9 @@
 
 ## Versioning
 
-RAPCores follows [Semantic Versioning](https://semver.org/). This is still a pre-1.0
+RAPcores follows [Semantic Versioning](https://semver.org/). This is still a pre-1.0
 project so breaking changes are likely to happen with the SPI protocol. This document
-serves as the "as-built" reference for the RAPcore, and may deviate from documents outside
+serves as the "as-built" reference for the RAPcores, and may deviate from documents outside
 this repository.
 
 ## Overview
@@ -25,28 +25,29 @@ SPI controller devices.
 
 | Header                | Action                  | Transmission Length (Words) | Default Value |
 |-----------------------|-------------------------|-----------------------------|---------------|
-| 0x01                  | Coordinated Step Timer  | 1 + 2*N motors              | N/A           |
-| 0x02                  | Integration Timer Scale | 1                           | 32            |
-| 0x03                  | Set Motor Count         | 1                           | 6             |
+| 0x01                  | Coordinated Step Timer  | 2 + 2*N motors              | N/A           |
+| 0x0a                  | Motor Enable/Disable    | 1                           | 0             |
+| 0x20                  | DDA Timer Divider       | 1                           | 32            |
 | 0x10                  | Set Motor Config        | 1                           | See Below     |
+| 0x31                  | Charge Pump Divider     | 1                           | See Below     |
 | 0xfe                  | Get Version             | 2                           | 0x...MMmmpp   |
 
 
-### Set Motor Config - 0x10
+## Set Motor Config - 0x10
 
 | Byte 1 | Byte 2         | Byte 3   | Byte 4   | Byte 5   | Byte 6   | Byte 7  | Byte 8     |
 |--------|----------------|----------|----------|----------|----------|---------|------------|
 | 0x10   | Motor Channel  | Reserved | Reserved | Reserved | Reserved | Current | Microsteps |
 
-### Get API Version - 0xfe
+## Get API Version - 0xfe
 
-|  | Word 1 |  |  |  |  |  |  |  | Word 2 |  |  |  |  |     |     |     |
-|--|--------|--|--|--|--|--|--|--|--------|--|--|--|--|-----|-----|-----|
-|  | Byte 1 |B2|B3|B4|B5|B6|B7|B8| B1     |B2|B3|B4|B5|B6   |B7   |B8   |
-|TX| 0xfe   |  |  |  |  |  |  |  |        |  |  |  |  |     |     |     |
-|RX| STATUS |  |  |  |  |  |  |  |        |  |  |  |  |MAJOR|MINOR|PATCH|
+|Word| Word 1 | | | | | | | | Word 2 | | | | |     |     |     |
+|----|--------|-|-|-|-|-|-|-|--------|-|-|-|-|-----|-----|-----|
+|Byte| Byte 1 |2|3|4|5|6|7|8| Byte 1 |2|3|4|5| 6   | 7   | 8   |
+|TX  | 0xfe   | | | | | | | |        | | | | |     |     |     |
+|RX  | STATUS | | | | | | | |        | | | | |MAJOR|MINOR|PATCH|
 
-### Enable/Disable Motors - 0x0a
+## Enable/Disable Motors - 0x0a
 
 |  | Word 1 |  |  |  |  |  |  |          |
 |--|--------|--|--|--|--|--|--|----------|
@@ -63,9 +64,6 @@ This will power up the motors. For example:
 |Mot 8| Mot 7 | Mot 6|Mot 5| Mot 4| Mot 3| Mot 2| Mot 1|
 | Dis. | Dis.  | Dis.| Dis.| En.  | En.  | En.  | En.  |
 | 0    |  0    | 0   | 0   | 1    | 1    | 1    | 1    |
-| 0x04                  | Set Microstepping       | 1                           | 2             |
-| 0xfe                  | Get Version             | 2                           | 0x...MMmmpp   |
-
 
 ## Coordinated Step Timer - 0x01
 This message type specifies a move segment to be clocked out of the core. It uses 64bit words to specify the DDA values, and returns 32bit precision encoder readings.

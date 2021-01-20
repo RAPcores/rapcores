@@ -14,7 +14,7 @@
     <script src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Board Definition Structure and Porting Guide" href="boards.html" />
+    <link rel="next" title="Board Configuration" href="configuration.html" />
     <link rel="prev" title="Release Notes" href="releases.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -47,9 +47,9 @@
 </div>
 <div class="section" id="versioning">
 <h2>Versioning<a class="headerlink" href="#versioning" title="Permalink to this headline">¶</a></h2>
-<p>RAPCores follows <a class="reference external" href="https://semver.org/">Semantic Versioning</a>. This is still a pre-1.0
+<p>RAPcores follows <a class="reference external" href="https://semver.org/">Semantic Versioning</a>. This is still a pre-1.0
 project so breaking changes are likely to happen with the SPI protocol. This document
-serves as the “as-built” reference for the RAPcore, and may deviate from documents outside
+serves as the “as-built” reference for the RAPcores, and may deviate from documents outside
 this repository.</p>
 </div>
 <div class="section" id="overview">
@@ -70,24 +70,30 @@ SPI controller devices.</p>
 <tr>
 <td>0x01</td>
 <td>Coordinated Step Timer</td>
-<td>1 + 2*N motors</td>
+<td>2 + 2*N motors</td>
 <td>N/A</td>
 </tr>
 <tr>
-<td>0x02</td>
-<td>Integration Timer Scale</td>
+<td>0x0a</td>
+<td>Motor Enable/Disable</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>0x20</td>
+<td>DDA Timer Divider</td>
 <td>1</td>
 <td>32</td>
 </tr>
 <tr>
-<td>0x03</td>
-<td>Set Motor Count</td>
-<td>1</td>
-<td>6</td>
-</tr>
-<tr>
 <td>0x10</td>
 <td>Set Motor Config</td>
+<td>1</td>
+<td>See Below</td>
+</tr>
+<tr>
+<td>0x31</td>
+<td>Charge Pump Divider</td>
 <td>1</td>
 <td>See Below</td>
 </tr>
@@ -98,8 +104,9 @@ SPI controller devices.</p>
 <td>0x...MMmmpp</td>
 </tr>
 </tbody>
-</table><div class="section" id="set-motor-config-0x10">
-<h3>Set Motor Config - 0x10<a class="headerlink" href="#set-motor-config-0x10" title="Permalink to this headline">¶</a></h3>
+</table></div>
+<div class="section" id="set-motor-config-0x10">
+<h2>Set Motor Config - 0x10<a class="headerlink" href="#set-motor-config-0x10" title="Permalink to this headline">¶</a></h2>
 <table border="1" class="docutils">
 <thead>
 <tr>
@@ -127,11 +134,11 @@ SPI controller devices.</p>
 </tbody>
 </table></div>
 <div class="section" id="get-api-version-0xfe">
-<h3>Get API Version - 0xfe<a class="headerlink" href="#get-api-version-0xfe" title="Permalink to this headline">¶</a></h3>
+<h2>Get API Version - 0xfe<a class="headerlink" href="#get-api-version-0xfe" title="Permalink to this headline">¶</a></h2>
 <table border="1" class="docutils">
 <thead>
 <tr>
-<th></th>
+<th>Word</th>
 <th>Word 1</th>
 <th></th>
 <th></th>
@@ -152,23 +159,23 @@ SPI controller devices.</p>
 </thead>
 <tbody>
 <tr>
-<td></td>
+<td>Byte</td>
 <td>Byte 1</td>
-<td>B2</td>
-<td>B3</td>
-<td>B4</td>
-<td>B5</td>
-<td>B6</td>
-<td>B7</td>
-<td>B8</td>
-<td>B1</td>
-<td>B2</td>
-<td>B3</td>
-<td>B4</td>
-<td>B5</td>
-<td>B6</td>
-<td>B7</td>
-<td>B8</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td>Byte 1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
 </tr>
 <tr>
 <td>TX</td>
@@ -211,7 +218,7 @@ SPI controller devices.</p>
 </tbody>
 </table></div>
 <div class="section" id="enable-disable-motors-0x0a">
-<h3>Enable/Disable Motors - 0x0a<a class="headerlink" href="#enable-disable-motors-0x0a" title="Permalink to this headline">¶</a></h3>
+<h2>Enable/Disable Motors - 0x0a<a class="headerlink" href="#enable-disable-motors-0x0a" title="Permalink to this headline">¶</a></h2>
 <table border="1" class="docutils">
 <thead>
 <tr>
@@ -317,29 +324,8 @@ This will power up the motors. For example:</p>
 <td>1</td>
 <td>1</td>
 </tr>
-<tr>
-<td>0x04</td>
-<td>Set Microstepping</td>
-<td>1</td>
-<td>2</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>0xfe</td>
-<td>Get Version</td>
-<td>2</td>
-<td>0x...MMmmpp</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
 </tbody>
 </table></div>
-</div>
 <div class="section" id="coordinated-step-timer-0x01">
 <h2>Coordinated Step Timer - 0x01<a class="headerlink" href="#coordinated-step-timer-0x01" title="Permalink to this headline">¶</a></h2>
 <p>This message type specifies a move segment to be clocked out of the core. It uses 64bit words to specify the DDA values, and returns 32bit precision encoder readings.</p>
@@ -408,10 +394,13 @@ This will power up the motors. For example:</p>
 <li class="toctree-l2"><a class="reference internal" href="#definitions">Definitions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#versioning">Versioning</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#set-motor-config-0x10">Set Motor Config - 0x10</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#get-api-version-0xfe">Get API Version - 0xfe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#enable-disable-motors-0x0a">Enable/Disable Motors - 0x0a</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coordinated-step-timer-0x01">Coordinated Step Timer - 0x01</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="boards.html">Board Definition Structure and Porting Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Board Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev.html">Developer Docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="motor_control.html">Motor Control</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interfaces.html">Interfaces</a></li>
@@ -423,7 +412,7 @@ This will power up the motors. For example:</p>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="releases.html" title="previous chapter">Release Notes</a></li>
-      <li>Next: <a href="boards.html" title="next chapter">Board Definition Structure and Porting Guide</a></li>
+      <li>Next: <a href="configuration.html" title="next chapter">Board Configuration</a></li>
   </ul></li>
 </ul>
 </div>

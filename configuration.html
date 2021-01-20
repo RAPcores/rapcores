@@ -1,0 +1,325 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Board Configuration &#8212; RAPcores  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Developer Docs" href="dev.html" />
+    <link rel="prev" title="SPI Specification" href="spi_spec.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="board-configuration">
+<h1>Board Configuration<a class="headerlink" href="#board-configuration" title="Permalink to this headline">¶</a></h1>
+<p>Each board should have the following three files in the name equal to the <code class="docutils literal notranslate"><span class="pre">BOARD</span></code>
+parameter sent to make:</p>
+<ul class="simple">
+<li><p>[.mk] FPGA Architecture parameters</p></li>
+<li><p>[.v] Verilog configuration parameters</p></li>
+<li><p>[.pcf/.lpf] Pin out and pin name information</p></li>
+</ul>
+<div class="section" id="makefile-mk-parameters">
+<h2>Makefile (.mk) Parameters<a class="headerlink" href="#makefile-mk-parameters" title="Permalink to this headline">¶</a></h2>
+<p>The following parameters are passed to place and route (nextpnr) and timing analysis
+tools to generate the bitstream of the RAPcores for FPGAs. These are required for bistream generation.</p>
+<div class="section" id="arch">
+<h3>ARCH<a class="headerlink" href="#arch" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ARCH</span> <span class="o">=</span> <span class="n">ice40</span>
+</pre></div>
+</div>
+<p>Values: ice40, ecp5</p>
+</div>
+<div class="section" id="device">
+<h3>DEVICE<a class="headerlink" href="#device" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DEVICE</span> <span class="o">=</span> <span class="n">lp8k</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="package">
+<h3>PACKAGE<a class="headerlink" href="#package" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">PACKAGE</span> <span class="o">=</span> <span class="n">cm81</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="freq">
+<h3>FREQ<a class="headerlink" href="#freq" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">FREQ</span> <span class="o">=</span> <span class="mi">16</span>
+</pre></div>
+</div>
+<p>Device external clock frequency. Used to validate timings.</p>
+</div>
+<div class="section" id="programmer-optional">
+<h3>PROGRAMMER (Optional)<a class="headerlink" href="#programmer-optional" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">PROGRAMMER</span> <span class="o">=</span> <span class="n">tinyprog</span> <span class="o">-</span><span class="n">p</span>
+</pre></div>
+</div>
+<p>The programming command for the device used with the <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">prog</span></code> target.</p>
+</div>
+</div>
+<div class="section" id="spi-interface">
+<h2>SPI Interface<a class="headerlink" href="#spi-interface" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define SPI_INTERFACE
+</pre></div>
+</div>
+<p>Enables the SPI Interface.</p>
+<div class="section" id="pin-names">
+<h3>Pin Names<a class="headerlink" href="#pin-names" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">SCK</span></code> - SPI Clock</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CS</span></code> - SPI Chip Select</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">COPI</span></code> - SPI Controller Out Peripheral In (RAPcores is the Peripheral)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CIPO</span></code> - SPI Controller In Peripheral Out</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="motors">
+<h2>Motors<a class="headerlink" href="#motors" title="Permalink to this headline">¶</a></h2>
+<p>In addition to device-specific counts, a motor count must be defines as so:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define MOTOR_COUNT &lt;N&gt;
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define DUAL_HBRIDGE &lt;N&gt;
+</pre></div>
+</div>
+<p>Enables control of Dual H Bridge motor drivers used for stepper control. Where <code class="docutils literal notranslate"><span class="pre">&lt;N&gt;</span></code>
+dual H Bridges are specified.</p>
+<p>See: “Dual H Bridge” in Pinouts for name specification.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define ULTIBRIDGE &lt;N&gt;
+</pre></div>
+</div>
+<p>Enables control of the Ultibridge. Where <code class="docutils literal notranslate"><span class="pre">&lt;N&gt;</span></code> Ultibridges are specified.</p>
+<p>See: “Ultibridge” in Pinouts for name specification.</p>
+<div class="section" id="pin-names-dual-h-bridge">
+<h3>Pin Names - Dual H Bridge<a class="headerlink" href="#pin-names-dual-h-bridge" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">PHASE_A1[N]</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PHASE_A2[N]</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PHASE_B1[N]</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PHASE_B2[N]</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">VREF_A[N]</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">VREF_B[N]</span></code></p></li>
+</ul>
+</div>
+<div class="section" id="pin-names-ultibridge">
+<h3>Pin Names ULTIBRIDGE<a class="headerlink" href="#pin-names-ultibridge" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">CHARGEPUMP</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">analog_cmp1</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">analog_out1</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">analog_cmp2</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">analog_out2</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PHASE_A1[N]</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PHASE_A2[N]</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PHASE_B1[N]</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PHASE_B2[N]</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PHASE_A1_H[N]</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PHASE_A2_H[N]</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PHASE_B1_H[N]</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PHASE_B2_H[N]</span></code></p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="encoders">
+<h2>Encoders<a class="headerlink" href="#encoders" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define QUAD_ENC &lt;N&gt;
+</pre></div>
+</div>
+<p>Enables quadrature encoder . Where <code class="docutils literal notranslate"><span class="pre">&lt;N&gt;</span></code> encoders are specified.</p>
+<div class="section" id="id1">
+<h3>Pin Names<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ENC_A[N]</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ENC_B[N]</span></code></p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="flow-control-and-events">
+<h2>Flow Control and Events<a class="headerlink" href="#flow-control-and-events" title="Permalink to this headline">¶</a></h2>
+<p>The following Input/Output tied to certain events can be enabled:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define BUFFER_DTR
+</pre></div>
+</div>
+<p>Type: Output</p>
+<p>Active High when move buffer has slots available for send.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define MOVE_DONE
+</pre></div>
+</div>
+<p>Type:Output</p>
+<p>Toggles when a move in the buffer has completed.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define HALT
+</pre></div>
+</div>
+<p>Type: Input</p>
+<p>Immediately stops step timing and clears the buffer.</p>
+<div class="section" id="id2">
+<h3>Pin Names<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">BUFFER_DTR</span></code> - Output active High when move buffer has slots.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MOVE_DONE</span></code> - Output toggles when a move in the buffer has finished.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">HALT</span></code> - Input immediately stops step timing and clears the buffer.</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="move-buffer-size">
+<h2>Move Buffer Size<a class="headerlink" href="#move-buffer-size" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define MOVE_BUFFER_SIZE 2
+</pre></div>
+</div>
+<p>Default: 2</p>
+<p>Changes the default move buffer size. Must be a power of two.</p>
+</div>
+<div class="section" id="internal-register-sizes">
+<h2>Internal Register Sizes<a class="headerlink" href="#internal-register-sizes" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define MOVE_DURATION_BITS 32
+</pre></div>
+</div>
+<p>Default: 32</p>
+<p>Sets the move_duration register size used in step timing routines.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define DEFAULT_TIMER_WIDTH 8
+</pre></div>
+</div>
+<p>Default: 8</p>
+<p>Sets the width for internal clock dividers.</p>
+</div>
+<div class="section" id="led">
+<h2>LED<a class="headerlink" href="#led" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define LED &lt;N&gt;
+</pre></div>
+</div>
+<p>Type: Output</p>
+<p>Default: none/0</p>
+<p>Enables LED output. Currently unused, but useful for low-frequency visual debugging.</p>
+</div>
+<div class="section" id="logic-analyzer">
+<h2>Logic Analyzer<a class="headerlink" href="#logic-analyzer" title="Permalink to this headline">¶</a></h2>
+<p>The Logic Analyzer interface allows for observation and injection of signals
+within the top-level RAPcores project without patching the core project.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define LA_OUT &lt;N&gt;
+</pre></div>
+</div>
+<p>Type: Output</p>
+<p>Default: none/0</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define LA_IN &lt;N&gt;
+</pre></div>
+</div>
+<p>Type: Input</p>
+<p>Default: none/0</p>
+<p>Assignments can be done at the <code class="docutils literal notranslate"><span class="pre">BOARD.v</span></code> level
+by making a <code class="docutils literal notranslate"><span class="pre">LOGICANALYZER_MACRO</span></code> like so:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define LOGICANALYZER_MACRO\
+  assign LA_OUT[1] = dir; \
+  assign LA_OUT[2] = analog_cmp2;
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">RAPcores</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spi_spec.html">SPI Specification</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Board Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#makefile-mk-parameters">Makefile (.mk) Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#spi-interface">SPI Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#motors">Motors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#encoders">Encoders</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#flow-control-and-events">Flow Control and Events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#move-buffer-size">Move Buffer Size</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#internal-register-sizes">Internal Register Sizes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#led">LED</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#logic-analyzer">Logic Analyzer</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dev.html">Developer Docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="motor_control.html">Motor Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="asic.html">RAPcores on ASIC</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="spi_spec.html" title="previous chapter">SPI Specification</a></li>
+      <li>Next: <a href="dev.html" title="next chapter">Developer Docs</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, RAPcore developers.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/configuration.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

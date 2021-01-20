@@ -15,7 +15,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Motor Control" href="motor_control.html" />
-    <link rel="prev" title="Board Definition Structure and Porting Guide" href="boards.html" />
+    <link rel="prev" title="Board Configuration" href="configuration.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -47,25 +47,14 @@ recommended.</p>
 <li><p><a class="reference external" href="https://github.com/YosysHQ/nextpnr">nextpnr</a></p></li>
 <li><p><a class="reference external" href="https://github.com/YosysHQ/icestorm">icestorm</a> (ice40 targets)</p></li>
 <li><p><a class="reference external" href="https://github.com/YosysHQ/prjtrellis">prjtrellis</a> (ECP5 targets)</p></li>
-<li><p><a class="reference external" href="https://github.com/google/verible">verible</a> (Optional, for linting)</p></li>
+<li><p><a class="reference external" href="https://github.com/verilator/verilator">verilator</a> (Optional, for linting/testbenches)</p></li>
+<li><p><a class="reference external" href="https://github.com/steveicarus/iverilog">iverilog</a> (Optional, for linting/testbenches)</p></li>
 <li><p><a class="reference external" href="https://github.com/YosysHQ/SymbiYosys">SymbiYosys</a> (Optional, for formal verification)</p></li>
 </ul>
-<div class="section" id="programming-tools">
-<h3>Programming Tools<a class="headerlink" href="#programming-tools" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="ecp5-devboard">
-<h4>ECP5 Devboard<a class="headerlink" href="#ecp5-devboard" title="Permalink to this headline">¶</a></h4>
-<p>openocd</p>
-</div>
-<div class="section" id="tinyfpga-bx">
-<h4>TinyFPGA BX<a class="headerlink" href="#tinyfpga-bx" title="Permalink to this headline">¶</a></h4>
-<p>The TinyFPGA BX uses tinyprog:</p>
-<p><code class="docutils literal notranslate"><span class="pre">pip3</span> <span class="pre">install</span> <span class="pre">--user</span> <span class="pre">tinyprog</span></code></p>
-</div>
-</div>
 </div>
 <div class="section" id="developing-with-nix">
 <h2>Developing with Nix<a class="headerlink" href="#developing-with-nix" title="Permalink to this headline">¶</a></h2>
-<p>RAPcore includes a <a class="reference external" href="../shell.nix">shell.nix</a> for use with the Nix Package manager.
+<p>RAPcores includes a <a class="reference external" href="../shell.nix">shell.nix</a> for use with the Nix Package manager.
 This makes it easy to get a development environment with all build requirements installed
 for you.</p>
 <p>To start you will need to install Nix using the instructions <a class="reference external" href="https://nixos.wiki/wiki/Nix_Installation_Guide">here</a>.
@@ -75,10 +64,36 @@ curl -L https://nixos.org/nix/install | sh
 source $HOME/.nix-profile/etc/profile.d/nix.sh &gt;&gt; ~/.bashrc
 </pre></div>
 </div>
-<p>Then restart the terminal. Next, <code class="docutils literal notranslate"><span class="pre">cd</span></code> to the RAPcore directory. Run <code class="docutils literal notranslate"><span class="pre">nix-shell</span></code>, and some
+<p>Then restart the terminal. Next, <code class="docutils literal notranslate"><span class="pre">cd</span></code> to the RAPcores directory. Run <code class="docutils literal notranslate"><span class="pre">nix-shell</span></code>, and some
 packages will be installed. Once complete you should be able to run any of the <code class="docutils literal notranslate"><span class="pre">make</span></code> commands
 below. This environment includes all the tools to synthesis, place, route, program, and
-formally verify the RAPcore project.</p>
+formally verify the RAPcores project.</p>
+<div class="section" id="packages-included-in-nix-environment">
+<h3>Packages included in Nix environment<a class="headerlink" href="#packages-included-in-nix-environment" title="Permalink to this headline">¶</a></h3>
+<p>Verilog frontends:</p>
+<ul class="simple">
+<li><p>yosys</p></li>
+<li><p>verilog</p></li>
+<li><p>verilator</p></li>
+</ul>
+<p>Place and route/databases:</p>
+<ul class="simple">
+<li><p>nextpnr</p></li>
+<li><p>icestorm</p></li>
+<li><p>trellis</p></li>
+</ul>
+<p>Formal verification:</p>
+<ul class="simple">
+<li><p>symbiyosys</p></li>
+<li><p>yices</p></li>
+</ul>
+<p>Programmers:</p>
+<ul class="simple">
+<li><p>tinyprog</p></li>
+<li><p>fujprog</p></li>
+<li><p>openocd</p></li>
+</ul>
+</div>
 </div>
 <div class="section" id="overview-of-make-targets">
 <h2>Overview of Make targets<a class="headerlink" href="#overview-of-make-targets" title="Permalink to this headline">¶</a></h2>
@@ -124,12 +139,17 @@ formally verify the RAPcore project.</p>
 <tr>
 <td>triple-check</td>
 <td></td>
-<td>parse the srec directory with yosys, iverilog, and verilator</td>
+<td>parse the src directory with yosys, iverilog, and verilator</td>
 </tr>
 <tr>
 <td>yosys-{test}</td>
 <td></td>
 <td>run the testbench recipe in <code>testbench/yosys/{test}</code></td>
+</tr>
+<tr>
+<td>cxxrtl-{test}</td>
+<td></td>
+<td>run the testbench recipe in <code>testbench/cxxrtl/{test}</code></td>
 </tr>
 </tbody>
 </table></div>
@@ -151,7 +171,7 @@ The formal verification configuration file is <code class="docutils literal notr
 </div>
 <div class="section" id="test-benches">
 <h2>Test Benches<a class="headerlink" href="#test-benches" title="Permalink to this headline">¶</a></h2>
-<p>The main RAPCore source is tested for compatibility against Yosys, IVerilog, and Verilator.
+<p>The main RAPcores source is tested for compatibility against Yosys, IVerilog, and Verilator.
 In-tree testbenches use the Yosys suite with either the default ‘sim’ or ‘cxxrtl’ backends.</p>
 <div class="section" id="yosys-sim-bench">
 <h3>Yosys Sim Bench<a class="headerlink" href="#yosys-sim-bench" title="Permalink to this headline">¶</a></h3>
@@ -221,7 +241,7 @@ The yosys CXXRTL test benches can be executed with:</p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="spi_spec.html">SPI Specification</a></li>
-<li class="toctree-l1"><a class="reference internal" href="boards.html">Board Definition Structure and Porting Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Board Configuration</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Developer Docs</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#build-prerequisites">Build Prerequisites</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#developing-with-nix">Developing with Nix</a></li>
@@ -244,7 +264,7 @@ The yosys CXXRTL test benches can be executed with:</p>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="boards.html" title="previous chapter">Board Definition Structure and Porting Guide</a></li>
+      <li>Previous: <a href="configuration.html" title="previous chapter">Board Configuration</a></li>
       <li>Next: <a href="motor_control.html" title="next chapter">Motor Control</a></li>
   </ul></li>
 </ul>
