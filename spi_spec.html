@@ -247,7 +247,7 @@ SPI controller devices.</p>
 </tr>
 <tr>
 <td>TX</td>
-<td>0xfe</td>
+<td>0x0a</td>
 <td></td>
 <td></td>
 <td></td>
@@ -325,7 +325,60 @@ This will power up the motors. For example:</p>
 <td>1</td>
 </tr>
 </tbody>
-</table></div>
+</table><div class="section" id="brake-motors-on-disable-0x0b">
+<h3>Brake motors on Disable - 0x0b<a class="headerlink" href="#brake-motors-on-disable-0x0b" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="docutils">
+<thead>
+<tr>
+<th></th>
+<th>Word 1</th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td>Byte 1</td>
+<td>B2</td>
+<td>B3</td>
+<td>B4</td>
+<td>B5</td>
+<td>B6</td>
+<td>B7</td>
+<td>B8</td>
+</tr>
+<tr>
+<td>TX</td>
+<td>0x0b</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>0b11111111</td>
+</tr>
+<tr>
+<td>RX</td>
+<td>STATUS</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table><p>Starting from 0x01 of B8, brake a motor channel on disable.</p>
+</div>
+</div>
 <div class="section" id="coordinated-step-timer-0x01">
 <h2>Coordinated Step Timer - 0x01<a class="headerlink" href="#coordinated-step-timer-0x01" title="Permalink to this headline">¶</a></h2>
 <p>This message type specifies a move segment to be clocked out of the core. It uses 64bit words to specify the DDA values, and returns 32bit precision encoder readings.</p>
