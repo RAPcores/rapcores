@@ -142,11 +142,6 @@ module spi_state_machine #(
   reg [motor_count-1:0] brake_r;
   assign brake[motor_count-1:0] = brake_r;
 
-  // Implement flow control and event pins if specified
-  `ifdef BUFFER_DTR
-    assign BUFFER_DTR = ~(~stepfinished == stepready);
-  `endif
-
   `ifndef STEPINPUT
     assign dir[motor_count-1:0] = dir_r[moveind]; // set direction
     assign step[motor_count-1:0] = dda_step;
