@@ -197,6 +197,7 @@ module rapcore #(
   wire signed [63:0] encoder_count;
   wire encoder_fault;
   `ifdef QUAD_ENC
+    /* verilator lint_off PINMISSING */
     // TODO: For ... generate
     quad_enc #(.encbits(64)) encoder0
     (
@@ -208,6 +209,7 @@ module rapcore #(
       .count(encoder_count)
       //.multiplier(encoder_multiplier)
       );
+      /* verilator lint_off PINMISSING */
   `endif
 
   //
