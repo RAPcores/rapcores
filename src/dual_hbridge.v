@@ -1,6 +1,8 @@
 `default_nettype none
 
-module dual_hbridge (
+module dual_hbridge #(
+   parameter current_bits = 7
+) (
     input clk,
     input resetn,
     output       phase_a1,  // Phase A
@@ -27,14 +29,14 @@ module dual_hbridge (
   reg [31:0] phase_table [0:255]; // Larger to trigger BRAM inference
 
   // Vref - A
-  pwm va (.clk(clk),
+  pwm #(.bits(current_bits)) va (.clk(clk),
           .resetn (resetn),
-          .val(current),
+          .val(current>>(8-current_bits)),
           .pwm(vref_a));
   // Vref - B
-  pwm vb (.clk(clk),
+  pwm #(.bits(current_bits)) vb (.clk(clk),
           .resetn (resetn),
-          .val(current),
+          .val(current>>(8-current_bits)),
           .pwm(vref_b));
 
   assign phase_a1 = (enable) ? phase_table[phase_ct][0] : brake;
