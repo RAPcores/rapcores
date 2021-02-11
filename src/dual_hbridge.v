@@ -1,7 +1,8 @@
 `default_nettype none
 
 module dual_hbridge #(
-   parameter current_bits = 7
+   parameter current_bits = 7,
+   parameter vref_off_brake = 1
 ) (
     input clk,
     input resetn,
@@ -39,10 +40,19 @@ module dual_hbridge #(
           .val(current>>(8-current_bits)),
           .pwm(vref_b));
 
-  assign phase_a1 = (enable) ? phase_table[phase_ct][0] : brake;
-  assign phase_a2 = (enable) ? phase_table[phase_ct][1] : brake;
-  assign phase_b1 = (enable) ? phase_table[phase_ct][2] : brake;
-  assign phase_b2 = (enable) ? phase_table[phase_ct][3] : brake;
+  // Set braking when PWM off
+  if (vref_off_brake) begin
+    wire brake_a = ((!enable & brake) | !vref_a);
+    wire brake_b = ((!enable & brake) | !vref_b);
+  end else begin
+    wire brake_a = brake;
+    wire brake_b = brake;
+  end
+
+  assign phase_a1 = (enable) ? phase_table[phase_ct][0] : brake_a;
+  assign phase_a2 = (enable) ? phase_table[phase_ct][1] : brake_a;
+  assign phase_b1 = (enable) ? phase_table[phase_ct][2] : brake_b;
+  assign phase_b2 = (enable) ? phase_table[phase_ct][3] : brake_b;
 
   assign abs_increment = 3'b100 >> microsteps;
   assign phase_inc = dir ? abs_increment : -abs_increment; // Generate increment, multiple of microsteps\
