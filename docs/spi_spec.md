@@ -41,11 +41,13 @@ SPI controller devices.
 
 ## Get API Version - 0xfe
 
-|Word| Word 1 | | | | | | | | Word 2 | | | | |     |     |     |
-|----|--------|-|-|-|-|-|-|-|--------|-|-|-|-|-----|-----|-----|
-|Byte| Byte 1 |2|3|4|5|6|7|8| Byte 1 |2|3|4|5| 6   | 7   | 8   |
-|TX  | 0xfe   | | | | | | | |        | | | | |     |     |     |
-|RX  | STATUS | | | | | | | |        | | | | |MAJOR|MINOR|PATCH|
+|Word| Word 1 | | | | | | | | Word 2 | | | |           |     |     |     |
+|----|--------|-|-|-|-|-|-|-|--------|-|-|-|-----------|-----|-----|-----|
+|Byte| Byte 1 |2|3|4|5|6|7|8| Byte 1 |2|3|4|5          | 6   | 7   | 8   |
+|TX  | 0xfe   | | | | | | | |        | | | |           |     |     |     |
+|RX  | STATUS | | | | | | | |        | | | |DEVELOPMENT|MAJOR|MINOR|PATCH|
+
+Note: For stable release versions the development flag is 0.
 
 ## Enable/Disable Motors - 0x0a
 

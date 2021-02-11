@@ -6,6 +6,7 @@
 `define VERSION_MAJOR 0
 `define VERSION_MINOR 2
 `define VERSION_PATCH 0
+`define VERSION_DEVEL 1
 
 // Default move buffer if not specified
 `ifndef BUFFER_SIZE
