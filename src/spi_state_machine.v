@@ -390,6 +390,7 @@ module spi_state_machine #(
             word_send_data[7:0] <= `VERSION_PATCH;
             word_send_data[15:8] <= `VERSION_MINOR;
             word_send_data[23:16] <= `VERSION_MAJOR;
+            word_send_data[31:24] <= `VERSION_DEVEL;
           end
 
           default: word_send_data <= 64'b0;
