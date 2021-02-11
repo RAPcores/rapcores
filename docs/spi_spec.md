@@ -27,6 +27,7 @@ SPI controller devices.
 |-----------------------|-------------------------|-----------------------------|---------------|
 | 0x01                  | Coordinated Step Timer  | 2 + 2*N motors              | N/A           |
 | 0x0a                  | Motor Enable/Disable    | 1                           | 0             |
+| 0x0b                  | Motor Braking on Disable| 1                           | 0             |
 | 0x20                  | DDA Timer Divider       | 1                           | 32            |
 | 0x10                  | Set Motor Config        | 1                           | See Below     |
 | 0x31                  | Charge Pump Divider     | 1                           | See Below     |
