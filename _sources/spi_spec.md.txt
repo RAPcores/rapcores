@@ -27,6 +27,7 @@ SPI controller devices.
 |-----------------------|-------------------------|-----------------------------|---------------|
 | 0x01                  | Coordinated Step Timer  | 2 + 2*N motors              | N/A           |
 | 0x0a                  | Motor Enable/Disable    | 1                           | 0             |
+| 0x0b                  | Motor Braking on Disable| 1                           | 0             |
 | 0x20                  | DDA Timer Divider       | 1                           | 32            |
 | 0x10                  | Set Motor Config        | 1                           | See Below     |
 | 0x31                  | Charge Pump Divider     | 1                           | See Below     |
@@ -41,11 +42,13 @@ SPI controller devices.
 
 ## Get API Version - 0xfe
 
-|Word| Word 1 | | | | | | | | Word 2 | | | | |     |     |     |
-|----|--------|-|-|-|-|-|-|-|--------|-|-|-|-|-----|-----|-----|
-|Byte| Byte 1 |2|3|4|5|6|7|8| Byte 1 |2|3|4|5| 6   | 7   | 8   |
-|TX  | 0xfe   | | | | | | | |        | | | | |     |     |     |
-|RX  | STATUS | | | | | | | |        | | | | |MAJOR|MINOR|PATCH|
+|Word| Word 1 | | | | | | | | Word 2 | | | |           |     |     |     |
+|----|--------|-|-|-|-|-|-|-|--------|-|-|-|-----------|-----|-----|-----|
+|Byte| Byte 1 |2|3|4|5|6|7|8| Byte 1 |2|3|4|5          | 6   | 7   | 8   |
+|TX  | 0xfe   | | | | | | | |        | | | |           |     |     |     |
+|RX  | STATUS | | | | | | | |        | | | |DEVELOPMENT|MAJOR|MINOR|PATCH|
+
+Note: For stable release versions the development flag is 0.
 
 ## Enable/Disable Motors - 0x0a
 
