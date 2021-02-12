@@ -1,19 +1,22 @@
 
 
 // Your config here
-`include "../boards/mpw_one_defines.v"
-//`include "../boards/tinyfpgabx/tinyfpgabx.v"
+//`include "../boards/mpw_one_defines.v"
+`include "../boards/tinyfpgabx/tinyfpgabx.v"
 
 
 `include "../src/macro_params.v"
+`include "../src/clock_divider.v"
 `include "../src/constants.v"
 `include "../src/pwm.v"
 `include "../src/quad_enc.v"
 `include "../src/rapcore.v"
 `include "../src/dda_timer.v"
+`include "../src/dda_fsm.v"
 `include "../src/spi_state_machine.v"
 `include "../src/spi.v"
-`include "../src/stepper.v"
+`include "../src/dual_hbridge.v"
+`include "../src/step_counter.v"
 `include "../src/microstepper/microstepper_top.v"
 `include "../src/microstepper/analog_out.v"
 `include "../src/microstepper/chargepump.v"
