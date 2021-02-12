@@ -1,7 +1,7 @@
 `default_nettype none
 
 module dual_hbridge #(
-   parameter current_bits = 7,
+   parameter current_bits = 3,
    parameter vref_off_brake = 1
 ) (
     input clk,
@@ -16,29 +16,44 @@ module dual_hbridge #(
     input        dir,
     input        enable,
     input        brake,
-    input  [2:0] microsteps,
+    input  [7:0] microsteps,
     input  [7:0] current
 );
 
   // TODO: if phase_ct is initialized BRAM does not infer
   // TODO: phase_ct must be initialized on enable does not enable before step
-  reg [2:0] phase_ct; // needs to be the size of microsteps, for LUT
+  reg [7:0] phase_ct; // needs to be the size of microsteps, for LUT
   wire signed [2:0] phase_inc; // Phase increment per step
   wire [2:0] abs_increment;
 
   // Table of phases
-  reg [31:0] phase_table [0:255]; // Larger to trigger BRAM inference
+  reg [7:0] phase_table [0:255]; // Larger to trigger BRAM inference
 
-  // Vref - A
+  initial $readmemb("lut/cos_lut.bit", phase_table);
+
+  wire da, db;
+
+  // Current -> Vector Magnitude
   pwm #(.bits(current_bits)) va (.clk(clk),
           .resetn (resetn),
           .val(current>>(8-current_bits)),
-          .pwm(vref_a));
-  // Vref - B
+          .pwm(da));
   pwm #(.bits(current_bits)) vb (.clk(clk),
           .resetn (resetn),
           .val(current>>(8-current_bits)),
+          .pwm(db));
+
+  // Microstep -> vector angle
+  pwm #(.bits(8)) ma (.clk(da),
+          .resetn (resetn),
+          .val(phase_table[phase_ct]),
+          .pwm(vref_a));
+  pwm #(.bits(8)) mb (.clk(db),
+          .resetn (resetn),
+          .val(phase_table[phase_ct-8'd64]),
           .pwm(vref_b));
+
+
 
   // Set braking when PWM off
   if (vref_off_brake) begin
@@ -51,14 +66,14 @@ module dual_hbridge #(
 
   // determine phase polarity from quadrant
   wire [3:0] phase_polarity;
-  assign phase_polarity = (phase_ct < 2) ? 4'b1010 : (phase_ct < 4) ? 4'b0110 : (phase_ct < 6) ? 4'b0101 : 4'b1001;
+  assign phase_polarity = (phase_ct < 64) ? 4'b1010 : (phase_ct < 128) ? 4'b0110 : (phase_ct < 192) ? 4'b0101 : 4'b1001;
 
   assign phase_a1 = (enable) ? phase_polarity[0] : brake_a;
   assign phase_a2 = (enable) ? phase_polarity[1] : brake_a;
   assign phase_b1 = (enable) ? phase_polarity[2] : brake_b;
   assign phase_b2 = (enable) ? phase_polarity[3] : brake_b;
 
-  assign abs_increment = 3'b100 >> microsteps;
+  assign abs_increment = 1'b1;
   assign phase_inc = dir ? abs_increment : -abs_increment; // Generate increment, multiple of microsteps\
 
   reg [1:0] step_r;
