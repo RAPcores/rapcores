@@ -46,11 +46,11 @@ module dual_hbridge #(
   // Microstep -> vector angle
   pwm #(.bits(8)) ma (.clk(da),
           .resetn (resetn),
-          .val(phase_table[phase_ct]),
+          .val(phase_table[phase_ct+8'd64]),
           .pwm(vref_a));
   pwm #(.bits(8)) mb (.clk(db),
           .resetn (resetn),
-          .val(phase_table[phase_ct+8'd64]),
+          .val(phase_table[phase_ct]),
           .pwm(vref_b));
 
 
