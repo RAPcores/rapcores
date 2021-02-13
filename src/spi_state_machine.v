@@ -13,10 +13,10 @@ module spi_state_machine #(
 
   input resetn,
   // SPI pins
-  input SCK,
-  input CS,
-  input COPI,
-  output CIPO,
+  input  wire SCK,
+  input  wire CS,
+  input  wire COPI,
+  output wire CIPO,
 
   // Step IO
   output wire [motor_count-1:0] step,
@@ -42,13 +42,13 @@ module spi_state_machine #(
 
   // Event IO
   `ifdef BUFFER_DTR
-    output BUFFER_DTR,
+    output wire BUFFER_DTR,
   `endif
   `ifdef MOVE_DONE
-    output MOVE_DONE,
+    output wire MOVE_DONE,
   `endif
   `ifdef HALT
-    input HALT,
+    input wire HALT,
   `endif
   `ifdef STEPINPUT
     input wire [motor_count-1:0] STEPINPUT,
