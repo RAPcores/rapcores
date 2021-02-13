@@ -101,7 +101,7 @@ module rapcore #(
   // Stepper Setup
   // TODO: Generate statement?
   // Stepper Config
-  wire [2:0] microsteps;
+  wire [7:0] microsteps;
   wire [7:0] current;
   wire [9:0] config_offtime;
   wire [7:0] config_blanktime;
