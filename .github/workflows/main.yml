@@ -7,11 +7,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - name: Cache install Nix packages
-      uses: nix-actions/cache-install@v1.0.6
+    - uses: actions/cache@v2
+      id: cache-nixstore
       with:
-        key: nix-${{ hashFiles('shell.nix') }}
-        nix_file: 'shell.nix'
+        path: /nix/store
+        key: nix-${{ hashFiles('shell.nix')}}
 
     - uses: actions/checkout@v2
   
