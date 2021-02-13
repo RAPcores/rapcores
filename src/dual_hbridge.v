@@ -52,12 +52,13 @@ module dual_hbridge #(
 
 
   // Set braking when PWM off
+  wire brake_a, brake_b;
   if (vref_off_brake) begin
-    wire brake_a = ((!enable & brake) | !vref_a);
-    wire brake_b = ((!enable & brake) | !vref_b);
+    assign brake_a = ((!enable & brake) | !vref_a);
+    assign brake_b = ((!enable & brake) | !vref_b);
   end else begin
-    wire brake_a = brake;
-    wire brake_b = brake;
+    assign brake_a = brake;
+    assign brake_b = brake;
   end
 
   // determine phase polarity from quadrant
