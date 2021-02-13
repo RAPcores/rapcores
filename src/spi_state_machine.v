@@ -25,7 +25,7 @@ module spi_state_machine #(
   output wire [motor_count-1:0] brake,
 
   // Stepper Config
-  output reg [2:0] microsteps,
+  output reg [7:0] microsteps,
   output reg [7:0] current,
   output reg [9:0] config_offtime,
   output reg [7:0] config_blanktime,
