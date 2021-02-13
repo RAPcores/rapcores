@@ -1,7 +1,8 @@
 `default_nettype none
 
 module dual_hbridge #(
-   parameter current_bits = 8,
+   parameter current_bits = 3,
+   parameter microstep_bits = 7,
    parameter vref_off_brake = 0
 ) (
     input clk,
@@ -22,7 +23,7 @@ module dual_hbridge #(
 
   // TODO: if phase_ct is initialized BRAM does not infer
   // TODO: phase_ct must be initialized on enable does not enable before step
-  reg [7:0] phase_ct = 0; // needs to be the size of microsteps, for LUT
+  reg [7:0] phase_ct; // needs to be the size of microsteps, for LUT
   wire signed [2:0] phase_inc; // Phase increment per step
   wire [2:0] abs_increment;
 
@@ -44,13 +45,13 @@ module dual_hbridge #(
           .pwm(db));
 
   // Microstep -> vector angle
-  pwm #(.bits(8)) ma (.clk(da),
+  pwm #(.bits(microstep_bits)) ma (.clk(da),
           .resetn (resetn),
-          .val(phase_table[phase_ct+8'd64]),
+          .val(phase_table[phase_ct+8'd64]>>(8-microstep_bits)),
           .pwm(vref_a));
-  pwm #(.bits(8)) mb (.clk(db),
+  pwm #(.bits(microstep_bits)) mb (.clk(db),
           .resetn (resetn),
-          .val(phase_table[phase_ct]),
+          .val(phase_table[phase_ct]>>(8-microstep_bits)),
           .pwm(vref_b));
 
 
