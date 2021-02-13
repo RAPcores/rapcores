@@ -3,7 +3,7 @@
 module dual_hbridge #(
    parameter current_bits = 3,
    parameter microstep_bits = 7,
-   parameter vref_off_brake = 0
+   parameter vref_off_brake = 1
 ) (
     input clk,
     input resetn,
@@ -64,10 +64,10 @@ module dual_hbridge #(
   wire [3:0] phase_polarity;
   assign phase_polarity = (phase_ct < 64) ? 4'b1010 : (phase_ct < 128) ? 4'b0110 : (phase_ct < 192) ? 4'b0101 : 4'b1001;
 
-  assign phase_a1 = (enable) ? phase_polarity[0] : brake_a;
-  assign phase_a2 = (enable) ? phase_polarity[1] : brake_a;
-  assign phase_b1 = (enable) ? phase_polarity[2] : brake_b;
-  assign phase_b2 = (enable) ? phase_polarity[3] : brake_b;
+  assign phase_a1 = (enable & vref_a) ? phase_polarity[0] : brake_a;
+  assign phase_a2 = (enable & vref_a) ? phase_polarity[1] : brake_a;
+  assign phase_b1 = (enable & vref_b) ? phase_polarity[2] : brake_b;
+  assign phase_b2 = (enable & vref_b) ? phase_polarity[3] : brake_b;
 
   assign abs_increment = 1'b1;
   assign phase_inc = dir ? abs_increment : -abs_increment; // Generate increment, multiple of microsteps\
