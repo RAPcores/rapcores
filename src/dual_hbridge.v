@@ -32,28 +32,23 @@ module dual_hbridge #(
 
   initial $readmemb("lut/cos_lut.bit", phase_table);
 
-  wire da, db;
+  wire current_pwm;
 
   // Current -> Vector Magnitude
   pwm #(.bits(current_bits)) va (.clk(clk),
           .resetn (resetn),
           .val(current>>(8-current_bits)),
-          .pwm(da));
-  pwm #(.bits(current_bits)) vb (.clk(clk),
-          .resetn (resetn),
-          .val(current>>(8-current_bits)),
-          .pwm(db));
-
+          .pwm(current_pwm));
+  
   // Microstep -> vector angle
-  pwm #(.bits(microstep_bits)) ma (.clk(da),
+  pwm #(.bits(microstep_bits)) ma (.clk(current_pwm),
           .resetn (resetn),
           .val(phase_table[phase_ct+8'd64]>>(8-microstep_bits)),
           .pwm(vref_a));
-  pwm #(.bits(microstep_bits)) mb (.clk(db),
+  pwm #(.bits(microstep_bits)) mb (.clk(current_pwm),
           .resetn (resetn),
           .val(phase_table[phase_ct]>>(8-microstep_bits)),
           .pwm(vref_b));
-
 
 
   // Set braking when PWM off
