@@ -20,5 +20,8 @@
 // Encoder Count
 `define QUAD_ENC 1
 
+// Use a PLL for PWM generation
+`define PWMPLL
+
 // Change the Move Buffer Size. Should be power of two
 //`define MOVE_BUFFER_SIZE 4
