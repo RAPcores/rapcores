@@ -98,6 +98,19 @@ module rapcore #(
   `endif
   wire reset = resetn;
 
+  // High frequency PLL for PWM or anything else
+  `ifdef PWMPLL
+    // PLL for SPI Bus
+    wire pwm_clock;
+    wire pwmpll_locked;
+    pwm_pll ppll (.clock_in(CLK),
+                  .clock_out(pwm_clock),
+                  .locked(pwmpll_locked));
+  `else
+    wire pwm_clock = CLK;
+  `endif
+
+
   // Stepper Setup
   // TODO: Generate statement?
   // Stepper Config
@@ -133,6 +146,7 @@ module rapcore #(
         dual_hbridge s0 (
                       .clk (CLK),
                       .resetn(resetn),
+                      .pwm_clk(pwm_clock),
                       .phase_a1 (PHASE_A1[i]),
                       .phase_a2 (PHASE_A2[i]),
                       .phase_b1 (PHASE_B1[i]),

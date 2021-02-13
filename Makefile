@@ -41,7 +41,7 @@ RAPCOREFILES := boards/$(BOARD)/$(BOARD).v \
 														dda_timer.v \
 														rapcore.v) \
 								$(wildcard src/microstepper/*.v)
-GENERATEDFILES := src/generated/spi_pll.v src/generated/board.v
+GENERATEDFILES := src/generated/spi_pll.v src/generated/pwm_pll.v  src/generated/board.v
 
 all: $(BUILD).bit
 
@@ -50,6 +50,7 @@ $(BUILD).bit: logs build $(RAPCOREFILES)
 	printf '`define $(BOARD)\n' > $(GENERATEDDIR)board.v
 ifeq ($(ARCH), ice40)
 	icepll -i $(FREQ) -o $(SPIFREQ) -m -n spi_pll -f $(GENERATEDDIR)spi_pll.v
+	icepll -i $(FREQ) -o $(PWMFREQ) -m -n pwm_pll -f $(GENERATEDDIR)pwm_pll.v
 	yosys -ql ./logs/$(BOARD)_yosys.log -p 'synth_ice40 -top $(PROJ) -abc9 -dsp -json $(BUILD).json' $(RAPCOREFILES) $(GENERATEDFILES)
 	nextpnr-ice40 -ql ./logs/$(BOARD)_nextpnr.log --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --json $(BUILD).json --asc $(BUILD).asc --pcf ./boards/$(BOARD)/$(PIN_DEF)
 	icetime -d $(DEVICE) -c $(FREQ) -mtr $(BUILD).rpt $(BUILD).asc
@@ -57,6 +58,7 @@ ifeq ($(ARCH), ice40)
 endif
 ifeq ($(ARCH), ecp5)
 	ecppll -i $(FREQ) -o $(SPIFREQ) --clkin_name clock_in --clkout0_name clock_out -n spi_pll -f $(GENERATEDDIR)spi_pll.v
+	ecppll -i $(FREQ) -o $(PWMFREQ) --clkin_name clock_in --clkout0_name clock_out -n pwm_pll -f $(GENERATEDDIR)pwm_pll.v
 	yosys -ql ./logs/$(BOARD)_yosys.log -p 'synth_ecp5 -top $(PROJ) -abc9 -json $(BUILD).json' $(RAPCOREFILES) $(GENERATEDFILES)
 	nextpnr-ecp5 -ql ./logs/$(BOARD)_nextpnr.log --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --textcfg $(BUILD)_out.config --json $(BUILD).json  --lpf ./boards/$(BOARD)/$(PIN_DEF)
 	ecppack --svf $(BUILD).svf $(BUILD)_out.config $(BUILD).bit

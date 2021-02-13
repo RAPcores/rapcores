@@ -1,12 +1,13 @@
 `default_nettype none
 
 module dual_hbridge #(
-   parameter current_bits = 3,
-   parameter microstep_bits = 7,
+   parameter current_bits = 4,
+   parameter microstep_bits = 8,
    parameter vref_off_brake = 1
 ) (
     input clk,
     input resetn,
+    input pwm_clk, // Clock for PWM
     output       phase_a1,  // Phase A
     output       phase_a2,  // Phase A
     output       phase_b1,  // Phase B
@@ -35,7 +36,7 @@ module dual_hbridge #(
   wire current_pwm;
 
   // Current -> Vector Magnitude
-  pwm #(.bits(current_bits)) va (.clk(clk),
+  pwm #(.bits(current_bits)) va (.clk(pwm_clk),
           .resetn (resetn),
           .val(current[7:(8-current_bits)]),
           .pwm(current_pwm));
