@@ -7,10 +7,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-  - name: Cache nix store
-    uses: actions/cache@v1.0.3
-    id: cache-nixstore
-    with:
+    - uses: actions/cache@v1.0.3
+      id: cache-nixstore
+      with:
         path: "/nix/store"
         key: ${{ hashFiles('shell.nix')}}
 
