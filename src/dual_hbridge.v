@@ -37,17 +37,17 @@ module dual_hbridge #(
   // Current -> Vector Magnitude
   pwm #(.bits(current_bits)) va (.clk(clk),
           .resetn (resetn),
-          .val(current>>(8-current_bits)),
+          .val(current[7:(8-current_bits)]),
           .pwm(current_pwm));
   
   // Microstep -> vector angle
   pwm #(.bits(microstep_bits)) ma (.clk(current_pwm),
           .resetn (resetn),
-          .val(phase_table[phase_ct+8'd64]>>(8-microstep_bits)),
+          .val(phase_table[phase_ct+8'd64][7:(8-microstep_bits)]),
           .pwm(vref_a));
   pwm #(.bits(microstep_bits)) mb (.clk(current_pwm),
           .resetn (resetn),
-          .val(phase_table[phase_ct]>>(8-microstep_bits)),
+          .val(phase_table[phase_ct][7:(8-microstep_bits)]),
           .pwm(vref_b));
 
 
