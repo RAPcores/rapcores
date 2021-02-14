@@ -69,3 +69,24 @@ action. Some examples:
 | |-| |+|+|
 | |-|-| |+|
 |+| |-| |+|
+
+
+## Current Regulation, Microstepping, and Vector Drive
+
+The key to smooth and efficient motor control is current regulation.
+Through current regulation in a motor, one can accomplish a few valuable things:
+
+- Microstepping (subdividing the commutation table)
+- Current regulation (limiting power output for efficiency)
+
+With closed loop current regulation, e.g. through a current sense resistor, additional
+capabilities are also achieved:
+
+- Fault detection
+- Phase shift and skip detection
+
+Here we will present the mathematical ideas of how to model the current in a bipolar stepper
+motor as a vector. To start we must understand some basic concepts from vector algebra
+and trigonometry.
+
+![](https://upload.wikimedia.org/wikipedia/commons/b/bd/Sine_and_cosine_animation.gif)
