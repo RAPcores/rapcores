@@ -33,22 +33,20 @@ module dual_hbridge #(
 
   initial $readmemb("lut/cos_lut.bit", phase_table);
 
-  wire current_pwm;
+  wire [11:0] pwm_a;
+  wire [11:0] pwm_b;
 
-  // Current -> Vector Magnitude
-  pwm #(.bits(current_bits)) va (.clk(pwm_clk),
-          .resetn (resetn),
-          .val(current[7:(8-current_bits)]),
-          .pwm(current_pwm));
-  
+  assign pwm_a = phase_table[phase_ct+8'd64][7:(8-microstep_bits)]*current[7:(8-current_bits)];
+  assign pwm_b = phase_table[phase_ct][7:(8-microstep_bits)]*current[7:(8-current_bits)];
+
   // Microstep -> vector angle
-  pwm #(.bits(microstep_bits)) ma (.clk(current_pwm),
+  pwm #(.bits(microstep_bits+current_bits)) ma (.clk(pwm_clk),
           .resetn (resetn),
-          .val(phase_table[phase_ct+8'd64][7:(8-microstep_bits)]),
+          .val(pwm_a),
           .pwm(vref_a));
-  pwm #(.bits(microstep_bits)) mb (.clk(current_pwm),
+  pwm #(.bits(microstep_bits+current_bits)) mb (.clk(pwm_clk),
           .resetn (resetn),
-          .val(phase_table[phase_ct][7:(8-microstep_bits)]),
+          .val(pwm_b),
           .pwm(vref_b));
 
 
