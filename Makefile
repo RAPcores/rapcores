@@ -21,6 +21,10 @@ ifdef BOARD
 	include ./boards/${BOARD}/${BOARD}.mk
 endif
 
+# Default parameters for PLL, since they are always generated, even if not used
+SPIFREQ ?= 64
+PWMFREQ ?= 150
+
 PROJ = rapcore
 TOP = ./src/rapcore.v
 GENERATEDDIR = ./src/generated/
