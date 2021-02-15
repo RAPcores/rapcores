@@ -37,8 +37,11 @@ module dual_hbridge #(
   wire [11:0] pwm_a;
   wire [11:0] pwm_b;
 
-  assign pwm_a = phase_table[phase_ct+8'd64][7:(8-microstep_bits)]*current[7:(8-current_bits)];
-  assign pwm_b = phase_table[phase_ct][7:(8-microstep_bits)]*current[7:(8-current_bits)];
+  reg [7:0] phase_a;
+  reg [7:0] phase_b;
+
+  assign pwm_a = phase_a[7:(8-microstep_bits)]*current[7:(8-current_bits)];
+  assign pwm_b = phase_b[7:(8-microstep_bits)]*current[7:(8-current_bits)];
 
   // Microstep -> vector angle
   pwm #(.bits(microstep_bits+current_bits)) ma (.clk(pwm_clk),
@@ -101,6 +104,8 @@ module dual_hbridge #(
       if (step_r == 2'b01) begin // rising edge
         phase_ct <= phase_ct + phase_inc;
       end
+      phase_a <= phase_table[phase_ct+8'd64];
+      phase_b <= phase_table[phase_ct];
     end
   end
 
