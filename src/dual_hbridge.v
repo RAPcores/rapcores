@@ -3,7 +3,8 @@
 module dual_hbridge #(
    parameter current_bits = 4,
    parameter microstep_bits = 8,
-   parameter vref_off_brake = 1
+   parameter vref_off_brake = 1,
+   parameter microstep_count = 64
 ) (
     input clk,
     input resetn,
@@ -62,7 +63,10 @@ module dual_hbridge #(
 
   // determine phase polarity from quadrant
   wire [3:0] phase_polarity;
-  assign phase_polarity = (phase_ct < 64) ? 4'b1010 : (phase_ct < 128) ? 4'b0110 : (phase_ct < 192) ? 4'b0101 : 4'b1001;
+  assign phase_polarity = (phase_ct < microstep_count  ) ? 4'b1010 :
+                          (phase_ct < microstep_count*2) ? 4'b0110 :
+                          (phase_ct < microstep_count*3) ? 4'b0101 :
+                                                           4'b1001 ;
 
   assign phase_a1 = (enable & vref_a) ? phase_polarity[0] : brake_a;
   assign phase_a2 = (enable & vref_a) ? phase_polarity[1] : brake_a;
