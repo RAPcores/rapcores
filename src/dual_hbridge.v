@@ -26,8 +26,8 @@ module dual_hbridge #(
   // TODO: if phase_ct is initialized BRAM does not infer
   // TODO: phase_ct must be initialized on enable does not enable before step
   reg [7:0] phase_ct; // needs to be the size of microsteps, for LUT
-  wire signed [2:0] phase_inc; // Phase increment per step
-  wire [2:0] abs_increment;
+  wire signed [7:0] phase_inc; // Phase increment per step
+  wire [7:0] abs_increment;
 
   // Table of phases
   reg [7:0] phase_table [0:255]; // Larger to trigger BRAM inference
@@ -73,7 +73,14 @@ module dual_hbridge #(
   assign phase_b1 = (enable & vref_b) ? phase_polarity[2] : brake_b;
   assign phase_b2 = (enable & vref_b) ? phase_polarity[3] : brake_b;
 
-  assign abs_increment = 1'b1;
+  assign abs_increment = (microsteps == 8'd0 ) ? 8'd64 :
+                         (microsteps <= 8'd2 ) ? 8'd32 :
+                         (microsteps <= 8'd4 ) ? 8'd16 :
+                         (microsteps <= 8'd8 ) ? 8'd8  :
+                         (microsteps <= 8'd16) ? 8'd4  :
+                         (microsteps <= 8'd32) ? 8'd2  :
+                                                 8'd1  ;
+
   assign phase_inc = dir ? abs_increment : -abs_increment; // Generate increment, multiple of microsteps\
 
   reg [1:0] step_r;
