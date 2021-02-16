@@ -205,6 +205,10 @@ by a factor `C`: :math:`(C \cdot cos(\theta), C \cdot sin(\theta))`. Then using 
 Then the matter of partitioning the 12 bit space of the PWM become quite simple. For example we may use 8 bits for the trigonometric functions (implemented as lookup tables in practice), and 4 bits for current.
 Which gives sufficient precision for 64 microsteps and 16 discrete current values.
 
+So now we can do space vector modulation. But where do we put it? The answer is as a voltage reference or gate PWM input. For example we may use this output to
+create a reference for a 1-bit ADC by adding a RC filter to the output in a `chopper drive <https://en.wikipedia.org/wiki/Chopper_(electronics)>`_. 
+Or for a dead-reckoned approach this PWM can be used to quickly turn the gate drivers on and off. An example of this can be found in the RAPcores Dual H Bridge module.
+
 
 SVM in Three Phase
 ------------------
