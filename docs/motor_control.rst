@@ -144,6 +144,8 @@ that we do not achieve the peak torque attainable in the corners of the square, 
 PWM Concepts
 ------------
 
+Below is a simple PWM module in verilog:
+
 .. code-block:: verilog
   :linenos:
 
@@ -170,3 +172,43 @@ PWM Concepts
 
     endmodule
 
+We can see that the PWM output frequency is a function of the base clock frequency (`clk`) and the number of bits used for the accumulator. E.g.:
+
+.. math::
+
+  F_{PMW} = \frac{F_{clk}}{2^{bits}}
+
+
+For quiet operation and fast updates we want the PWM frequency to be superaudible, so a value greater than 30khz. Assume we use a PLL to achieve
+a higher operational frequency for `PWM` module at 150mhz. The bit resolution of the PWM can be calculated thus:
+
+.. math::
+
+  bits = \log_2({F_{PMW}/F_{clk}})
+
+In our example of a 30khz output with a 150mhz accumulator clock we get ~12.3 bit resolution. For simplicity we will use 12 bits going forward.
+
+Now the challenge is how to compute the value to the PWM such that we bring both the current and the microstep/phase angle into a single value.
+In the next section we will see this is a relatively straight forward process that falls out of the vector model.
+
+
+Applied Space Vector Modulation
+-------------------------------
+
+Recall that a vector (:math:`\vec{A}`) may be element-wise scaled by a given factor such that the length (:math:`\left\lVert\vec{A}\right\rVert`) is scaled by the same factor.
+Our vector is formed from a given angle (or microstep position) :math:`\theta` as: :math:`(cos(\theta), sin(\theta))`. Then scaling the current is simply multiplication of this vector
+by a factor `C`: :math:`(C \cdot cos(\theta), C \cdot sin(\theta))`. Then using the above identify we known that the length of this vector is:
+
+.. math::
+  \left\lVert(C \cdot cos(\theta), C \cdot sin(\theta))\right\rVert = C
+
+Then the matter of partitioning the 12 bit space of the PWM become quite simple. For example we may use 8 bits for the trigonometric functions (implemented as lookup tables in practice), and 4 bits for current.
+Which gives sufficient precision for 64 microsteps and 16 discrete current values.
+
+
+SVM in Three Phase
+------------------
+
+For the mathematically inclined, you may notice that the bipolar stepper is nice as the phases form an orthonormal basis. In three phase this is not the case.
+We have yet to implement three phase in RAPcores, but in the interim `the wikipedia page <https://en.wikipedia.org/wiki/Space_vector_modulation>`_ has some
+information on handling this case.
