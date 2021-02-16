@@ -1,12 +1,12 @@
-# RAPcore
+# RAPcores
 
 ![RAPcore](https://github.com/RAPcores/Ulticores/workflows/RAPCore/badge.svg)
 
-https://rapcores.github.io/rapcores/
+http://rapcores.org/rapcores/
 
-The Robotic Application Processing Core.
+Robotic Application Processing Cores.
 
-RAPcore is a project targeting FPGAs and ASIC devices for the next generation of motor and motion
+RAPcores is a project targeting FPGAs and ASIC devices for the next generation of motor and motion
 control applications. It is a peripheral that sits between firmwares and motors to free up
 processing on the microcontroller and greatly simplify the motor driver.
 
@@ -27,9 +27,13 @@ The following FPGA architectures are supported and tested:
 
 We welcome ports to other architectures.
 
+An early pathfinder has been hardened on ASIC for the Skywater Open MPW run using OpenLANE:
+
+- [MPW-one ASIC](https://github.com/RAPcores/caravel_rapcores)
+
 ## Build Requirements
 
-RAPcore uses the free and open source Yosys and nextpnr tool chains.
+RAPcores uses the free and open source Yosys and nextpnr tool chains.
 See the [dev docs](https://rapcores.github.io/rapcores/dev.html) for more information.
 
 ## Documentation
