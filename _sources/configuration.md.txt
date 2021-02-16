@@ -55,6 +55,26 @@ Enables the SPI Interface.
 - `COPI` - SPI Controller Out Peripheral In (RAPcores is the Peripheral)
 - `CIPO` - SPI Controller In Peripheral Out
 
+## PWM
+
+For high resolution PWM signals a PLL is required. This acts as a clock multiplier, and for example
+given a 16mhz clock, a 200mhz signal can be used for things like accumulators and timing.
+
+To enable declare the following in the ".v" configuration file:
+
+```
+`define PWMPLL
+```
+
+Then inside of the ".mk" aguements we will need to declare the frequency (in mhz):
+
+```
+PWMFREQ = 275
+```
+
+This will allow PWM signals to use this clock for accumulators giving higher precision and
+less audible noise in the case of motor drives.
+
 ## Motors
 
 In addition to device-specific counts, a motor count must be defines as so:

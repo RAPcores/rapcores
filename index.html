@@ -12,6 +12,7 @@
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Release Notes" href="releases.html" />
@@ -67,6 +68,8 @@ circuitry.</p>
 <li><p>High-speed Quadrature Encoder Accumulator</p></li>
 <li><p>High-Speed SPI Bus</p></li>
 </ul>
+<div class="math notranslate nohighlight">
+\[\]</div>
 </div>
 <div class="section" id="contents">
 <h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
@@ -90,6 +93,7 @@ circuitry.</p>
 <li class="toctree-l1"><a class="reference internal" href="configuration.html">Board Configuration</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="configuration.html#makefile-mk-parameters">Makefile (.mk) Parameters</a></li>
 <li class="toctree-l2"><a class="reference internal" href="configuration.html#spi-interface">SPI Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#pwm">PWM</a></li>
 <li class="toctree-l2"><a class="reference internal" href="configuration.html#motors">Motors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="configuration.html#encoders">Encoders</a></li>
 <li class="toctree-l2"><a class="reference internal" href="configuration.html#flow-control-and-events">Flow Control and Events</a></li>
@@ -115,6 +119,8 @@ circuitry.</p>
 <li class="toctree-l1"><a class="reference internal" href="motor_control.html">Motor Control</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="motor_control.html#definitions">Definitions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="motor_control.html#electrical-commutation">Electrical Commutation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="motor_control.html#commutation-tables">Commutation Tables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="motor_control.html#space-vector-modulation">Space Vector Modulation</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="interfaces.html">Interfaces</a><ul>
@@ -188,7 +194,7 @@ circuitry.</p>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2019, RAPcore developers.
+      &copy;2019-2021, RAPcore developers.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.4</a>

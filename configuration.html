@@ -12,6 +12,7 @@
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Developer Docs" href="dev.html" />
@@ -94,6 +95,21 @@ tools to generate the bitstream of the RAPcores for FPGAs. These are required fo
 <li><p><code class="docutils literal notranslate"><span class="pre">CIPO</span></code> - SPI Controller In Peripheral Out</p></li>
 </ul>
 </div>
+</div>
+<div class="section" id="pwm">
+<h2>PWM<a class="headerlink" href="#pwm" title="Permalink to this headline">¶</a></h2>
+<p>For high resolution PWM signals a PLL is required. This acts as a clock multiplier, and for example
+given a 16mhz clock, a 200mhz signal can be used for things like accumulators and timing.</p>
+<p>To enable declare the following in the “.v” configuration file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define PWMPLL
+</pre></div>
+</div>
+<p>Then inside of the “.mk” aguements we will need to declare the frequency (in mhz):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">PWMFREQ</span> <span class="o">=</span> <span class="mi">275</span>
+</pre></div>
+</div>
+<p>This will allow PWM signals to use this clock for accumulators giving higher precision and
+less audible noise in the case of motor drives.</p>
 </div>
 <div class="section" id="motors">
 <h2>Motors<a class="headerlink" href="#motors" title="Permalink to this headline">¶</a></h2>
@@ -260,6 +276,7 @@ by making a <code class="docutils literal notranslate"><span class="pre">LOGICAN
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Board Configuration</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#makefile-mk-parameters">Makefile (.mk) Parameters</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#spi-interface">SPI Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pwm">PWM</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#motors">Motors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#encoders">Encoders</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#flow-control-and-events">Flow Control and Events</a></li>
@@ -307,7 +324,7 @@ by making a <code class="docutils literal notranslate"><span class="pre">LOGICAN
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2019, RAPcore developers.
+      &copy;2019-2021, RAPcore developers.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.4</a>
