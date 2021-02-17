@@ -33,9 +33,9 @@ In contrast to integrated drivers e.g. that take PWM for BLDC, or step/direction
 the approach in RAPcores is to provide higher level APIs tailored for the application or
 action. Some examples:
 
-- "S"-curve stepping algorithms
-- Sensorless homing
-- Torque control
+* "S"-curve stepping algorithms
+* Sensorless homing
+* Torque control
 
 Commutation Tables
 ==================
@@ -90,14 +90,14 @@ Space Vector Modulation
 The key to smooth and efficient motor control is current regulation.
 Through current regulation in a motor, one can accomplish a few valuable things:
 
-- Microstepping (subdividing the commutation table)
-- Current regulation (limiting power output for efficiency)
+* Microstepping (subdividing the commutation table)
+* Current regulation (limiting power output for efficiency)
 
 With closed loop current regulation, e.g. through a current sense resistor, additional
 capabilities are also achieved:
 
-- Fault detection
-- Phase shift and skip detection
+* Fault detection
+* Phase shift and skip detection
 
 
 Vector Concepts
@@ -136,9 +136,9 @@ If we visualize each phase as a 2D plot we can see these commutation steps form 
 
 .. image:: ./img/bipolar-svm.svg
 
-Microstepping is possible in this space (a square), however it yield undesirable effects since the total current in the motor
+Microstepping is possible in this space (a square), however it yields undesirable effects since the total current in the motor
 varies due to a change of vector length as shown in the red arrow above. This can yield resonance and torque ripples. The objective
-is to create smooth motion as we traverse between the phases. Therefore we need to move our vector along a circle, such as the arrows in blue above. The tradeoff is
+is to create smooth motion as we traverse between the phases. Therefore we need to move our vector along a circle, such as the arrows in blue above. The trade-off is
 that we do not achieve the peak torque attainable in the corners of the square, but instead the motion is smooth and controllable.
 
 PWM Concepts
@@ -213,6 +213,6 @@ Or for a dead-reckoned approach this PWM can be used to quickly turn the gate dr
 SVM in Three Phase
 ------------------
 
-For the mathematically inclined, you may notice that the bipolar stepper is nice as the phases form an orthonormal basis. In three phase this is not the case.
+For the mathematically inclined, you may notice that the bipolar stepper is nice as the phases form an orthonormal basis in 2D space. In three phase this is not the case.
 We have yet to implement three phase in RAPcores, but in the interim `the wikipedia page <https://en.wikipedia.org/wiki/Space_vector_modulation>`_ has some
 information on handling this case.

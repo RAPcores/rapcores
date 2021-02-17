@@ -281,9 +281,9 @@ To start we must understand some basic concepts from vector algebra and trigonom
 </tbody>
 </table>
 <p>If we visualize each phase as a 2D plot we can see these commutation steps form the corners of a square as shown below:</p>
-<img alt="_images/bipolar-svm.svg" src="_images/bipolar-svm.svg" /><p>Microstepping is possible in this space (a square), however it yield undesirable effects since the total current in the motor
+<img alt="_images/bipolar-svm.svg" src="_images/bipolar-svm.svg" /><p>Microstepping is possible in this space (a square), however it yields undesirable effects since the total current in the motor
 varies due to a change of vector length as shown in the red arrow above. This can yield resonance and torque ripples. The objective
-is to create smooth motion as we traverse between the phases. Therefore we need to move our vector along a circle, such as the arrows in blue above. The tradeoff is
+is to create smooth motion as we traverse between the phases. Therefore we need to move our vector along a circle, such as the arrows in blue above. The trade-off is
 that we do not achieve the peak torque attainable in the corners of the square, but instead the motion is smooth and controllable.</p>
 </div>
 <div class="section" id="pwm-concepts">
@@ -360,7 +360,7 @@ Or for a dead-reckoned approach this PWM can be used to quickly turn the gate dr
 </div>
 <div class="section" id="svm-in-three-phase">
 <h3>SVM in Three Phase<a class="headerlink" href="#svm-in-three-phase" title="Permalink to this headline">¶</a></h3>
-<p>For the mathematically inclined, you may notice that the bipolar stepper is nice as the phases form an orthonormal basis. In three phase this is not the case.
+<p>For the mathematically inclined, you may notice that the bipolar stepper is nice as the phases form an orthonormal basis in 2D space. In three phase this is not the case.
 We have yet to implement three phase in RAPcores, but in the interim <a class="reference external" href="https://en.wikipedia.org/wiki/Space_vector_modulation">the wikipedia page</a> has some
 information on handling this case.</p>
 </div>
