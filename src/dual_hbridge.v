@@ -2,7 +2,7 @@
 
 module dual_hbridge #(
    parameter current_bits = 4,
-   parameter microstep_bits = 8,
+   parameter microstep_bits = 8, // should not be greater than 8
    parameter vref_off_brake = 1,
    parameter microstep_count = 64
 ) (
@@ -23,27 +23,21 @@ module dual_hbridge #(
     input  [7:0] current
 );
 
-  // TODO: if phase_ct is initialized BRAM does not infer
-  // TODO: phase_ct must be initialized on enable does not enable before step
-  reg [7:0] phase_ct; // needs to be the size of microsteps, for LUT
-  wire signed [7:0] phase_inc; // Phase increment per step
-  wire [7:0] abs_increment;
+  // Table of phases (BRAM on FPGA)
+  reg [7:0] phase_table [0:255];
 
-  // Table of phases
-  reg [7:0] phase_table [0:255]; // Larger to trigger BRAM inference
-
+  // Load sine table into BRAM
   initial $readmemb("lut/cos_lut.bit", phase_table);
 
-  wire [11:0] pwm_a;
-  wire [11:0] pwm_b;
+  // unscaled sine value based on phase location (retrieved from BRAM)
+  reg [microstep_bits-1:0] phase_a;
+  reg [microstep_bits-1:0] phase_b;
 
-  reg [7:0] phase_a;
-  reg [7:0] phase_b;
+  // sine value scaled by the current
+  wire [microstep_bits+current_bits-1:0] pwm_a = phase_a[7:(8-microstep_bits)]*current[7:(8-current_bits)];
+  wire [microstep_bits+current_bits-1:0] pwm_b = phase_b[7:(8-microstep_bits)]*current[7:(8-current_bits)];
 
-  assign pwm_a = phase_a[7:(8-microstep_bits)]*current[7:(8-current_bits)];
-  assign pwm_b = phase_b[7:(8-microstep_bits)]*current[7:(8-current_bits)];
-
-  // Microstep -> vector angle
+  // Microstep*current -> vector angle voltage reference
   pwm #(.bits(microstep_bits+current_bits)) ma (.clk(pwm_clk),
           .resetn (resetn),
           .val(pwm_a),
@@ -53,8 +47,7 @@ module dual_hbridge #(
           .val(pwm_b),
           .pwm(vref_b));
 
-
-  // Set braking when PWM off
+  // Set braking when PWM off (type of decay for integrated bridges without current chop)
   wire brake_a, brake_b;
   if (vref_off_brake) begin
     assign brake_a = ((!enable & brake) | !vref_a);
@@ -71,20 +64,25 @@ module dual_hbridge #(
                           (phase_ct < microstep_count*3) ? 4'b0101 :
                                                            4'b1001 ;
 
+  // Set the bridge directions
   assign phase_a1 = (enable & vref_a) ? phase_polarity[0] : brake_a;
   assign phase_a2 = (enable & vref_a) ? phase_polarity[1] : brake_a;
   assign phase_b1 = (enable & vref_b) ? phase_polarity[2] : brake_b;
   assign phase_b2 = (enable & vref_b) ? phase_polarity[3] : brake_b;
 
-  assign abs_increment = (microsteps == 8'd0 ) ? 8'd64 :
-                         (microsteps <= 8'd2 ) ? 8'd32 :
-                         (microsteps <= 8'd4 ) ? 8'd16 :
-                         (microsteps <= 8'd8 ) ? 8'd8  :
-                         (microsteps <= 8'd16) ? 8'd4  :
-                         (microsteps <= 8'd32) ? 8'd2  :
-                                                 8'd1  ;
+  // Set the increment across the phase table from the specified microsteps
+  wire [7:0] abs_increment = (microsteps == 8'd0 ) ? 8'd64 :
+                             (microsteps <= 8'd2 ) ? 8'd32 :
+                             (microsteps <= 8'd4 ) ? 8'd16 :
+                             (microsteps <= 8'd8 ) ? 8'd8  :
+                             (microsteps <= 8'd16) ? 8'd4  :
+                             (microsteps <= 8'd32) ? 8'd2  :
+                                                     8'd1  ;
 
-  assign phase_inc = dir ? abs_increment : -abs_increment; // Generate increment, multiple of microsteps\
+  // Set the increment sign based on direction
+  wire signed [7:0] phase_inc = dir ? abs_increment : -abs_increment;
+
+  reg [7:0] phase_ct;
 
   reg [1:0] step_r;
 
@@ -93,17 +91,13 @@ module dual_hbridge #(
       step_r <= 2'b0;
     end else if (resetn) begin
       step_r <= {step_r[0], step};
-      
-      // TODO: Need to add safety SPI or here
-      //`ifdef FORMAL
-      //  assert( (microsteps == 3'b010 && phase_inc == 3'b001) ||
-      //          (microsteps == 3'b001 && phase_inc == 3'b010) );
-      //`endif
 
       // Traverse the table based on direction, rolls over
       if (step_r == 2'b01) begin // rising edge
         phase_ct <= phase_ct + phase_inc;
       end
+
+      // Load sine/cosine from RAM
       phase_a <= phase_table[phase_ct+8'd64];
       phase_b <= phase_table[phase_ct];
     end
