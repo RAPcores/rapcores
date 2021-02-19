@@ -71,17 +71,6 @@ module spi_state_machine #(
   input spi_clock
 );
 
-  `ifdef SPIPLL
-    // PLL for SPI Bus
-    wire spi_clock;
-    wire spipll_locked;
-    spi_pll spll (.clock_in(CLK),
-                  .clock_out(spi_clock),
-                  .locked(spipll_locked));
-  `else
-    wire spi_clock = CLK;
-  `endif
-
   // Word handler
   // The system operates on 64 bit little endian words
   // This should make it easier to send 64 bit chunks from the host controller
@@ -213,7 +202,6 @@ module spi_state_machine #(
   `endif
 
   `ifdef ULTIBRIDGE
-    genvar i;
     generate
       for (i=0; i<motor_count; i=i+1) begin
         microstepper_top microstepper0(
