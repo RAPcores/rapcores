@@ -161,17 +161,16 @@ module spi_state_machine #(
   // Stepper Configs
   //
 
-  reg [7:0] microsteps;
-  reg [7:0] current;
-  reg [9:0] config_offtime;
-  reg [7:0] config_blanktime;
-  reg [9:0] config_fastdecay_threshold;
-  reg [7:0] config_minimum_on_time;
-  reg [10:0] config_current_threshold;
-  reg [7:0] config_chargepump_period;
-  reg config_invert_highside;
-  reg config_invert_lowside;
-
+  reg [7:0] microsteps [0:motor_count-1];
+  reg [7:0] current [0:motor_count-1];
+  reg [9:0] config_offtime [0:motor_count-1];
+  reg [7:0] config_blanktime [0:motor_count-1];
+  reg [9:0] config_fastdecay_threshold [0:motor_count-1];
+  reg [7:0] config_minimum_on_time [0:motor_count-1];
+  reg [10:0] config_current_threshold [0:motor_count-1];
+  reg config_invert_highside [0:motor_count-1];
+  reg config_invert_lowside [0:motor_count-1];
+  reg [7:0] config_chargepump_period; // one chargepump for all
 
   //
   // Stepper Modules
@@ -195,8 +194,8 @@ module spi_state_machine #(
                       .dir (dir[i]),
                       .enable (enable[i]),
                       .brake  (brake[i]),
-                      .microsteps (microsteps),
-                      .current (current));
+                      .microsteps (microsteps[i]),
+                      .current (current[i]));
       end
     endgenerate
   `endif
@@ -226,14 +225,14 @@ module spi_state_machine #(
           .analog_cmp2 (analog_cmp2[i]),
           .analog_out2 (analog_out2[i]),
           .chargepump_pin (CHARGEPUMP),
-          .config_offtime (config_offtime),
-          .config_blanktime (config_blanktime),
-          .config_fastdecay_threshold (config_fastdecay_threshold),
-          .config_minimum_on_time (config_minimum_on_time),
-          .config_current_threshold (config_current_threshold),
+          .config_offtime (config_offtime[i]),
+          .config_blanktime (config_blanktime[i]),
+          .config_fastdecay_threshold (config_fastdecay_threshold[i]),
+          .config_minimum_on_time (config_minimum_on_time[i]),
+          .config_current_threshold (config_current_threshold[i]),
           .config_chargepump_period (config_chargepump_period),
-          .config_invert_highside (config_invert_highside),
-          .config_invert_lowside (config_invert_lowside),
+          .config_invert_highside (config_invert_highside[i]),
+          .config_invert_lowside (config_invert_lowside[i]),
           //.cos_table (cos_table),
           .step (step[i]),
           .dir (dir[i]),
@@ -364,17 +363,9 @@ module spi_state_machine #(
   reg [7:0] nmot;
 
   always @(posedge CLK) if (!resetn) begin
-    // Stepper Config
-    microsteps <= 2;
-    current <= 140;
-    config_offtime <= 810;
-    config_blanktime <= 27;
-    config_fastdecay_threshold <= 706;
-    config_minimum_on_time <= 54;
-    config_current_threshold <= 1024;
+
     config_chargepump_period <= 91;
-    config_invert_highside <= `DEFAULT_BRIDGE_INVERTING;
-    config_invert_lowside <= `DEFAULT_BRIDGE_INVERTING;
+
     enable_r <= {(motor_count){1'b0}};
 
     word_send_data <= 0;
@@ -408,6 +399,17 @@ module spi_state_machine #(
       // Encoders
       step_encoder_store[nmot] <= 0;
       encoder_store[nmot] <= 0;
+
+      // Stepper Config
+      microsteps[nmot] <= 2;
+      current[nmot] <= 140;
+      config_offtime[nmot] <= 810;
+      config_blanktime[nmot] <= 27;
+      config_fastdecay_threshold[nmot] <= 706;
+      config_minimum_on_time[nmot] <= 54;
+      config_current_threshold[nmot] <= 1024;
+      config_invert_highside[nmot] <= `DEFAULT_BRIDGE_INVERTING;
+      config_invert_lowside[nmot] <= `DEFAULT_BRIDGE_INVERTING;
     end
     /* verilator lint_off WIDTH */
 
@@ -459,17 +461,17 @@ module spi_state_machine #(
           // Set Microstepping
           `CMD_MOTORCONFIG: begin
             // TODO needs to be power of two
-            current[7:0] <= word_data_received[15:8];
-            microsteps[2:0] <= word_data_received[2:0];
+            current[word_data_received[55:48]][7:0] <= word_data_received[15:8];
+            microsteps[word_data_received[55:48]][2:0] <= word_data_received[2:0];
           end
 
           // Set Microstepping Parameters
           `CMD_MICROSTEPPER_CONFIG: begin
-            config_offtime[9:0] <= word_data_received[39:30];
-            config_blanktime[7:0] <= word_data_received[29:22];
-            config_fastdecay_threshold[9:0] <= word_data_received[21:12];
-            config_minimum_on_time[7:0] <= word_data_received[18:11];
-            config_current_threshold[10:0] <= word_data_received[10:0];
+            config_offtime[word_data_received[55:48]][9:0] <= word_data_received[39:30];
+            config_blanktime[word_data_received[55:48]][7:0] <= word_data_received[29:22];
+            config_fastdecay_threshold[word_data_received[55:48]][9:0] <= word_data_received[21:12];
+            config_minimum_on_time[word_data_received[55:48]][7:0] <= word_data_received[18:11];
+            config_current_threshold[word_data_received[55:48]][10:0] <= word_data_received[10:0];
           end
 
           // Set chargepump period
@@ -479,8 +481,8 @@ module spi_state_machine #(
 
           // Invert Bridge outputs
           `CMD_BRIDGEINVERT: begin
-            config_invert_highside <= word_data_received[1];
-            config_invert_lowside <= word_data_received[0];
+            config_invert_highside[word_data_received[55:48]] <= word_data_received[1];
+            config_invert_lowside[word_data_received[55:48]] <= word_data_received[0];
           end
 
           // Write to Cosine Table
