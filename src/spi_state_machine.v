@@ -18,27 +18,33 @@ module spi_state_machine #(
   input  wire COPI,
   output wire CIPO,
 
-  // Step IO
-  output wire [motor_count-1:0] step,
-  output wire [motor_count-1:0] dir,
-  output wire [motor_count-1:0] enable,
-  output wire [motor_count-1:0] brake,
-
-  // Stepper Config
-  output reg [7:0] microsteps,
-  output reg [7:0] current,
-  output reg [9:0] config_offtime,
-  output reg [7:0] config_blanktime,
-  output reg [9:0] config_fastdecay_threshold,
-  output reg [7:0] config_minimum_on_time,
-  output reg [10:0] config_current_threshold,
-  output reg [7:0] config_chargepump_period,
-  output reg config_invert_highside,
-  output reg config_invert_lowside,
-  //output [511:0] cos_table,
-
-  // encoder
-  input [63:0] encoder_count,
+  `ifdef DUAL_HBRIDGE
+    output wire [`DUAL_HBRIDGE-1:0] PHASE_A1,  // Phase A
+    output wire [`DUAL_HBRIDGE-1:0] PHASE_A2,  // Phase A
+    output wire [`DUAL_HBRIDGE-1:0] PHASE_B1,  // Phase B
+    output wire [`DUAL_HBRIDGE-1:0] PHASE_B2,  // Phase B
+    output wire [`DUAL_HBRIDGE-1:0] VREF_A,  // VRef
+    output wire [`DUAL_HBRIDGE-1:0] VREF_B,  // VRef
+  `endif
+  `ifdef ULTIBRIDGE
+    output wire CHARGEPUMP,
+    input  wire [`ULTIBRIDGE-1:0] analog_cmp1,
+    output wire [`ULTIBRIDGE-1:0] analog_out1,
+    input  wire [`ULTIBRIDGE-1:0] analog_cmp2,
+    output wire [`ULTIBRIDGE-1:0] analog_out2,
+    output wire [`ULTIBRIDGE-1:0] PHASE_A1,  // Phase A
+    output wire [`ULTIBRIDGE-1:0] PHASE_A2,  // Phase A
+    output wire [`ULTIBRIDGE-1:0] PHASE_B1,  // Phase B
+    output wire [`ULTIBRIDGE-1:0] PHASE_B2,  // Phase B
+    output wire [`ULTIBRIDGE-1:0] PHASE_A1_H,  // Phase A
+    output wire [`ULTIBRIDGE-1:0] PHASE_A2_H,  // Phase A
+    output wire [`ULTIBRIDGE-1:0] PHASE_B1_H,  // Phase B
+    output wire [`ULTIBRIDGE-1:0] PHASE_B2_H,  // Phase B
+  `endif
+  `ifdef QUAD_ENC
+    input wire [`QUAD_ENC-1:0] ENC_B,
+    input wire [`QUAD_ENC-1:0] ENC_A,
+  `endif
 
   // Event IO
   `ifdef BUFFER_DTR
@@ -60,7 +66,9 @@ module spi_state_machine #(
     output wire [motor_count-1:0] DIROUTPUT,
     output wire [motor_count-1:0] ENOUTPUT,
   `endif
-  input CLK
+  input CLK,
+  input pwm_clock,
+  input spi_clock
 );
 
   `ifdef SPIPLL
@@ -140,16 +148,16 @@ module spi_state_machine #(
 
   // Motor Brake
   reg [motor_count-1:0] brake_r;
-  assign brake[motor_count-1:0] = brake_r;
+  wire [motor_count-1:0] brake = brake_r;
 
   `ifndef STEPINPUT
-    assign dir[motor_count-1:0] = dir_r[moveind]; // set direction
-    assign step[motor_count-1:0] = dda_step;
-    assign enable[motor_count-1:0] = enable_r;
+    wire [motor_count-1:0] dir = dir_r[moveind]; // set direction
+    wire [motor_count-1:0] step = dda_step;
+    wire [motor_count-1:0] enable = enable_r;
   `else
-    assign dir[motor_count-1:0] = dir_r[moveind] ^ DIRINPUT; // set direction
-    assign step[motor_count-1:0] = dda_step ^ STEPINPUT;
-    assign enable[motor_count-1:0] = enable_r | ENINPUT;
+    wire [motor_count-1:0] dir = dir_r[moveind] ^ DIRINPUT; // set direction
+    wire [motor_count-1:0] step = dda_step ^ STEPINPUT;
+    wire [motor_count-1:0] enable = enable_r | ENINPUT;
   `endif
 
   `ifdef STEPOUTPUT
@@ -157,6 +165,119 @@ module spi_state_machine #(
     assign DIROUTPUT = dir;
     assign ENOUTPUT = enable;
   `endif
+
+  wire [motor_count-1:0] faultn; // stepper fault
+
+  //
+  // Stepper Configs
+  //
+
+  reg [7:0] microsteps;
+  reg [7:0] current;
+  reg [9:0] config_offtime;
+  reg [7:0] config_blanktime;
+  reg [9:0] config_fastdecay_threshold;
+  reg [7:0] config_minimum_on_time;
+  reg [10:0] config_current_threshold;
+  reg [7:0] config_chargepump_period;
+  reg config_invert_highside;
+  reg config_invert_lowside;
+
+
+  //
+  // Stepper Modules
+  //
+
+  `ifdef DUAL_HBRIDGE
+    genvar i;
+    generate
+      for (i=0; i<motor_count; i=i+1) begin
+        dual_hbridge s0 (
+                      .clk (CLK),
+                      .resetn(resetn),
+                      .pwm_clk(pwm_clock),
+                      .phase_a1 (PHASE_A1[i]),
+                      .phase_a2 (PHASE_A2[i]),
+                      .phase_b1 (PHASE_B1[i]),
+                      .phase_b2 (PHASE_B2[i]),
+                      .vref_a (VREF_A[i]),
+                      .vref_b (VREF_B[i]),
+                      .step (step[i]),
+                      .dir (dir[i]),
+                      .enable (enable[i]),
+                      .brake  (brake[i]),
+                      .microsteps (microsteps),
+                      .current (current));
+      end
+    endgenerate
+  `endif
+
+  `ifdef ULTIBRIDGE
+    genvar i;
+    generate
+      for (i=0; i<motor_count; i=i+1) begin
+        microstepper_top microstepper0(
+          `ifdef LA_IN
+            .LA_IN(LA_IN),
+          `endif
+          `ifdef LA_OUT
+            .LA_OUT(LA_OUT),
+          `endif
+          .clk(CLK),
+          .resetn( resetn),
+          .phase_a1_l(PHASE_A1[i]),
+          .phase_a2_l(PHASE_A2[i]),
+          .phase_b1_l(PHASE_B1[i]),
+          .phase_b2_l(PHASE_B2[i]),
+          .phase_a1_h(PHASE_A1_H[i]),
+          .phase_a2_h(PHASE_A2_H[i]),
+          .phase_b1_h(PHASE_B1_H[i]),
+          .phase_b2_h(PHASE_B2_H[i]),
+          .analog_cmp1 (analog_cmp1[i]),
+          .analog_out1 (analog_out1[i]),
+          .analog_cmp2 (analog_cmp2[i]),
+          .analog_out2 (analog_out2[i]),
+          .chargepump_pin (CHARGEPUMP),
+          .config_offtime (config_offtime),
+          .config_blanktime (config_blanktime),
+          .config_fastdecay_threshold (config_fastdecay_threshold),
+          .config_minimum_on_time (config_minimum_on_time),
+          .config_current_threshold (config_current_threshold),
+          .config_chargepump_period (config_chargepump_period),
+          .config_invert_highside (config_invert_highside),
+          .config_invert_lowside (config_invert_lowside),
+          //.cos_table (cos_table),
+          .step (step[i]),
+          .dir (dir[i]),
+          .enable_in(enable[i]),
+          .faultn(faultn[i])
+          );
+      end
+    endgenerate
+  `endif
+
+
+  //
+  // Encoder
+  //
+  wire signed [63:0] encoder_count;
+  wire encoder_fault;
+  `ifdef QUAD_ENC
+    /* verilator lint_off PINMISSING */
+    // TODO: For ... generate
+    quad_enc #(.encbits(64)) encoder0
+    (
+      .resetn(resetn),
+      .clk(CLK),
+      .a(ENC_A[0]),
+      .b(ENC_B[0]),
+      .faultn(encoder_fault),
+      .count(encoder_count)
+      //.multiplier(encoder_multiplier)
+      );
+      /* verilator lint_off PINMISSING */
+  `endif
+
 
   wire loading_move;
   wire executing_move;
