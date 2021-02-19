@@ -44,13 +44,13 @@ module rapcore #(
       input wire [`QUAD_ENC-1:0] ENC_A,
     `endif
     `ifdef BUFFER_DTR
-      output wire BUFFER_DTR,
+      output BUFFER_DTR,
     `endif
     `ifdef MOVE_DONE
-      output wire MOVE_DONE,
+      output MOVE_DONE,
     `endif
     `ifdef HALT
-      input wire HALT,
+      input HALT,
     `endif
     `ifdef STEPINPUT
       input wire [motor_count-1:0] STEPINPUT,
@@ -78,6 +78,14 @@ module rapcore #(
     // drive USB pull-up resistor to '0' to disable USB
     assign USBPU = 0;
   `endif
+
+  // Wire declarations
+  // These are declared here so that we may just leave disconnected without
+  // ifdef in the modules for easier reuse
+  wire MOVE_DONE;
+  wire BUFFER_DTR;
+  wire HALT;
+
 
   //Reset
   wire resetn;
@@ -144,6 +152,10 @@ module rapcore #(
     .COPI(COPI),
     .CIPO(CIPO),
 
+    .buffer_dtr(BUFFER_DTR),
+    .move_done(MOVE_DONE),
+    .halt(HALT),
+
   `ifdef DUAL_HBRIDGE
     .PHASE_A1(PHASE_A1),  // Phase A
     .PHASE_A2(PHASE_A2),  // Phase A
@@ -173,15 +185,8 @@ module rapcore #(
   `endif
 
 
-    `ifdef BUFFER_DTR
-      .BUFFER_DTR(BUFFER_DTR),
-    `endif
-    `ifdef MOVE_DONE
-      .MOVE_DONE(MOVE_DONE),
-    `endif
-    `ifdef HALT
-      .HALT(HALT),
-    `endif
+
+
     `ifdef STEPINPUT
       .STEPINPUT(STEPINPUT),
       .DIRINPUT(DIRINPUT),

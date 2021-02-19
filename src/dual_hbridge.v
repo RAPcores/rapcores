@@ -63,6 +63,7 @@ module dual_hbridge #(
   end
 
   // determine phase polarity from quadrant
+  // TODO double check
   wire [3:0] phase_polarity;
   assign phase_polarity = (phase_ct < microstep_count  ) ? 4'b1010 :
                           (phase_ct < microstep_count*2) ? 4'b0110 :
