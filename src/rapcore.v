@@ -110,123 +110,15 @@ module rapcore #(
     wire pwm_clock = CLK;
   `endif
 
-
-  // Stepper Setup
-  // TODO: Generate statement?
-  // Stepper Config
-  wire [7:0] microsteps;
-  wire [7:0] current;
-  wire [9:0] config_offtime;
-  wire [7:0] config_blanktime;
-  wire [9:0] config_fastdecay_threshold;
-  wire [7:0] config_minimum_on_time;
-  wire [10:0] config_current_threshold;
-  wire [7:0] config_chargepump_period;
-  wire config_invert_highside;
-  wire config_invert_lowside;
-
-  // Stepper control lines
-  wire [motor_count-1:0] step;
-  wire [motor_count-1:0] dir;
-  wire [motor_count-1:0] enable;
-  wire [motor_count-1:0] brake;
-
-  // Stepper status outputs
-  wire [motor_count-1:0] faultn;
-
-
-  //
-  // Stepper Modules
-  //
-
-  `ifdef DUAL_HBRIDGE
-    genvar i;
-    generate
-      for (i=0; i<motor_count; i=i+1) begin
-        dual_hbridge s0 (
-                      .clk (CLK),
-                      .resetn(resetn),
-                      .pwm_clk(pwm_clock),
-                      .phase_a1 (PHASE_A1[i]),
-                      .phase_a2 (PHASE_A2[i]),
-                      .phase_b1 (PHASE_B1[i]),
-                      .phase_b2 (PHASE_B2[i]),
-                      .vref_a (VREF_A[i]),
-                      .vref_b (VREF_B[i]),
-                      .step (step[i]),
-                      .dir (dir[i]),
-                      .enable (enable[i]),
-                      .brake  (brake[i]),
-                      .microsteps (microsteps),
-                      .current (current));
-      end
-    endgenerate
-  `endif
-
-  `ifdef ULTIBRIDGE
-    genvar i;
-    generate
-      for (i=0; i<motor_count; i=i+1) begin
-        microstepper_top microstepper0(
-          `ifdef LA_IN
-            .LA_IN(LA_IN),
-          `endif
-          `ifdef LA_OUT
-            .LA_OUT(LA_OUT),
-          `endif
-          .clk(CLK),
-          .resetn( resetn),
-          .phase_a1_l(PHASE_A1[i]),
-          .phase_a2_l(PHASE_A2[i]),
-          .phase_b1_l(PHASE_B1[i]),
-          .phase_b2_l(PHASE_B2[i]),
-          .phase_a1_h(PHASE_A1_H[i]),
-          .phase_a2_h(PHASE_A2_H[i]),
-          .phase_b1_h(PHASE_B1_H[i]),
-          .phase_b2_h(PHASE_B2_H[i]),
-          .analog_cmp1 (analog_cmp1[i]),
-          .analog_out1 (analog_out1[i]),
-          .analog_cmp2 (analog_cmp2[i]),
-          .analog_out2 (analog_out2[i]),
-          .chargepump_pin (CHARGEPUMP),
-          .config_offtime (config_offtime),
-          .config_blanktime (config_blanktime),
-          .config_fastdecay_threshold (config_fastdecay_threshold),
-          .config_minimum_on_time (config_minimum_on_time),
-          .config_current_threshold (config_current_threshold),
-          .config_chargepump_period (config_chargepump_period),
-          .config_invert_highside (config_invert_highside),
-          .config_invert_lowside (config_invert_lowside),
-          //.cos_table (cos_table),
-          .step (step[i]),
-          .dir (dir[i]),
-          .enable_in(enable[i]),
-          .faultn(faultn[i])
-          );
-      end
-    endgenerate
-  `endif
-
-
-  //
-  // Encoder
-  //
-  wire signed [63:0] encoder_count;
-  wire encoder_fault;
-  `ifdef QUAD_ENC
-    /* verilator lint_off PINMISSING */
-    // TODO: For ... generate
-    quad_enc #(.encbits(64)) encoder0
-    (
-      .resetn(resetn),
-      .clk(CLK),
-      .a(ENC_A[0]),
-      .b(ENC_B[0]),
-      .faultn(encoder_fault),
-      .count(encoder_count)
-      //.multiplier(encoder_multiplier)
-      );
-      /* verilator lint_off PINMISSING */
+  // SPI PLL
+  `ifdef SPIPLL
+    wire spi_clock;
+    wire spipll_locked;
+    spi_pll spll (.clock_in(CLK),
+                  .clock_out(spi_clock),
+                  .locked(spipll_locked));
+  `else
+    wire spi_clock = CLK;
   `endif
 
   //
@@ -243,6 +135,8 @@ module rapcore #(
       .LA_OUT(LA_OUT),
     `endif
     .CLK(CLK),
+    .pwm_clock(pwm_clock),
+    .spi_clock(spi_clock),
     .resetn(resetn),
 
     .SCK(SCK),
@@ -250,23 +144,34 @@ module rapcore #(
     .COPI(COPI),
     .CIPO(CIPO),
 
-    .microsteps(microsteps),
-    .current(current),
-    .config_offtime(config_offtime),
-    .config_blanktime(config_blanktime),
-    .config_fastdecay_threshold(config_fastdecay_threshold),
-    .config_minimum_on_time(config_minimum_on_time),
-    .config_current_threshold(config_current_threshold),
-    .config_chargepump_period(config_chargepump_period),
-    .config_invert_highside(config_invert_highside),
-    .config_invert_lowside(config_invert_lowside),
+  `ifdef DUAL_HBRIDGE
+    .PHASE_A1(PHASE_A1),  // Phase A
+    .PHASE_A2(PHASE_A2),  // Phase A
+    .PHASE_B1(PHASE_B1),  // Phase B
+    .PHASE_B2(PHASE_B2),  // Phase B
+    .VREF_A(VREF_A),       // VRef
+    .VREF_B(VREF_B),       // VRef
+  `endif
+  `ifdef ULTIBRIDGE
+    .CHARGEPUMP (CHARGEPUMP ),
+    .analog_cmp1(analog_cmp1),
+    .analog_out1(analog_out1),
+    .analog_cmp2(analog_cmp2),
+    .analog_out2(analog_out2),
+    .PHASE_A1(PHASE_A1), // Phase A
+    .PHASE_A2(PHASE_A2), // Phase A
+    .PHASE_B1(PHASE_B1), // Phase B
+    .PHASE_B2(PHASE_B2), // Phase B
+    .PHASE_A1_H(PHASE_A1_H), // Phase A
+    .PHASE_A2_H(PHASE_A2_H), // Phase A
+    .PHASE_B1_H(PHASE_B1_H), // Phase B
+    .PHASE_B2_H(PHASE_B2_H), // Phase B
+  `endif
+  `ifdef QUAD_ENC
+    .ENC_B(ENC_B),
+    .ENC_A(ENC_A),
+  `endif
 
-    .encoder_count(encoder_count),
-
-    .step(step),
-    .dir(dir),
-    .enable(enable),
-    .brake(brake),
 
     `ifdef BUFFER_DTR
       .BUFFER_DTR(BUFFER_DTR),

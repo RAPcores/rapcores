@@ -40,9 +40,9 @@
 //`define LA_IN 2
 
 // Logic Analyzer IO for rapcore.v can be set here
-`define TOP_LA\
-  assign LA_OUT[1] = dir; \
-  assign LA_OUT[2] = analog_cmp2;
+//`define TOP_LA\
+//  assign LA_OUT[1] = dir; \
+//  assign LA_OUT[2] = analog_cmp2;
 
 // Logic Analyzer IO for microstepper_top.v can be set here
 //`define MICROSTEPPER_LA\
