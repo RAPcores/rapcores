@@ -12,11 +12,11 @@ module spi_state_machine #(
   `endif
 
   input resetn,
-  // SPI pins
-  input  wire SCK,
-  input  wire CS,
-  input  wire COPI,
-  output wire CIPO,
+
+  // Bus Interface
+  input wire [63:0] word_data_received,
+  output reg [63:0] word_send_data,
+  input wire word_received,
 
   `ifdef DUAL_HBRIDGE
     output wire [`DUAL_HBRIDGE-1:0] PHASE_A1,  // Phase A
@@ -62,35 +62,8 @@ module spi_state_machine #(
     output wire [motor_count-1:0] ENOUTPUT,
   `endif
   input CLK,
-  input pwm_clock,
-  input spi_clock
+  input pwm_clock
 );
-
-  // Word handler
-  // The system operates on 64 bit little endian words
-  // This should make it easier to send 64 bit chunks from the host controller
-  reg [63:0] word_send_data;
-  reg [63:0] word_data_received;
-
-  wire [63:0] word_data_received_w;
-  always @(posedge spi_clock)
-  if(!resetn)
-    word_data_received <= 0;
-  else
-    word_data_received <= word_data_received_w;
-
-  wire word_received;
-  SPIWord word_proc (
-                .clk(spi_clock),
-                .resetn (resetn),
-                .SCK(SCK),
-                .CS(CS),
-                .COPI(COPI),
-                .CIPO(CIPO),
-                .word_send_data(word_send_data),
-                .word_received(word_received),
-                .word_data_received(word_data_received_w));
-
 
   //
   // Stepper Timing and Buffer Setup
