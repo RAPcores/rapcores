@@ -35,49 +35,51 @@ module SPI (
   assign CIPO = (CS_active) ? tx_byte[txbitcnt] : 1'bZ;
 
 
-  always @(posedge clk) if (!resetn) begin
-    // Registers to sync IO with FPGA clock
-    SCKr <= 3'b0;
-    CSr <= 3'h1; // active low, init unselected
-    COPIr <= 2'b0;
+  always @(posedge clk) begin
+    if (!resetn) begin
+      // Registers to sync IO with FPGA clock
+      SCKr <= 3'b0;
+      CSr <= 3'h1; // active low, init unselected
+      COPIr <= 2'b0;
 
-    // Output Byte and ready flag
-    rx_byte_ready_r <= 0;
-    rx_byte <= 8'b0;
+      // Output Byte and ready flag
+      rx_byte_ready_r <= 0;
+      rx_byte <= 8'b0;
 
-    // count the number of RX and TX bits RX incrments on rising, TX on falling SCK edge
-    rxbitcnt <= 3'b000; // counts up
-    txbitcnt <= 3'b111; // counts down
-  end else if (resetn) begin
+      // count the number of RX and TX bits RX incrments on rising, TX on falling SCK edge
+      rxbitcnt <= 3'b000; // counts up
+      txbitcnt <= 3'b111; // counts down
+    end else if (resetn) begin
 
-    // Use a 3 bit shift register to sync CS, COPI, CIPO, with FPGA clock
-    SCKr <= {SCKr[1:0], SCK};
-    CSr <= {CSr[1:0], CS};
-    COPIr <= {COPIr[0], COPI};
+      // Use a 3 bit shift register to sync CS, COPI, CIPO, with FPGA clock
+      SCKr <= {SCKr[1:0], SCK};
+      CSr <= {CSr[1:0], CS};
+      COPIr <= {COPIr[0], COPI};
 
-    if (CS_active) begin
-      // Recieve increment on rising edge
-      if (SCK_risingedge) begin
-        rxbitcnt <= rxbitcnt + 3'b001;
-        // Shift in Recieved bits
-        rx_byte <= {rx_byte[6:0], COPI_data};
+      if (CS_active) begin
+        // Recieve increment on rising edge
+        if (SCK_risingedge) begin
+          rxbitcnt <= rxbitcnt + 3'b001;
+          // Shift in Recieved bits
+          rx_byte <= {rx_byte[6:0], COPI_data};
 
-        // Trigger Byte recieved
-        rx_byte_ready_r <= (rxbitcnt[2:0] == 3'b111);
+          // Trigger Byte recieved
+          rx_byte_ready_r <= (rxbitcnt[2:0] == 3'b111);
+        end
+
+        // Transmit increment
+        if (SCK_fallingedge) begin
+          txbitcnt <= txbitcnt - 3'b001; // rolls over
+        end
+
+        //`ifdef FORMAL
+        //  assert(rx_byte_ready && rxbitcnt == 3'b111);
+        //`endif
+      end else begin // !CS_active
+        // Reset counts if a txfer is interrupted for some reason
+        rxbitcnt <= 3'b000;
+        txbitcnt <= 3'b111;
       end
-
-      // Transmit increment
-      if (SCK_fallingedge) begin
-        txbitcnt <= txbitcnt - 3'b001; // rolls over
-      end
-
-      //`ifdef FORMAL
-      //  assert(rx_byte_ready && rxbitcnt == 3'b111);
-      //`endif
-    end else begin
-      // Reset counts if a txfer is interrupted for some reason
-      rxbitcnt <= 3'b000;
-      txbitcnt <= 3'b111;
     end
   end
 
