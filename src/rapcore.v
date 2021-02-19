@@ -44,13 +44,13 @@ module rapcore #(
       input wire [`QUAD_ENC-1:0] ENC_A,
     `endif
     `ifdef BUFFER_DTR
-      output BUFFER_DTR,
+      output wire BUFFER_DTR,
     `endif
     `ifdef MOVE_DONE
-      output MOVE_DONE,
+      output wire MOVE_DONE,
     `endif
     `ifdef HALT
-      input HALT,
+      input wire HALT,
     `endif
     `ifdef STEPINPUT
       input wire [motor_count-1:0] STEPINPUT,
@@ -82,9 +82,15 @@ module rapcore #(
   // Wire declarations
   // These are declared here so that we may just leave disconnected without
   // ifdef in the modules for easier reuse
-  wire MOVE_DONE;
-  wire BUFFER_DTR;
-  wire HALT;
+  `ifndef BUFFER_DTR
+    wire BUFFER_DTR;
+  `endif
+  `ifndef MOVE_DONE
+    wire MOVE_DONE;
+  `endif
+  `ifndef HALT
+    wire HALT;
+  `endif
 
 
   //Reset
