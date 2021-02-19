@@ -16,7 +16,7 @@
 `include "../src/spi_state_machine.v"
 `include "../src/spi.v"
 `include "../src/dual_hbridge.v"
-`include "../src/step_counter.v"
+`include "../src/generated/pwm_pll_sim.v"
 `include "../src/microstepper/microstepper_top.v"
 `include "../src/microstepper/analog_out.v"
 `include "../src/microstepper/chargepump.v"
