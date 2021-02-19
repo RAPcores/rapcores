@@ -88,14 +88,14 @@ endmodule
 // 32 bit word SPI wrapper for Little endian 8 bit transfers
 //
 module SPIWord (
-    input             clk,
-    input             resetn,
-    input             SCK,
-    input             CS,
-    input             COPI,
-    output            CIPO,
-    input      [63:0] word_send_data,
-    output            word_received,
+    input wire        clk,
+    input wire        resetn,
+    input wire        SCK,
+    input wire        CS,
+    input wire        COPI,
+    output wire       CIPO,
+    input wire [63:0] word_send_data,
+    output wire       word_received,
     output reg [63:0] word_data_received
 );
 
@@ -132,7 +132,15 @@ module SPIWord (
     end
   end
 
-  assign word_received = (byte_count == 8);
+  wire word_received = (byte_count == 8);
+
+  // Cross clock
+  //wire [63:0] word_data_received_w;
+  //always @(posedge clk)
+  //if(!resetn)
+  //  word_data_received <= 0;
+  //else
+  //  word_data_received <= word_data_received_w;
 
   //TODO: Use generate
   assign word_slice[0] = word_send_data[7:0]; // This should only hit at initialization
