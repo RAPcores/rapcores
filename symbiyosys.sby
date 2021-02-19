@@ -12,7 +12,6 @@ read -formal clock_divider.v
 read -formal dda_fsm.v
 read -formal dda_timer.v
 read -formal spi.v
-read -formal step_counter.v
 read -formal dual_hbridge.v
 read -formal quad_enc.v
 read -formal pwm.v
@@ -38,7 +37,6 @@ src/clock_divider.v
 src/dda_fsm.v
 src/dda_timer.v
 src/spi.v
-src/step_counter.v
 src/dual_hbridge.v
 src/spi_state_machine.v
 src/rapcore.v

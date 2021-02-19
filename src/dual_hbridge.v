@@ -4,7 +4,8 @@ module dual_hbridge #(
    parameter current_bits = 4,
    parameter microstep_bits = 8, // should not be greater than 8
    parameter vref_off_brake = 1,
-   parameter microstep_count = 64
+   parameter microstep_count = 64,
+   parameter step_count_bits = 32
 ) (
     input clk,
     input resetn,
@@ -20,8 +21,12 @@ module dual_hbridge #(
     input        enable,
     input        brake,
     input  [7:0] microsteps,
-    input  [7:0] current
+    input  [7:0] current,
+    output wire [step_count_bits-1:0] step_count
 );
+
+  reg signed [step_count_bits-1:0] count_r;
+  assign step_count = count_r;
 
   // Table of phases (BRAM on FPGA)
   reg [7:0] phase_table [0:255];
@@ -95,6 +100,7 @@ module dual_hbridge #(
       // Traverse the table based on direction, rolls over
       if (step_r == 2'b01) begin // rising edge
         phase_ct <= phase_ct + phase_inc;
+        count_r <= count_r + phase_inc;
       end
 
       // Load sine/cosine from RAM
