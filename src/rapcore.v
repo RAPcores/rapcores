@@ -135,6 +135,33 @@ module rapcore #(
     wire spi_clock = CLK;
   `endif
 
+  // Word handler
+  // The system operates on 64 bit little endian words
+  // This should make it easier to send 64 bit chunks from the host controller
+  reg [63:0] word_send_data;
+  reg [63:0] word_data_received;
+
+  wire [63:0] word_data_received_w;
+  always @(posedge spi_clock)
+  if(!resetn)
+    word_data_received <= 0;
+  else
+    word_data_received <= word_data_received_w;
+
+  wire word_received;
+  SPIWord word_proc (
+                .clk(spi_clock),
+                .resetn (resetn),
+                .SCK(SCK),
+                .CS(CS),
+                .COPI(COPI),
+                .CIPO(CIPO),
+                .word_send_data(word_send_data),
+                .word_received(word_received),
+                .word_data_received(word_data_received_w));
+
+
+
   //
   // SPI State Machine
   //
@@ -150,13 +177,11 @@ module rapcore #(
     `endif
     .CLK(CLK),
     .pwm_clock(pwm_clock),
-    .spi_clock(spi_clock),
     .resetn(resetn),
 
-    .SCK(SCK),
-    .CS(CS),
-    .COPI(COPI),
-    .CIPO(CIPO),
+    .word_data_received(word_data_received_w),
+    .word_send_data(word_send_data),
+    .word_received(word_received),
 
     .buffer_dtr(BUFFER_DTR),
     .move_done(MOVE_DONE),
