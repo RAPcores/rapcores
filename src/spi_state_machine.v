@@ -47,15 +47,10 @@ module spi_state_machine #(
   `endif
 
   // Event IO
-  `ifdef BUFFER_DTR
-    output wire BUFFER_DTR,
-  `endif
-  `ifdef MOVE_DONE
-    output wire MOVE_DONE,
-  `endif
-  `ifdef HALT
-    input wire HALT,
-  `endif
+  output wire buffer_dtr,
+  output wire move_done,
+  input  wire halt,
+
   `ifdef STEPINPUT
     input wire [motor_count-1:0] STEPINPUT,
     input wire [motor_count-1:0] DIRINPUT,
@@ -271,16 +266,6 @@ module spi_state_machine #(
 
   wire loading_move;
   wire executing_move;
-  wire move_done;
-  wire buffer_dtr;
-
-  // Buffer sync events
-  `ifdef MOVE_DONE
-    assign MOVE_DONE = move_done;
-  `endif
-  `ifdef BUFFER_DTR
-    assign BUFFER_DTR = buffer_dtr;
-  `endif
 
   //
   // DDA Setup
