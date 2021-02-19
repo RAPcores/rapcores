@@ -157,6 +157,8 @@ module spi_state_machine #(
 
   wire [motor_count-1:0] faultn; // stepper fault
 
+  wire [31:0] step_encoder [motor_count-1:0]; // step encoder
+
   //
   // Stepper Configs
   //
@@ -195,7 +197,8 @@ module spi_state_machine #(
                       .enable (enable[i]),
                       .brake  (brake[i]),
                       .microsteps (microsteps[i]),
-                      .current (current[i]));
+                      .current (current[i]),
+                      .step_count(step_encoder[i]));
       end
     endgenerate
   `endif
@@ -328,19 +331,6 @@ module spi_state_machine #(
   // Encoders
   //
 
-  wire [31:0] step_encoder [motor_count-1:0];
-
-  generate
-    for (i=0; i<motor_count; i=i+1) begin
-      step_encoder #(.width(32)) senc0 (
-                    .resetn(resetn),
-                    .clk(CLK),
-                    .step(step[i]),
-                    .dir(dir[i]),
-                    .count(step_encoder[i])
-                    );
-  end
-  endgenerate
 
 
 
