@@ -138,17 +138,10 @@ module rapcore #(
   // Word handler
   // The system operates on 64 bit little endian words
   // This should make it easier to send 64 bit chunks from the host controller
-  reg [63:0] word_send_data;
-  reg [63:0] word_data_received;
-
-  wire [63:0] word_data_received_w;
-  always @(posedge spi_clock)
-  if(!resetn)
-    word_data_received <= 0;
-  else
-    word_data_received <= word_data_received_w;
-
+  wire [63:0] word_send_data;
+  wire [63:0] word_data_received;
   wire word_received;
+
   SPIWord word_proc (
                 .clk(spi_clock),
                 .resetn (resetn),
@@ -158,7 +151,7 @@ module rapcore #(
                 .CIPO(CIPO),
                 .word_send_data(word_send_data),
                 .word_received(word_received),
-                .word_data_received(word_data_received_w));
+                .word_data_received(word_data_received));
 
 
 
@@ -179,7 +172,7 @@ module rapcore #(
     .pwm_clock(pwm_clock),
     .resetn(resetn),
 
-    .word_data_received(word_data_received_w),
+    .word_data_received(word_data_received),
     .word_send_data(word_send_data),
     .word_received(word_received),
 
