@@ -30,3 +30,15 @@
 `ifndef DEFAULT_BRIDGE_INVERTING
 `define DEFAULT_BRIDGE_INVERTING 1
 `endif
+
+//
+// Motor defaults
+//
+
+`ifndef DEFAULT_MICROSTEPS
+`define DEFAULT_MICROSTEPS 8'd64
+`endif
+
+`ifndef DEFAULT_CURRENT
+`define DEFAULT_CURRENT 8'd150
+`endif

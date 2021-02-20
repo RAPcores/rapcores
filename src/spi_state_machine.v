@@ -2,7 +2,9 @@
 
 module spi_state_machine #(
     parameter motor_count = 1,
-    parameter move_duration_bits = 32
+    parameter move_duration_bits = 32,
+    parameter default_microsteps = 64,
+    parameter default_current = 140
   )(
   `ifdef LA_IN
     input wire [`LA_IN:1] LA_IN,
@@ -349,8 +351,8 @@ module spi_state_machine #(
       encoder_store[nmot] <= 0;
 
       // Stepper Config
-      microsteps[nmot] <= 2;
-      current[nmot] <= 140;
+      microsteps[nmot] <= default_microsteps;
+      current[nmot] <= default_current;
       config_offtime[nmot] <= 810;
       config_blanktime[nmot] <= 27;
       config_fastdecay_threshold[nmot] <= 706;

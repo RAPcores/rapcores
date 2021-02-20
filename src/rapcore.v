@@ -160,7 +160,9 @@ module rapcore #(
   //
 
   spi_state_machine #(.motor_count(motor_count),
-                      .move_duration_bits(move_duration_bits)) spifsm
+                      .move_duration_bits(move_duration_bits),
+                      .default_microsteps(`DEFAULT_MICROSTEPS),
+                      .default_current(`DEFAULT_CURRENT)) spifsm
   (
     `ifdef LA_IN
       .LA_IN(LA_IN),
