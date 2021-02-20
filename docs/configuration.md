@@ -124,6 +124,20 @@ See: "Ultibridge" in Pinouts for name specification.
 - `PHASE_B2_H[N]`
 
 
+### Defaults
+
+```
+`define DEFAULT_MICROSTEPS <N>
+```
+
+Set the default microsteps for all motor channels.
+
+```
+`define DEFAULT_CURRENT <N>
+```
+
+Set the default current for all motor channels.
+
 ## Encoders
 
 ```
