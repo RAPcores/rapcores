@@ -117,32 +117,28 @@ module SPIWord (
             .rx_byte(rx_byte),
             .rx_byte_ready(rx_byte_ready));
 
-  reg [3:0] byte_count;
-  wire [7:0] word_slice [8:0]; // slice the register into 8 bits
+  reg [2:0] byte_count;
+  wire [7:0] word_slice [7:0]; // slice the register into 8 bits
   reg [1:0] rx_byte_ready_r;
+  reg word_received_r;
 
   // Recieve Shift Register
   always @(posedge clk) if (!resetn) begin
     word_data_received <= 64'b0;
     byte_count <= 0;
     rx_byte_ready_r <= 2'b0;
+    word_received_r <= 0;
   end else if (resetn) begin
     rx_byte_ready_r <= {rx_byte_ready_r[0], rx_byte_ready};
     if (rx_byte_ready_r == 2'b01) begin
-      byte_count <= (byte_count == 8) ? 1 : byte_count + 1;
+      byte_count <= byte_count + 1'b1;
       word_data_received <= {rx_byte[7:0], word_data_received[63:8]};
+      if (byte_count == 3'b111) word_received_r <= 1'b1;
+      else word_received_r <= 1'b0;
     end
   end
 
-  wire word_received = (byte_count == 8);
-
-  // Cross clock
-  //wire [63:0] word_data_received_w;
-  //always @(posedge clk)
-  //if(!resetn)
-  //  word_data_received <= 0;
-  //else
-  //  word_data_received <= word_data_received_w;
+  wire word_received = word_received_r;
 
   //TODO: Use generate
   assign word_slice[0] = word_send_data[7:0]; // This should only hit at initialization
@@ -153,7 +149,6 @@ module SPIWord (
   assign word_slice[5] = word_send_data[47:40];
   assign word_slice[6] = word_send_data[55:48];
   assign word_slice[7] = word_send_data[63:56];
-  assign word_slice[8] = word_send_data[7:0];
 
   assign tx_byte[7:0] = word_slice[byte_count];
 
