@@ -14,8 +14,7 @@ module SPI (
 );
 
   // Registers to sync IO with FPGA clock
-  reg [2:0] SCKr;
-  reg [2:0] CSr; // active low, init unselected
+  reg [1:0] SCKr;
   reg [1:0] COPIr;
 
   // Output Byte and ready flag
@@ -27,9 +26,9 @@ module SPI (
   reg [2:0] txbitcnt; // counts down
 
   // Assign wires for SPI events, registers assigned in block below
-  wire SCK_risingedge = (SCKr[2:1] == 2'b01);
-  wire SCK_fallingedge = (SCKr[2:1] == 2'b10);
-  wire CS_active = ~CSr[1];  // active low
+  wire SCK_risingedge = (SCKr == 2'b01);
+  wire SCK_fallingedge = (SCKr == 2'b10);
+  wire CS_active = ~CS;  // active low
   wire COPI_data = COPIr[1];
   // CIPO pin (tristated per convention)
   assign CIPO = (CS_active) ? tx_byte[txbitcnt] : 1'bZ;
@@ -38,8 +37,7 @@ module SPI (
   always @(posedge clk) begin
     if (!resetn) begin
       // Registers to sync IO with FPGA clock
-      SCKr <= 3'b0;
-      CSr <= 3'h1; // active low, init unselected
+      SCKr <= 2'b0;
       COPIr <= 2'b0;
 
       // Output Byte and ready flag
@@ -52,24 +50,23 @@ module SPI (
     end else if (resetn) begin
 
       // Use a 3 bit shift register to sync CS, COPI, CIPO, with FPGA clock
-      SCKr <= {SCKr[1:0], SCK};
-      CSr <= {CSr[1:0], CS};
+      SCKr <= {SCKr[0], SCK};
       COPIr <= {COPIr[0], COPI};
 
       if (CS_active) begin
         // Recieve increment on rising edge
         if (SCK_risingedge) begin
-          rxbitcnt <= rxbitcnt + 3'b001;
+          rxbitcnt <= rxbitcnt + 1'b1;
           // Shift in Recieved bits
           rx_byte <= {rx_byte[6:0], COPI_data};
 
           // Trigger Byte recieved
-          rx_byte_ready_r <= (rxbitcnt[2:0] == 3'b111);
+          rx_byte_ready_r <= (&rxbitcnt[2:0]);
         end
 
         // Transmit increment
         if (SCK_fallingedge) begin
-          txbitcnt <= txbitcnt - 3'b001; // rolls over
+          txbitcnt <= txbitcnt - 1'b1; // rolls over
         end
 
         //`ifdef FORMAL
