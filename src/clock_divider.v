@@ -19,8 +19,8 @@ module clock_divider #(parameter divider_bits = 8)
     if (!resetn) begin
       accum <= 0;
     end else begin
-      accum <= accum + 1'b1;
       if (accum == divider) accum <= 0;
+      else accum <= accum + 1'b1;
     end
   end
 
