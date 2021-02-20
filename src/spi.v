@@ -138,7 +138,7 @@ module SPIWord (
     end
   end
 
-  wire word_received = word_received_r;
+  assign word_received = word_received_r;
 
   //TODO: Use generate
   assign word_slice[0] = word_send_data[7:0]; // This should only hit at initialization
