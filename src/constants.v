@@ -14,3 +14,11 @@
 `define CMD_API_VERSION 8'hfe
 `define CMD_CHARGEPUMP 8'h31
 `define CMD_BRIDGEINVERT 8'h32
+
+
+//
+// Bit packed memory offsets for configs
+//
+
+`define MEM_MICROSTEPS 15:8
+`define MEM_CURRENT 7:0
