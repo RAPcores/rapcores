@@ -79,14 +79,16 @@ module spi_state_machine #(
   // the DDA side is internal to dda_fsm
   reg [`MOVE_BUFFER_SIZE:0] stepready;
 
-  reg [motor_count:1] dir_r [`MOVE_BUFFER_SIZE:0];
+  reg [63:0] buffer_memory [`MOVE_BUFFER_SIZE:0][(motor_count)*2+1:0];
 
-  reg [move_duration_bits-1:0] move_duration [`MOVE_BUFFER_SIZE:0];
-  reg signed [63:0] increment [`MOVE_BUFFER_SIZE:0][motor_count-1:0];
-  reg signed [63:0] incrementincrement [`MOVE_BUFFER_SIZE:0][motor_count-1:0];
+  //reg [motor_count:1] dir_r [`MOVE_BUFFER_SIZE:0];
+
+  //reg [move_duration_bits-1:0] move_duration [`MOVE_BUFFER_SIZE:0];
+  //reg signed [63:0] increment [`MOVE_BUFFER_SIZE:0][motor_count-1:0];
+  //reg signed [63:0] incrementincrement [`MOVE_BUFFER_SIZE:0][motor_count-1:0];
 
   // DDA module input wires determined from buffer
-  wire [move_duration_bits-1:0] move_duration_w = move_duration[moveind];
+  wire [move_duration_bits-1:0] move_duration_w = buffer_memory[moveind][1];
 
   // Per-axis DDA parameters
   wire [63:0] increment_w [motor_count-1:0];
@@ -94,8 +96,8 @@ module spi_state_machine #(
 
   genvar i;
   for (i=0; i<motor_count; i=i+1) begin
-    assign increment_w[i] = increment[moveind][i];
-    assign incrementincrement_w[i] = incrementincrement[moveind][i];
+    assign increment_w[i] = buffer_memory[moveind][(i*2)+2];
+    assign incrementincrement_w[i] = buffer_memory[moveind][(i*2)+3];
   end
 
   wire dda_tick;
@@ -110,11 +112,11 @@ module spi_state_machine #(
   wire [motor_count-1:0] brake = brake_r;
 
   `ifndef STEPINPUT
-    wire [motor_count-1:0] dir = dir_r[moveind]; // set direction
+    wire [motor_count-1:0] dir = buffer_memory[moveind][0]; // set direction
     wire [motor_count-1:0] step = dda_step;
     wire [motor_count-1:0] enable = enable_r;
   `else
-    wire [motor_count-1:0] dir = dir_r[moveind] ^ DIRINPUT; // set direction
+    wire [motor_count-1:0] dir = buffer_memory[moveind][0] ^ DIRINPUT; // set direction
     wire [motor_count-1:0] step = dda_step ^ STEPINPUT;
     wire [motor_count-1:0] enable = enable_r | ENINPUT;
   `endif
@@ -324,8 +326,8 @@ module spi_state_machine #(
     stepready <= 0;  // Latching mechanism for engaging the buffered move.
 
     // TODO fix this
-    dir_r[0] <= {(motor_count){1'b0}};
-    dir_r[1] <= {(motor_count){1'b0}};
+    //dir_r[0] <= {(motor_count){1'b0}};
+    //dir_r[1] <= {(motor_count){1'b0}};
 
     brake_r <= 0;
 
@@ -336,15 +338,15 @@ module spi_state_machine #(
     word_received_r <= 2'b0;
 
     // TODO change to for loops for buffer
-    move_duration[0] <= 0;
-    move_duration[1] <= 0;
+    //move_duration[0] <= 0;
+    //move_duration[1] <= 0;
 
     /* verilator lint_off WIDTH */
     for (nmot=0; nmot<motor_count; nmot=nmot+1) begin
-      increment[0][nmot] <= 64'b0;
-      increment[1][nmot] <= 64'b0;
-      incrementincrement[0][nmot] <= 64'b0;
-      incrementincrement[1][nmot] <= 64'b0;
+      //increment[0][nmot] <= 64'b0;
+      //increment[1][nmot] <= 64'b0;
+      //incrementincrement[0][nmot] <= 64'b0;
+      //incrementincrement[1][nmot] <= 64'b0;
   
       // Encoders
       step_encoder_store[nmot] <= 0;
@@ -384,7 +386,7 @@ module spi_state_machine #(
           `CMD_COORDINATED_STEP: begin
 
             // Get Direction Bits
-            dir_r[writemoveind] <= word_data_received[motor_count-1:0];
+            buffer_memory[writemoveind][0] <= word_data_received[motor_count-1:0];
 
             // Store encoder values across all axes
             for (nmot=0; nmot<motor_count; nmot=nmot+1) begin
@@ -471,17 +473,17 @@ module spi_state_machine #(
               // the first non-header word is the move duration
               if (nmot == 0) begin
                 if (message_word_count == 1) begin
-                  move_duration[writemoveind][move_duration_bits-1:0] <= word_data_received[move_duration_bits-1:0];
+                  buffer_memory[writemoveind][1][move_duration_bits-1:0] <= word_data_received[move_duration_bits-1:0];
                   word_send_data <= step_encoder_store[0]; // Prep to send steps
                 end
               end
 
               if (message_word_count == (nmot+1)*2) begin
-                increment[writemoveind][nmot][63:0] <= word_data_received[63:0];
+                buffer_memory[writemoveind][(nmot*2)+2][63:0] <= word_data_received[63:0];
                 word_send_data <= encoder_store[nmot]; // Prep to send steps
               end
               if (message_word_count == (nmot+1)*2+1) begin
-                incrementincrement[writemoveind][nmot][63:0] <= word_data_received[63:0];
+                buffer_memory[writemoveind][(nmot*2)+3][63:0] <= word_data_received[63:0];
                 if (nmot != motor_count-1) word_send_data <= step_encoder_store[nmot+1]; // Prep to send steps
 
                 if (nmot == motor_count-1) begin
