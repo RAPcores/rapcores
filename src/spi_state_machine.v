@@ -137,14 +137,6 @@ module spi_state_machine #(
 
   reg [7:0] microsteps [0:motor_count-1];
   reg [7:0] current [0:motor_count-1];
-  reg [9:0] config_offtime [0:motor_count-1];
-  reg [7:0] config_blanktime [0:motor_count-1];
-  reg [9:0] config_fastdecay_threshold [0:motor_count-1];
-  reg [7:0] config_minimum_on_time [0:motor_count-1];
-  reg [10:0] config_current_threshold [0:motor_count-1];
-  reg config_invert_highside [0:motor_count-1];
-  reg config_invert_lowside [0:motor_count-1];
-  reg [7:0] config_chargepump_period; // one chargepump for all
 
   //
   // Stepper Modules
@@ -176,6 +168,16 @@ module spi_state_machine #(
   `endif
 
   `ifdef ULTIBRIDGE
+
+    reg [9:0] config_offtime [0:motor_count-1];
+    reg [7:0] config_blanktime [0:motor_count-1];
+    reg [9:0] config_fastdecay_threshold [0:motor_count-1];
+    reg [7:0] config_minimum_on_time [0:motor_count-1];
+    reg [10:0] config_current_threshold [0:motor_count-1];
+    reg config_invert_highside [0:motor_count-1];
+    reg config_invert_lowside [0:motor_count-1];
+    reg [7:0] config_chargepump_period; // one chargepump for all
+
     generate
       for (i=0; i<motor_count; i=i+1) begin
         microstepper_top microstepper0(
@@ -316,7 +318,9 @@ module spi_state_machine #(
 
   always @(posedge CLK) if (!resetn) begin
 
-    config_chargepump_period <= 91;
+    `ifdef ULTIBRIDGE
+      config_chargepump_period <= 91;
+    `endif
 
     enable_r <= {(motor_count){1'b0}};
 
@@ -355,13 +359,15 @@ module spi_state_machine #(
       // Stepper Config
       microsteps[nmot] <= default_microsteps;
       current[nmot] <= default_current;
-      config_offtime[nmot] <= 810;
-      config_blanktime[nmot] <= 27;
-      config_fastdecay_threshold[nmot] <= 706;
-      config_minimum_on_time[nmot] <= 54;
-      config_current_threshold[nmot] <= 1024;
-      config_invert_highside[nmot] <= `DEFAULT_BRIDGE_INVERTING;
-      config_invert_lowside[nmot] <= `DEFAULT_BRIDGE_INVERTING;
+      `ifdef ULTIBRIDGE
+        config_offtime[nmot] <= 810;
+        config_blanktime[nmot] <= 27;
+        config_fastdecay_threshold[nmot] <= 706;
+        config_minimum_on_time[nmot] <= 54;
+        config_current_threshold[nmot] <= 1024;
+        config_invert_highside[nmot] <= `DEFAULT_BRIDGE_INVERTING;
+        config_invert_lowside[nmot] <= `DEFAULT_BRIDGE_INVERTING;
+      `endif
     end
     /* verilator lint_off WIDTH */
 
@@ -417,25 +423,27 @@ module spi_state_machine #(
             microsteps[word_data_received[55:48]][2:0] <= word_data_received[2:0];
           end
 
-          // Set Microstepping Parameters
-          `CMD_MICROSTEPPER_CONFIG: begin
-            config_offtime[word_data_received[55:48]][9:0] <= word_data_received[39:30];
-            config_blanktime[word_data_received[55:48]][7:0] <= word_data_received[29:22];
-            config_fastdecay_threshold[word_data_received[55:48]][9:0] <= word_data_received[21:12];
-            config_minimum_on_time[word_data_received[55:48]][7:0] <= word_data_received[18:11];
-            config_current_threshold[word_data_received[55:48]][10:0] <= word_data_received[10:0];
-          end
+          `ifdef ULTIBRIDGE
+            // Set Microstepping Parameters
+            `CMD_MICROSTEPPER_CONFIG: begin
+              config_offtime[word_data_received[55:48]][9:0] <= word_data_received[39:30];
+              config_blanktime[word_data_received[55:48]][7:0] <= word_data_received[29:22];
+              config_fastdecay_threshold[word_data_received[55:48]][9:0] <= word_data_received[21:12];
+              config_minimum_on_time[word_data_received[55:48]][7:0] <= word_data_received[18:11];
+              config_current_threshold[word_data_received[55:48]][10:0] <= word_data_received[10:0];
+            end
 
-          // Set chargepump period
-          `CMD_CHARGEPUMP: begin
-            config_chargepump_period[7:0] <= word_data_received[7:0];
-          end
+            // Set chargepump period
+            `CMD_CHARGEPUMP: begin
+              config_chargepump_period[7:0] <= word_data_received[7:0];
+            end
 
-          // Invert Bridge outputs
-          `CMD_BRIDGEINVERT: begin
-            config_invert_highside[word_data_received[55:48]] <= word_data_received[1];
-            config_invert_lowside[word_data_received[55:48]] <= word_data_received[0];
-          end
+            // Invert Bridge outputs
+            `CMD_BRIDGEINVERT: begin
+              config_invert_highside[word_data_received[55:48]] <= word_data_received[1];
+              config_invert_lowside[word_data_received[55:48]] <= word_data_received[0];
+            end
+          `endif
 
           // Write to Cosine Table
           // TODO Cosine Net is broken
