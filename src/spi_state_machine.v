@@ -133,8 +133,8 @@ module spi_state_machine #(
   // Stepper Configs
   //
 
-  reg [15:0] config_memory [0:motor_count-1]; // [15:8] -> microsteps [7:0] current
-
+  reg [7:0] microsteps [0:motor_count-1];
+  reg [7:0] current [0:motor_count-1];
   reg [9:0] config_offtime [0:motor_count-1];
   reg [7:0] config_blanktime [0:motor_count-1];
   reg [9:0] config_fastdecay_threshold [0:motor_count-1];
@@ -166,8 +166,8 @@ module spi_state_machine #(
                       .dir (dir[i]),
                       .enable (enable[i]),
                       .brake  (brake[i]),
-                      .microsteps (config_memory[i][`MEM_MICROSTEPS]),
-                      .current (config_memory[i][`MEM_CURRENT]),
+                      .microsteps (microsteps[i]),
+                      .current (current[i]),
                       .step_count(step_encoder[i]));
       end
     endgenerate
@@ -351,10 +351,8 @@ module spi_state_machine #(
       encoder_store[nmot] <= 0;
 
       // Stepper Config
-      config_memory[nmot][`MEM_MICROSTEPS] <= default_microsteps;
-      config_memory[nmot][`MEM_CURRENT] <= default_current;
-
-      // Microstepper config
+      microsteps[nmot] <= default_microsteps;
+      current[nmot] <= default_current;
       config_offtime[nmot] <= 810;
       config_blanktime[nmot] <= 27;
       config_fastdecay_threshold[nmot] <= 706;
@@ -413,7 +411,8 @@ module spi_state_machine #(
           // Set Microstepping
           `CMD_MOTORCONFIG: begin
             // TODO needs to be power of two
-            config_memory[word_data_received[55:48]] <= word_data_received[15:0];
+            current[word_data_received[55:48]][7:0] <= word_data_received[15:8];
+            microsteps[word_data_received[55:48]][2:0] <= word_data_received[2:0];
           end
 
           // Set Microstepping Parameters
