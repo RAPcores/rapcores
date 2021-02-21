@@ -14,3 +14,21 @@
 `define CMD_API_VERSION 8'hfe
 `define CMD_CHARGEPUMP 8'h31
 `define CMD_BRIDGEINVERT 8'h32
+
+
+
+
+//
+// Buffer Memory Offsets
+//
+
+`define MOVE_BUF_DIRECTION 0
+`define MOVE_BUF_DURATION 1
+// Axes follow increment=2, incrementincrement=3 ...
+
+//
+// Bit packed memory offsets for configs
+//
+
+`define MEM_MICROSTEPS 15:8
+`define MEM_CURRENT 7:0
