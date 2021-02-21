@@ -88,7 +88,7 @@ module spi_state_machine #(
   //reg signed [63:0] incrementincrement [`MOVE_BUFFER_SIZE:0][motor_count-1:0];
 
   // DDA module input wires determined from buffer
-  wire [move_duration_bits-1:0] move_duration_w = buffer_memory[moveind][1];
+  wire [move_duration_bits-1:0] move_duration_w = buffer_memory[moveind][1][move_duration_bits-1:0];
 
   // Per-axis DDA parameters
   wire [63:0] increment_w [motor_count-1:0];
@@ -112,11 +112,11 @@ module spi_state_machine #(
   wire [motor_count-1:0] brake = brake_r;
 
   `ifndef STEPINPUT
-    wire [motor_count-1:0] dir = buffer_memory[moveind][0]; // set direction
+    wire [motor_count-1:0] dir = buffer_memory[moveind][0][motor_count-1:0]; // set direction
     wire [motor_count-1:0] step = dda_step;
     wire [motor_count-1:0] enable = enable_r;
   `else
-    wire [motor_count-1:0] dir = buffer_memory[moveind][0] ^ DIRINPUT; // set direction
+    wire [motor_count-1:0] dir = buffer_memory[moveind][0][motor_count-1:0] ^ DIRINPUT; // set direction
     wire [motor_count-1:0] step = dda_step ^ STEPINPUT;
     wire [motor_count-1:0] enable = enable_r | ENINPUT;
   `endif
