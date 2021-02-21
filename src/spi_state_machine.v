@@ -135,8 +135,7 @@ module spi_state_machine #(
   // Stepper Configs
   //
 
-  reg [7:0] microsteps [0:motor_count-1];
-  reg [7:0] current [0:motor_count-1];
+  reg [15:0] config_memory [0:motor_count-1]; // [15:8] -> microsteps [7:0] current
 
   //
   // Stepper Modules
@@ -160,8 +159,8 @@ module spi_state_machine #(
                       .dir (dir[i]),
                       .enable (enable[i]),
                       .brake  (brake[i]),
-                      .microsteps (microsteps[i]),
-                      .current (current[i]),
+                      .microsteps (config_memory[i][`MEM_MICROSTEPS]),
+                      .current (config_memory[i][`MEM_CURRENT]),
                       .step_count(step_encoder[i]));
       end
     endgenerate
@@ -357,8 +356,8 @@ module spi_state_machine #(
       encoder_store[nmot] <= 0;
 
       // Stepper Config
-      microsteps[nmot] <= default_microsteps;
-      current[nmot] <= default_current;
+      config_memory[nmot][`MEM_MICROSTEPS] <= default_microsteps;
+      config_memory[nmot][`MEM_CURRENT] <= default_current;
       `ifdef ULTIBRIDGE
         config_offtime[nmot] <= 810;
         config_blanktime[nmot] <= 27;
@@ -419,8 +418,7 @@ module spi_state_machine #(
           // Set Microstepping
           `CMD_MOTORCONFIG: begin
             // TODO needs to be power of two
-            current[word_data_received[55:48]][7:0] <= word_data_received[15:8];
-            microsteps[word_data_received[55:48]][2:0] <= word_data_received[2:0];
+            config_memory[word_data_received[55:48]] <= word_data_received[15:0];
           end
 
           `ifdef ULTIBRIDGE

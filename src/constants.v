@@ -25,3 +25,10 @@
 `define MOVE_BUF_DIRECTION 0
 `define MOVE_BUF_DURATION 1
 // Axes follow increment=2, incrementincrement=3 ...
+
+//
+// Bit packed memory offsets for configs
+//
+
+`define MEM_MICROSTEPS 15:8
+`define MEM_CURRENT 7:0
