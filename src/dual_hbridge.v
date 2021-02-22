@@ -22,7 +22,8 @@ module dual_hbridge #(
     input        brake,
     input  [7:0] microsteps,
     input  [7:0] current,
-    output wire [step_count_bits-1:0] step_count
+    output wire [step_count_bits-1:0] step_count,
+    output wire faultn
 );
 
   reg signed [step_count_bits-1:0] count_r;
