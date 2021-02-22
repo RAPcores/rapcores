@@ -125,7 +125,7 @@ module spi_state_machine #(
     assign ENOUTPUT = enable;
   `endif
 
-  wire [motor_count-1:0] faultn; // stepper fault
+  wire [motor_count-1:0] stepper_faultn; // stepper fault
 
   wire [31:0] step_encoder [motor_count-1:0]; // step encoder
 
@@ -168,7 +168,8 @@ module spi_state_machine #(
                       .brake  (brake[i]),
                       .microsteps (microsteps[i]),
                       .current (current[i]),
-                      .step_count(step_encoder[i]));
+                      .step_count(step_encoder[i]),
+                      .faultn(stepper_faultn[i]));
       end
     endgenerate
   `endif
@@ -210,7 +211,7 @@ module spi_state_machine #(
           .step (step[i]),
           .dir (dir[i]),
           .enable_in(enable[i]),
-          .faultn(faultn[i])
+          .faultn(stepper_faultn[i])
           );
       end
     endgenerate
@@ -307,7 +308,9 @@ module spi_state_machine #(
 
   // check if the Header indicated multi-word transfer
   wire awaiting_more_words = (message_header == `CMD_COORDINATED_STEP) |
-                             (message_header == `CMD_API_VERSION);
+                             (message_header == `CMD_API_VERSION) |
+                             (message_header == `CMD_STEPPERFAULT) |
+                             (message_header == `CMD_ENCODERFAULT);
   reg [1:0] word_received_r;
 
   reg [7:0] nmot;
@@ -434,6 +437,18 @@ module spi_state_machine #(
             config_invert_highside[word_data_received[55:48]] <= word_data_received[1];
             config_invert_lowside[word_data_received[55:48]] <= word_data_received[0];
           end
+
+          // Read Stepper fault register
+          `CMD_STEPPERFAULT: begin
+            word_send_data[motor_count-1:0] <= stepper_faultn;
+          end
+
+          // Read Stepper fault register
+          // TODO
+          //`CMD_ENCODERFAULT: begin
+          //  word_send_data[motor_count-1:0] <= stepper_faultn;
+          //end
+
 
           // Write to Cosine Table
           // TODO Cosine Net is broken
