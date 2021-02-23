@@ -123,6 +123,11 @@ formally verify the RAPcores project.</p>
 <td>run formal verification</td>
 </tr>
 <tr>
+<td>stat</td>
+<td>BOARD</td>
+<td>get yosys synthesis statistics</td>
+</tr>
+<tr>
 <td>iverilog-parse</td>
 <td></td>
 <td>parse the src directory with iverilog</td>
@@ -154,9 +159,17 @@ formally verify the RAPcores project.</p>
 </tr>
 </tbody>
 </table></div>
-<div class="section" id="build-bitstream">
-<h2>Build Bitstream<a class="headerlink" href="#build-bitstream" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="board-targets">
+<h2>Board targets<a class="headerlink" href="#board-targets" title="Permalink to this headline">¶</a></h2>
+<p>The following targets require a <code class="docutils literal notranslate"><span class="pre">BOARD</span></code> to be specified.</p>
 <p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">BOARD=&lt;board&gt;</span></code></p>
+<p>Generate bit stream.</p>
+<p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">clean</span> <span class="pre">BOARD=&lt;board&gt;</span></code></p>
+<p>Clean build artifacts.</p>
+<p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">prog</span> <span class="pre">BOARD=&lt;board&gt;</span></code></p>
+<p>Generate bitstream and upload.</p>
+<p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">stat</span> <span class="pre">BOARD=&lt;board&gt;</span></code></p>
+<p>Get logic synthesis statistics for the given configuration.</p>
 </div>
 <div class="section" id="formal-verification">
 <h2>Formal Verification<a class="headerlink" href="#formal-verification" title="Permalink to this headline">¶</a></h2>
@@ -247,7 +260,7 @@ The yosys CXXRTL test benches can be executed with:</p>
 <li class="toctree-l2"><a class="reference internal" href="#build-prerequisites">Build Prerequisites</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#developing-with-nix">Developing with Nix</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#overview-of-make-targets">Overview of Make targets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#build-bitstream">Build Bitstream</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#board-targets">Board targets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#formal-verification">Formal Verification</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#test-benches">Test Benches</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#formatting">Formatting</a></li>

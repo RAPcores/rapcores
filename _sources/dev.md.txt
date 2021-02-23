@@ -71,6 +71,7 @@ Programmers:
 | clean          | BOARD     | remove build artifacts  |
 | prog           | BOARD     | build and program BOARD |
 | formal         | BOARD     | run formal verification |
+| stat           | BOARD     | get yosys synthesis statistics |
 | iverilog-parse |           | parse the src directory with iverilog |
 | yosys-parse    |           | parse the src directory with yosys |
 | verilator-cdc  |           | parse the src directory and run CDC checks with verilator |
@@ -79,9 +80,25 @@ Programmers:
 | cxxrtl-{test}  |           | run the testbench recipe in `testbench/cxxrtl/{test}` |
 
 
-## Build Bitstream
+## Board targets
+
+The following targets require a `BOARD` to be specified.
 
 `make BOARD=<board>`
+
+Generate bit stream.
+
+`make clean BOARD=<board>`
+
+Clean build artifacts.
+
+`make prog BOARD=<board>`
+
+Generate bitstream and upload.
+
+`make stat BOARD=<board>`
+
+Get logic synthesis statistics for the given configuration.
 
 
 ## Formal Verification
