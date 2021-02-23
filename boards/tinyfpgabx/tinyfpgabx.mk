@@ -6,3 +6,4 @@ FREQ = 16
 PROGRAMMER = tinyprog -p
 SPIFREQ = 64
 PWMFREQ = 150
+SYNTH_FLAGS = -abc9 -device lp -dff
