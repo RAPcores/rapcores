@@ -102,6 +102,9 @@ verilator-cdc: $(RAPCOREFILES)
 
 triple-check: yosys-parse iverilog-parse verilator-cdc
 
+svlint: $(RAPCOREFILES)
+	svlint $(RAPCOREFILES)
+
 vvp: $(RAPCOREFILES)
 	iverilog -tvvp $(RAPCOREFILES)
 
