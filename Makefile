@@ -26,7 +26,7 @@ SPIFREQ ?= 64
 PWMFREQ ?= 150
 
 # Default flags
-SYNTH_FLAGS ?= -abc9 -dff
+SYNTH_FLAGS ?= -abc9
 PNR_FLAGS ?=
 
 PROJ = rapcore
