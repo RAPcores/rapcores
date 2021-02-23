@@ -1,8 +1,10 @@
 `default_nettype none
 
 module spi_state_machine #(
-    parameter motor_count = 1,
+    parameter num_motors = 1,
+    parameter num_encoders = 0,
     parameter move_duration_bits = 32,
+    parameter encoder_bits = 32,
     parameter default_microsteps = 64,
     parameter default_current = 140
   )(
@@ -44,8 +46,8 @@ module spi_state_machine #(
     output wire [`ULTIBRIDGE-1:0] PHASE_B2_H,  // Phase B
   `endif
   `ifdef QUAD_ENC
-    input wire [`QUAD_ENC-1:0] ENC_B,
-    input wire [`QUAD_ENC-1:0] ENC_A,
+    input wire [num_encoders-1:0] ENC_B,
+    input wire [num_encoders-1:0] ENC_A,
   `endif
 
   // Event IO
@@ -54,14 +56,14 @@ module spi_state_machine #(
   input  wire halt,
 
   `ifdef STEPINPUT
-    input wire [motor_count-1:0] STEPINPUT,
-    input wire [motor_count-1:0] DIRINPUT,
-    input wire [motor_count-1:0] ENINPUT,
+    input wire [num_motors-1:0] STEPINPUT,
+    input wire [num_motors-1:0] DIRINPUT,
+    input wire [num_motors-1:0] ENINPUT,
   `endif
   `ifdef STEPOUTPUT
-    output wire [motor_count-1:0] STEPOUTPUT,
-    output wire [motor_count-1:0] DIROUTPUT,
-    output wire [motor_count-1:0] ENOUTPUT,
+    output wire [num_motors-1:0] STEPOUTPUT,
+    output wire [num_motors-1:0] DIROUTPUT,
+    output wire [num_motors-1:0] ENOUTPUT,
   `endif
   input CLK,
   input pwm_clock
@@ -79,21 +81,21 @@ module spi_state_machine #(
   // the DDA side is internal to dda_fsm
   reg [`MOVE_BUFFER_SIZE:0] stepready;
 
-  reg [motor_count:1] dir_r [`MOVE_BUFFER_SIZE:0];
+  reg [num_motors:1] dir_r [`MOVE_BUFFER_SIZE:0];
 
   reg [move_duration_bits-1:0] move_duration [`MOVE_BUFFER_SIZE:0];
-  reg signed [63:0] increment [`MOVE_BUFFER_SIZE:0][motor_count-1:0];
-  reg signed [63:0] incrementincrement [`MOVE_BUFFER_SIZE:0][motor_count-1:0];
+  reg signed [63:0] increment [`MOVE_BUFFER_SIZE:0][num_motors-1:0];
+  reg signed [63:0] incrementincrement [`MOVE_BUFFER_SIZE:0][num_motors-1:0];
 
   // DDA module input wires determined from buffer
   wire [move_duration_bits-1:0] move_duration_w = move_duration[moveind];
 
   // Per-axis DDA parameters
-  wire [63:0] increment_w [motor_count-1:0];
-  wire [63:0] incrementincrement_w [motor_count-1:0];
+  wire [63:0] increment_w [num_motors-1:0];
+  wire [63:0] incrementincrement_w [num_motors-1:0];
 
   genvar i;
-  for (i=0; i<motor_count; i=i+1) begin
+  for (i=0; i<num_motors; i=i+1) begin
     assign increment_w[i] = increment[moveind][i];
     assign incrementincrement_w[i] = incrementincrement[moveind][i];
   end
@@ -102,21 +104,21 @@ module spi_state_machine #(
   reg [7:0] clock_divisor;  // should be 40 for 400 khz at 16Mhz Clk
 
   // Step IO
-  wire [motor_count-1:0] dda_step;
-  reg [motor_count-1:0] enable_r;
+  wire [num_motors-1:0] dda_step;
+  reg [num_motors-1:0] enable_r;
 
   // Motor Brake
-  reg [motor_count-1:0] brake_r;
-  wire [motor_count-1:0] brake = brake_r;
+  reg [num_motors-1:0] brake_r;
+  wire [num_motors-1:0] brake = brake_r;
 
   `ifndef STEPINPUT
-    wire [motor_count-1:0] dir = dir_r[moveind]; // set direction
-    wire [motor_count-1:0] step = dda_step;
-    wire [motor_count-1:0] enable = enable_r;
+    wire [num_motors-1:0] dir = dir_r[moveind]; // set direction
+    wire [num_motors-1:0] step = dda_step;
+    wire [num_motors-1:0] enable = enable_r;
   `else
-    wire [motor_count-1:0] dir = dir_r[moveind] ^ DIRINPUT; // set direction
-    wire [motor_count-1:0] step = dda_step ^ STEPINPUT;
-    wire [motor_count-1:0] enable = enable_r | ENINPUT;
+    wire [num_motors-1:0] dir = dir_r[moveind] ^ DIRINPUT; // set direction
+    wire [num_motors-1:0] step = dda_step ^ STEPINPUT;
+    wire [num_motors-1:0] enable = enable_r | ENINPUT;
   `endif
 
   `ifdef STEPOUTPUT
@@ -125,23 +127,23 @@ module spi_state_machine #(
     assign ENOUTPUT = enable;
   `endif
 
-  wire [motor_count-1:0] stepper_faultn; // stepper fault
+  wire [num_motors-1:0] stepper_faultn; // stepper fault
 
-  wire [31:0] step_encoder [motor_count-1:0]; // step encoder
+  wire [31:0] step_encoder [num_motors-1:0]; // step encoder
 
   //
   // Stepper Configs
   //
 
-  reg [7:0] microsteps [0:motor_count-1];
-  reg [7:0] current [0:motor_count-1];
-  reg [9:0] config_offtime [0:motor_count-1];
-  reg [7:0] config_blanktime [0:motor_count-1];
-  reg [9:0] config_fastdecay_threshold [0:motor_count-1];
-  reg [7:0] config_minimum_on_time [0:motor_count-1];
-  reg [10:0] config_current_threshold [0:motor_count-1];
-  reg config_invert_highside [0:motor_count-1];
-  reg config_invert_lowside [0:motor_count-1];
+  reg [7:0] microsteps [0:num_motors-1];
+  reg [7:0] current [0:num_motors-1];
+  reg [9:0] config_offtime [0:num_motors-1];
+  reg [7:0] config_blanktime [0:num_motors-1];
+  reg [9:0] config_fastdecay_threshold [0:num_motors-1];
+  reg [7:0] config_minimum_on_time [0:num_motors-1];
+  reg [10:0] config_current_threshold [0:num_motors-1];
+  reg config_invert_highside [0:num_motors-1];
+  reg config_invert_lowside [0:num_motors-1];
   reg [7:0] config_chargepump_period; // one chargepump for all
 
   //
@@ -151,7 +153,7 @@ module spi_state_machine #(
   `ifdef DUAL_HBRIDGE
     genvar i;
     generate
-      for (i=0; i<motor_count; i=i+1) begin
+      for (i=0; i<num_motors; i=i+1) begin
         dual_hbridge s0 (
                       .clk (CLK),
                       .resetn(resetn),
@@ -176,7 +178,7 @@ module spi_state_machine #(
 
   `ifdef ULTIBRIDGE
     generate
-      for (i=0; i<motor_count; i=i+1) begin
+      for (i=0; i<num_motors; i=i+1) begin
         microstepper_top microstepper0(
           `ifdef LA_IN
             .LA_IN(LA_IN),
@@ -219,25 +221,28 @@ module spi_state_machine #(
 
 
   //
-  // Encoder
+  // Encoders
   //
-  wire signed [63:0] encoder_count;
-  wire encoder_fault;
-  `ifdef QUAD_ENC
-    /* verilator lint_off PINMISSING */
-    // TODO: For ... generate
-    quad_enc #(.encbits(64)) encoder0
-    (
-      .resetn(resetn),
-      .clk(CLK),
-      .a(ENC_A[0]),
-      .b(ENC_B[0]),
-      .faultn(encoder_fault),
-      .count(encoder_count)
-      //.multiplier(encoder_multiplier)
-      );
+
+  wire signed [encoder_bits-1:0] encoder_count [num_encoders-1:0];
+  wire [num_encoders-1:0] encoder_fault;
+
+  if(num_encoders > 0) begin
+    for (i=0; i<num_encoders; i=i+1) begin
       /* verilator lint_off PINMISSING */
-  `endif
+      quad_enc #(.encbits(encoder_bits)) encoder0
+      (
+        .resetn(resetn),
+        .clk(CLK),
+        .a(ENC_A[i]),
+        .b(ENC_B[i]),
+        .faultn(encoder_fault[i]),
+        .count(encoder_count[i])
+        //.multiplier(encoder_multiplier)
+        );
+        /* verilator lint_off PINMISSING */
+    end
+  end
 
 
   wire loading_move;
@@ -274,7 +279,7 @@ module spi_state_machine #(
 
   // N dda timers per axis
   generate
-    for (i=0; i<motor_count; i=i+1) begin
+    for (i=0; i<num_motors; i=i+1) begin
       dda_timer ddan (
                     .resetn(resetn),
                     .dda_tick(dda_tick),
@@ -289,13 +294,6 @@ module spi_state_machine #(
   endgenerate
 
   //
-  // Encoders
-  //
-
-
-
-
-  //
   // State Machine for handling SPI Messages
   //
 
@@ -303,8 +301,8 @@ module spi_state_machine #(
   reg [7:0] message_header;
 
   // Encoder
-  reg signed [63:0] encoder_store [motor_count-1:0]; // Snapshot for SPI comms
-  reg signed [63:0] step_encoder_store [motor_count-1:0]; // Snapshot for SPI comms
+  reg signed [63:0] encoder_store [num_motors-1:0]; // Snapshot for SPI comms
+  reg signed [63:0] step_encoder_store [num_motors-1:0]; // Snapshot for SPI comms
 
   // check if the Header indicated multi-word transfer
   wire awaiting_more_words = (message_header == `CMD_COORDINATED_STEP) |
@@ -319,7 +317,7 @@ module spi_state_machine #(
 
     config_chargepump_period <= 91;
 
-    enable_r <= {(motor_count){1'b0}};
+    enable_r <= {(num_motors){1'b0}};
 
     word_send_data <= 0;
 
@@ -327,8 +325,8 @@ module spi_state_machine #(
     stepready <= 0;  // Latching mechanism for engaging the buffered move.
 
     // TODO fix this
-    dir_r[0] <= {(motor_count){1'b0}};
-    dir_r[1] <= {(motor_count){1'b0}};
+    dir_r[0] <= {(num_motors){1'b0}};
+    dir_r[1] <= {(num_motors){1'b0}};
 
     brake_r <= 0;
 
@@ -343,7 +341,7 @@ module spi_state_machine #(
     move_duration[1] <= 0;
 
     /* verilator lint_off WIDTH */
-    for (nmot=0; nmot<motor_count; nmot=nmot+1) begin
+    for (nmot=0; nmot<num_motors; nmot=nmot+1) begin
       increment[0][nmot] <= 64'b0;
       increment[1][nmot] <= 64'b0;
       incrementincrement[0][nmot] <= 64'b0;
@@ -387,10 +385,10 @@ module spi_state_machine #(
           `CMD_COORDINATED_STEP: begin
 
             // Get Direction Bits
-            dir_r[writemoveind] <= word_data_received[motor_count-1:0];
+            dir_r[writemoveind] <= word_data_received[num_motors-1:0];
 
             // Store encoder values across all axes
-            for (nmot=0; nmot<motor_count; nmot=nmot+1) begin
+            for (nmot=0; nmot<num_motors; nmot=nmot+1) begin
               step_encoder_store[nmot] <= step_encoder[nmot];
             end
 
@@ -398,12 +396,12 @@ module spi_state_machine #(
 
           // Motor Enable/disable
           `CMD_MOTOR_ENABLE: begin
-            enable_r[motor_count-1:0] <= word_data_received[motor_count-1:0];
+            enable_r[num_motors-1:0] <= word_data_received[num_motors-1:0];
           end
 
           // Motor Brake on Disable
           `CMD_MOTOR_BRAKE: begin
-            brake_r[motor_count-1:0] <= word_data_received[motor_count-1:0];
+            brake_r[num_motors-1:0] <= word_data_received[num_motors-1:0];
           end
 
           // Clock divisor (24 bit)
@@ -440,13 +438,13 @@ module spi_state_machine #(
 
           // Read Stepper fault register
           `CMD_STEPPERFAULT: begin
-            word_send_data[motor_count-1:0] <= stepper_faultn;
+            word_send_data[num_motors-1:0] <= stepper_faultn;
           end
 
           // Read Stepper fault register
           // TODO
           //`CMD_ENCODERFAULT: begin
-          //  word_send_data[motor_count-1:0] <= stepper_faultn;
+          //  word_send_data[num_motors-1:0] <= stepper_faultn;
           //end
 
 
@@ -482,7 +480,7 @@ module spi_state_machine #(
           // Move Routine
           `CMD_COORDINATED_STEP: begin
             // Multiaxis
-            for (nmot=0; nmot<motor_count; nmot=nmot+1) begin
+            for (nmot=0; nmot<num_motors; nmot=nmot+1) begin
               // the first non-header word is the move duration
               if (nmot == 0) begin
                 if (message_word_count == 1) begin
@@ -497,9 +495,9 @@ module spi_state_machine #(
               end
               if (message_word_count == (nmot+1)*2+1) begin
                 incrementincrement[writemoveind][nmot][63:0] <= word_data_received[63:0];
-                if (nmot != motor_count-1) word_send_data <= step_encoder_store[nmot+1]; // Prep to send steps
+                if (nmot != num_motors-1) word_send_data <= step_encoder_store[nmot+1]; // Prep to send steps
 
-                if (nmot == motor_count-1) begin
+                if (nmot == num_motors-1) begin
                   writemoveind <= writemoveind + 1'b1;
                   stepready[writemoveind] <= ~stepready[writemoveind];
                   message_header <= 8'b0; // Reset Message Header at the end

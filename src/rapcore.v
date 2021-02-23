@@ -1,7 +1,7 @@
 `default_nettype none
 
 module rapcore #(
-  parameter motor_count = `MOTOR_COUNT,
+  parameter num_motors = `MOTOR_COUNT,
   parameter move_duration_bits = `MOVE_DURATION_BITS
   )(
     `ifdef LED
@@ -53,14 +53,14 @@ module rapcore #(
       input wire HALT,
     `endif
     `ifdef STEPINPUT
-      input wire [motor_count-1:0] STEPINPUT,
-      input wire [motor_count-1:0] DIRINPUT,
-      input wire [motor_count-1:0] ENINPUT,
+      input wire [num_motors-1:0] STEPINPUT,
+      input wire [num_motors-1:0] DIRINPUT,
+      input wire [num_motors-1:0] ENINPUT,
     `endif
     `ifdef STEPOUTPUT
-      output wire [motor_count-1:0] STEPOUTPUT,
-      output wire [motor_count-1:0] ENOUTPUT,
-      output wire [motor_count-1:0] DIROUTPUT,
+      output wire [num_motors-1:0] STEPOUTPUT,
+      output wire [num_motors-1:0] ENOUTPUT,
+      output wire [num_motors-1:0] DIROUTPUT,
     `endif
     `ifdef LA_IN
       input wire [`LA_IN:1] LA_IN,
@@ -90,6 +90,13 @@ module rapcore #(
   `endif
   `ifndef HALT
     wire HALT;
+  `endif
+
+  // Local Parameters
+  `ifdef QUAD_ENC
+    localparam num_encoders = `QUAD_ENC;
+  `else
+    localparam num_encoders = 0;
   `endif
 
 
@@ -159,10 +166,11 @@ module rapcore #(
   // SPI State Machine
   //
 
-  spi_state_machine #(.motor_count(motor_count),
+  spi_state_machine #(.num_motors(num_motors),
                       .move_duration_bits(move_duration_bits),
                       .default_microsteps(`DEFAULT_MICROSTEPS),
-                      .default_current(`DEFAULT_CURRENT)) spifsm
+                      .default_current(`DEFAULT_CURRENT),
+                      .num_encoders(num_encoders)) spifsm
   (
     `ifdef LA_IN
       .LA_IN(LA_IN),
