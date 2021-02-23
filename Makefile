@@ -25,6 +25,10 @@ endif
 SPIFREQ ?= 64
 PWMFREQ ?= 150
 
+# Default flags
+SYNTH_FLAGS ?= -abc9
+PNR_FLAGS ?=
+
 PROJ = rapcore
 TOP = ./src/rapcore.v
 GENERATEDDIR = ./src/generated/
@@ -54,18 +58,20 @@ $(BUILD).bit: logs build $(RAPCOREFILES)
 ifeq ($(ARCH), ice40)
 	icepll -i $(FREQ) -o $(SPIFREQ) -m -n spi_pll -f $(GENERATEDDIR)spi_pll.v
 	icepll -i $(FREQ) -o $(PWMFREQ) -m -n pwm_pll -f $(GENERATEDDIR)pwm_pll.v
-	yosys -ql ./logs/$(BOARD)_yosys.log -p 'synth_ice40 -top $(PROJ) -abc9 -json $(BUILD).json' $(RAPCOREFILES) $(GENERATEDFILES)
-	nextpnr-ice40 -ql ./logs/$(BOARD)_nextpnr.log --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --json $(BUILD).json --asc $(BUILD).asc --pcf ./boards/$(BOARD)/$(PIN_DEF)
+	yosys -ql ./logs/$(BOARD)_yosys.log -p 'synth_ice40 -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json' $(RAPCOREFILES) $(GENERATEDFILES)
+	nextpnr-ice40 -ql ./logs/$(BOARD)_nextpnr.log $(PNR_FLAGS) --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --json $(BUILD).json --asc $(BUILD).asc --pcf ./boards/$(BOARD)/$(PIN_DEF)
 	icetime -d $(DEVICE) -c $(FREQ) -mtr $(BUILD).rpt $(BUILD).asc
 	icepack $(BUILD).asc $(BUILD).bit
 endif
 ifeq ($(ARCH), ecp5)
 	ecppll -i $(FREQ) -o $(SPIFREQ) --clkin_name clock_in --clkout0_name clock_out -n spi_pll -f $(GENERATEDDIR)spi_pll.v
 	ecppll -i $(FREQ) -o $(PWMFREQ) --clkin_name clock_in --clkout0_name clock_out -n pwm_pll -f $(GENERATEDDIR)pwm_pll.v
-	yosys -ql ./logs/$(BOARD)_yosys.log -p 'synth_ecp5 -top $(PROJ) -abc9 -json $(BUILD).json' $(RAPCOREFILES) $(GENERATEDFILES)
-	nextpnr-ecp5 -ql ./logs/$(BOARD)_nextpnr.log --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --textcfg $(BUILD)_out.config --json $(BUILD).json  --lpf ./boards/$(BOARD)/$(PIN_DEF)
+	yosys -ql ./logs/$(BOARD)_yosys.log -p 'synth_ecp5 -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json' $(RAPCOREFILES) $(GENERATEDFILES)
+	nextpnr-ecp5 -ql ./logs/$(BOARD)_nextpnr.log $(PNR_FLAGS) --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --textcfg $(BUILD)_out.config --json $(BUILD).json  --lpf ./boards/$(BOARD)/$(PIN_DEF)
 	ecppack --svf $(BUILD).svf $(BUILD)_out.config $(BUILD).bit
 endif
+
+
 
 logs:
 	mkdir -p logs
