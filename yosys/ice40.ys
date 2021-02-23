@@ -1,0 +1,74 @@
+
+begin:
+read_verilog -lib +/ice40/cells_sim.v
+hierarchy -check -top rapcore
+proc
+
+flatten: 
+flatten
+tribuf -logic
+deminout
+
+coarse:
+opt_expr
+opt_clean
+check
+opt -nodffe -nosdff
+fsm
+opt
+wreduce
+peepopt
+opt_clean
+share
+techmap -map +/cmp2lut.v -D LUT_WIDTH=4
+opt_expr
+opt_clean
+###ice40_dsp    #(if -dsp)
+alumacc
+opt
+memory -nomap
+opt_clean
+
+bram:
+memory_bram -rules +/ice40/brams.txt
+techmap -map +/ice40/brams_map.v
+ice40_braminit
+
+map:
+opt -fast -mux_undef -undriven -fine
+memory_map -iattr -attr !ram_block -attr !rom_block -attr logic_block -attr syn_ramstyle=auto -attr syn_ramstyle=registers -attr syn_romstyle=auto -attr syn_romstyle=logic
+opt -undriven -fine
+
+map_gates:
+ice40_wrapcarry
+techmap -map +/techmap.v -map +/ice40/arith_map.v
+opt
+ice40_opt
+
+map_ffs:
+dfflegalize -cell $_DFF_?_ 0 -cell $_DFFE_?P_ 0 -cell $_DFF_?P?_ 0 -cell $_DFFE_?P?P_ 0 -cell $_SDFF_?P?_ 0 -cell $_SDFFCE_?P?P_ 0 -cell $_DLATCH_?_ x -mince -1
+techmap -map +/ice40/ff_map.v
+opt_expr -mux_undef
+simplemap
+ice40_opt -full
+
+map_luts:
+techmap -map +/gate2lut.v -D LUT_WIDTH=4
+ice40_wrapcarry -unwrap
+techmap -map +/ice40/ff_map.v
+clean
+opt_lut -dlogic SB_CARRY:I0=2:I1=1:CI=0
+
+
+map_cells:
+techmap -map +/ice40/cells_map.v
+clean
+
+check:
+autoname
+hierarchy -check
+stat -width
+check -noinit
+
+json:
+write_json rapcore_ice40.json

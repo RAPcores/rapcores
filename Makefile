@@ -26,7 +26,7 @@ SPIFREQ ?= 64
 PWMFREQ ?= 150
 
 # Default flags
-SYNTH_FLAGS ?= -abc9
+SYNTH_FLAGS ?= -abc9 -device lp -dff
 PNR_FLAGS ?=
 
 PROJ = rapcore
@@ -117,6 +117,12 @@ cxxrtl-%: testbench/vcd
 	clang++ -g -O3 -std=c++14 -I `yosys-config --datdir`/include testbench/cxxrtl/$*.cpp -o testbench/cxxrtl/$*.bin
 	./testbench/cxxrtl/$*.bin
 	gtkwave testbench/vcd/$*_cxxrtl.vcd
+
+stat:
+	yosys -s yosys/stats.ys $(RAPCOREFILES) $(GENERATEDFILES)
+
+ice40:
+	yosys -s yosys/ice40.ys $(RAPCOREFILES) $(GENERATEDFILES)
 
 .SECONDARY:
 .PHONY: all prog clean formal
