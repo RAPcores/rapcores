@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 
 # Synchronous assigns 
-syncs="$(grep -nrP '(.*)([=<])(.*)(;)' src/* | grep -v 'assign\|wire\|reg\|parameter\|for\|==\|<=' )"
+syncs="$(grep -nrP '(.*)([=<])(.*)(;)' src/* | grep -v 'assign\|wire\|reg\|parameter\|localparam\|for\|==\|<=' )"
 printf "Synchronous assigns:\n"
 echo "$syncs"
 
