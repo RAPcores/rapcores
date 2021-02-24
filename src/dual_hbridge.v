@@ -91,16 +91,15 @@ module dual_hbridge #(
 
   reg [7:0] phase_ct;
 
-  reg [1:0] step_r;
+  wire step_rising;
+  rising_edge_detector step_r (.clk(clk), .in(step), .out(step_rising));
 
   always @(posedge clk) begin
     if (!resetn) begin
-      step_r <= 2'b0;
+      phase_ct <= 8'b0;
     end else if (resetn) begin
-      step_r <= {step_r[0], step};
-
       // Traverse the table based on direction, rolls over
-      if (step_r == 2'b01) begin // rising edge
+      if (step_rising) begin // rising edge
         phase_ct <= phase_ct + phase_inc;
         count_r <= count_r + phase_inc;
       end
