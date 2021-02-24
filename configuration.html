@@ -175,6 +175,10 @@ dual H Bridges are specified.</p>
 </pre></div>
 </div>
 <p>Enables quadrature encoder . Where <code class="docutils literal notranslate"><span class="pre">&lt;N&gt;</span></code> encoders are specified.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define ENCODER_BITS 32
+</pre></div>
+</div>
+<p>Sets the register size for encoder accumulators. Max: 32 bit.</p>
 <div class="section" id="id1">
 <h3>Pin Names<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
@@ -217,6 +221,14 @@ dual H Bridges are specified.</p>
 </div>
 <p>Default: 2</p>
 <p>Changes the default move buffer size. Must be a power of two.</p>
+</div>
+<div class="section" id="dda">
+<h2>DDA<a class="headerlink" href="#dda" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define DEFAULT_CLOCK_DIVISOR 40
+</pre></div>
+</div>
+<p>Default: 40</p>
+<p>Sets the default clock divisor for the DDA.</p>
 </div>
 <div class="section" id="internal-register-sizes">
 <h2>Internal Register Sizes<a class="headerlink" href="#internal-register-sizes" title="Permalink to this headline">¶</a></h2>
@@ -292,6 +304,7 @@ by making a <code class="docutils literal notranslate"><span class="pre">LOGICAN
 <li class="toctree-l2"><a class="reference internal" href="#encoders">Encoders</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#flow-control-and-events">Flow Control and Events</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#move-buffer-size">Move Buffer Size</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dda">DDA</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#internal-register-sizes">Internal Register Sizes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#led">LED</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#logic-analyzer">Logic Analyzer</a></li>
