@@ -69,6 +69,21 @@ module spi_state_machine #(
   input pwm_clock
 );
 
+  localparam CMD_COORDINATED_STEP    = 8'h01;
+  localparam CMD_MOTOR_ENABLE        = 8'h0a;
+  localparam CMD_MOTOR_BRAKE         = 8'h0b;
+  localparam CMD_MOTORCONFIG         = 8'h10;
+  localparam CMD_CLK_DIVISOR         = 8'h20;
+  localparam CMD_MICROSTEPPER_CONFIG = 8'h30;
+  localparam CMD_COSINE_CONFIG       = 8'h40;
+  localparam CMD_API_VERSION         = 8'hfe;
+  localparam CMD_CHARGEPUMP          = 8'h31;
+  localparam CMD_BRIDGEINVERT        = 8'h32;
+  localparam CMD_STEPPERFAULT        = 8'h50;
+  localparam CMD_ENCODERFAULT        = 8'h51;
+
+
+
   //
   // Stepper Timing and Buffer Setup
   //
@@ -305,10 +320,10 @@ module spi_state_machine #(
   reg signed [63:0] step_encoder_store [num_motors-1:0]; // Snapshot for SPI comms
 
   // check if the Header indicated multi-word transfer
-  wire awaiting_more_words = (message_header == `CMD_COORDINATED_STEP) |
-                             (message_header == `CMD_API_VERSION) |
-                             (message_header == `CMD_STEPPERFAULT) |
-                             (message_header == `CMD_ENCODERFAULT);
+  wire awaiting_more_words = (message_header == CMD_COORDINATED_STEP) |
+                             (message_header == CMD_API_VERSION) |
+                             (message_header == CMD_STEPPERFAULT) |
+                             (message_header == CMD_ENCODERFAULT);
   reg [1:0] word_received_r;
 
   reg [7:0] nmot;
@@ -382,7 +397,7 @@ module spi_state_machine #(
         case (word_data_received[63:56])
 
           // Coordinated Move
-          `CMD_COORDINATED_STEP: begin
+          CMD_COORDINATED_STEP: begin
 
             // Get Direction Bits
             dir_r[writemoveind] <= word_data_received[num_motors-1:0];
@@ -395,29 +410,29 @@ module spi_state_machine #(
           end
 
           // Motor Enable/disable
-          `CMD_MOTOR_ENABLE: begin
+          CMD_MOTOR_ENABLE: begin
             enable_r[num_motors-1:0] <= word_data_received[num_motors-1:0];
           end
 
           // Motor Brake on Disable
-          `CMD_MOTOR_BRAKE: begin
+          CMD_MOTOR_BRAKE: begin
             brake_r[num_motors-1:0] <= word_data_received[num_motors-1:0];
           end
 
           // Clock divisor (24 bit)
-          `CMD_CLK_DIVISOR: begin
+          CMD_CLK_DIVISOR: begin
             clock_divisor[7:0] <= word_data_received[7:0];
           end
 
           // Set Microstepping
-          `CMD_MOTORCONFIG: begin
+          CMD_MOTORCONFIG: begin
             // TODO needs to be power of two
             current[word_data_received[55:48]][7:0] <= word_data_received[15:8];
             microsteps[word_data_received[55:48]][2:0] <= word_data_received[2:0];
           end
 
           // Set Microstepping Parameters
-          `CMD_MICROSTEPPER_CONFIG: begin
+          CMD_MICROSTEPPER_CONFIG: begin
             config_offtime[word_data_received[55:48]][9:0] <= word_data_received[39:30];
             config_blanktime[word_data_received[55:48]][7:0] <= word_data_received[29:22];
             config_fastdecay_threshold[word_data_received[55:48]][9:0] <= word_data_received[21:12];
@@ -426,31 +441,31 @@ module spi_state_machine #(
           end
 
           // Set chargepump period
-          `CMD_CHARGEPUMP: begin
+          CMD_CHARGEPUMP: begin
             config_chargepump_period[7:0] <= word_data_received[7:0];
           end
 
           // Invert Bridge outputs
-          `CMD_BRIDGEINVERT: begin
+          CMD_BRIDGEINVERT: begin
             config_invert_highside[word_data_received[55:48]] <= word_data_received[1];
             config_invert_lowside[word_data_received[55:48]] <= word_data_received[0];
           end
 
           // Read Stepper fault register
-          `CMD_STEPPERFAULT: begin
+          CMD_STEPPERFAULT: begin
             word_send_data[num_motors-1:0] <= stepper_faultn;
           end
 
           // Read Stepper fault register
           // TODO
-          //`CMD_ENCODERFAULT: begin
+          //CMD_ENCODERFAULT: begin
           //  word_send_data[num_motors-1:0] <= stepper_faultn;
           //end
 
 
           // Write to Cosine Table
           // TODO Cosine Net is broken
-          //`CMD_COSINE_CONFIG: begin
+          //CMD_COSINE_CONFIG: begin
             //cos_table[word_data_received[35:32]] <= word_data_received[31:0];
             //cos_table[word_data_received[37:32]] <= word_data_received[7:0];
             //cos_table[word_data_received[35:32]+3] <= word_data_received[31:25];
@@ -460,7 +475,7 @@ module spi_state_machine #(
           //end
 
           // API Version
-          `CMD_API_VERSION: begin
+          CMD_API_VERSION: begin
             word_send_data[7:0] <= `VERSION_PATCH;
             word_send_data[15:8] <= `VERSION_MINOR;
             word_send_data[23:16] <= `VERSION_MAJOR;
@@ -478,7 +493,7 @@ module spi_state_machine #(
 
         case (message_header)
           // Move Routine
-          `CMD_COORDINATED_STEP: begin
+          CMD_COORDINATED_STEP: begin
             // Multiaxis
             for (nmot=0; nmot<num_motors; nmot=nmot+1) begin
               // the first non-header word is the move duration
