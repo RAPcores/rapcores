@@ -16,6 +16,7 @@ module dda_timer(
 
   // Step Trigger condition
   reg step_r;
+  reg [1:0] dda_tick_r;
   assign step = step_r;
 
   always @(posedge CLK) if (!resetn) begin
@@ -23,6 +24,7 @@ module dda_timer(
     substep_accumulator <= 64'b0; // typemax(Int64) - 100 for buffer
     increment_r <= 64'b0;
     step_r <= 0;
+    dda_tick_r <= 0;
 
   end else if (resetn) begin
 
@@ -31,8 +33,8 @@ module dda_timer(
       increment_r <= increment;
     end
 
-    // check if this move has been done before
-    if(dda_tick) begin
+    dda_tick_r <= {dda_tick_r[0], dda_tick};
+    if(dda_tick_r == 2'b01) begin
 
       // Step taken, rollback accumulator
       if (substep_accumulator > 0) begin
