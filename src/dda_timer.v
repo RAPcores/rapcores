@@ -16,15 +16,16 @@ module dda_timer(
 
   // Step Trigger condition
   reg step_r;
-  reg [1:0] dda_tick_r;
+  wire dda_tick_rising;
   assign step = step_r;
+
+  rising_edge_detector dda_rising (.clk(CLK), .in(dda_tick), .out(dda_tick_rising));
 
   always @(posedge CLK) if (!resetn) begin
 
     substep_accumulator <= 64'b0; // typemax(Int64) - 100 for buffer
     increment_r <= 64'b0;
     step_r <= 0;
-    dda_tick_r <= 0;
 
   end else if (resetn) begin
 
@@ -33,8 +34,7 @@ module dda_timer(
       increment_r <= increment;
     end
 
-    dda_tick_r <= {dda_tick_r[0], dda_tick};
-    if(dda_tick_r == 2'b01) begin
+    if(dda_tick_rising) begin
 
       // Step taken, rollback accumulator
       if (substep_accumulator > 0) begin
