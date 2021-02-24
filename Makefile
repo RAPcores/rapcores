@@ -88,7 +88,8 @@ cleanall:
 	rm -rf build logs ./src/generated/*.v
 
 formal:
-	sby -f symbiyosys.sby
+	cat symbiyosys/symbiyosys.sby boards/$(BOARD)/$(BOARD).v > symbiyosys/symbiyosys_$(BOARD).sby
+	sby -f symbiyosys/symbiyosys_$(BOARD).sby
 
 iverilog-parse: $(RAPCOREFILES)
 	iverilog -tnull $(RAPCOREFILES)
