@@ -38,8 +38,6 @@ The basic features of RAPcores is as follows:
 * High-speed Quadrature Encoder Accumulator
 * High-Speed SPI Bus
 
-.. math::
-
 Contents
 --------
 
