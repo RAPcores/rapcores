@@ -7,7 +7,6 @@ smtbmc
 [script]
 read -formal formal_config.v
 read -formal macro_params.v
-read -formal constants.v
 read -formal clock_divider.v
 read -formal dda_fsm.v
 read -formal dda_timer.v
@@ -32,7 +31,6 @@ prep -top rapcore
 boards/formal_config.v
 lut/cos_lut.bit src/lut/cos_lut.bit
 src/macro_params.v
-src/constants.v
 src/clock_divider.v
 src/dda_fsm.v
 src/dda_timer.v
