@@ -193,6 +193,14 @@ Default: 2
 
 Changes the default move buffer size. Must be a power of two.
 
+## DDA
+
+```
+`define DEFAULT_CLOCK_DIVISOR 32
+```
+Default: 32
+
+Sets the default clock divisor for the DDA.
 
 ## Internal Register Sizes
 

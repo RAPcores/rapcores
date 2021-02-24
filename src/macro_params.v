@@ -13,6 +13,10 @@
 `define BUFFER_SIZE 2
 `endif
 
+`ifndef DEFAULT_CLOCK_DIVISOR
+`define DEFAULT_CLOCK_DIVISOR 40
+`endif
+
 `ifndef DEFAULT_TIMER_WIDTH
 `define DEFAULT_TIMER_WIDTH 8
 `endif
