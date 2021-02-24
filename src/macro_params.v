@@ -31,6 +31,11 @@
 `define DEFAULT_BRIDGE_INVERTING 1
 `endif
 
+// Default Encoder accumulator bits
+`ifndef ENCODER_BITS
+`define ENCODER_BITS 32
+`endif
+
 //
 // Motor defaults
 //

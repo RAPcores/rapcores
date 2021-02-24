@@ -145,6 +145,11 @@ Set the default current for all motor channels.
 ```
 Enables quadrature encoder . Where `<N>` encoders are specified.
 
+```
+`define ENCODER_BITS 32
+```
+Sets the register size for encoder accumulators. Max: 32 bit.
+
 ### Pin Names
 
 - `ENC_A[N]`
@@ -196,9 +201,9 @@ Changes the default move buffer size. Must be a power of two.
 ## DDA
 
 ```
-`define DEFAULT_CLOCK_DIVISOR 32
+`define DEFAULT_CLOCK_DIVISOR 40
 ```
-Default: 32
+Default: 40
 
 Sets the default clock divisor for the DDA.
 
