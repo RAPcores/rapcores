@@ -21,7 +21,7 @@ module dda_fsm #(parameter buffer_bits = 2,
 
 
   // Buffer latching
-  reg [`MOVE_BUFFER_SIZE:0] stepfinished;
+  reg [buffer_size-1:0] stepfinished;
 
   assign moveind = moveind_r;
   reg [buffer_bits-1:0] moveind_r;

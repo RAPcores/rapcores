@@ -6,7 +6,8 @@ module spi_state_machine #(
     parameter move_duration_bits = 32,
     parameter encoder_bits = 32,
     parameter default_microsteps = 64,
-    parameter default_current = 140
+    parameter default_current = 140,
+    parameter BUFFER_SIZE = 2
   )(
   `ifdef LA_IN
     input wire [`LA_IN:1] LA_IN,
@@ -82,6 +83,8 @@ module spi_state_machine #(
   localparam CMD_STEPPERFAULT        = 8'h50;
   localparam CMD_ENCODERFAULT        = 8'h51;
 
+  localparam MOVE_BUFFER_SIZE = BUFFER_SIZE - 1; //This is the zero-indexed end index
+  localparam MOVE_BUFFER_BITS = $clog2(BUFFER_SIZE) - 1; // number of bits to index given size
 
 
   //
@@ -89,18 +92,18 @@ module spi_state_machine #(
   //
 
   // Move buffer
-  reg [`MOVE_BUFFER_BITS:0] writemoveind;
-  wire [`MOVE_BUFFER_BITS:0] moveind; // set via DDA FSM
+  reg [MOVE_BUFFER_BITS:0] writemoveind;
+  wire [MOVE_BUFFER_BITS:0] moveind; // set via DDA FSM
 
   // Latching mechanism for engaging the buffered move.
   // the DDA side is internal to dda_fsm
-  reg [`MOVE_BUFFER_SIZE:0] stepready;
+  reg [MOVE_BUFFER_SIZE:0] stepready;
 
-  reg [num_motors:1] dir_r [`MOVE_BUFFER_SIZE:0];
+  reg [num_motors:1] dir_r [MOVE_BUFFER_SIZE:0];
 
-  reg [move_duration_bits-1:0] move_duration [`MOVE_BUFFER_SIZE:0];
-  reg signed [63:0] increment [`MOVE_BUFFER_SIZE:0][num_motors-1:0];
-  reg signed [63:0] incrementincrement [`MOVE_BUFFER_SIZE:0][num_motors-1:0];
+  reg [move_duration_bits-1:0] move_duration [MOVE_BUFFER_SIZE:0];
+  reg signed [63:0] increment [MOVE_BUFFER_SIZE:0][num_motors-1:0];
+  reg signed [63:0] incrementincrement [MOVE_BUFFER_SIZE:0][num_motors-1:0];
 
   // DDA module input wires determined from buffer
   wire [move_duration_bits-1:0] move_duration_w = move_duration[moveind];
@@ -277,8 +280,8 @@ module spi_state_machine #(
   );
 
   // DDA FSM for duration and buffer state managment
-  dda_fsm #(.buffer_bits(`MOVE_BUFFER_BITS+1),
-            .buffer_size(`MOVE_BUFFER_SIZE+1),
+  dda_fsm #(.buffer_bits(MOVE_BUFFER_BITS+1),
+            .buffer_size(BUFFER_SIZE),
             .move_duration_bits(move_duration_bits)) ddam0 (
     .clk(CLK),
     .resetn(resetn),
@@ -519,7 +522,7 @@ module spi_state_machine #(
                   message_word_count <= 0;
                 end
                 `ifdef FORMAL
-                  assert(writemoveind <= `MOVE_BUFFER_SIZE);
+                  assert(writemoveind <= MOVE_BUFFER_SIZE);
                 `endif
               end
             end

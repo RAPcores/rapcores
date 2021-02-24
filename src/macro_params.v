@@ -13,10 +13,6 @@
 `define BUFFER_SIZE 2
 `endif
 
-`define MOVE_BUFFER_SIZE `BUFFER_SIZE - 1 //This is the zero-indexed end index
-
-`define MOVE_BUFFER_BITS $clog2(`BUFFER_SIZE)-1 // number of bits to index given size
-
 `ifndef DEFAULT_TIMER_WIDTH
 `define DEFAULT_TIMER_WIDTH 8
 `endif
