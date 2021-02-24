@@ -13,7 +13,7 @@ module pwm #(
     output pwm
 );
 
-  reg [bits-1:0] accum = 0;
+  reg [bits-1:0] accum = 0; // FPGA ONLY
   assign pwm = (accum < val);
 
   always @(posedge clk)

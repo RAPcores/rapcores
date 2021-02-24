@@ -61,7 +61,7 @@ module SPI (
           rx_byte <= {rx_byte[6:0], COPI_data};
 
           // Trigger Byte recieved
-          rx_byte_ready_r <= (&rxbitcnt[2:0]);
+          rx_byte_ready_r <= &rxbitcnt;
         end
 
         // Transmit increment
