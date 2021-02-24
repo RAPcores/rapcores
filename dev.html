@@ -174,14 +174,15 @@ formally verify the RAPcores project.</p>
 <div class="section" id="formal-verification">
 <h2>Formal Verification<a class="headerlink" href="#formal-verification" title="Permalink to this headline">¶</a></h2>
 <p>SymbiYosys is used for formal verification of the code base. It can be run with:</p>
-<p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">formal</span></code></p>
-<p>This command will create a <code class="docutils literal notranslate"><span class="pre">symbiyosys</span></code> directory in the project that
+<p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">formal</span> <span class="pre">BOARD=&lt;board&gt;</span></code></p>
+<p>This command will create a <code class="docutils literal notranslate"><span class="pre">symbiyosys_&lt;board&gt;</span></code> directory in the <code class="docutils literal notranslate"><span class="pre">symbiyosys</span></code> directory
 contains all the logs and data from the verification. If an assert or
 cover fails, a <code class="docutils literal notranslate"><span class="pre">.vcd</span></code> file will be generated that will display the states
 of registers and wires that induced the failure. GTKWave is a useful
 program for viewing the <code class="docutils literal notranslate"><span class="pre">.vcd</span></code> files.</p>
-<p>The config for Symbiyosys is <code class="docutils literal notranslate"><span class="pre">symbiyosys.sby</span></code> in the root of the directory.
-The formal verification configuration file is <code class="docutils literal notranslate"><span class="pre">boards/formal_config.v</span></code>.</p>
+<p>The base config for Symbiyosys is <code class="docutils literal notranslate"><span class="pre">symbiyosys.sby</span></code> in the <code class="docutils literal notranslate"><span class="pre">symbiyosys</span></code> directory.
+Board specific defines are overlaid on top to ensure that each board configuration
+can be validated.</p>
 </div>
 <div class="section" id="test-benches">
 <h2>Test Benches<a class="headerlink" href="#test-benches" title="Permalink to this headline">¶</a></h2>
