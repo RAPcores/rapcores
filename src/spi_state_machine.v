@@ -173,7 +173,8 @@ module spi_state_machine #(
     genvar i;
     generate
       for (i=0; i<num_motors; i=i+1) begin
-        dual_hbridge s0 (
+        dual_hbridge #(.step_count_bits(encoder_bits))
+                    s0 (
                       .clk (CLK),
                       .resetn(resetn),
                       .pwm_clk(pwm_clock),
