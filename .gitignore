@@ -15,7 +15,7 @@
 build/*.json
 *.config
 *.vcd
-symbiyosys
+symbiyosys/symbiyosys_*
 a.out
 
 src/generated/*
