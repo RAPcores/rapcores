@@ -331,7 +331,7 @@ module spi_state_machine #(
                              (message_header == CMD_ENCODERFAULT);
 
   wire word_received_rising;
-  rising_edge_detector step_r (.clk(CLK), .in(word_received), .out(word_received_rising));
+  rising_edge_detector word_recieved_edge_rising (.clk(CLK), .in(word_received), .out(word_received_rising));
 
   reg [7:0] nmot;
 

@@ -14,7 +14,6 @@ module SPI (
 );
 
   // Registers to sync IO with FPGA clock
-  reg [1:0] SCKr;
   reg [1:0] COPIr;
 
   // Output Byte and ready flag
@@ -26,8 +25,11 @@ module SPI (
   reg [2:0] txbitcnt; // counts down
 
   // Assign wires for SPI events, registers assigned in block below
-  wire SCK_risingedge = (SCKr == 2'b01);
-  wire SCK_fallingedge = (SCKr == 2'b10);
+  wire SCK_risingedge;
+  wire SCK_fallingedge;
+  rising_edge_detector sck_rising (.clk(clk), .in(SCK), .out(SCK_risingedge));
+  falling_edge_detector sck_falling (.clk(clk), .in(SCK), .out(SCK_fallingedge));
+
   wire CS_active = ~CS;  // active low
   wire COPI_data = COPIr[1];
   // CIPO pin (tristated per convention)
@@ -37,7 +39,6 @@ module SPI (
   always @(posedge clk) begin
     if (!resetn) begin
       // Registers to sync IO with FPGA clock
-      SCKr <= 2'b0;
       COPIr <= 2'b0;
 
       // Output Byte and ready flag
@@ -49,8 +50,7 @@ module SPI (
       txbitcnt <= 3'b111; // counts down
     end else if (resetn) begin
 
-      // Use a 3 bit shift register to sync CS, COPI, CIPO, with FPGA clock
-      SCKr <= {SCKr[0], SCK};
+      // Use a 2 bit shift register to sync COPI with FPGA clock
       COPIr <= {COPIr[0], COPI};
 
       if (CS_active) begin
