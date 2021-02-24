@@ -170,7 +170,8 @@ module rapcore #(
                       .move_duration_bits(move_duration_bits),
                       .default_microsteps(`DEFAULT_MICROSTEPS),
                       .default_current(`DEFAULT_CURRENT),
-                      .num_encoders(num_encoders)) spifsm
+                      .num_encoders(num_encoders),
+                      .BUFFER_SIZE(`BUFFER_SIZE)) spifsm
   (
     `ifdef LA_IN
       .LA_IN(LA_IN),
