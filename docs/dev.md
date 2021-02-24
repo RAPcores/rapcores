@@ -105,16 +105,17 @@ Get logic synthesis statistics for the given configuration.
 
 SymbiYosys is used for formal verification of the code base. It can be run with:
 
-`make formal`
+`make formal BOARD=<board>`
 
-This command will create a `symbiyosys` directory in the project that
+This command will create a `symbiyosys_<board>` directory in the `symbiyosys` directory
 contains all the logs and data from the verification. If an assert or
 cover fails, a `.vcd` file will be generated that will display the states
 of registers and wires that induced the failure. GTKWave is a useful
 program for viewing the `.vcd` files.
 
-The config for Symbiyosys is `symbiyosys.sby` in the root of the directory.
-The formal verification configuration file is `boards/formal_config.v`.
+The base config for Symbiyosys is `symbiyosys.sby` in the `symbiyosys` directory.
+Board specific defines are overlaid on top to ensure that each board configuration
+can be validated.
 
 ## Test Benches
 
