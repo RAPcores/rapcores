@@ -7,7 +7,8 @@ module spi_state_machine #(
     parameter encoder_bits = 32,
     parameter default_microsteps = 64,
     parameter default_current = 140,
-    parameter BUFFER_SIZE = 2
+    parameter BUFFER_SIZE = 2,
+    parameter default_clock_divisor = 32
   )(
   `ifdef LA_IN
     input wire [`LA_IN:1] LA_IN,
@@ -348,7 +349,7 @@ module spi_state_machine #(
 
     brake_r <= 0;
 
-    clock_divisor <= 40;  // should be 40 for 400 khz at 16Mhz Clk
+    clock_divisor <= default_clock_divisor;  // should be 40 for 400 khz at 16Mhz Clk
     message_word_count <= 0;
     message_header <= 0;
 

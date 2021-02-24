@@ -171,7 +171,8 @@ module rapcore #(
                       .default_microsteps(`DEFAULT_MICROSTEPS),
                       .default_current(`DEFAULT_CURRENT),
                       .num_encoders(num_encoders),
-                      .BUFFER_SIZE(`BUFFER_SIZE)) spifsm
+                      .BUFFER_SIZE(`BUFFER_SIZE),
+                      .default_clock_divisor(`DEFAULT_CLOCK_DIVISOR)) spifsm
   (
     `ifdef LA_IN
       .LA_IN(LA_IN),
