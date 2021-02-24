@@ -37,6 +37,7 @@ BUILDDIR = ./build/
 BUILD = $(BUILDDIR)$(BOARD)
 RAPCOREFILES := boards/$(BOARD)/$(BOARD).v \
 								$(addprefix src/, clock_divider.v \
+														edge_detector.v \
 													  macro_params.v \
 														spi_state_machine.v \
 														pwm.v \

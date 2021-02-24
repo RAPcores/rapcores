@@ -10,6 +10,7 @@ read -formal macro_params.v
 read -formal clock_divider.v
 read -formal dda_fsm.v
 read -formal dda_timer.v
+read -formal edge_detector.v
 read -formal spi.v
 read -formal dual_hbridge.v
 read -formal quad_enc.v
@@ -34,6 +35,7 @@ src/macro_params.v
 src/clock_divider.v
 src/dda_fsm.v
 src/dda_timer.v
+src/edge_detector.v
 src/spi.v
 src/dual_hbridge.v
 src/spi_state_machine.v

@@ -116,18 +116,18 @@ module SPIWord (
 
   reg [2:0] byte_count;
   wire [7:0] word_slice [7:0]; // slice the register into 8 bits
-  reg [1:0] rx_byte_ready_r;
+  wire rx_byte_ready_rising;
   reg word_received_r;
+
+  rising_edge_detector ready_rising (.clk(clk), .in(rx_byte_ready), .out(rx_byte_ready_rising));
 
   // Recieve Shift Register
   always @(posedge clk) if (!resetn) begin
     word_data_received <= 64'b0;
     byte_count <= 0;
-    rx_byte_ready_r <= 2'b0;
     word_received_r <= 0;
   end else if (resetn) begin
-    rx_byte_ready_r <= {rx_byte_ready_r[0], rx_byte_ready};
-    if (rx_byte_ready_r == 2'b01) begin
+    if (rx_byte_ready_rising) begin
       byte_count <= byte_count + 1'b1;
       word_data_received <= {rx_byte[7:0], word_data_received[63:8]};
       if (byte_count == 3'b111) word_received_r <= 1'b1;

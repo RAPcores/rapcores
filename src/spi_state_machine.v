@@ -329,7 +329,9 @@ module spi_state_machine #(
                              (message_header == CMD_API_VERSION) |
                              (message_header == CMD_STEPPERFAULT) |
                              (message_header == CMD_ENCODERFAULT);
-  reg [1:0] word_received_r;
+
+  wire word_received_rising;
+  rising_edge_detector step_r (.clk(CLK), .in(word_received), .out(word_received_rising));
 
   reg [7:0] nmot;
 
@@ -353,8 +355,6 @@ module spi_state_machine #(
     clock_divisor <= default_clock_divisor;  // should be 40 for 400 khz at 16Mhz Clk
     message_word_count <= 0;
     message_header <= 0;
-
-    word_received_r <= 2'b0;
 
     // TODO change to for loops for buffer
     move_duration[0] <= 0;
@@ -385,8 +385,7 @@ module spi_state_machine #(
     /* verilator lint_off WIDTH */
 
   end else if (resetn) begin
-    word_received_r <= {word_received_r[0], word_received};
-    if (word_received_r == 2'b01) begin
+    if (word_received_rising) begin
       // Zero out send data register
       word_send_data <= 64'b0;
 
