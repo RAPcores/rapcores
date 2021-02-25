@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: ISC
 `default_nettype none
 module mytimer_10 (
     input               clk,

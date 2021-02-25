@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: ISC
 // !!!
 // These are derived parameters. User defines go in <board>.v files.
 // !!!

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: ISC
 // Dummy PLL module for sim
 
 module pwm_pll(

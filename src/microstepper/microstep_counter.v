@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: ISC
 `default_nettype none
 
 module microstep_counter (
