@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: ISC
 `default_nettype none
 
 // Mode 0 8Bit transfer SPI Peripheral implementation
