@@ -14,6 +14,7 @@
 
 // Motor Definitions
 `define DUAL_HBRIDGE 4
+`define VREF_AB
 
 `define MOTOR_COUNT 4
 
