@@ -40,6 +40,10 @@
 // Motor defaults
 //
 
+`ifndef MOTOR_COUNT
+`define MOTOR_COUNT 0
+`endif
+
 `ifndef DEFAULT_MICROSTEPS
 `define DEFAULT_MICROSTEPS 8'd64
 `endif
