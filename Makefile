@@ -75,7 +75,11 @@ ifeq ($(ARCH), nexus)
 	nextpnr-nexus -ql ./logs/$(BOARD)_nextpnr.log $(PNR_FLAGS) --device $(DEVICE) --freq $(FREQ) --json $(BUILD).json --fasm $(BUILD).fasm --pdc ./boards/$(BOARD)/$(PIN_DEF)
 	prjoxide pack $(BUILD).fasm $(BUILD).bit
 endif
-
+ifeq ($(ARCH), gowin)
+	yosys -ql ./logs/$(BOARD)_yosys.log -p 'synth_gowin -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json' $(RAPCOREFILES) $(GENERATEDFILES)
+	nextpnr-gowin -ql ./logs/$(BOARD)_nextpnr.log $(PNR_FLAGS) --device $(DEVICE) --freq $(FREQ) --json $(BUILD).json --cst ./boards/$(BOARD)/$(PIN_DEF)
+	gowin_pack $(PACK_FLAGS) -o $(BUILD).bit $(BUILD).json
+endif
 
 
 logs:
