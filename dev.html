@@ -40,61 +40,19 @@
 <p>RAPcores targets the FOSS synthesis, place and route, and bitstream tools. Namely yosys and
 nextpnr. We are open to support other flows and open source tool chain. However do note
 that RAPcores does use some SystemVerilog features supported by Yosys.</p>
-<p>We recommend using a relatively recent build of these tools. The ones included in Linux
-distros may be out of date. Using the Nix package manager with the included <code class="docutils literal notranslate"><span class="pre">shell.nix</span></code> is
-recommended.</p>
+<p>We recommend using a relatively recent build of these tools. The ones included in LTS Linux
+distros may be out of date.</p>
 <ul class="simple">
 <li><p><a class="reference external" href="https://github.com/YosysHQ/yosys">Yosys</a></p></li>
 <li><p><a class="reference external" href="https://github.com/YosysHQ/nextpnr">nextpnr</a></p></li>
 <li><p><a class="reference external" href="https://github.com/YosysHQ/icestorm">icestorm</a> (ice40 targets)</p></li>
 <li><p><a class="reference external" href="https://github.com/YosysHQ/prjtrellis">prjtrellis</a> (ECP5 targets)</p></li>
+<li><p><a class="reference external" href="https://github.com/YosysHQ/apicula">apicula</a> (Gowin targets)</p></li>
+<li><p><a class="reference external" href="https://github.com/gatecat/prjoxide">prjoxide</a> (nexus targets)</p></li>
 <li><p><a class="reference external" href="https://github.com/verilator/verilator">verilator</a> (Optional, for linting/testbenches)</p></li>
 <li><p><a class="reference external" href="https://github.com/steveicarus/iverilog">iverilog</a> (Optional, for linting/testbenches)</p></li>
 <li><p><a class="reference external" href="https://github.com/YosysHQ/SymbiYosys">SymbiYosys</a> (Optional, for formal verification)</p></li>
 </ul>
-</div>
-<div class="section" id="developing-with-nix">
-<h2>Developing with Nix<a class="headerlink" href="#developing-with-nix" title="Permalink to this headline">¶</a></h2>
-<p>RAPcores includes a <a class="reference external" href="../shell.nix">shell.nix</a> for use with the Nix Package manager.
-This makes it easy to get a development environment with all build requirements installed
-for you.</p>
-<p>To start you will need to install Nix using the instructions <a class="reference external" href="https://nixos.wiki/wiki/Nix_Installation_Guide">here</a>.
-They are reproduced here with some recommendations:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>sudo install -d -m755 -o $(id -u) -g $(id -g) /nix
-curl -L https://nixos.org/nix/install | sh
-source $HOME/.nix-profile/etc/profile.d/nix.sh &gt;&gt; ~/.bashrc
-</pre></div>
-</div>
-<p>Then restart the terminal. Next, <code class="docutils literal notranslate"><span class="pre">cd</span></code> to the RAPcores directory. Run <code class="docutils literal notranslate"><span class="pre">nix-shell</span></code>, and some
-packages will be installed. Once complete you should be able to run any of the <code class="docutils literal notranslate"><span class="pre">make</span></code> commands
-below. This environment includes all the tools to synthesis, place, route, program, and
-formally verify the RAPcores project.</p>
-<div class="section" id="packages-included-in-nix-environment">
-<h3>Packages included in Nix environment<a class="headerlink" href="#packages-included-in-nix-environment" title="Permalink to this headline">¶</a></h3>
-<p>Verilog frontends:</p>
-<ul class="simple">
-<li><p>yosys</p></li>
-<li><p>verilog</p></li>
-<li><p>verilator</p></li>
-</ul>
-<p>Place and route/databases:</p>
-<ul class="simple">
-<li><p>nextpnr</p></li>
-<li><p>icestorm</p></li>
-<li><p>trellis</p></li>
-</ul>
-<p>Formal verification:</p>
-<ul class="simple">
-<li><p>symbiyosys</p></li>
-<li><p>yices</p></li>
-</ul>
-<p>Programmers:</p>
-<ul class="simple">
-<li><p>tinyprog</p></li>
-<li><p>fujprog</p></li>
-<li><p>openocd</p></li>
-</ul>
-</div>
 </div>
 <div class="section" id="overview-of-make-targets">
 <h2>Overview of Make targets<a class="headerlink" href="#overview-of-make-targets" title="Permalink to this headline">¶</a></h2>
@@ -220,6 +178,49 @@ The yosys CXXRTL test benches can be executed with:</p>
 </div>
 <p>which will parse the source using Yosys, IVerilog, and Verilator.</p>
 </div>
+<div class="section" id="developing-with-nix">
+<h2>Developing with Nix<a class="headerlink" href="#developing-with-nix" title="Permalink to this headline">¶</a></h2>
+<p>RAPcores includes a <a class="reference external" href="../shell.nix">shell.nix</a> for use with the Nix Package manager.
+This makes it easy to get a development environment with all build requirements installed
+for you.</p>
+<p>To start you will need to install Nix using the instructions <a class="reference external" href="https://nixos.wiki/wiki/Nix_Installation_Guide">here</a>.
+They are reproduced here with some recommendations:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>sudo install -d -m755 -o $(id -u) -g $(id -g) /nix
+curl -L https://nixos.org/nix/install | sh
+source $HOME/.nix-profile/etc/profile.d/nix.sh &gt;&gt; ~/.bashrc
+</pre></div>
+</div>
+<p>Then restart the terminal. Next, <code class="docutils literal notranslate"><span class="pre">cd</span></code> to the RAPcores directory. Run <code class="docutils literal notranslate"><span class="pre">nix-shell</span></code>, and some
+packages will be installed. Once complete you should be able to run any of the <code class="docutils literal notranslate"><span class="pre">make</span></code> commands
+below. This environment includes all the tools to synthesis, place, route, program, and
+formally verify the RAPcores project.</p>
+<div class="section" id="packages-included-in-nix-environment">
+<h3>Packages included in Nix environment<a class="headerlink" href="#packages-included-in-nix-environment" title="Permalink to this headline">¶</a></h3>
+<p>Verilog frontends:</p>
+<ul class="simple">
+<li><p>yosys</p></li>
+<li><p>verilog</p></li>
+<li><p>verilator</p></li>
+</ul>
+<p>Place and route/databases:</p>
+<ul class="simple">
+<li><p>nextpnr</p></li>
+<li><p>icestorm</p></li>
+<li><p>trellis</p></li>
+</ul>
+<p>Formal verification:</p>
+<ul class="simple">
+<li><p>symbiyosys</p></li>
+<li><p>yices</p></li>
+</ul>
+<p>Programmers:</p>
+<ul class="simple">
+<li><p>tinyprog</p></li>
+<li><p>fujprog</p></li>
+<li><p>openocd</p></li>
+</ul>
+</div>
+</div>
 <div class="section" id="helpful-articles">
 <h2>Helpful Articles<a class="headerlink" href="#helpful-articles" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
@@ -259,13 +260,13 @@ The yosys CXXRTL test benches can be executed with:</p>
 <li class="toctree-l1"><a class="reference internal" href="configuration.html">Board Configuration</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Developer Docs</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#build-prerequisites">Build Prerequisites</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#developing-with-nix">Developing with Nix</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#overview-of-make-targets">Overview of Make targets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#board-targets">Board targets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#formal-verification">Formal Verification</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#test-benches">Test Benches</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#formatting">Formatting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#linting">Linting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#developing-with-nix">Developing with Nix</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#helpful-articles">Helpful Articles</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#useful-tools">Useful Tools</a></li>
 </ul>
