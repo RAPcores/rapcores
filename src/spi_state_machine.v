@@ -30,6 +30,8 @@ module spi_state_machine #(
     output wire [`DUAL_HBRIDGE-1:0] PHASE_A2,  // Phase A
     output wire [`DUAL_HBRIDGE-1:0] PHASE_B1,  // Phase B
     output wire [`DUAL_HBRIDGE-1:0] PHASE_B2,  // Phase B
+  `endif
+  `ifdef VREF_AB
     output wire [`DUAL_HBRIDGE-1:0] VREF_A,  // VRef
     output wire [`DUAL_HBRIDGE-1:0] VREF_B,  // VRef
   `endif
@@ -183,8 +185,10 @@ module spi_state_machine #(
                       .phase_a2 (PHASE_A2[i]),
                       .phase_b1 (PHASE_B1[i]),
                       .phase_b2 (PHASE_B2[i]),
-                      .vref_a (VREF_A[i]),
-                      .vref_b (VREF_B[i]),
+                      `ifdef VREF_AB
+                        .vref_a (VREF_A[i]),
+                        .vref_b (VREF_B[i]),
+                      `endif
                       .step (step[i]),
                       .dir (dir[i]),
                       .enable (enable[i]),
