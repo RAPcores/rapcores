@@ -24,6 +24,8 @@ The following FPGA architectures are supported and tested:
 
 - iCE40
 - ECP5
+- Gowin (Experimental)
+- nexus (Experimental)
 
 We welcome ports to other architectures.
 

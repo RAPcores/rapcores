@@ -6,63 +6,18 @@ RAPcores targets the FOSS synthesis, place and route, and bitstream tools. Namel
 nextpnr. We are open to support other flows and open source tool chain. However do note
 that RAPcores does use some SystemVerilog features supported by Yosys.
 
-We recommend using a relatively recent build of these tools. The ones included in Linux
-distros may be out of date. Using the Nix package manager with the included `shell.nix` is
-recommended.
+We recommend using a relatively recent build of these tools. The ones included in LTS Linux
+distros may be out of date.
 
 - [Yosys](https://github.com/YosysHQ/yosys)
 - [nextpnr](https://github.com/YosysHQ/nextpnr)
 - [icestorm](https://github.com/YosysHQ/icestorm) (ice40 targets)
 - [prjtrellis](https://github.com/YosysHQ/prjtrellis) (ECP5 targets)
+- [apicula](https://github.com/YosysHQ/apicula) (Gowin targets)
+- [prjoxide](https://github.com/gatecat/prjoxide) (nexus targets)
 - [verilator](https://github.com/verilator/verilator) (Optional, for linting/testbenches)
 - [iverilog](https://github.com/steveicarus/iverilog) (Optional, for linting/testbenches)
 - [SymbiYosys](https://github.com/YosysHQ/SymbiYosys) (Optional, for formal verification)
-
-## Developing with Nix
-
-RAPcores includes a [shell.nix](../shell.nix) for use with the Nix Package manager.
-This makes it easy to get a development environment with all build requirements installed
-for you.
-
-To start you will need to install Nix using the instructions [here](https://nixos.wiki/wiki/Nix_Installation_Guide).
-They are reproduced here with some recommendations:
-
-```
-sudo install -d -m755 -o $(id -u) -g $(id -g) /nix
-curl -L https://nixos.org/nix/install | sh
-source $HOME/.nix-profile/etc/profile.d/nix.sh >> ~/.bashrc
-```
-
-Then restart the terminal. Next, `cd` to the RAPcores directory. Run `nix-shell`, and some
-packages will be installed. Once complete you should be able to run any of the `make` commands
-below. This environment includes all the tools to synthesis, place, route, program, and
-formally verify the RAPcores project.
-
-### Packages included in Nix environment
-
-Verilog frontends:
-
-- yosys
-- verilog 
-- verilator
-
-Place and route/databases:
-
-- nextpnr
-- icestorm
-- trellis
-
-Formal verification:
-
-- symbiyosys
-- yices
-
-Programmers:
-
-- tinyprog
-- fujprog
-- openocd
-
 
 ## Overview of Make targets
 
@@ -161,6 +116,51 @@ make triple-check
 ```
 
 which will parse the source using Yosys, IVerilog, and Verilator.
+
+## Developing with Nix
+
+RAPcores includes a [shell.nix](../shell.nix) for use with the Nix Package manager.
+This makes it easy to get a development environment with all build requirements installed
+for you.
+
+To start you will need to install Nix using the instructions [here](https://nixos.wiki/wiki/Nix_Installation_Guide).
+They are reproduced here with some recommendations:
+
+```
+sudo install -d -m755 -o $(id -u) -g $(id -g) /nix
+curl -L https://nixos.org/nix/install | sh
+source $HOME/.nix-profile/etc/profile.d/nix.sh >> ~/.bashrc
+```
+
+Then restart the terminal. Next, `cd` to the RAPcores directory. Run `nix-shell`, and some
+packages will be installed. Once complete you should be able to run any of the `make` commands
+below. This environment includes all the tools to synthesis, place, route, program, and
+formally verify the RAPcores project.
+
+### Packages included in Nix environment
+
+Verilog frontends:
+
+- yosys
+- verilog 
+- verilator
+
+Place and route/databases:
+
+- nextpnr
+- icestorm
+- trellis
+
+Formal verification:
+
+- symbiyosys
+- yices
+
+Programmers:
+
+- tinyprog
+- fujprog
+- openocd
 
 ## Helpful Articles
 
