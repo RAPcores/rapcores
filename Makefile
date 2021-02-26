@@ -28,6 +28,7 @@ PWMFREQ ?= 150
 # Default flags
 SYNTH_FLAGS ?= -abc9
 PNR_FLAGS ?=
+YOSYS_FLAGS ?= -DBOARD=$(BOARD)
 
 PROJ = rapcore
 TOP = ./src/rapcore.v
@@ -48,17 +49,15 @@ RAPCOREFILES := boards/$(BOARD)/$(BOARD).v \
 														dda_timer.v \
 														rapcore.v) \
 								$(wildcard src/microstepper/*.v)
-GENERATEDFILES := src/generated/spi_pll.v src/generated/pwm_pll.v  src/generated/board.v
+GENERATEDFILES := src/generated/spi_pll.v src/generated/pwm_pll.v
 
 all: $(BUILD).bit
 
 $(BUILD).bit: logs build $(RAPCOREFILES)
-# set board define for Verilog and include the board specific verilog file
-	printf '`define $(BOARD)\n' > $(GENERATEDDIR)board.v
 ifeq ($(ARCH), ice40)
 	icepll -i $(FREQ) -o $(SPIFREQ) -m -n spi_pll -f $(GENERATEDDIR)spi_pll.v
 	icepll -i $(FREQ) -o $(PWMFREQ) -m -n pwm_pll -f $(GENERATEDDIR)pwm_pll.v
-	yosys -ql ./logs/$(BOARD)_yosys.log -p 'synth_ice40 -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json' $(RAPCOREFILES) $(GENERATEDFILES)
+	yosys -ql ./logs/$(BOARD)_yosys.log $(YOSYS_FLAGS) -p 'synth_ice40 -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json' $(RAPCOREFILES) $(GENERATEDFILES)
 	nextpnr-ice40 -ql ./logs/$(BOARD)_nextpnr.log $(PNR_FLAGS) --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --json $(BUILD).json --asc $(BUILD).asc --pcf ./boards/$(BOARD)/$(PIN_DEF)
 	icetime -d $(DEVICE) -c $(FREQ) -mtr $(BUILD).rpt $(BUILD).asc
 	icepack $(BUILD).asc $(BUILD).bit
@@ -66,17 +65,17 @@ endif
 ifeq ($(ARCH), ecp5)
 	ecppll -i $(FREQ) -o $(SPIFREQ) --clkin_name clock_in --clkout0_name clock_out -n spi_pll -f $(GENERATEDDIR)spi_pll.v
 	ecppll -i $(FREQ) -o $(PWMFREQ) --clkin_name clock_in --clkout0_name clock_out -n pwm_pll -f $(GENERATEDDIR)pwm_pll.v
-	yosys -ql ./logs/$(BOARD)_yosys.log -p 'synth_ecp5 -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json' $(RAPCOREFILES) $(GENERATEDFILES)
+	yosys -ql ./logs/$(BOARD)_yosys.log $(YOSYS_FLAGS) -p 'synth_ecp5 -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json' $(RAPCOREFILES) $(GENERATEDFILES)
 	nextpnr-ecp5 -ql ./logs/$(BOARD)_nextpnr.log $(PNR_FLAGS) --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --textcfg $(BUILD)_out.config --json $(BUILD).json  --lpf ./boards/$(BOARD)/$(PIN_DEF)
 	ecppack --svf $(BUILD).svf $(BUILD)_out.config $(BUILD).bit
 endif
 ifeq ($(ARCH), nexus)
-	yosys -ql ./logs/$(BOARD)_yosys.log -p 'synth_nexus -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json' $(RAPCOREFILES) $(GENERATEDFILES)
+	yosys -ql ./logs/$(BOARD)_yosys.log $(YOSYS_FLAGS) -p 'synth_nexus -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json' $(RAPCOREFILES) $(GENERATEDFILES)
 	nextpnr-nexus -ql ./logs/$(BOARD)_nextpnr.log $(PNR_FLAGS) --device $(DEVICE) --freq $(FREQ) --json $(BUILD).json --fasm $(BUILD).fasm --pdc ./boards/$(BOARD)/$(PIN_DEF)
 	prjoxide pack $(BUILD).fasm $(BUILD).bit
 endif
 ifeq ($(ARCH), gowin)
-	yosys -ql ./logs/$(BOARD)_yosys.log -p 'synth_gowin -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json' $(RAPCOREFILES) $(GENERATEDFILES)
+	yosys -ql ./logs/$(BOARD)_yosys.log $(YOSYS_FLAGS) -p 'synth_gowin -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json' $(RAPCOREFILES) $(GENERATEDFILES)
 	nextpnr-gowin -ql ./logs/$(BOARD)_nextpnr.log $(PNR_FLAGS) --device $(DEVICE) --freq $(FREQ) --json $(BUILD).json --cst ./boards/$(BOARD)/$(PIN_DEF)
 	gowin_pack $(PACK_FLAGS) -o $(BUILD).bit $(BUILD).json
 endif
