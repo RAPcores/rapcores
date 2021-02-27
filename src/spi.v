@@ -124,7 +124,7 @@ module SPIWord #(parameter bits = 64) (
 
   // Recieve Shift Register
   always @(posedge clk) if (!resetn) begin
-    word_data_received <= bits'b0;
+    word_data_received <= {bits{1'b0}};
     byte_count <= 0;
     word_received_r <= 0;
   end else if (resetn) begin
