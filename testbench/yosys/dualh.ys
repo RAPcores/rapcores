@@ -1,5 +1,4 @@
-
 read_verilog -sv testbench/dualh_tb.v
-
+hierarchy -check -top daulh_tb
 prep -top dualh_tb
 sim -n 10000 -clock clk -resetn resetn -vcd testbench/vcd/dualh.vcd

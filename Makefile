@@ -120,8 +120,8 @@ vvp: $(RAPCOREFILES)
 testbench/vcd:
 	mkdir -p testbench/vcd
 
-yosys-%: testbench/vcd
-	yosys testbench/yosys/$*.ys
+yosys-%: testbench/vcd $(RAPCOREFILES)
+	yosys -s testbench/yosys/$*.ys $(RAPCOREFILES)
 	gtkwave testbench/vcd/$*.vcd
 
 cxxrtl-%: testbench/vcd

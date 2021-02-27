@@ -1,7 +1,4 @@
 
-`include "../src/pwm.v"
-`include "../src/dual_hbridge.v"
-
 module dualh_tb(input  wire clk,
               input  wire resetn,
               output wire A1,

@@ -1,6 +1,4 @@
 
-`include "../src/pwm.v"
-
 module pwm_tb(input  wire clk,
               input  wire resetn,
               output wire pwm);
