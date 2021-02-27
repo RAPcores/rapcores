@@ -326,8 +326,8 @@ module spi_state_machine #(
   reg [7:0] message_header;
 
   // Encoder
-  reg signed [63:0] encoder_store [num_motors-1:0]; // Snapshot for SPI comms
-  reg signed [63:0] step_encoder_store [num_motors-1:0]; // Snapshot for SPI comms
+  reg signed [encoder_bits-1:0] encoder_store [num_motors-1:0]; // Snapshot for SPI comms
+  reg signed [encoder_bits-1:0] step_encoder_store [num_motors-1:0]; // Snapshot for SPI comms
 
   // check if the Header indicated multi-word transfer
   wire awaiting_more_words = (message_header == CMD_COORDINATED_STEP) |
