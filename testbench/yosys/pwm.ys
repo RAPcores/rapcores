@@ -1,5 +1,5 @@
 
 read_verilog -sv testbench/pwm_tb.v
-
+hierarchy -check -top pwm_tb
 prep -top pwm_tb
 sim -n 10000 -clock clk -resetn resetn -vcd testbench/vcd/pwm.vcd

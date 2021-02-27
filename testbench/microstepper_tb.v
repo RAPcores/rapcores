@@ -1,5 +1,4 @@
 `default_nettype none
-`include "../src/microstepper/microstepper_top.v"
 `include "hbridge_coil.v"
 `include "pwm_duty.v"
 `timescale 1ns/100ps

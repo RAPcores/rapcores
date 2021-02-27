@@ -15,13 +15,6 @@
  *  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-`include "../src/macro_params.v"
-`include "../src/constants.v"
-`include "../boards/rapbo/rapbo.v"
-`include "../src/spi_state_machine.v"
-`include "../src/spi.v"
-`include "../src/dda_timer.v"
-
 `timescale 1ns/100ps
 
 module testbench(

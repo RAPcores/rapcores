@@ -15,7 +15,6 @@
  *  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-`include "../src/quad_enc.v"
 `timescale 1ns/100ps
 
 module testbench(
