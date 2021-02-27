@@ -4,6 +4,8 @@
 module spi_state_machine #(
     parameter num_motors = 1,
     parameter num_encoders = 0,
+    parameter word_bits = 64,
+    parameter dda_bits = 64,
     parameter move_duration_bits = 32,
     parameter encoder_bits = 32,
     parameter default_microsteps = 64,
@@ -21,8 +23,8 @@ module spi_state_machine #(
   input resetn,
 
   // Bus Interface
-  input wire [63:0] word_data_received,
-  output reg [63:0] word_send_data,
+  input wire [word_bits-1:0] word_data_received,
+  output reg [word_bits-1:0] word_send_data,
   input wire word_received,
 
   `ifdef DUAL_HBRIDGE
@@ -106,15 +108,15 @@ module spi_state_machine #(
   reg [num_motors:1] dir_r [MOVE_BUFFER_SIZE:0];
 
   reg [move_duration_bits-1:0] move_duration [MOVE_BUFFER_SIZE:0];
-  reg signed [63:0] increment [MOVE_BUFFER_SIZE:0][num_motors-1:0];
-  reg signed [63:0] incrementincrement [MOVE_BUFFER_SIZE:0][num_motors-1:0];
+  reg signed [dda_bits-1:0] increment [MOVE_BUFFER_SIZE:0][num_motors-1:0];
+  reg signed [dda_bits-1:0] incrementincrement [MOVE_BUFFER_SIZE:0][num_motors-1:0];
 
   // DDA module input wires determined from buffer
   wire [move_duration_bits-1:0] move_duration_w = move_duration[moveind];
 
   // Per-axis DDA parameters
-  wire [63:0] increment_w [num_motors-1:0];
-  wire [63:0] incrementincrement_w [num_motors-1:0];
+  wire [dda_bits-1:0] increment_w [num_motors-1:0];
+  wire [dda_bits-1:0] incrementincrement_w [num_motors-1:0];
 
   genvar i;
   for (i=0; i<num_motors; i=i+1) begin
@@ -367,10 +369,10 @@ module spi_state_machine #(
 
     /* verilator lint_off WIDTH */
     for (nmot=0; nmot<num_motors; nmot=nmot+1) begin
-      increment[0][nmot] <= 64'b0;
-      increment[1][nmot] <= 64'b0;
-      incrementincrement[0][nmot] <= 64'b0;
-      incrementincrement[1][nmot] <= 64'b0;
+      increment[0][nmot] <= {dda_bits{1'b0}};
+      increment[1][nmot] <= {dda_bits{1'b0}};
+      incrementincrement[0][nmot] <= {dda_bits{1'b0}};
+      incrementincrement[1][nmot] <= {dda_bits{1'b0}};
   
       // Encoders
       step_encoder_store[nmot] <= 0;
@@ -398,12 +400,12 @@ module spi_state_machine #(
       if (!awaiting_more_words) begin
 
         // Save CMD header incase multi word transaction
-        message_header <= word_data_received[63:56]; // Header is 8 MSB
+        message_header <= word_data_received[word_bits-1:word_bits-8]; // Header is 8 MSB
 
         // First word so message count zero
         message_word_count <= 1;
 
-        case (word_data_received[63:56])
+        case (word_data_received[word_bits-1:word_bits-8])
 
           // Coordinated Move
           CMD_COORDINATED_STEP: begin
@@ -514,11 +516,11 @@ module spi_state_machine #(
               end
 
               if (message_word_count == (nmot+1)*2) begin
-                increment[writemoveind][nmot][63:0] <= word_data_received[63:0];
+                increment[writemoveind][nmot] <= word_data_received;
                 word_send_data <= encoder_store[nmot]; // Prep to send steps
               end
               if (message_word_count == (nmot+1)*2+1) begin
-                incrementincrement[writemoveind][nmot][63:0] <= word_data_received[63:0];
+                incrementincrement[writemoveind][nmot] <= word_data_received;
                 if (nmot != num_motors-1) word_send_data <= step_encoder_store[nmot+1]; // Prep to send steps
 
                 if (nmot == num_motors-1) begin

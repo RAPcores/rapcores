@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: ISC
 `default_nettype none
 
-module dda_timer(
+module dda_timer #(parameter dda_bits = 64)
+(
   input resetn,
-  input [63:0] increment,
-  input [63:0] incrementincrement,
+  input [dda_bits-1:0] increment,
+  input [dda_bits-1:0] incrementincrement,
   input  loading_move,
   input  executing_move,
   output step,
@@ -12,8 +13,8 @@ module dda_timer(
   input CLK
 );
 
-  reg signed [63:0] substep_accumulator; // typemax(Int64) - 100 for buffer
-  reg signed [63:0] increment_r;
+  reg signed [dda_bits-1:0] substep_accumulator; // typemax(Int64) - 100 for buffer
+  reg signed [dda_bits-1:0] increment_r;
 
   // Step Trigger condition
   reg step_r;
@@ -24,8 +25,8 @@ module dda_timer(
 
   always @(posedge CLK) if (!resetn) begin
 
-    substep_accumulator <= 64'b0; // typemax(Int64) - 100 for buffer
-    increment_r <= 64'b0;
+    substep_accumulator <= {dda_bits{1'b0}}; // typemax(Int64) - 100 for buffer
+    increment_r <= {dda_bits{1'b0}};
     step_r <= 0;
 
   end else if (resetn) begin
