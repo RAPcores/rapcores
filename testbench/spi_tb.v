@@ -17,18 +17,17 @@
 
 `timescale 1ns/100ps
 
-module testbench(
+module testbench #(parameter SPIBITS = 32)(
     input             clk,
-    output reg [63:0] word_send_data,
+    output reg [SPIBITS-1:0] word_send_data,
     output            word_received,
-    output reg [63:0] word_data_received,
+    output reg [SPIBITS-1:0] word_data_received,
     output COPI_tx,
     output [3:0] bit_count,
     output [3:0] byte_count
   );
 
   parameter NUMWORDS = 3;
-  localparam SPIBITS = 64;
   localparam NUMBYTES = SPIBITS/8;
 
   reg CS = 0; // selected
