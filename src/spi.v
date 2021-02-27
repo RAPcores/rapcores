@@ -87,16 +87,16 @@ endmodule
 
 // 32 bit word SPI wrapper for Little endian 8 bit transfers
 //
-module SPIWord (
+module SPIWord #(parameter bits = 64) (
     input wire        clk,
     input wire        resetn,
     input wire        SCK,
     input wire        CS,
     input wire        COPI,
     output wire       CIPO,
-    input wire [63:0] word_send_data,
+    input wire [bits-1:0] word_send_data,
     output wire       word_received,
-    output reg [63:0] word_data_received
+    output reg [bits-1:0] word_data_received
 );
 
   // SPI Initialization
@@ -124,29 +124,32 @@ module SPIWord (
 
   // Recieve Shift Register
   always @(posedge clk) if (!resetn) begin
-    word_data_received <= 64'b0;
+    word_data_received <= bits'b0;
     byte_count <= 0;
     word_received_r <= 0;
   end else if (resetn) begin
     if (rx_byte_ready_rising) begin
       byte_count <= byte_count + 1'b1;
-      word_data_received <= {rx_byte[7:0], word_data_received[63:8]};
-      if (byte_count == 3'b111) word_received_r <= 1'b1;
+      word_data_received <= {rx_byte[7:0], word_data_received[bits-1:8]};
+      if (bits == 64 && byte_count == 3'b111) word_received_r <= 1'b1;
       else word_received_r <= 1'b0;
     end
   end
 
   assign word_received = word_received_r;
 
-  //TODO: Use generate
-  assign word_slice[0] = word_send_data[7:0]; // This should only hit at initialization
-  assign word_slice[1] = word_send_data[15:8];
-  assign word_slice[2] = word_send_data[23:16];
-  assign word_slice[3] = word_send_data[31:24];
-  assign word_slice[4] = word_send_data[39:32];
-  assign word_slice[5] = word_send_data[47:40];
-  assign word_slice[6] = word_send_data[55:48];
-  assign word_slice[7] = word_send_data[63:56];
+  if (bits >= 32) begin
+    assign word_slice[0] = word_send_data[7:0]; // This should only hit at initialization
+    assign word_slice[1] = word_send_data[15:8];
+    assign word_slice[2] = word_send_data[23:16];
+    assign word_slice[3] = word_send_data[31:24];
+  end
+  if (bits >= 64) begin
+    assign word_slice[4] = word_send_data[39:32];
+    assign word_slice[5] = word_send_data[47:40];
+    assign word_slice[6] = word_send_data[55:48];
+    assign word_slice[7] = word_send_data[63:56];
+  end
 
   assign tx_byte[7:0] = word_slice[byte_count];
 
