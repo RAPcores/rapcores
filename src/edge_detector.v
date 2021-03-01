@@ -53,7 +53,7 @@ module falling_edge_detector_tribuf (
   reg [2:0] in_q;
 
   always @(posedge clk) begin
-    in_q <= in;
+    in_q <= {in_q[1:0], in};
   end
 
   assign out = (in_q == 3'b100);
