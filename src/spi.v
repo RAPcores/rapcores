@@ -28,8 +28,8 @@ module SPI (
   // Assign wires for SPI events, registers assigned in block below
   wire SCK_risingedge;
   wire SCK_fallingedge;
-  rising_edge_detector sck_rising (.clk(clk), .in(SCK), .out(SCK_risingedge));
-  falling_edge_detector sck_falling (.clk(clk), .in(SCK), .out(SCK_fallingedge));
+  rising_edge_detector_tribuf sck_rising (.clk(clk), .in(SCK), .out(SCK_risingedge));
+  falling_edge_detector_tribuf sck_falling (.clk(clk), .in(SCK), .out(SCK_fallingedge));
 
   wire CS_active = ~CS;  // active low
   wire COPI_data = COPIr[1];
