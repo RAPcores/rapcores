@@ -95,13 +95,13 @@ module dual_hbridge #(
   wire step_rising;
   rising_edge_detector step_r (.clk(clk), .in(step), .out(step_rising));
   reg phase_flip;
-  reg [4:0] flip_accum;
+  reg [9:0] flip_accum;
 
   always @(posedge clk) begin
     if (!resetn) begin
       phase_ct <= 8'b0;
       phase_flip <= 1'b0;
-      flip_accum <= 5'b0;
+      flip_accum <= 10'b0;
     end else if (resetn) begin
       // Traverse the table based on direction, rolls over
       if (step_rising) begin // rising edge
@@ -111,8 +111,8 @@ module dual_hbridge #(
 
       // Weird drive mode
       if (&flip_accum) begin
-        if (phase_flip) phase_ct <= phase_ct - 8'd50;
-        else phase_ct <= phase_ct + 8'd50;
+        if (phase_flip) phase_ct <= phase_ct - 8'd40;
+        else phase_ct <= phase_ct + 8'd40;
         phase_flip <= !phase_flip;
       end
       flip_accum <= flip_accum + 1'b1;
