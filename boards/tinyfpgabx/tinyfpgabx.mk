@@ -5,5 +5,5 @@ PACKAGE = cm81
 FREQ = 16
 PROGRAMMER = tinyprog -p
 SPIFREQ = 64
-PWMFREQ = 150
+PWMFREQ = 140
 SYNTH_FLAGS = -abc9 -device lp -dff
