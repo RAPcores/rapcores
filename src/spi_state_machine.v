@@ -416,6 +416,7 @@ module spi_state_machine #(
             // Store encoder values across all axes
             for (nmot=0; nmot<num_motors; nmot=nmot+1) begin
               step_encoder_store[nmot] <= step_encoder[nmot];
+              encoder_store[nmot] <= encoder_count[nmot];
             end
 
           end

@@ -84,6 +84,14 @@ Five Phase Stepper
  \+ \  \- \  \+ 
  == == == == ==
 
+Bridge Control
+==============
+
+Decay Modes
+
+
+
+
 Space Vector Modulation
 =======================
 
