@@ -46,14 +46,21 @@ module dual_hbridge #(
   wire [microstep_bits+current_bits-1:0] pwm_a = phase_a[7:(8-microstep_bits)]*current[7:(8-current_bits)];
   wire [microstep_bits+current_bits-1:0] pwm_b = phase_b[7:(8-microstep_bits)]*current[7:(8-current_bits)];
 
+  // Determine delay for center aligned PWM
+  wire [microstep_bits+current_bits-1:0] pwm_max = (pwm_a >= pwm_b) ? pwm_a : pwm_b;
+  wire [microstep_bits+current_bits-1:0] pwm_delay_a = (pwm_max == pwm_a) ? 0 : (pwm_max-pwm_a)>>1;
+  wire [microstep_bits+current_bits-1:0] pwm_delay_b = (pwm_max == pwm_b) ? 0 : (pwm_max-pwm_b)>>1;
+
   // Microstep*current -> vector angle voltage reference
-  pwm #(.bits(microstep_bits+current_bits)) ma (.clk(pwm_clk),
+  pwm_delayed #(.bits(microstep_bits+current_bits)) ma (.clk(pwm_clk),
           .resetn (resetn),
           .val(pwm_a),
+          .delay(pwm_delay_a),
           .pwm(vref_a));
-  pwm #(.bits(microstep_bits+current_bits)) mb (.clk(pwm_clk),
+  pwm_delayed #(.bits(microstep_bits+current_bits)) mb (.clk(pwm_clk),
           .resetn (resetn),
           .val(pwm_b),
+          .delay(pwm_delay_b),
           .pwm(vref_b));
 
   // Set braking when PWM off (type of decay for integrated bridges without current chop)
