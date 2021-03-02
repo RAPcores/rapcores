@@ -42,15 +42,15 @@ set_io --warn-no-port SCK A2 # PIN_1
 set_io --warn-no-port CS A1 # PIN_2
 set_io --warn-no-port COPI B1 # PIN_3
 set_io --warn-no-port CIPO C2 # PIN_4
-set_io --warn-no-port ENC_A[3] C1
+set_io --warn-no-port ENC_A[1] C1
 set_io --warn-no-port PHASE_A1[3] D2
 set_io --warn-no-port PHASE_A2[3] D1
 set_io --warn-no-port PHASE_A1[1] E2
 set_io --warn-no-port PHASE_A2[1] E1
 set_io --warn-no-port PHASE_B1[1] G2
 set_io --warn-no-port PHASE_B2[1] H1
-set_io --warn-no-port ENC_A[1] J1 # PIN_12
-set_io --warn-no-port ENC_B[1] H2 # PIN_13
+set_io --warn-no-port ENC_A[3] J1 # PIN_12
+set_io --warn-no-port ENC_B[3] H2 # PIN_13
 
 # Right side of board
 set_io --warn-no-port ENC_B[0] H9
@@ -59,7 +59,7 @@ set_io --warn-no-port PHASE_B1[0] D8
 set_io --warn-no-port PHASE_A1[0] C9
 set_io --warn-no-port PHASE_A2[0] A9
 set_io --warn-no-port ENC_A[0] B8
-set_io --warn-no-port ENC_B[3] A8
+set_io --warn-no-port ENC_B[1] A8
 set_io --warn-no-port PHASE_B2[3] B7
 set_io --warn-no-port PHASE_B1[3] A7 # PIN_22
 #set_io --warn-no-port ENC_B B6 # PIN_23
