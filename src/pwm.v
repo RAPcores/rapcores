@@ -26,3 +26,33 @@ module pwm #(
 
 
 endmodule
+
+
+/*
+
+ PWM with Delay on the output, useful for constructing
+ center-aligned PWM
+*/
+module pwm_delayed #(
+    parameter bits = 8,
+    parameter resetable = 0
+) (
+    input  clk,
+    input  resetn,
+    input  [bits-1:0] delay,
+    input  [bits-1:0] val,
+    output pwm
+);
+
+  reg [bits-1:0] accum = 0; // FPGA ONLY
+  assign pwm = (accum >= delay) & (accum < (val+delay));
+
+  always @(posedge clk)
+  if (resetable) begin
+    if(!resetn) accum <= 0;
+    else if(resetn) accum <= accum + 1'b1;
+  end else
+    accum <= accum + 1'b1;
+
+
+endmodule
