@@ -198,6 +198,7 @@ module spi_state_machine #(
                       .microsteps (microsteps[i]),
                       .current (current[i]),
                       .step_count(step_encoder[i]),
+                      .encoder_count(encoder_count[i]),
                       .faultn(stepper_faultn[i]));
       end
     endgenerate

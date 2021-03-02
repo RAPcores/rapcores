@@ -6,7 +6,8 @@ module dual_hbridge #(
    parameter microstep_bits = 8, // should not be greater than 8
    parameter vref_off_brake = 1,
    parameter microstep_count = 64,
-   parameter step_count_bits = 32
+   parameter step_count_bits = 32,
+   parameter encoder_bits = 24
 ) (
     input clk,
     input resetn,
@@ -24,6 +25,7 @@ module dual_hbridge #(
     input  [7:0] microsteps,
     input  [7:0] current,
     output wire [step_count_bits-1:0] step_count,
+    input signed wire [encoder_bits-1:0] encoder_count,
     output wire faultn
 );
 
@@ -94,6 +96,7 @@ module dual_hbridge #(
 
   wire step_rising;
   rising_edge_detector step_r (.clk(clk), .in(step), .out(step_rising));
+  reg signed [encoder_bits-1:0] encoder_prev;
 
   always @(posedge clk) begin
     if (!resetn) begin
