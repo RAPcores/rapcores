@@ -39,13 +39,13 @@ module pwm_delayed #(
 ) (
     input  clk,
     input  resetn,
-    input  [bits-1:0] delay,
+    input  [bits-2:0] delay, // delay should never be more than half the period
     input  [bits-1:0] val,
     output pwm
 );
 
   reg [bits-1:0] accum = 0; // FPGA ONLY
-  assign pwm = (accum >= delay) & (accum < (val+delay));
+  assign pwm = (accum[bits-2:0] >= delay) & (accum < (val+delay));
 
   always @(posedge clk)
   if (resetable) begin
