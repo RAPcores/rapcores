@@ -105,7 +105,7 @@ Bridge Control
 
 Below is a simple motor control hierarchy:
 
-.. image:: ./img/control-hierarchy.svg
+.. image:: ./img/controller-hierarchy.svg
 
 And the four motoring quadrants that occur in a motor:
 
