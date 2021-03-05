@@ -84,10 +84,51 @@ Five Phase Stepper
  \+ \  \- \  \+ 
  == == == == ==
 
+
+Motor Fault Types
+=================
+
+The following faults may occur in a motor: 
+
+* Disconnection
+* Overcurrent
+* Undervoltage
+* Thermal Shutdown
+* Overvoltage
+
+A good bridge design should be able to handle the majority of these
+fault conditions and report back to higher level controllers for
+rectification by the user or path planner.
+
 Bridge Control
 ==============
 
-Decay Modes
+Below is a simple motor control hierarchy:
+
+.. image:: ./img/controller-hierarchy.svg
+
+And the four motoring quadrants that occur in a motor:
+
+.. image:: ./img/motoring-quadrants.svg
+
+Bridge control involves the timing of output signals such that
+the motor bridge or motor inverter does not enter a state that may
+lead to failure or poor performance characteristics. Below are some
+common timing events that need to be handled in a direct bridge control
+paradigm:
+
+* Dead time
+* Off time
+* On time
+* Blank time
+
+
+Dead Time 
+---------
+
+Dead time is the amount of time a bridge spends in an "off" state between state transitions.
+The purpose of this is to allow for all residual currents in the load (motor in this case),
+to dissipate before switching current flow direction in the bridge.
 
 
 

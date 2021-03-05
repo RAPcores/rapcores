@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="112.09004mm"
+   height="65.027351mm"
+   viewBox="0 0 112.09004 65.027351"
+   version="1.1"
+   id="svg8"
+   inkscape:version="1.0.1 (0767f8302a, 2020-10-17)"
+   sodipodi:docname="controller_hierarchy.svg">
+  <defs
+     id="defs2">
+    <rect
+       x="61.309517"
+       y="66.35289"
+       width="106.72576"
+       height="104.0762"
+       id="rect841" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.4"
+     inkscape:cx="65.449418"
+     inkscape:cy="193.78311"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     inkscape:document-rotation="0"
+     showgrid="false"
+     inkscape:window-width="1994"
+     inkscape:window-height="1199"
+     inkscape:window-x="2258"
+     inkscape:window-y="891"
+     inkscape:window-maximized="0"
+     inkscape:snap-midpoints="true" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-56.784554,-40.175716)">
+    <text
+       xml:space="preserve"
+       id="text839"
+       style="font-size:4.93889px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;white-space:pre;shape-inside:url(#rect841);" />
+    <rect
+       style="fill:#00ffff;fill-opacity:1;stroke:none;stroke-width:0.662898;stroke-dasharray:0, 0.662898, 1.32579, 1.9887, 2.6516, 3.31449, 3.97737, 4.64029, 5.30318, 5.96606, 6.62898, 7.29186, 7.95481, 8.61768, 9.28057;stroke-opacity:1"
+       id="rect875"
+       width="112.09004"
+       height="64.798004"
+       x="56.784554"
+       y="40.175716"
+       ry="0" />
+    <rect
+       style="fill:#00ff00;fill-opacity:1;stroke:none;stroke-width:0.763189;stroke-dasharray:0, 0.763189, 1.52636, 2.28957, 3.05277, 3.81595, 4.57912, 5.34233, 6.1055, 6.86869, 7.63189, 8.39504, 9.15834, 9.92146, 10.6846;stroke-opacity:1"
+       id="rect879"
+       width="100.57758"
+       height="53.127693"
+       x="62.540783"
+       y="51.846035" />
+    <rect
+       style="fill:#ff7f2a;fill-opacity:1;stroke:none;stroke-width:0.625741;stroke-dasharray:0, 0.625741, 1.25148, 1.87722, 2.50297, 3.12871, 3.75444, 4.3802, 5.00593, 5.63166, 6.25741, 6.88314, 7.5089, 8.13463, 8.76038;stroke-opacity:1"
+       id="rect885"
+       width="89.329468"
+       height="41.735046"
+       x="68.164841"
+       y="63.428249" />
+    <rect
+       style="fill:#ffcc00;fill-opacity:1;stroke:none;stroke-width:0.692645;stroke-dasharray:0, 0.692645, 1.38531, 2.07793, 2.77058, 3.46324, 4.15586, 4.84853, 5.54117, 6.23379, 6.92645, 7.6191, 8.31175, 9.00438, 9.69704;stroke-opacity:1"
+       id="rect887"
+       width="74.019318"
+       height="31.083256"
+       x="75.819916"
+       y="74.119812" />
+    <text
+       xml:space="preserve"
+       style="font-size:5.64444px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583;stroke-opacity:1"
+       x="91.911774"
+       y="80.635735"
+       id="text847"><tspan
+         sodipodi:role="line"
+         id="tspan845"
+         x="91.911774"
+         y="80.635735"
+         style="font-size:5.64444px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583;stroke-opacity:1">Bridge Control</tspan><tspan
+         sodipodi:role="line"
+         x="91.911774"
+         y="87.691284"
+         style="font-size:5.64444px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583;stroke-opacity:1"
+         id="tspan849">- Deadtime</tspan><tspan
+         sodipodi:role="line"
+         x="91.911774"
+         y="94.746834"
+         style="font-size:5.64444px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583;stroke-opacity:1"
+         id="tspan851">- Offtime</tspan><tspan
+         sodipodi:role="line"
+         x="91.911774"
+         y="101.80238"
+         style="font-size:5.64444px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583;stroke-opacity:1"
+         id="tspan855">- Decay Modes</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:5.64444px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       x="69.745239"
+       y="70.640862"
+       id="text861"><tspan
+         sodipodi:role="line"
+         id="tspan859"
+         x="69.745239"
+         y="70.640862"
+         style="font-size:5.64444px;stroke-width:0.264583">Commutator/Vector Modulator</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:5.64444px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       x="91.633888"
+       y="59.654114"
+       id="text865"><tspan
+         sodipodi:role="line"
+         id="tspan863"
+         x="91.633888"
+         y="59.654114"
+         style="font-size:5.64444px;stroke-width:0.264583">Current Control</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:5.64444px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       x="69.403679"
+       y="47.830257"
+       id="text869"><tspan
+         sodipodi:role="line"
+         id="tspan867"
+         x="69.403679"
+         y="47.830257"
+         style="font-size:5.64444px;stroke-width:0.264583">Position/Velocity/Torque Control</tspan></text>
+  </g>
+</svg>

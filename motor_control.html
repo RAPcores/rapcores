@@ -227,9 +227,41 @@ action. Some examples:</p>
 </div></blockquote>
 </div>
 </div>
+<div class="section" id="motor-fault-types">
+<h2>Motor Fault Types<a class="headerlink" href="#motor-fault-types" title="Permalink to this headline">¶</a></h2>
+<p>The following faults may occur in a motor:</p>
+<ul class="simple">
+<li><p>Disconnection</p></li>
+<li><p>Overcurrent</p></li>
+<li><p>Undervoltage</p></li>
+<li><p>Thermal Shutdown</p></li>
+<li><p>Overvoltage</p></li>
+</ul>
+<p>A good bridge design should be able to handle the majority of these
+fault conditions and report back to higher level controllers for
+rectification by the user or path planner.</p>
+</div>
 <div class="section" id="bridge-control">
 <h2>Bridge Control<a class="headerlink" href="#bridge-control" title="Permalink to this headline">¶</a></h2>
-<p>Decay Modes</p>
+<p>Below is a simple motor control hierarchy:</p>
+<img alt="_images/controller-hierarchy.svg" src="_images/controller-hierarchy.svg" /><p>And the four motoring quadrants that occur in a motor:</p>
+<img alt="_images/motoring-quadrants.svg" src="_images/motoring-quadrants.svg" /><p>Bridge control involves the timing of output signals such that
+the motor bridge or motor inverter does not enter a state that may
+lead to failure or poor performance characteristics. Below are some
+common timing events that need to be handled in a direct bridge control
+paradigm:</p>
+<ul class="simple">
+<li><p>Dead time</p></li>
+<li><p>Off time</p></li>
+<li><p>On time</p></li>
+<li><p>Blank time</p></li>
+</ul>
+<div class="section" id="dead-time">
+<h3>Dead Time<a class="headerlink" href="#dead-time" title="Permalink to this headline">¶</a></h3>
+<p>Dead time is the amount of time a bridge spends in an “off” state between state transitions.
+The purpose of this is to allow for all residual currents in the load (motor in this case),
+to dissipate before switching current flow direction in the bridge.</p>
+</div>
 </div>
 <div class="section" id="space-vector-modulation">
 <h2>Space Vector Modulation<a class="headerlink" href="#space-vector-modulation" title="Permalink to this headline">¶</a></h2>
@@ -397,6 +429,7 @@ information on handling this case.</p>
 <li class="toctree-l2"><a class="reference internal" href="#definitions">Definitions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#electrical-commutation">Electrical Commutation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#commutation-tables">Commutation Tables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#motor-fault-types">Motor Fault Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#bridge-control">Bridge Control</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#space-vector-modulation">Space Vector Modulation</a></li>
 </ul>
