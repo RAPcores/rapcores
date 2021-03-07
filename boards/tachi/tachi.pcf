@@ -1,94 +1,38 @@
-###############################################################################
-#
-# TinyFPGA BX constraint file (.pcf)
-#
-###############################################################################
-#
-# Copyright (c) 2018, Luke Valenty
-# All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are met:
-#
-# 1. Redistributions of source code must retain the above copyright notice, this
-#    list of conditions and the following disclaimer.
-# 2. Redistributions in binary form must reproduce the above copyright notice,
-#    this list of conditions and the following disclaimer in the documentation
-#    and/or other materials provided with the distribution.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-# ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
-# The views and conclusions contained in the software and documentation are those
-# of the authors and should not be interpreted as representing official policies,
-# either expressed or implied, of the <project name> project.
-#
-###############################################################################
+set_io --warn-no-port CLK B3 # Random TODO
 
-####
-# TinyFPGA BX information: https://github.com/tinyfpga/TinyFPGA-BX/
-####
+set_io --warn-no-port SCK L10 
+set_io --warn-no-port CS K10 
+set_io --warn-no-port COPI J9 
+set_io --warn-no-port CIPO K9
 
-# Left side of board
-set_io --warn-no-port SCK A2 # PIN_1
-set_io --warn-no-port CS A1 # PIN_2
-set_io --warn-no-port COPI B1 # PIN_3
-set_io --warn-no-port CIPO C2 # PIN_4
-set_io --warn-no-port VREF_A[3] C1
-set_io --warn-no-port PHASE_A1[3] D2
-set_io --warn-no-port PHASE_A2[3] D1
-set_io --warn-no-port PHASE_A1[1] E2
-set_io --warn-no-port PHASE_A2[1] E1
-set_io --warn-no-port PHASE_B1[1] G2
-set_io --warn-no-port PHASE_B2[1] H1
-set_io --warn-no-port VREF_A[1] J1 # PIN_12
-set_io --warn-no-port VREF_B[1] H2 # PIN_13
+set_io --warn-no-port PHASE_A1[0] E1
+set_io --warn-no-port PHASE_A2[0] F1
+set_io --warn-no-port PHASE_B1[0] H1
+set_io --warn-no-port PHASE_B2[0] G1
 
-# Right side of board
-set_io --warn-no-port VREF_B[0] H9
-set_io --warn-no-port PHASE_B2[0] D9
-set_io --warn-no-port PHASE_B1[0] D8
-set_io --warn-no-port PHASE_A1[0] C9
-set_io --warn-no-port PHASE_A2[0] A9
-set_io --warn-no-port VREF_A[0] B8
-set_io --warn-no-port VREF_B[3] A8
-set_io --warn-no-port PHASE_B2[3] B7
-set_io --warn-no-port PHASE_B1[3] A7 # PIN_22
-set_io --warn-no-port ENC_B B6 # PIN_23
-set_io --warn-no-port ENC_A A6 # PIN_24
+set_io --warn-no-port PHASE_A1[1] A3
+set_io --warn-no-port PHASE_A2[1] A2
+set_io --warn-no-port PHASE_B1[1] B1
+set_io --warn-no-port PHASE_B2[1] A1
 
-# SPI flash interface on bottom of board
-set_io --warn-no-port SPI_SS F7
-set_io --warn-no-port SPI_SCK G7
-set_io --warn-no-port SPI_IO0 G6
-set_io --warn-no-port SPI_IO1 H7
-set_io --warn-no-port SPI_IO2 H4
-set_io --warn-no-port SPI_IO3 J8
+set_io --warn-no-port PHASE_A1[2] A9
+set_io --warn-no-port PHASE_A2[2] A8
+set_io --warn-no-port PHASE_B1[2] A6
+set_io --warn-no-port PHASE_B2[2] A7
 
-# General purpose pins on bottom of board
-set_io --warn-no-port PIN_25 G1
-set_io --warn-no-port VREF_B[2] J3
-set_io --warn-no-port PHASE_B2[2] J4
-set_io --warn-no-port PHASE_B1[2] G9
-set_io --warn-no-port PHASE_A1[2] J9
-set_io --warn-no-port PHASE_A2[2] E8
-set_io --warn-no-port VREF_A[2] J2
+set_io --warn-no-port PHASE_A1[3] L1
+set_io --warn-no-port PHASE_A2[3] L2
+set_io --warn-no-port PHASE_B1[3] L4
+set_io --warn-no-port PHASE_B2[3] L3
 
-# LED
-set_io --warn-no-port LED[1] B3
+set_io --warn-no-port ENC_A[0] F11
+set_io --warn-no-port ENC_B[0] H11
 
-# USB
-set_io --warn-no-port USBP B4
-set_io --warn-no-port USBN A4
-set_io --warn-no-port USBPU A3
+set_io --warn-no-port ENC_A[1] B11
+set_io --warn-no-port ENC_B[1] D11
 
-# 16MHz clock
-set_io --warn-no-port CLK B2 # input
+set_io --warn-no-port ENC_A[2] E11
+set_io --warn-no-port ENC_B[2] G11
+
+set_io --warn-no-port ENC_A[3] A11
+set_io --warn-no-port ENC_B[3] C11
