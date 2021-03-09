@@ -40,6 +40,7 @@ RAPCOREFILES := boards/$(BOARD)/$(BOARD).v \
 								$(addprefix src/, clock_divider.v \
 														edge_detector.v \
 													  macro_params.v \
+														space_vector_modulator.v \
 														spi_state_machine.v \
 														pwm.v \
 														quad_enc.v \

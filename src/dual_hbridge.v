@@ -31,50 +31,40 @@ module dual_hbridge #(
 
   reg signed [step_count_bits-1:0] count_r;
   assign step_count = count_r;
+  reg [7:0] phase_ct;
+  // Set the increment sign based on direction
+  wire signed [7:0] phase_inc = dir ? abs_increment : -abs_increment;
 
-  // Table of phases (BRAM on FPGA)
-  reg [7:0] phase_table [0:255];
+  // Set the increment across the phase table from the specified microsteps
+  wire [7:0] abs_increment = (microsteps == 8'd0 ) ? 8'd64 :
+                             (microsteps <= 8'd2 ) ? 8'd32 :
+                             (microsteps <= 8'd4 ) ? 8'd16 :
+                             (microsteps <= 8'd8 ) ? 8'd8  :
+                             (microsteps <= 8'd16) ? 8'd4  :
+                             (microsteps <= 8'd32) ? 8'd2  :
+                                                     8'd1  ;
 
-  // Load sine table into BRAM
-  initial $readmemb("lut/cos_lut.bit", phase_table);
+  //-------------------------------
+  // Space Vector Modulation
+  //-------------------------------
 
-  // unscaled sine value based on phase location (retrieved from BRAM)
-  reg [microstep_bits-1:0] phase_a;
-  reg [microstep_bits-1:0] phase_b;
+  space_vector_modulator #(
+    .current_bits(current_bits)
+  )
+    svm0 (.clk(clk),
+          .pwm_clk(pwm_clk),
+          .resetn(resetn),
+          .vref_a(vref_a),
+          .vref_b(vref_b),
+          .current(current),
+          .phase_ct(phase_ct));
 
-  // sine value scaled by the current
-  wire [microstep_bits+current_bits-1:0] pwm_a = phase_a[7:(8-microstep_bits)]*current[7:(8-current_bits)];
-  wire [microstep_bits+current_bits-1:0] pwm_b = phase_b[7:(8-microstep_bits)]*current[7:(8-current_bits)];
 
-  // Determine delay for center aligned PWM
-  wire [microstep_bits+current_bits-2:0] pwm_delay_a = (pwm_a >= pwm_b) ? 0 : (pwm_b-pwm_a)>>1;
-  wire [microstep_bits+current_bits-2:0] pwm_delay_b = (pwm_b >= pwm_a) ? 0 : (pwm_a-pwm_b)>>1;
-
-  // Microstep*current -> vector angle voltage reference
-  // Center aligned for better response characteristics
-  pwm_delayed #(.bits(microstep_bits+current_bits)) ma (.clk(pwm_clk),
-          .resetn (resetn),
-          .val(pwm_a),
-          .delay(pwm_delay_a),
-          .pwm(vref_a));
-  pwm_delayed #(.bits(microstep_bits+current_bits)) mb (.clk(pwm_clk),
-          .resetn (resetn),
-          .val(pwm_b),
-          .delay(pwm_delay_b),
-          .pwm(vref_b));
-
-  // Set braking when PWM off (type of decay for integrated bridges without current chop)
-  wire brake_a, brake_b;
-  if (vref_off_brake) begin
-    assign brake_a = ((!enable & brake) | !vref_a);
-    assign brake_b = ((!enable & brake) | !vref_b);
-  end else begin
-    assign brake_a = brake;
-    assign brake_b = brake;
-  end
+  //-------------------------------
+  // Coil Polarities
+  //-------------------------------
 
   // determine phase polarity from quadrant
-  // TODO double check
   wire [3:0] phase_polarity;
   assign phase_polarity = (phase_ct < microstep_count  ) ? 4'b1010 :
                           (phase_ct < microstep_count*2) ? 4'b0110 :
@@ -87,19 +77,21 @@ module dual_hbridge #(
   assign phase_b1 = (enable & vref_b) ? phase_polarity[2] : brake_b;
   assign phase_b2 = (enable & vref_b) ? phase_polarity[3] : brake_b;
 
-  // Set the increment across the phase table from the specified microsteps
-  wire [7:0] abs_increment = (microsteps == 8'd0 ) ? 8'd64 :
-                             (microsteps <= 8'd2 ) ? 8'd32 :
-                             (microsteps <= 8'd4 ) ? 8'd16 :
-                             (microsteps <= 8'd8 ) ? 8'd8  :
-                             (microsteps <= 8'd16) ? 8'd4  :
-                             (microsteps <= 8'd32) ? 8'd2  :
-                                                     8'd1  ;
 
-  // Set the increment sign based on direction
-  wire signed [7:0] phase_inc = dir ? abs_increment : -abs_increment;
+  //-------------------------------
+  // Decay Modes
+  //-------------------------------
 
-  reg [7:0] phase_ct;
+  // Set braking when PWM off (type of decay for integrated bridges without current chop)
+  wire brake_a, brake_b;
+  if (vref_off_brake) begin
+    assign brake_a = ((!enable & brake) | !vref_a);
+    assign brake_b = ((!enable & brake) | !vref_b);
+  end else begin
+    assign brake_a = brake;
+    assign brake_b = brake;
+  end
+
 
   wire step_rising;
   rising_edge_detector step_r (.clk(clk), .in(step), .out(step_rising));
@@ -115,9 +107,6 @@ module dual_hbridge #(
         count_r <= count_r + phase_inc;
       end
 
-      // Load sine/cosine from RAM
-      phase_a <= phase_table[phase_ct+8'd64];
-      phase_b <= phase_table[phase_ct];
     end
   end
 
