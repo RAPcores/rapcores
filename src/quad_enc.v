@@ -26,6 +26,7 @@ module quad_enc #(
   assign step_i = i_stable[1] ^ i_stable[2];  //Step if b changed
   wire step = step_a ^ step_b;  //Step if a xor b stepped
   wire direction = a_stable[1] ^ b_stable[2];  //Direction determined by comparing current sample to last
+  wire signed increment = (direction) ? 1 : -1;
 
   always @(posedge clk) begin
     if (!resetn) begin
@@ -39,14 +40,11 @@ module quad_enc #(
       b_stable <= {b_stable[1:0], b};  //Shift new b in
       i_stable <= {i_stable[1:0], i};
 
-      if (step_a && step_b)  //We do not know direction if both inputs triggered on single clock
+      if (step_a & step_b)  //We do not know direction if both inputs triggered on single clock
         faultn <= 0;
-      if (step) begin
-        if (direction)
-          count <= count + 1'b1; //{ 56'b0, multiplier};
-        else
-          count <= count - 1'b1; //{ 56'b0, multiplier};
-      end
+      /* verilator lint_off WIDTH */
+      if (step) count <= count + increment;
+      /* verilator lint_on */
     end
   end
 endmodule
