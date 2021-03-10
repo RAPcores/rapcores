@@ -268,7 +268,7 @@ module spi_state_machine #(
         .count(encoder_count[i])
         //.multiplier(encoder_multiplier)
         );
-        /* verilator lint_off PINMISSING */
+        /* verilator lint_on PINMISSING */
     end
   end
 
@@ -341,7 +341,7 @@ module spi_state_machine #(
   wire word_received_rising;
   rising_edge_detector word_recieved_edge_rising (.clk(CLK), .in(word_received), .out(word_received_rising));
 
-  reg [7:0] nmot;
+  reg [$clog2(num_motors):0] nmot;
 
   always @(posedge CLK) if (!resetn) begin
 
@@ -390,7 +390,7 @@ module spi_state_machine #(
       config_invert_highside[nmot] <= `DEFAULT_BRIDGE_INVERTING;
       config_invert_lowside[nmot] <= `DEFAULT_BRIDGE_INVERTING;
     end
-    /* verilator lint_off WIDTH */
+    /* verilator lint_on WIDTH */
 
   end else if (resetn) begin
     if (word_received_rising) begin
