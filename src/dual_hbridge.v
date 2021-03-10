@@ -25,15 +25,20 @@ module dual_hbridge #(
     input  [7:0] microsteps,
     input  [7:0] current,
     output wire [step_count_bits-1:0] step_count,
-    input [encoder_bits-1:0] encoder_count,
+    input signed [encoder_bits-1:0] encoder_count,
     output wire faultn
 );
+
+  //-------------------------------
+  // Phase Vector Angle and Internal Step Counts
+  //-------------------------------
 
   reg signed [step_count_bits-1:0] count_r;
   assign step_count = count_r;
   reg [7:0] phase_ct;
   // Set the increment sign based on direction
   wire signed [7:0] phase_inc = dir ? abs_increment : -abs_increment;
+  reg signed [encoder_bits-1:0] encoder_prev;
 
   // Set the increment across the phase table from the specified microsteps
   wire [7:0] abs_increment = (microsteps == 8'd0 ) ? 8'd64 :
@@ -95,7 +100,6 @@ module dual_hbridge #(
 
   wire step_rising;
   rising_edge_detector step_r (.clk(clk), .in(step), .out(step_rising));
-  reg signed [encoder_bits-1:0] encoder_prev;
 
   always @(posedge clk) begin
     if (!resetn) begin
