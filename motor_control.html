@@ -259,8 +259,8 @@ paradigm:</p>
 <div class="section" id="dead-time">
 <h3>Dead Time<a class="headerlink" href="#dead-time" title="Permalink to this headline">¶</a></h3>
 <p>Dead time is the amount of time a bridge spends in an “off” state between state transitions.
-The purpose of this is to allow for all residual currents in the load (motor in this case),
-to dissipate before switching current flow direction in the bridge.</p>
+This avoids a scenario when in a given half bridge both the high and low side
+switching circuits are both on at the same time, thereby creating a short circuit.</p>
 </div>
 </div>
 <div class="section" id="space-vector-modulation">
@@ -401,6 +401,83 @@ We have yet to implement three phase in RAPcores, but in the interim <a class="r
 information on handling this case.</p>
 </div>
 </div>
+<div class="section" id="frequency-considerations">
+<h2>Frequency Considerations<a class="headerlink" href="#frequency-considerations" title="Permalink to this headline">¶</a></h2>
+<p>Below is a table showing some relevant stepping frequencies for a stock Prusa MK3S:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 53%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 13%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Prusa MK3S</p></th>
+<th class="head"><p>X</p></th>
+<th class="head"><p>Y</p></th>
+<th class="head"><p>Z</p></th>
+<th class="head"><p>E</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Full Steps/rev</p></td>
+<td><p>200</p></td>
+<td><p>200</p></td>
+<td><p>200</p></td>
+<td><p>200</p></td>
+</tr>
+<tr class="row-odd"><td><p>Microsteps</p></td>
+<td><p>16</p></td>
+<td><p>16</p></td>
+<td><p>16</p></td>
+<td><p>32</p></td>
+</tr>
+<tr class="row-even"><td><p>Homing Feedrate (mm/sec)</p></td>
+<td><p>50</p></td>
+<td><p>50</p></td>
+<td><p>13.3</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>Max travel Rate (mm/sec)</p></td>
+<td><p>200</p></td>
+<td><p>200</p></td>
+<td><p>12</p></td>
+<td><p>120</p></td>
+</tr>
+<tr class="row-even"><td><p>(Steps*microsteps)/mm</p></td>
+<td><p>100</p></td>
+<td><p>100</p></td>
+<td><p>400</p></td>
+<td><p>280</p></td>
+</tr>
+<tr class="row-odd"><td><p>Microsteps/sec (travel)</p></td>
+<td><p>20000</p></td>
+<td><p>20000</p></td>
+<td><p>4800</p></td>
+<td><p>33600</p></td>
+</tr>
+<tr class="row-even"><td><p>Full Steps/sec (travel)</p></td>
+<td><p>1250</p></td>
+<td><p>1250</p></td>
+<td><p>300</p></td>
+<td><p>1050</p></td>
+</tr>
+<tr class="row-odd"><td><p>Microsteps/sec (homing)</p></td>
+<td><p>5000</p></td>
+<td><p>5000</p></td>
+<td><p>5333.3</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>Full Steps/sec (homing)</p></td>
+<td><p>312.5</p></td>
+<td><p>312.5</p></td>
+<td><p>333.3</p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 
 
@@ -432,6 +509,7 @@ information on handling this case.</p>
 <li class="toctree-l2"><a class="reference internal" href="#motor-fault-types">Motor Fault Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#bridge-control">Bridge Control</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#space-vector-modulation">Space Vector Modulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#frequency-considerations">Frequency Considerations</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="interfaces.html">Interfaces</a></li>

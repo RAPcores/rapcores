@@ -127,11 +127,8 @@ Dead Time
 ---------
 
 Dead time is the amount of time a bridge spends in an "off" state between state transitions.
-The purpose of this is to allow for all residual currents in the load (motor in this case),
-to dissipate before switching current flow direction in the bridge.
-
-
-
+This avoids a scenario when in a given half bridge both the high and low side
+switching circuits are both on at the same time, thereby creating a short circuit.
 
 Space Vector Modulation
 =======================
@@ -265,3 +262,22 @@ SVM in Three Phase
 For the mathematically inclined, you may notice that the bipolar stepper is nice as the phases form an orthonormal basis in 2D space. In three phase this is not the case.
 We have yet to implement three phase in RAPcores, but in the interim `the wikipedia page <https://en.wikipedia.org/wiki/Space_vector_modulation>`_ has some
 information on handling this case.
+
+Frequency Considerations
+========================
+
+Below is a table showing some relevant stepping frequencies for a stock Prusa MK3S:
+
+======================== =====  ===== ======  =====
+Prusa MK3S               X      Y     Z       E
+======================== =====  ===== ======  =====
+Full Steps/rev           200    200   200     200
+Microsteps               16     16    16      32
+Homing Feedrate (mm/sec) 50     50    13.3  
+Max travel Rate (mm/sec) 200    200   12      120
+(Steps*microsteps)/mm    100    100   400     280
+Microsteps/sec (travel)  20000  20000 4800    33600
+Full Steps/sec (travel)  1250   1250  300     1050
+Microsteps/sec (homing)  5000   5000  5333.3
+Full Steps/sec (homing)  312.5  312.5 333.3
+======================== =====  ===== ======  =====
