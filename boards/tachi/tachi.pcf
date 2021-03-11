@@ -1,38 +1,38 @@
-set_io --warn-no-port CLK B3 # Random TODO
+set_io --warn-no-port CLK L5
 
 set_io --warn-no-port SCK L10 
 set_io --warn-no-port CS K10 
 set_io --warn-no-port COPI J9 
 set_io --warn-no-port CIPO K9
 
-set_io --warn-no-port PHASE_A1[0] E1
-set_io --warn-no-port PHASE_A2[0] F1
-set_io --warn-no-port PHASE_B1[0] H1
-set_io --warn-no-port PHASE_B2[0] G1
+set_io --warn-no-port PHASE_A1[0] C1
+set_io --warn-no-port PHASE_A2[0] D1
+set_io --warn-no-port PHASE_B1[0] F1
+set_io --warn-no-port PHASE_B2[0] E1
 
-set_io --warn-no-port PHASE_A1[1] A3
-set_io --warn-no-port PHASE_A2[1] A2
-set_io --warn-no-port PHASE_B1[1] B1
-set_io --warn-no-port PHASE_B2[1] A1
+set_io --warn-no-port PHASE_A1[1] A5
+set_io --warn-no-port PHASE_A2[1] A4
+set_io --warn-no-port PHASE_B1[1] A2
+set_io --warn-no-port PHASE_B2[1] A3
 
-set_io --warn-no-port PHASE_A1[2] A9
-set_io --warn-no-port PHASE_A2[2] A8
-set_io --warn-no-port PHASE_B1[2] A6
-set_io --warn-no-port PHASE_B2[2] A7
+set_io --warn-no-port PHASE_A1[2] A11
+set_io --warn-no-port PHASE_A2[2] A10
+set_io --warn-no-port PHASE_B1[2] A8
+set_io --warn-no-port PHASE_B2[2] A9
 
-set_io --warn-no-port PHASE_A1[3] L1
-set_io --warn-no-port PHASE_A2[3] L2
-set_io --warn-no-port PHASE_B1[3] L4
-set_io --warn-no-port PHASE_B2[3] L3
+set_io --warn-no-port PHASE_A1[3] J1
+set_io --warn-no-port PHASE_A2[3] K1
+set_io --warn-no-port PHASE_B1[3] L2
+set_io --warn-no-port PHASE_B2[3] L1
 
-set_io --warn-no-port ENC_A[0] F11
-set_io --warn-no-port ENC_B[0] H11
+set_io --warn-no-port ENC_A[0] B11
+set_io --warn-no-port ENC_B[0] C11
 
-set_io --warn-no-port ENC_A[1] B11
-set_io --warn-no-port ENC_B[1] D11
+set_io --warn-no-port ENC_A[1] D11
+set_io --warn-no-port ENC_B[1] E11
 
-set_io --warn-no-port ENC_A[2] E11
+set_io --warn-no-port ENC_A[2] F11
 set_io --warn-no-port ENC_B[2] G11
 
-set_io --warn-no-port ENC_A[3] A11
-set_io --warn-no-port ENC_B[3] C11
+set_io --warn-no-port ENC_A[3] H11
+set_io --warn-no-port ENC_B[3] J11
