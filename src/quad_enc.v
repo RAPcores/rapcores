@@ -44,7 +44,7 @@ module quad_enc #(
         faultn <= 0;
       /* verilator lint_off WIDTH */
       if (step) count <= count + increment;
-      /* verilator lint_on */
+      /* verilator lint_on WIDTH */
     end
   end
 endmodule
