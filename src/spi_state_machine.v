@@ -513,17 +513,17 @@ module spi_state_machine #(
               if (nmot == 0) begin
                 if (message_word_count == 1) begin
                   move_duration[writemoveind][move_duration_bits-1:0] <= word_data_received[move_duration_bits-1:0];
-                  word_send_data <= step_encoder_store[0]; // Prep to send steps
+                  word_send_data[encoder_bits-1:0] <= step_encoder_store[0]; // Prep to send steps
                 end
               end
 
               if (message_word_count == (nmot+1)*2) begin
                 increment[writemoveind][nmot] <= word_data_received;
-                word_send_data <= encoder_store[nmot]; // Prep to send steps
+                word_send_data[encoder_bits-1:0] <= encoder_store[nmot]; // Prep to send steps
               end
               if (message_word_count == (nmot+1)*2+1) begin
                 incrementincrement[writemoveind][nmot] <= word_data_received;
-                if (nmot != num_motors-1) word_send_data <= step_encoder_store[nmot+1]; // Prep to send steps
+                if (nmot != num_motors-1) word_send_data[encoder_bits-1:0] <= step_encoder_store[nmot+1]; // Prep to send steps
 
                 if (nmot == num_motors-1) begin
                   writemoveind <= writemoveind + 1'b1;
