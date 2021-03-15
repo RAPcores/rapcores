@@ -257,7 +257,6 @@ module spi_state_machine #(
 
   if(num_encoders > 0) begin
     for (i=0; i<num_encoders; i=i+1) begin
-      /* verilator lint_off PINMISSING */
       quad_enc #(.encbits(encoder_bits)) encoder0
       (
         .resetn(resetn),
@@ -268,7 +267,6 @@ module spi_state_machine #(
         .count(encoder_count[i])
         //.multiplier(encoder_multiplier)
         );
-        /* verilator lint_on PINMISSING */
     end
   end
 
@@ -368,7 +366,6 @@ module spi_state_machine #(
     move_duration[0] <= 0;
     move_duration[1] <= 0;
 
-    /* verilator lint_off WIDTH */
     for (nmot=0; nmot<num_motors; nmot=nmot+1) begin
       increment[0][nmot] <= {dda_bits{1'b0}};
       increment[1][nmot] <= {dda_bits{1'b0}};
@@ -390,7 +387,6 @@ module spi_state_machine #(
       config_invert_highside[nmot] <= `DEFAULT_BRIDGE_INVERTING;
       config_invert_lowside[nmot] <= `DEFAULT_BRIDGE_INVERTING;
     end
-    /* verilator lint_on WIDTH */
 
   end else if (resetn) begin
     if (word_received_rising) begin
