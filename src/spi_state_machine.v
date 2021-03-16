@@ -153,7 +153,7 @@ module spi_state_machine #(
 
   wire [num_motors-1:0] stepper_faultn; // stepper fault
 
-  wire [31:0] step_encoder [num_motors-1:0]; // step encoder
+  wire [encoder_bits-1:0] step_encoder [num_motors-1:0]; // step encoder
 
   //
   // Stepper Configs
