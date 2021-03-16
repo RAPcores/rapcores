@@ -336,7 +336,7 @@ module spi_state_machine #(
                              (message_header == CMD_STEPPERFAULT) |
                              (message_header == CMD_ENCODERFAULT);
 
-  wire header_motor_channel = word_data_received[(48+$clog2(num_motors)):48];
+  wire [$clog2(num_motors-1):0] header_motor_channel = word_data_received[(48+$clog2(num_motors)):48];
 
 
   wire word_received_rising;
@@ -441,6 +441,9 @@ module spi_state_machine #(
             // TODO needs to be power of two
             current[header_motor_channel][7:0] <= word_data_received[15:8];
             microsteps[header_motor_channel][2:0] <= word_data_received[2:0];
+            `ifdef FORMAL
+              assert(header_motor_channel == word_data_received[(48+$clog2(num_motors)):48]);
+            `endif
           end
 
           // Set Microstepping Parameters
