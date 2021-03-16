@@ -336,6 +336,9 @@ module spi_state_machine #(
                              (message_header == CMD_STEPPERFAULT) |
                              (message_header == CMD_ENCODERFAULT);
 
+  wire header_motor_channel = word_data_received[(48+$clog2(num_motors)):48];
+
+
   wire word_received_rising;
   rising_edge_detector word_recieved_edge_rising (.clk(CLK), .in(word_received), .out(word_received_rising));
 
@@ -436,17 +439,17 @@ module spi_state_machine #(
           // Set Microstepping
           CMD_MOTORCONFIG: begin
             // TODO needs to be power of two
-            current[word_data_received[55:48]][7:0] <= word_data_received[15:8];
-            microsteps[word_data_received[55:48]][2:0] <= word_data_received[2:0];
+            current[header_motor_channel][7:0] <= word_data_received[15:8];
+            microsteps[header_motor_channel][2:0] <= word_data_received[2:0];
           end
 
           // Set Microstepping Parameters
           CMD_MICROSTEPPER_CONFIG: begin
-            config_offtime[word_data_received[55:48]][9:0] <= word_data_received[39:30];
-            config_blanktime[word_data_received[55:48]][7:0] <= word_data_received[29:22];
-            config_fastdecay_threshold[word_data_received[55:48]][9:0] <= word_data_received[21:12];
-            config_minimum_on_time[word_data_received[55:48]][7:0] <= word_data_received[18:11];
-            config_current_threshold[word_data_received[55:48]][10:0] <= word_data_received[10:0];
+            config_offtime[header_motor_channel][9:0] <= word_data_received[39:30];
+            config_blanktime[header_motor_channel][7:0] <= word_data_received[29:22];
+            config_fastdecay_threshold[header_motor_channel][9:0] <= word_data_received[21:12];
+            config_minimum_on_time[header_motor_channel][7:0] <= word_data_received[18:11];
+            config_current_threshold[header_motor_channel][10:0] <= word_data_received[10:0];
           end
 
           // Set chargepump period
@@ -456,8 +459,8 @@ module spi_state_machine #(
 
           // Invert Bridge outputs
           CMD_BRIDGEINVERT: begin
-            config_invert_highside[word_data_received[55:48]] <= word_data_received[1];
-            config_invert_lowside[word_data_received[55:48]] <= word_data_received[0];
+            config_invert_highside[header_motor_channel] <= word_data_received[1];
+            config_invert_lowside[header_motor_channel] <= word_data_received[0];
           end
 
           // Read Stepper fault register
@@ -512,12 +515,15 @@ module spi_state_machine #(
                   word_send_data[encoder_bits-1:0] <= step_encoder_store[0]; // Prep to send steps
                 end
               end
-
+              /* verilator lint_off WIDTH */
               if (message_word_count == (nmot+1)*2) begin
+              /* verilator lint_on WIDTH */
                 increment[writemoveind][nmot] <= word_data_received;
                 word_send_data[encoder_bits-1:0] <= encoder_store[nmot]; // Prep to send steps
               end
+              /* verilator lint_off WIDTH */
               if (message_word_count == (nmot+1)*2+1) begin
+              /* verilator lint_on WIDTH */
                 incrementincrement[writemoveind][nmot] <= word_data_received;
                 if (nmot != num_motors-1) word_send_data[encoder_bits-1:0] <= step_encoder_store[nmot+1]; // Prep to send steps
 
