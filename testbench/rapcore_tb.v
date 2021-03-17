@@ -17,8 +17,6 @@ module rapcore_tb #(
       output wire [`DUAL_HBRIDGE-1:0] PHASE_A2,  // Phase A
       output wire [`DUAL_HBRIDGE-1:0] PHASE_B1,  // Phase B
       output wire [`DUAL_HBRIDGE-1:0] PHASE_B2,  // Phase B
-      output wire [`DUAL_HBRIDGE-1:0] VREF_A,  // VRef
-      output wire [`DUAL_HBRIDGE-1:0] VREF_B,  // VRef
     `endif
     input             CLK,
     output CIPO
@@ -170,6 +168,8 @@ module rapcore_tb #(
         .PHASE_A2(PHASE_A2),  // Phase A
         .PHASE_B1(PHASE_B1),  // Phase B
         .PHASE_B2(PHASE_B2),  // Phase B
+      `endif
+      `ifdef VREF_AB
         .VREF_A(VREF_A),  // VRef
         .VREF_B(VREF_B),  // VRef
       `endif
