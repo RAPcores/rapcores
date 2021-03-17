@@ -38,8 +38,8 @@ module microstepper_top (
     input   wire     enable_in,
     output  wire     faultn
 );
-  wire [5:0] cos_index1;
-  wire [5:0] cos_index2;
+  wire [7:0] cos_index1;
+  wire [7:0] cos_index2;
   wire [7:0] pwm1;
   wire [7:0] pwm2;
 
