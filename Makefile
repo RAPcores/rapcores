@@ -122,7 +122,7 @@ testbench/vcd:
 	mkdir -p testbench/vcd
 
 yosys-%: testbench/vcd $(RAPCOREFILES)
-	yosys -s testbench/yosys/$*.ys $(RAPCOREFILES)
+	yosys -s testbench/yosys/$*.ys src/sim/pwm_pll.v $(RAPCOREFILES)
 	gtkwave testbench/vcd/$*.vcd
 
 cxxrtl-%: testbench/vcd

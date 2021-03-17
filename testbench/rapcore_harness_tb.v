@@ -16,12 +16,14 @@ module rapcore_harness #(
       input wire BOOT_DONE_IN,
     `endif
     `ifdef DUAL_HBRIDGE
-      input wire [`DUAL_HBRIDGE-1:0] PHASE_A1,  // Phase A
-      input wire [`DUAL_HBRIDGE-1:0] PHASE_A2,  // Phase A
-      input wire [`DUAL_HBRIDGE-1:0] PHASE_B1,  // Phase B
-      input wire [`DUAL_HBRIDGE-1:0] PHASE_B2,  // Phase B
-      input wire [`DUAL_HBRIDGE-1:0] VREF_A,  // VRef
-      input wire [`DUAL_HBRIDGE-1:0] VREF_B,  // VRef
+      input [`DUAL_HBRIDGE-1:0] PHASE_A1,  // Phase A
+      input [`DUAL_HBRIDGE-1:0] PHASE_A2,  // Phase A
+      input [`DUAL_HBRIDGE-1:0] PHASE_B1,  // Phase B
+      input [`DUAL_HBRIDGE-1:0] PHASE_B2,  // Phase B
+    `endif
+    `ifdef VREF_AB
+      input [`DUAL_HBRIDGE-1:0] VREF_A,  // VRef
+      input [`DUAL_HBRIDGE-1:0] VREF_B,  // VRef
     `endif
     `ifdef ULTIBRIDGE
       input wire CHARGEPUMP,
