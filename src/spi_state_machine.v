@@ -392,24 +392,28 @@ module spi_state_machine #(
     end
 
   end else if (resetn) begin
-    if (word_received_rising) begin
-      // Zero out send data register
-      word_send_data <= 64'b0;
 
+    if (word_received_rising) begin
       // Header Processing
-      if (!awaiting_more_words) begin
+      //if (!awaiting_more_words) begin
 
         // Save CMD header incase multi word transaction
-        message_header <= word_data_received[word_bits-1:word_bits-8]; // Header is 8 MSB
+        //message_header <= word_data_received[word_bits-1:word_bits-8]; // Header is 8 MSB
 
         // First word so message count zero
+      if (!awaiting_more_words) begin
         message_word_count <= 1;
+        message_header <= word_data_received[word_bits-1:word_bits-8]; // Header is 8 MSB
+      end else begin
+        message_word_count <= message_word_count + 1;
+      end
 
-        case (word_data_received[word_bits-1:word_bits-8])
+      case (message_header)
 
-          // Coordinated Move
-          CMD_COORDINATED_STEP: begin
+        // Coordinated Move
+        CMD_COORDINATED_STEP: begin
 
+          if (message_word_count == 0) begin
             // Get Direction Bits
             dir_r[writemoveind] <= word_data_received[num_motors-1:0];
 
@@ -418,134 +422,122 @@ module spi_state_machine #(
               step_encoder_store[nmot] <= step_encoder[nmot];
               encoder_store[nmot] <= encoder_count[nmot];
             end
-
           end
 
-          // Motor Enable/disable
-          CMD_MOTOR_ENABLE: begin
-            enable_r[num_motors-1:0] <= word_data_received[num_motors-1:0];
-          end
-
-          // Motor Brake on Disable
-          CMD_MOTOR_BRAKE: begin
-            brake_r[num_motors-1:0] <= word_data_received[num_motors-1:0];
-          end
-
-          // Clock divisor (24 bit)
-          CMD_CLK_DIVISOR: begin
-            clock_divisor[7:0] <= word_data_received[7:0];
-          end
-
-          // Set Microstepping
-          CMD_MOTORCONFIG: begin
-            // TODO needs to be power of two
-            current[header_motor_channel][7:0] <= word_data_received[15:8];
-            microsteps[header_motor_channel][2:0] <= word_data_received[2:0];
-            `ifdef FORMAL
-              assert(header_motor_channel == word_data_received[(48+$clog2(num_motors)):48]);
-            `endif
-          end
-
-          // Set Microstepping Parameters
-          CMD_MICROSTEPPER_CONFIG: begin
-            config_offtime[header_motor_channel][9:0] <= word_data_received[39:30];
-            config_blanktime[header_motor_channel][7:0] <= word_data_received[29:22];
-            config_fastdecay_threshold[header_motor_channel][9:0] <= word_data_received[21:12];
-            config_minimum_on_time[header_motor_channel][7:0] <= word_data_received[18:11];
-            config_current_threshold[header_motor_channel][10:0] <= word_data_received[10:0];
-          end
-
-          // Set chargepump period
-          CMD_CHARGEPUMP: begin
-            config_chargepump_period[7:0] <= word_data_received[7:0];
-          end
-
-          // Invert Bridge outputs
-          CMD_BRIDGEINVERT: begin
-            config_invert_highside[header_motor_channel] <= word_data_received[1];
-            config_invert_lowside[header_motor_channel] <= word_data_received[0];
-          end
-
-          // Read Stepper fault register
-          CMD_STEPPERFAULT: begin
-            word_send_data[num_motors-1:0] <= stepper_faultn;
-          end
-
-          // Read Stepper fault register
-          // TODO
-          //CMD_ENCODERFAULT: begin
-          //  word_send_data[num_motors-1:0] <= stepper_faultn;
-          //end
-
-
-          // Write to Cosine Table
-          // TODO Cosine Net is broken
-          //CMD_COSINE_CONFIG: begin
-            //cos_table[word_data_received[35:32]] <= word_data_received[31:0];
-            //cos_table[word_data_received[37:32]] <= word_data_received[7:0];
-            //cos_table[word_data_received[35:32]+3] <= word_data_received[31:25];
-            //cos_table[word_data_received[35:32]+2] <= word_data_received[24:16];
-            //cos_table[word_data_received[35:32]+1] <= word_data_received[15:8];
-            //cos_table[word_data_received[35:32]] <= word_data_received[7:0];
-          //end
-
-          // API Version
-          CMD_API_VERSION: begin
-            word_send_data[7:0] <= `VERSION_PATCH;
-            word_send_data[15:8] <= `VERSION_MINOR;
-            word_send_data[23:16] <= `VERSION_MAJOR;
-            word_send_data[31:24] <= `VERSION_DEVEL;
-          end
-
-          default: word_send_data <= 64'b0;
-
-        endcase
-
-      // Addition Word Processing
-      end else begin
-
-        message_word_count <= message_word_count + 1;
-
-        case (message_header)
-          // Move Routine
-          CMD_COORDINATED_STEP: begin
-            // Multiaxis
-            for (nmot=0; nmot<num_motors; nmot=nmot+1) begin
-              // the first non-header word is the move duration
-              if (nmot == 0) begin
-                if (message_word_count == 1) begin
-                  move_duration[writemoveind][move_duration_bits-1:0] <= word_data_received[move_duration_bits-1:0];
-                  word_send_data[encoder_bits-1:0] <= step_encoder_store[0]; // Prep to send steps
-                end
-              end
-              /* verilator lint_off WIDTH */
-              if (message_word_count == (nmot+1)*2) begin
-              /* verilator lint_on WIDTH */
-                increment[writemoveind][nmot] <= word_data_received;
-                word_send_data[encoder_bits-1:0] <= encoder_store[nmot]; // Prep to send steps
-              end
-              /* verilator lint_off WIDTH */
-              if (message_word_count == (nmot+1)*2+1) begin
-              /* verilator lint_on WIDTH */
-                incrementincrement[writemoveind][nmot] <= word_data_received;
-                if (nmot != num_motors-1) word_send_data[encoder_bits-1:0] <= step_encoder_store[nmot+1]; // Prep to send steps
-
-                if (nmot == num_motors-1) begin
-                  writemoveind <= writemoveind + 1'b1;
-                  stepready[writemoveind] <= ~stepready[writemoveind];
-                  message_header <= 8'b0; // Reset Message Header at the end
-                  message_word_count <= 0;
-                end
-                `ifdef FORMAL
-                  assert(writemoveind <= MOVE_BUFFER_SIZE);
-                `endif
+          // Multiaxis
+          for (nmot=0; nmot<num_motors; nmot=nmot+1) begin
+            // the first non-header word is the move duration
+            if (nmot == 0) begin
+              if (message_word_count == 1) begin
+                move_duration[writemoveind][move_duration_bits-1:0] <= word_data_received[move_duration_bits-1:0];
+                word_send_data[encoder_bits-1:0] <= step_encoder_store[0]; // Prep to send steps
               end
             end
-          end // `CMD_COORDINATED_STEP
-          // by default reset the message header if it was a two word transaction
-          default: message_header <= 8'b0; // Reset Message Header
-        endcase
-      end
+            /* verilator lint_off WIDTH */
+            if (message_word_count == (nmot+1)*2) begin
+            /* verilator lint_on WIDTH */
+              increment[writemoveind][nmot] <= word_data_received;
+              word_send_data[encoder_bits-1:0] <= encoder_store[nmot]; // Prep to send steps
+            end
+            /* verilator lint_off WIDTH */
+            if (message_word_count == (nmot+1)*2+1) begin
+            /* verilator lint_on WIDTH */
+              incrementincrement[writemoveind][nmot] <= word_data_received;
+              if (nmot != num_motors-1) word_send_data[encoder_bits-1:0] <= step_encoder_store[nmot+1]; // Prep to send steps
+
+              if (nmot == num_motors-1) begin
+                writemoveind <= writemoveind + 1'b1;
+                stepready[writemoveind] <= ~stepready[writemoveind];
+                message_header <= 8'b0; // Reset Message Header at the end
+                message_word_count <= 0;
+              end
+              `ifdef FORMAL
+                assert(writemoveind <= MOVE_BUFFER_SIZE);
+              `endif
+            end
+          end
+        end // CMD_COORDINATED_STEP
+
+        // Motor Enable/disable
+        CMD_MOTOR_ENABLE: begin
+          enable_r[num_motors-1:0] <= word_data_received[num_motors-1:0];
+        end
+
+        // Motor Brake on Disable
+        CMD_MOTOR_BRAKE: begin
+          brake_r[num_motors-1:0] <= word_data_received[num_motors-1:0];
+        end
+
+        // Clock divisor (24 bit)
+        CMD_CLK_DIVISOR: begin
+          clock_divisor[7:0] <= word_data_received[7:0];
+        end
+
+        // Set Microstepping
+        CMD_MOTORCONFIG: begin
+          // TODO needs to be power of two
+          current[header_motor_channel][7:0] <= word_data_received[15:8];
+          microsteps[header_motor_channel][2:0] <= word_data_received[2:0];
+          `ifdef FORMAL
+            assert(header_motor_channel == word_data_received[(48+$clog2(num_motors)):48]);
+          `endif
+        end
+
+        // Set Microstepping Parameters
+        CMD_MICROSTEPPER_CONFIG: begin
+          config_offtime[header_motor_channel][9:0] <= word_data_received[39:30];
+          config_blanktime[header_motor_channel][7:0] <= word_data_received[29:22];
+          config_fastdecay_threshold[header_motor_channel][9:0] <= word_data_received[21:12];
+          config_minimum_on_time[header_motor_channel][7:0] <= word_data_received[18:11];
+          config_current_threshold[header_motor_channel][10:0] <= word_data_received[10:0];
+        end
+
+        // Set chargepump period
+        CMD_CHARGEPUMP: begin
+          config_chargepump_period[7:0] <= word_data_received[7:0];
+        end
+
+        // Invert Bridge outputs
+        CMD_BRIDGEINVERT: begin
+          config_invert_highside[header_motor_channel] <= word_data_received[1];
+          config_invert_lowside[header_motor_channel] <= word_data_received[0];
+        end
+
+        // Read Stepper fault register
+        CMD_STEPPERFAULT: begin
+          word_send_data[num_motors-1:0] <= stepper_faultn;
+        end
+
+        // Read Stepper fault register
+        // TODO
+        //CMD_ENCODERFAULT: begin
+        //  word_send_data[num_motors-1:0] <= stepper_faultn;
+        //end
+
+
+        // Write to Cosine Table
+        // TODO Cosine Net is broken
+        //CMD_COSINE_CONFIG: begin
+          //cos_table[word_data_received[35:32]] <= word_data_received[31:0];
+          //cos_table[word_data_received[37:32]] <= word_data_received[7:0];
+          //cos_table[word_data_received[35:32]+3] <= word_data_received[31:25];
+          //cos_table[word_data_received[35:32]+2] <= word_data_received[24:16];
+          //cos_table[word_data_received[35:32]+1] <= word_data_received[15:8];
+          //cos_table[word_data_received[35:32]] <= word_data_received[7:0];
+        //end
+
+        // API Version
+        CMD_API_VERSION: begin
+          word_send_data[7:0] <= `VERSION_PATCH;
+          word_send_data[15:8] <= `VERSION_MINOR;
+          word_send_data[23:16] <= `VERSION_MAJOR;
+          word_send_data[31:24] <= `VERSION_DEVEL;
+        end
+
+        default: word_send_data <= 64'b0;
+
+      endcase
+
     end
   end
 
