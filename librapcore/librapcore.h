@@ -1,6 +1,12 @@
 
 #include <inttypes.h>
 
+struct RAPcore {
+    
+
+};
+
+
 struct CoordinatedMove1 {
     uint32_t duration;
     int64_t increment[1];

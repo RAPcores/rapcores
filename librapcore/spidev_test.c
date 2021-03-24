@@ -59,25 +59,30 @@ static void pabort(const char *s)
 	abort();
 }
 
-static const char *device = "/dev/spidev1.1";
+static const char *device = "/dev/spidev0.0";
 static uint32_t mode;
 static uint8_t bits = 8;
 static char *input_file;
 static char *output_file;
-static uint32_t speed = 500000;
+static uint32_t speed = 100000;
 static uint16_t delay;
 static int verbose;
 static int transfer_size;
 static int iterations;
 static int interval = 5; /* interval in seconds for showing transfer rate */
 
-static uint8_t default_tx[] = {
-	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-	0x40, 0x00, 0x00, 0x00, 0x00, 0x95,
-	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-	0xF0, 0x0D,
+static uint64_t default_tx[] = {
+0x0a0000000000000f, 0x0000000000000000,
+0x0100000000000000,
+0x00000000004fffff,
+0x0000010000000000,
+0x0000000100000000,
+0x0000010000000000,
+0x0000000100000000,
+0x0000020000000000,
+0x0000000010000000,
+0x0062000000000000,
+0x0000000000000000
 };
 
 static uint8_t default_rx[ARRAY_SIZE(default_tx)] = {0, };
@@ -333,59 +338,6 @@ static void parse_opts(int argc, char *argv[])
 	}
 }
 
-static void transfer_escaped_string(int fd, char *str)
-{
-	size_t size = strlen(str);
-	uint8_t *tx;
-	uint8_t *rx;
-
-	tx = malloc(size);
-	if (!tx)
-		pabort("can't allocate tx buffer");
-
-	rx = malloc(size);
-	if (!rx)
-		pabort("can't allocate rx buffer");
-
-	size = unescape((char *)tx, str, size);
-	transfer(fd, tx, rx, size);
-	free(rx);
-	free(tx);
-}
-
-static void transfer_file(int fd, char *filename)
-{
-	ssize_t bytes;
-	struct stat sb;
-	int tx_fd;
-	uint8_t *tx;
-	uint8_t *rx;
-
-	if (stat(filename, &sb) == -1)
-		pabort("can't stat input file");
-
-	tx_fd = open(filename, O_RDONLY);
-	if (tx_fd < 0)
-		pabort("can't open input file");
-
-	tx = malloc(sb.st_size);
-	if (!tx)
-		pabort("can't allocate tx buffer");
-
-	rx = malloc(sb.st_size);
-	if (!rx)
-		pabort("can't allocate rx buffer");
-
-	bytes = read(tx_fd, tx, sb.st_size);
-	if (bytes != sb.st_size)
-		pabort("failed to read input file");
-
-	transfer(fd, tx, rx, sb.st_size);
-	free(rx);
-	free(tx);
-	close(tx_fd);
-}
-
 static uint64_t _read_count;
 static uint64_t _write_count;
 
@@ -488,30 +440,7 @@ int main(int argc, char *argv[])
 	printf("bits per word: %u\n", bits);
 	printf("max speed: %u Hz (%u kHz)\n", speed, speed/1000);
 
-	if (input_tx)
-		transfer_escaped_string(fd, input_tx);
-	else if (input_file)
-		transfer_file(fd, input_file);
-	else if (transfer_size) {
-		struct timespec last_stat;
-
-		clock_gettime(CLOCK_MONOTONIC, &last_stat);
-
-		while (iterations-- > 0) {
-			struct timespec current;
-
-			transfer_buf(fd, transfer_size);
-
-			clock_gettime(CLOCK_MONOTONIC, &current);
-			if (current.tv_sec - last_stat.tv_sec > interval) {
-				show_transfer_rate();
-				last_stat = current;
-			}
-		}
-		printf("total: tx %.1fKB, rx %.1fKB\n",
-		       _write_count/1024.0, _read_count/1024.0);
-	} else
-		transfer(fd, default_tx, default_rx, sizeof(default_tx));
+	transfer(fd, default_tx, default_rx, sizeof(default_tx));
 
 	close(fd);
 
