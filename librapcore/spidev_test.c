@@ -22,7 +22,7 @@
 #include <sys/stat.h>
 #include <linux/types.h>
 #include <linux/spi/spidev.h>
-
+#include "librapcore.h"
 
 #define SPI_CPHA		0x01
 #define SPI_CPOL		0x02
@@ -116,33 +116,6 @@ static void hex_dump(const void *src, size_t length, size_t line_size,
 	}
 }
 
-/*
- *  Unescape - process hexadecimal escape character
- *      converts shell input "\x23" -> 0x23
- */
-static int unescape(char *_dst, char *_src, size_t len)
-{
-	int ret = 0;
-	int match;
-	char *src = _src;
-	char *dst = _dst;
-	unsigned int ch;
-
-	while (*src) {
-		if (*src == '\\' && *(src+1) == 'x') {
-			match = sscanf(src + 2, "%2x", &ch);
-			if (!match)
-				pabort("malformed input string");
-
-			src += 4;
-			*dst++ = (unsigned char)ch;
-		} else {
-			*dst++ = *src++;
-		}
-		ret++;
-	}
-	return ret;
-}
 
 static void transfer(int fd, uint8_t const *tx, uint8_t const *rx, size_t len)
 {
@@ -394,12 +367,16 @@ int main(int argc, char *argv[])
 	int ret = 0;
 	int fd;
 
+	struct RAPcore rapcore;
+
+	init_rapcore(&rapcore);
+
 	parse_opts(argc, argv);
 
 	if (input_tx && input_file)
 		pabort("only one of -p and --input may be selected");
 
-	fd = open(device, O_RDWR);
+	fd = open(rapcore.device, O_RDWR);
 	if (fd < 0)
 		pabort("can't open device");
 
@@ -417,28 +394,28 @@ int main(int argc, char *argv[])
 	/*
 	 * bits per word
 	 */
-	ret = ioctl(fd, SPI_IOC_WR_BITS_PER_WORD, &bits);
+	ret = ioctl(fd, SPI_IOC_WR_BITS_PER_WORD, &(rapcore.bits));
 	if (ret == -1)
 		pabort("can't set bits per word");
 
-	ret = ioctl(fd, SPI_IOC_RD_BITS_PER_WORD, &bits);
+	ret = ioctl(fd, SPI_IOC_RD_BITS_PER_WORD, &(rapcore.bits));
 	if (ret == -1)
 		pabort("can't get bits per word");
 
 	/*
 	 * max speed hz
 	 */
-	ret = ioctl(fd, SPI_IOC_WR_MAX_SPEED_HZ, &speed);
+	ret = ioctl(fd, SPI_IOC_WR_MAX_SPEED_HZ, &(rapcore.speed));
 	if (ret == -1)
 		pabort("can't set max speed hz");
 
-	ret = ioctl(fd, SPI_IOC_RD_MAX_SPEED_HZ, &speed);
+	ret = ioctl(fd, SPI_IOC_RD_MAX_SPEED_HZ, &(rapcore.speed));
 	if (ret == -1)
 		pabort("can't get max speed hz");
 
-	printf("spi mode: 0x%x\n", mode);
-	printf("bits per word: %u\n", bits);
-	printf("max speed: %u Hz (%u kHz)\n", speed, speed/1000);
+	printf("spi mode: 0x%x\n", rapcore.mode);
+	printf("bits per word: %u\n", rapcore.bits);
+	printf("max speed: %u Hz (%u kHz)\n", rapcore.speed, rapcore.speed/1000);
 
 	transfer(fd, default_tx, default_rx, sizeof(default_tx));
 
