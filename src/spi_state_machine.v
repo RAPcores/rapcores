@@ -77,6 +77,7 @@ module spi_state_machine #(
 );
 
   localparam CMD_COORDINATED_STEP    = 8'h01;
+  localparam CMD_READ_ENCODER        = 8'h03;
   localparam CMD_MOTOR_ENABLE        = 8'h0a;
   localparam CMD_MOTOR_BRAKE         = 8'h0b;
   localparam CMD_MOTORCONFIG         = 8'h10;
@@ -253,7 +254,7 @@ module spi_state_machine #(
   //
 
   wire signed [encoder_bits-1:0] encoder_count [num_encoders-1:0];
-  wire [num_encoders-1:0] encoder_fault;
+  wire [num_encoders-1:0] encoder_faultn;
 
   if(num_encoders > 0) begin
     for (i=0; i<num_encoders; i=i+1) begin
@@ -263,7 +264,7 @@ module spi_state_machine #(
         .clk(CLK),
         .a(ENC_A[i]),
         .b(ENC_B[i]),
-        .faultn(encoder_fault[i]),
+        .faultn(encoder_faultn[i]),
         .count(encoder_count[i])
         //.multiplier(encoder_multiplier)
         );
@@ -334,7 +335,8 @@ module spi_state_machine #(
   wire awaiting_more_words = (message_header == CMD_COORDINATED_STEP) |
                              (message_header == CMD_API_VERSION) |
                              (message_header == CMD_STEPPERFAULT) |
-                             (message_header == CMD_ENCODERFAULT);
+                             (message_header == CMD_ENCODERFAULT) |
+                             (message_header == CMD_READ_ENCODER);
 
   wire [$clog2(num_motors-1):0] header_motor_channel = word_data_received[(48+$clog2(num_motors)):48];
 
@@ -426,6 +428,10 @@ module spi_state_machine #(
             enable_r[num_motors-1:0] <= word_data_received[num_motors-1:0];
           end
 
+          CMD_READ_ENCODER: begin
+            word_send_data[encoder_bits-1:0] <= encoder_count[header_motor_channel];
+          end
+
           // Motor Brake on Disable
           CMD_MOTOR_BRAKE: begin
             brake_r[num_motors-1:0] <= word_data_received[num_motors-1:0];
@@ -468,14 +474,13 @@ module spi_state_machine #(
 
           // Read Stepper fault register
           CMD_STEPPERFAULT: begin
-            word_send_data[num_motors-1:0] <= stepper_faultn;
+            word_send_data[num_motors-1:0] <= ~stepper_faultn;
           end
 
           // Read Stepper fault register
-          // TODO
-          //CMD_ENCODERFAULT: begin
-          //  word_send_data[num_motors-1:0] <= stepper_faultn;
-          //end
+          CMD_ENCODERFAULT: begin
+            word_send_data[num_encoders-1:0] <= ~encoder_faultn;
+          end
 
 
           // Write to Cosine Table

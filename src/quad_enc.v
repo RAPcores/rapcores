@@ -9,7 +9,7 @@ module quad_enc #(
   input wire  a,
   input wire  b,
   output reg faultn,
-  output reg signed [encbits-1:0] count
+  output wire signed [encbits-1:0] count
   //input [7:0] multiplier
   );
 
@@ -21,11 +21,13 @@ module quad_enc #(
   wire step_b = b_stable[1] ^ b_stable[2];  //Step if b changed
   wire step = step_a ^ step_b;  //Step if a xor b stepped
   wire direction = a_stable[1] ^ b_stable[2];  //Direction determined by comparing current sample to last
-  wire signed increment = (direction) ? 1 : -1;
+
+  reg signed [encbits-1:0] count_r;
+  assign count = count_r;
 
   always @(posedge clk) begin
     if (!resetn) begin
-      count <= 0;  //reset count
+      count_r <= 0;  //reset count
       faultn <= 1'b1; //reset faultn
       a_stable <= 3'b0;
       b_stable <= 3'b0;
@@ -36,9 +38,10 @@ module quad_enc #(
 
       if (step_a & step_b)  //We do not know direction if both inputs triggered on single clock
         faultn <= 0;
-      /* verilator lint_off WIDTH */
-      if (step) count <= count + increment;
-      /* verilator lint_on WIDTH */
+      if (step) begin
+        if (direction) count_r <= count_r + 1'b1;
+        else count_r <= count_r - 1'b1;
+      end
     end
   end
 endmodule
