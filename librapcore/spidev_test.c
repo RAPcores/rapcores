@@ -61,14 +61,10 @@ static void pabort(const char *s)
 
 static uint32_t mode;
 static uint8_t bits = 8;
-static char *input_file;
-static char *output_file;
 static uint32_t speed = 100000;
 static uint16_t delay;
 static int verbose;
 static int transfer_size;
-static int iterations;
-static int interval = 5; /* interval in seconds for showing transfer rate */
 
 static uint64_t default_tx[] = {
 0x0a0000000000000f, 0x0000000000000000,
@@ -178,12 +174,6 @@ static void parse_opts(int argc, char *argv[])
 		case 'b':
 			bits = atoi(optarg);
 			break;
-		case 'i':
-			input_file = optarg;
-			break;
-		case 'o':
-			output_file = optarg;
-			break;
 		case 'l':
 			mode |= SPI_LOOP;
 			break;
@@ -226,9 +216,6 @@ static void parse_opts(int argc, char *argv[])
 		case 'S':
 			transfer_size = atoi(optarg);
 			break;
-		case 'I':
-			iterations = atoi(optarg);
-			break;
 		default:
 			print_usage(argv[0]);
 		}
@@ -245,9 +232,6 @@ int main(int argc, char *argv[])
 	init_rapcore(&rapcore);
 
 	parse_opts(argc, argv);
-
-	if (input_tx && input_file)
-		pabort("only one of -p and --input may be selected");
 
 	fd = open(rapcore.device, O_RDWR);
 	if (fd < 0)
