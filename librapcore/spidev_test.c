@@ -59,7 +59,6 @@ static void pabort(const char *s)
 	abort();
 }
 
-static const char *device = "/dev/spidev0.0";
 static uint32_t mode;
 static uint8_t bits = 8;
 static char *input_file;
@@ -88,34 +87,6 @@ static uint64_t default_tx[] = {
 static uint8_t default_rx[ARRAY_SIZE(default_tx)] = {0, };
 static char *input_tx;
 
-static void hex_dump(const void *src, size_t length, size_t line_size,
-		     char *prefix)
-{
-	int i = 0;
-	const unsigned char *address = src;
-	const unsigned char *line = address;
-	unsigned char c;
-
-	printf("%s | ", prefix);
-	while (length-- > 0) {
-		printf("%02X ", *address++);
-		if (!(++i % line_size) || (length == 0 && i % line_size)) {
-			if (length == 0) {
-				while (i++ % line_size)
-					printf("__ ");
-			}
-			printf(" |");
-			while (line < address) {
-				c = *line++;
-				printf("%c", (c < 32 || c > 126) ? '.' : c);
-			}
-			printf("|\n");
-			if (length > 0)
-				printf("%s | ", prefix);
-		}
-	}
-}
-
 
 static void transfer(int fd, uint8_t const *tx, uint8_t const *rx, size_t len)
 {
@@ -130,46 +101,10 @@ static void transfer(int fd, uint8_t const *tx, uint8_t const *rx, size_t len)
 		.bits_per_word = bits,
 	};
 
-	if (mode & SPI_TX_OCTAL)
-		tr.tx_nbits = 8;
-	else if (mode & SPI_TX_QUAD)
-		tr.tx_nbits = 4;
-	else if (mode & SPI_TX_DUAL)
-		tr.tx_nbits = 2;
-	if (mode & SPI_RX_OCTAL)
-		tr.rx_nbits = 8;
-	else if (mode & SPI_RX_QUAD)
-		tr.rx_nbits = 4;
-	else if (mode & SPI_RX_DUAL)
-		tr.rx_nbits = 2;
-	if (!(mode & SPI_LOOP)) {
-		if (mode & (SPI_TX_OCTAL | SPI_TX_QUAD | SPI_TX_DUAL))
-			tr.rx_buf = 0;
-		else if (mode & (SPI_RX_OCTAL | SPI_RX_QUAD | SPI_RX_DUAL))
-			tr.tx_buf = 0;
-	}
-
 	ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
 	if (ret < 1)
 		pabort("can't send spi message");
 
-	if (verbose)
-		hex_dump(tx, len, 32, "TX");
-
-	if (output_file) {
-		out_fd = open(output_file, O_WRONLY | O_CREAT | O_TRUNC, 0666);
-		if (out_fd < 0)
-			pabort("could not open output file");
-
-		ret = write(out_fd, rx, len);
-		if (ret != len)
-			pabort("not all bytes written to output file");
-
-		close(out_fd);
-	}
-
-	if (verbose)
-		hex_dump(rx, len, 32, "RX");
 }
 
 static void print_usage(const char *prog)
@@ -234,9 +169,6 @@ static void parse_opts(int argc, char *argv[])
 			break;
 
 		switch (c) {
-		case 'D':
-			device = optarg;
-			break;
 		case 's':
 			speed = atoi(optarg);
 			break;
@@ -301,65 +233,6 @@ static void parse_opts(int argc, char *argv[])
 			print_usage(argv[0]);
 		}
 	}
-	if (mode & SPI_LOOP) {
-		if (mode & SPI_TX_DUAL)
-			mode |= SPI_RX_DUAL;
-		if (mode & SPI_TX_QUAD)
-			mode |= SPI_RX_QUAD;
-		if (mode & SPI_TX_OCTAL)
-			mode |= SPI_RX_OCTAL;
-	}
-}
-
-static uint64_t _read_count;
-static uint64_t _write_count;
-
-static void show_transfer_rate(void)
-{
-	static uint64_t prev_read_count, prev_write_count;
-	double rx_rate, tx_rate;
-
-	rx_rate = ((_read_count - prev_read_count) * 8) / (interval*1000.0);
-	tx_rate = ((_write_count - prev_write_count) * 8) / (interval*1000.0);
-
-	printf("rate: tx %.1fkbps, rx %.1fkbps\n", rx_rate, tx_rate);
-
-	prev_read_count = _read_count;
-	prev_write_count = _write_count;
-}
-
-static void transfer_buf(int fd, int len)
-{
-	uint8_t *tx;
-	uint8_t *rx;
-	int i;
-
-	tx = malloc(len);
-	if (!tx)
-		pabort("can't allocate tx buffer");
-	for (i = 0; i < len; i++)
-		tx[i] = random();
-
-	rx = malloc(len);
-	if (!rx)
-		pabort("can't allocate rx buffer");
-
-	transfer(fd, tx, rx, len);
-
-	_write_count += len;
-	_read_count += len;
-
-	if (mode & SPI_LOOP) {
-		if (memcmp(tx, rx, len)) {
-			fprintf(stderr, "transfer error !\n");
-			hex_dump(tx, len, 32, "TX");
-			hex_dump(rx, len, 32, "RX");
-			exit(1);
-		}
-	}
-
-	free(rx);
-	free(tx);
 }
 
 int main(int argc, char *argv[])
