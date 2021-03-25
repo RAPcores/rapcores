@@ -81,13 +81,10 @@ static uint64_t default_tx[] = {
 };
 
 static uint8_t default_rx[ARRAY_SIZE(default_tx)] = {0, };
-static char *input_tx;
-
 
 static void transfer(int fd, uint8_t const *tx, uint8_t const *rx, size_t len)
 {
 	int ret;
-	int out_fd;
 	struct spi_ioc_transfer tr = {
 		.tx_buf = (unsigned long)tx,
 		.rx_buf = (unsigned long)rx,
@@ -201,9 +198,6 @@ static void parse_opts(int argc, char *argv[])
 		case 'R':
 			mode |= SPI_READY;
 			break;
-		case 'p':
-			input_tx = optarg;
-			break;
 		case '2':
 			mode |= SPI_TX_DUAL;
 			break;
@@ -272,7 +266,7 @@ int main(int argc, char *argv[])
 
 	printf("spi mode: 0x%x\n", rapcore.mode);
 	printf("bits per word: %u\n", rapcore.bits);
-	printf("max speed: %u Hz (%u kHz)\n", rapcore.speed, rapcore.speed/1000);
+	printf("max speed: %u Hz (%.3f mbps)\n", rapcore.speed, rapcore.speed/8000000.0);
 
 	transfer(fd, default_tx, default_rx, sizeof(default_tx));
 
