@@ -255,6 +255,7 @@ module spi_state_machine #(
 
   wire signed [encoder_bits-1:0] encoder_count [num_encoders-1:0];
   wire [num_encoders-1:0] encoder_faultn;
+  wire [31:0] encoder_velocity [num_encoders-1:0];
 
   if(num_encoders > 0) begin
     for (i=0; i<num_encoders; i=i+1) begin
@@ -265,7 +266,8 @@ module spi_state_machine #(
         .a(ENC_A[i]),
         .b(ENC_B[i]),
         .faultn(encoder_faultn[i]),
-        .count(encoder_count[i])
+        .count(encoder_count[i]),
+        .velocity(encoder_velocity[i])
         //.multiplier(encoder_multiplier)
         );
     end
@@ -429,7 +431,7 @@ module spi_state_machine #(
           end
 
           CMD_READ_ENCODER: begin
-            word_send_data[encoder_bits-1:0] <= encoder_count[header_motor_channel];
+            word_send_data[encoder_bits-1:0] <= {encoder_velocity[header_motor_channel], encoder_count[header_motor_channel]};
           end
 
           // Motor Brake on Disable
@@ -437,7 +439,7 @@ module spi_state_machine #(
             brake_r[num_motors-1:0] <= word_data_received[num_motors-1:0];
           end
 
-          // Clock divisor (24 bit)
+          // Clock divisor
           CMD_CLK_DIVISOR: begin
             clock_divisor[7:0] <= word_data_received[7:0];
           end

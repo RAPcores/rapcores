@@ -2,14 +2,17 @@
 `default_nettype none
 
 module quad_enc #(
-    parameter encbits = 64
+    parameter encbits = 64,
+    parameter enable_velocity = 1,
+    parameter velocity_bits = 32
   )(
   input wire resetn,
   input wire  clk,
   input wire  a,
   input wire  b,
   output reg faultn,
-  output wire signed [encbits-1:0] count
+  output wire signed [encbits-1:0] count,
+  output wire signed [velocity_bits-1:0] velocity
   //input [7:0] multiplier
   );
 
@@ -25,6 +28,10 @@ module quad_enc #(
   reg signed [encbits-1:0] count_r;
   assign count = count_r;
 
+  reg signed [velocity_bits-1:0] velocity_counter;
+  reg signed [velocity_bits-1:0] velocity_r;
+  assign velocity = velocity_r;
+
   always @(posedge clk) begin
     if (!resetn) begin
       count_r <= 0;  //reset count
@@ -35,12 +42,20 @@ module quad_enc #(
     else begin
       a_stable <= {a_stable[1:0], a};  //Shift new a in. Last 2 samples shift to bits 2 and 1
       b_stable <= {b_stable[1:0], b};  //Shift new b in
+      velocity_counter <= velocity_counter + 1'b1;
 
       if (step_a & step_b)  //We do not know direction if both inputs triggered on single clock
         faultn <= 0;
       if (step) begin
-        if (direction) count_r <= count_r + 1'b1;
-        else count_r <= count_r - 1'b1;
+        if (direction) begin
+          count_r <= count_r + 1'b1;
+          velocity_r <= velocity_counter;
+        end
+        else begin
+          count_r <= count_r - 1'b1;
+          velocity_r <= -velocity_counter;
+        end
+        velocity_counter <= 0;
       end
     end
   end
