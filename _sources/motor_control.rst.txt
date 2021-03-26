@@ -281,3 +281,42 @@ Full Steps/sec (travel)  1250   1250  300     1050
 Microsteps/sec (homing)  5000   5000  5333.3
 Full Steps/sec (homing)  312.5  312.5 333.3
 ======================== =====  ===== ======  =====
+
+Analytical Model of a Stepper Motor
+===================================
+
+A model of a hybrid stepper motor is given by Bodson, et. al.: [1]
+
+.. math::
+  \frac{d \theta}{dt} = \omega
+.. math::
+  \frac{d \omega}{dt} = ( -K_m i_a sin(N_r \theta) + K_m i_b cos(N_r \theta) - B \omega - \tau)/J
+.. math::
+  \frac{d i_a}{dt} = ( v_a - R i_a + K_m sin(N_r \theta))/L
+.. math::
+  \frac{i_b}{dt} = ( v_b - R i_b - K_m cos(N_r \theta))/L
+
+Where:
+
+* :math:`\omega` - Angular Velocity
+* :math:`\theta` - Angular Position
+* :math:`J` - Rotor and Load Inertia
+* :math:`K_m` - Motor Torque constant
+* :math:`L` - Coil Inductance
+* :math:`R` - Coil Resistance
+* :math:`N_r` - Number of rotor teeth
+* :math:`i_a, i_b` - Coil Current
+* :math:`v_a, v_b` - Coil Current
+
+From this a simpler model for the current can be developed:
+
+.. math::
+  i_{qr} = \frac{J}{K_m} \alpha_r + \frac{B}{K_m} \omega_r
+
+
+
+
+References
+==========
+
+[1]M. Bodson and J. N. Chiasson, “High-Performance Nonlinear Feedback Control of a Permanent Magnet Stepper Motor,” p. 10.

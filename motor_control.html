@@ -478,6 +478,37 @@ information on handling this case.</p>
 </tbody>
 </table>
 </div>
+<div class="section" id="analytical-model-of-a-stepper-motor">
+<h2>Analytical Model of a Stepper Motor<a class="headerlink" href="#analytical-model-of-a-stepper-motor" title="Permalink to this headline">¶</a></h2>
+<p>A model of a hybrid stepper motor is given by Bodson, et. al.: [1]</p>
+<div class="math notranslate nohighlight">
+\[\frac{d \theta}{dt} = \omega\]</div>
+<div class="math notranslate nohighlight">
+\[\frac{d \omega}{dt} = ( -K_m i_a sin(N_r \theta) + K_m i_b cos(N_r \theta) - B \omega - \tau)/J\]</div>
+<div class="math notranslate nohighlight">
+\[\frac{d i_a}{dt} = ( v_a - R i_a + K_m sin(N_r \theta))/L\]</div>
+<div class="math notranslate nohighlight">
+\[\frac{i_b}{dt} = ( v_b - R i_b - K_m cos(N_r \theta))/L\]</div>
+<p>Where:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\omega\)</span> - Angular Velocity</p></li>
+<li><p><span class="math notranslate nohighlight">\(\theta\)</span> - Angular Position</p></li>
+<li><p><span class="math notranslate nohighlight">\(J\)</span> - Rotor and Load Inertia</p></li>
+<li><p><span class="math notranslate nohighlight">\(K_m\)</span> - Motor Torque constant</p></li>
+<li><p><span class="math notranslate nohighlight">\(L\)</span> - Coil Inductance</p></li>
+<li><p><span class="math notranslate nohighlight">\(R\)</span> - Coil Resistance</p></li>
+<li><p><span class="math notranslate nohighlight">\(N_r\)</span> - Number of rotor teeth</p></li>
+<li><p><span class="math notranslate nohighlight">\(i_a, i_b\)</span> - Coil Current</p></li>
+<li><p><span class="math notranslate nohighlight">\(v_a, v_b\)</span> - Coil Current</p></li>
+</ul>
+<p>From this a simpler model for the current can be developed:</p>
+<div class="math notranslate nohighlight">
+\[i_{qr} = \frac{J}{K_m} \alpha_r + \frac{B}{K_m} \omega_r\]</div>
+</div>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<p>[1]M. Bodson and J. N. Chiasson, “High-Performance Nonlinear Feedback Control of a Permanent Magnet Stepper Motor,” p. 10.</p>
+</div>
 </div>
 
 
@@ -510,6 +541,8 @@ information on handling this case.</p>
 <li class="toctree-l2"><a class="reference internal" href="#bridge-control">Bridge Control</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#space-vector-modulation">Space Vector Modulation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#frequency-considerations">Frequency Considerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#analytical-model-of-a-stepper-motor">Analytical Model of a Stepper Motor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#references">References</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="interfaces.html">Interfaces</a></li>
