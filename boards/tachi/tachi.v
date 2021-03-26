@@ -14,12 +14,12 @@
 
 // Motor Definitions
 `define DUAL_HBRIDGE 4
-`define VREF_AB
+//`define VREF_AB
 
 `define MOTOR_COUNT 4
 
 // Encoder Count
-`define QUAD_ENC 1
+`define QUAD_ENC 4
 
 // Use a PLL for PWM generation
 `define PWMPLL
