@@ -22,7 +22,7 @@ module dda_fsm #(parameter buffer_bits = 2,
 
 
   // Buffer latching
-  reg [buffer_size-1:0] stepfinished;
+  (* onehot *) reg [buffer_size-1:0] stepfinished;
 
   assign moveind = moveind_r;
   reg [buffer_bits-1:0] moveind_r;
