@@ -103,7 +103,7 @@ module spi_state_machine #(
 
   // Latching mechanism for engaging the buffered move.
   // the DDA side is internal to dda_fsm
-  reg [MOVE_BUFFER_SIZE:0] stepready;
+  (* onehot *)reg [MOVE_BUFFER_SIZE:0] stepready;
 
   reg [num_motors:1] dir_r [MOVE_BUFFER_SIZE:0];
 
