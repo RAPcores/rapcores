@@ -70,7 +70,7 @@ module microstepper_tb(
 		$dumpvars(0, microstepper_tb);
 
 		// Repeat cycles of 1000 clock edges as needed to complete testbench
-		repeat (250) begin
+		repeat (350) begin
 			repeat (4000) @(posedge clk);
 			$display("+1000 cycles");
 		end
@@ -116,7 +116,7 @@ module microstepper_tb(
                 current_abs2 = current2;
             end
             step_clock <= step_clock + 1;
-            step <= step_clock[10];
+            step <= step_clock[11];
             analog_cmp1 <= (current_abs1[11:0] >= target_current1[11:0]); // compare unsigned
             analog_cmp2 <= (current_abs2[11:0] >= target_current2[11:0]);
             if (cnt <= 20'h4CA9) begin

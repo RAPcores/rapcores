@@ -9,7 +9,7 @@ module mytimer (
     output [WIDTH-1:0]  timer,
     output        reg   done // single cycle timer done event
 );
-  parameter WIDTH = `DEFAULT_TIMER_WIDTH;
+  parameter WIDTH = 10; //DEFAULT_TIMER_WIDTH;
 
   reg run;
   reg [WIDTH-1:0] counter;

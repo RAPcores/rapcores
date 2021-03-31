@@ -132,6 +132,8 @@ module microstepper_control (
   assign phase_b2_l = !zero_pwm2 && slowDecay1 | ( fastDecay1 ? s4 : !s4 );
 
   // Fixed off time peak current controller off time start
+  //assign offtimer_en0 = analog_cmp1 & (blank_timer0 == 0) & (minimum_on_timer0 == 0) & (off_timer0 == 0);
+  //assign offtimer_en1 = analog_cmp2 & (blank_timer1 == 0) & (minimum_on_timer1 == 0) & (off_timer1 == 0);
   assign offtimer_en0 = analog_cmp1 & (blank_timer0 == 0) & (off_timer0 == 0);
   assign offtimer_en1 = analog_cmp2 & (blank_timer1 == 0) & (off_timer1 == 0);
 
