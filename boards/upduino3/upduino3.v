@@ -23,6 +23,8 @@
 // Use a PLL for PWM generation
 `define PWMPLL
 
+`define BUFFERED_PLL
+
 `define STEPINPUT
 
 `define ENCODER_BITS 24
