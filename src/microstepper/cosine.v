@@ -4,8 +4,13 @@
 module cosine (
     input wire clk,
     input  wire [7:0] cos_index,
-    output wire [7:0] cos_value
+    output wire [7:0] cos_value,
+    output wire zero_pwm
 );
+  reg zero_pwm_r;
+  assign zero_pwm = zero_pwm_r;
+  always @(posedge clk) zero_pwm_r <= cos_r == 1'b0;
+
   reg [7:0] cos_r;
   assign cos_value = cos_r;
   always @(posedge clk)

@@ -32,7 +32,8 @@ module microstepper_control (
     input      [9:0] off_timer0,
     input      [9:0] off_timer1,
     input      [7:0] minimum_on_timer0,
-    input      [7:0]   minimum_on_timer1
+    input      [7:0]   minimum_on_timer1,
+    input            zero_pwm1, zero_pwm2
 //    input           mixed_decay_enable,
 );
   reg [2:0] step_r;
@@ -117,18 +118,18 @@ module microstepper_control (
   // ( fast decay active AND would normally be off this phase )
   // OR
   // Should be on to drive this phase / polarity (microstepper_counter)
-  assign phase_a1_h = !slowDecay0 && ( fastDecay0 ? !s1 : s1 );
-  assign phase_a2_h = !slowDecay0 && ( fastDecay0 ? !s2 : s2 );
-  assign phase_b1_h = !slowDecay1 && ( fastDecay1 ? !s3 : s3 );
-  assign phase_b2_h = !slowDecay1 && ( fastDecay1 ? !s4 : s4 );
+  assign phase_a1_h = !zero_pwm1 && !slowDecay0 && ( fastDecay0 ? !s1 : s1 );
+  assign phase_a2_h = !zero_pwm1 && !slowDecay0 && ( fastDecay0 ? !s2 : s2 );
+  assign phase_b1_h = !zero_pwm2 && !slowDecay1 && ( fastDecay1 ? !s3 : s3 );
+  assign phase_b2_h = !zero_pwm2 && !slowDecay1 && ( fastDecay1 ? !s4 : s4 );
   // Low side is active
   // WHEN slow decay is active
   // OR
   // ( Fast decay active AND would normally be off this phase )
-  assign phase_a1_l = slowDecay0 | ( fastDecay0 ? s1 : !s1 );
-  assign phase_a2_l = slowDecay0 | ( fastDecay0 ? s2 : !s2 );
-  assign phase_b1_l = slowDecay1 | ( fastDecay1 ? s3 : !s3 );
-  assign phase_b2_l = slowDecay1 | ( fastDecay1 ? s4 : !s4 );
+  assign phase_a1_l = !zero_pwm1 && slowDecay0 | ( fastDecay0 ? s1 : !s1 );
+  assign phase_a2_l = !zero_pwm1 && slowDecay0 | ( fastDecay0 ? s2 : !s2 );
+  assign phase_b1_l = !zero_pwm2 && slowDecay1 | ( fastDecay1 ? s3 : !s3 );
+  assign phase_b2_l = !zero_pwm2 && slowDecay1 | ( fastDecay1 ? s4 : !s4 );
 
   // Fixed off time peak current controller off time start
   assign offtimer_en0 = analog_cmp1 & (blank_timer0 == 0) & (off_timer0 == 0);

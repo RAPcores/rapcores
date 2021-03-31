@@ -87,7 +87,9 @@ module microstepper_top (
     .off_timer0(off_timer0),
     .off_timer1(off_timer1),
     .minimum_on_timer0(minimum_on_timer0),
-    .minimum_on_timer1(minimum_on_timer1)
+    .minimum_on_timer1(minimum_on_timer1),
+    .zero_pwm1 (zero_pwm1),
+    .zero_pwm2 (zero_pwm2)
 );
 
 wire        off_timer0_done;
@@ -159,17 +161,20 @@ wire        off_timer1_done;
       .sw        ({s1, s2, s3, s4})
   );
 
+  wire zero_pwm1, zero_pwm2;
   cosine cosine0 (
       .clk (clk),
       .cos_index(cos_index1),
-      .cos_value(pwm1)
+      .cos_value(pwm1),
+      .zero_pwm (zero_pwm1)
       //.cos_table(cos_table)
   );
 
   cosine cosine1 (
       .clk (clk),
       .cos_index(cos_index2),
-      .cos_value(pwm2)
+      .cos_value(pwm2),
+      .zero_pwm (zero_pwm2)
       //.cos_table(cos_table)
   );
 
