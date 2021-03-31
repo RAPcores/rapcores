@@ -176,7 +176,8 @@ module rapcore #(
                       .num_encoders(num_encoders),
                       .BUFFER_SIZE(`BUFFER_SIZE),
                       .default_clock_divisor(`DEFAULT_CLOCK_DIVISOR),
-                      .encoder_bits(`ENCODER_BITS)) spifsm
+                      .encoder_bits(`ENCODER_BITS),
+                      .use_dda(`USE_DDA)) spifsm
   (
     `ifdef LA_IN
       .LA_IN(LA_IN),
