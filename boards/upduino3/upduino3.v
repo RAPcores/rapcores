@@ -29,5 +29,7 @@
 
 `define ENCODER_BITS 24
 
+`define USE_DDA 0
+
 // Change the Move Buffer Size. Should be power of two
 //`define MOVE_BUFFER_SIZE 4

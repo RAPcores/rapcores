@@ -221,6 +221,15 @@ Default: 40
 
 Sets the default clock divisor for the DDA.
 
+### Disabling DDA
+
+By default the DDA for step generation is used. It may be disabled in
+favor of a different interface by setting:
+
+```
+`define USE_DDA 0
+```
+
 ## Internal Register Sizes
 
 ```

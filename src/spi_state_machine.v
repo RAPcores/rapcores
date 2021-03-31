@@ -6,6 +6,7 @@ module spi_state_machine #(
     parameter num_encoders = 0,
     parameter word_bits = 64,
     parameter dda_bits = 64,
+    parameter use_dda = 1,
     parameter move_duration_bits = 32,
     parameter encoder_bits = 32,
     parameter default_microsteps = 64,
@@ -252,7 +253,7 @@ module spi_state_machine #(
   // Encoders
   //
 
-  wire signed [encoder_bits-1:0] encoder_count [num_encoders-1:0];
+  wire signed [encoder_bits-1:0] encoder_count [num_motors-1:0];
   wire [num_encoders-1:0] encoder_fault;
 
   if(num_encoders > 0) begin
@@ -287,37 +288,40 @@ module spi_state_machine #(
     .clk(CLK)
   );
 
-  // DDA FSM for duration and buffer state managment
-  dda_fsm #(.buffer_bits(MOVE_BUFFER_BITS+1),
-            .buffer_size(BUFFER_SIZE),
-            .move_duration_bits(move_duration_bits)) ddam0 (
-    .clk(CLK),
-    .resetn(resetn),
-    .dda_tick(dda_tick),
-    .loading_move(loading_move),
-    .move_duration(move_duration_w),
-    .executing_move(executing_move),
-    .move_done(move_done),
-    .stepready(stepready),
-    .buffer_dtr(buffer_dtr),
-    .moveind(moveind)
-  );
+  if (use_dda) begin
+    // DDA FSM for duration and buffer state managment
+    dda_fsm #(.buffer_bits(MOVE_BUFFER_BITS+1),
+              .buffer_size(BUFFER_SIZE),
+              .move_duration_bits(move_duration_bits)) ddam0 (
+      .clk(CLK),
+      .resetn(resetn),
+      .dda_tick(dda_tick),
+      .loading_move(loading_move),
+      .move_duration(move_duration_w),
+      .executing_move(executing_move),
+      .move_done(move_done),
+      .stepready(stepready),
+      .buffer_dtr(buffer_dtr),
+      .moveind(moveind)
+    );
 
-  // N dda timers per axis
-  generate
-    for (i=0; i<num_motors; i=i+1) begin
-      dda_timer ddan (
-                    .resetn(resetn),
-                    .dda_tick(dda_tick),
-                    .increment(increment_w[i]),
-                    .incrementincrement(incrementincrement_w[i]),
-                    .loading_move(loading_move),
-                    .executing_move(executing_move),
-                    .step(dda_step[i]),
-                    .CLK(CLK)
-                    );
-  end
-  endgenerate
+    // N dda timers per axis
+    generate
+      for (i=0; i<num_motors; i=i+1) begin
+        dda_timer ddan (
+                      .resetn(resetn),
+                      .dda_tick(dda_tick),
+                      .increment(increment_w[i]),
+                      .incrementincrement(incrementincrement_w[i]),
+                      .loading_move(loading_move),
+                      .executing_move(executing_move),
+                      .step(dda_step[i]),
+                      .CLK(CLK)
+                      );
+    end
+    endgenerate
+  end // use_dda
+
 
   //
   // State Machine for handling SPI Messages
@@ -416,7 +420,8 @@ module spi_state_machine #(
             // Store encoder values across all axes
             for (nmot=0; nmot<num_motors; nmot=nmot+1) begin
               step_encoder_store[nmot] <= step_encoder[nmot];
-              encoder_store[nmot] <= encoder_count[nmot];
+              if (num_encoders > 0)
+                encoder_store[nmot] <= encoder_count[nmot];
             end
 
           end
