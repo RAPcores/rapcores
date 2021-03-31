@@ -34,6 +34,20 @@ FREQ = 16
 ```
 Device external clock frequency. Used to validate timings.
 
+### PLL Parameters and Setup
+
+```
+PWMFREQ = 275
+```
+Set the PLL frequency (Mhz) for PWM generation.
+
+```
+MANUALPLL = 1
+```
+Skips autogeneration of PLLs using bitstream tools (icepll, ecppll).
+The build system will look for *both* spi_pll.v and pwm_pll.v files in
+the boards/"myboard" location. 
+
 ### PROGRAMMER (Optional)
 ```
 PROGRAMMER = tinyprog -p
