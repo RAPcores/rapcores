@@ -306,20 +306,18 @@ module spi_state_machine #(
     );
 
     // N dda timers per axis
-    generate
-      for (i=0; i<num_motors; i=i+1) begin
-        dda_timer ddan (
-                      .resetn(resetn),
-                      .dda_tick(dda_tick),
-                      .increment(increment_w[i]),
-                      .incrementincrement(incrementincrement_w[i]),
-                      .loading_move(loading_move),
-                      .executing_move(executing_move),
-                      .step(dda_step[i]),
-                      .CLK(CLK)
-                      );
+    for (i=0; i<num_motors; i=i+1) begin
+      dda_timer ddan (
+                    .resetn(resetn),
+                    .dda_tick(dda_tick),
+                    .increment(increment_w[i]),
+                    .incrementincrement(incrementincrement_w[i]),
+                    .loading_move(loading_move),
+                    .executing_move(executing_move),
+                    .step(dda_step[i]),
+                    .CLK(CLK)
+                    );
     end
-    endgenerate
   end // use_dda
 
 
