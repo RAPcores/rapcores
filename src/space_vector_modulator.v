@@ -2,7 +2,7 @@
 `default_nettype none
 
 //
-// Space Vector Modulator (Two and three Phase)
+// Space Vector Modulator (one, two and three Phase)
 // https://en.wikipedia.org/wiki/Space_vector_modulation
 // http://rapcores.org/rapcores/motor_control.html#space-vector-modulation
 
@@ -53,7 +53,7 @@ module space_vector_modulator #(
   // A: ___|-------|____
   // B: ___|-|__________
 
-  if (center_aligned) begin
+  if (center_aligned && phases >= 1) begin
     // Determine delay for center aligned PWM
     wire [microstep_bits+current_bits-2:0] pwm_delay [phases-1:0];
 
@@ -71,6 +71,7 @@ module space_vector_modulator #(
       assign pwm_delay[0] = (pwm[0] >= pwm[1]) ? 0 : (pwm[1]-pwm[0])>>1;
       assign pwm_delay[1] = (pwm[1] >= pwm[0]) ? 0 : (pwm[0]-pwm[1])>>1;
     end if (phases == 3) begin
+      // TODO
       assign pwm_delay[0] = (pwm[0] >= pwm[1]) ? 0 : (pwm[1]-pwm[0])>>1;
       assign pwm_delay[1] = (pwm[1] >= pwm[0]) ? 0 : (pwm[0]-pwm[1])>>1;
     end
@@ -98,8 +99,17 @@ module space_vector_modulator #(
   always @(posedge clk) begin
     if (resetn) begin
       // Load sine/cosine from RAM
-      phase[0]<= phase_table[phase_ct+8'd64];
-      phase[1] <= phase_table[phase_ct];
+      if (phases == 1) begin
+        phase[1] <= phase_table[phase_ct];
+      end if (phases == 2) begin
+        phase[0]<= phase_table[phase_ct+8'd64];
+        phase[1] <= phase_table[phase_ct];
+      end if (phases == 3) begin
+        phase[0]<= phase_table[phase_ct+8'd86];
+        phase[0]<= phase_table[phase_ct+8'd43];
+        phase[1] <= phase_table[phase_ct];
+      end
+      end
     end
   end
 
