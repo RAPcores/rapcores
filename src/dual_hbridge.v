@@ -59,8 +59,7 @@ module dual_hbridge #(
     svm0 (.clk(clk),
           .pwm_clk(pwm_clk),
           .resetn(resetn),
-          .vref_a(vref_a),
-          .vref_b(vref_b),
+          .vref_pwm({vref_a,vref_b}),
           .current(current),
           .phase_ct(phase_ct));
 
