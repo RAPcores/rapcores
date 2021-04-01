@@ -102,13 +102,55 @@ module rapcore #(
     localparam num_encoders = 0;
   `endif
 
+  // Clocks
+  // Some PLL/IP cannot have shared clocks, but some allow module pass through
+  // We use buffered_clk through this module for portability and for certain
+  // FPGA devices.
+  `ifndef BUFFERED_PLL
+    wire buffered_clk = CLK;
+  `else
+    wire buffered_clk;
+  `endif
+
+  // High frequency PLL for PWM or anything else
+  `ifdef PWMPLL
+    // PLL for SPI Bus
+    wire pwm_clock;
+    wire pwmpll_locked;
+    `ifndef BUFFERED_PLL
+      pwm_pll ppll (.clock_in(CLK),
+                    .clock_out(pwm_clock),
+                    .locked(pwmpll_locked));
+    `else
+      // We only get buffered_clk here since
+      // it is primary/requisite PLL
+      pwm_pll ppll (.clock_in(CLK),
+                    .clock_out(pwm_clock),
+                    .clock_out_buffered(buffered_clk),
+                    .locked(pwmpll_locked));
+    `endif
+  `else
+    wire pwm_clock = buffered_clk;
+  `endif
+
+  // SPI PLL
+  `ifdef SPIPLL
+    wire spi_clock;
+    wire spipll_locked;
+    spi_pll ppll (.clock_in(CLK),
+                  .clock_out(spi_clock),
+                  .locked(pwmpll_locked));
+  `else
+    wire spi_clock = buffered_clk;
+  `endif
+
 
   //Reset
   wire resetn;
   assign resetn = &resetn_counter;
   `ifdef RESETN
     reg [7:0] resetn_counter;
-    always @(posedge CLK)
+    always @(posedge buffered_clk)
     if(!resetn_in)
       resetn_counter <= 0;
     else
@@ -116,34 +158,11 @@ module rapcore #(
   `endif
   `ifndef RESETN
     reg [7:0] resetn_counter = 0; // FPGA ONLY
-    always @(posedge CLK) begin
+    always @(posedge buffered_clk) begin
       if (!resetn) resetn_counter <= resetn_counter + 1'b1;
     end
   `endif
   wire reset = resetn;
-
-  // High frequency PLL for PWM or anything else
-  `ifdef PWMPLL
-    // PLL for SPI Bus
-    wire pwm_clock;
-    wire pwmpll_locked;
-    pwm_pll ppll (.clock_in(CLK),
-                  .clock_out(pwm_clock),
-                  .locked(pwmpll_locked));
-  `else
-    wire pwm_clock = CLK;
-  `endif
-
-  // SPI PLL
-  `ifdef SPIPLL
-    wire spi_clock;
-    wire spipll_locked;
-    spi_pll spll (.clock_in(CLK),
-                  .clock_out(spi_clock),
-                  .locked(spipll_locked));
-  `else
-    wire spi_clock = CLK;
-  `endif
 
   // Word handler
   // The system operates on 64 bit little endian words
@@ -185,7 +204,7 @@ module rapcore #(
     `ifdef LA_OUT
       .LA_OUT(LA_OUT),
     `endif
-    .CLK(CLK),
+    .CLK(buffered_clk),
     .pwm_clock(pwm_clock),
     .resetn(resetn),
 

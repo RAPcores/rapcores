@@ -26,6 +26,8 @@
 // Output Step/DIR signals
 `define STEPOUTPUT
 
+`define PWMPLL
+
 // Change the Move Buffer Size. Should be power of two
 //`define MOVE_BUFFER_SIZE 4
 
