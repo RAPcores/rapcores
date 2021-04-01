@@ -13,7 +13,7 @@
 module pwm_pll(
 	input  clock_in,
 	output clock_out,
-  output clock_out_buffered,
+  output wire clock_out_buffered,
 	output locked
 	);
 
@@ -29,7 +29,7 @@ SB_PLL40_2_PAD #(
 		.BYPASS(1'b0),
 		.PACKAGEPIN(clock_in),
 		.PLLOUTGLOBALA(clock_out),
-    .PLLOUTGLOBALB(clock_in_buffered)
+    .PLLOUTGLOBALB(clock_out_buffered)
 		);
 
 endmodule
