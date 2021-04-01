@@ -109,7 +109,6 @@ module space_vector_modulator #(
         phase[0]<= phase_table[phase_ct+8'd43];
         phase[1] <= phase_table[phase_ct];
       end
-      end
     end
   end
 
