@@ -45,13 +45,7 @@ module dual_hbridge #(
   wire [2*(current_bits+microstep_bits)-1:0] vref_val_packed;
 
   // Set the increment across the phase table from the specified microsteps
-  wire [7:0] abs_increment = (microsteps == 8'd0 ) ? 8'd64 :
-                             (microsteps <= 8'd2 ) ? 8'd32 :
-                             (microsteps <= 8'd4 ) ? 8'd16 :
-                             (microsteps <= 8'd8 ) ? 8'd8  :
-                             (microsteps <= 8'd16) ? 8'd4  :
-                             (microsteps <= 8'd32) ? 8'd2  :
-                                                     8'd1  ;
+  wire [7:0] abs_increment = microsteps;
 
   //-------------------------------
   // Space Vector Modulation
