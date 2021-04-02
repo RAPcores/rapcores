@@ -23,6 +23,8 @@ module space_vector_modulator #(
     input [phase_ct_bits-1:0] phase_ct // Represents 0 -> 2pi integer range
 );
 
+  // center aligned delay only possible with phases > 1
+  localparam can_delay = center_aligned && phases > 1;
 
   // Table of phase agnles (BRAM on FPGA)
   reg [7:0] phase_table [0:255];
@@ -52,10 +54,11 @@ module space_vector_modulator #(
   // Normal
   // A: ___|-------|____
   // B: ___|-|__________
+  wire [microstep_bits+current_bits-2:0] pwm_delay [phases-1:0];
 
-  if (center_aligned && phases >= 1) begin
+
+  if (can_delay) begin
     // Determine delay for center aligned PWM
-    wire [microstep_bits+current_bits-2:0] pwm_delay [phases-1:0];
 
     // Center Aligned
     // A: |-------|____
@@ -75,26 +78,19 @@ module space_vector_modulator #(
       assign pwm_delay[0] = (pwm[0] >= pwm[1]) ? 0 : (pwm[1]-pwm[0])>>1;
       assign pwm_delay[1] = (pwm[1] >= pwm[0]) ? 0 : (pwm[0]-pwm[1])>>1;
     end
-
-    // Microstep*current -> vector angle voltage reference
-    // Center aligned for better response characteristics
-    for (i=0; i<phases; i=i+1) begin
-      pwm_delayed #(.bits(microstep_bits+current_bits)) mb (.clk(pwm_clk),
-              .resetn (resetn),
-              .val(pwm[i]),
-              .delay(pwm_delay[i]),
-              .pwm(vref_pwm[i]));
-    end
-
-  end else begin
-    // Microstep*current -> vector angle voltage reference
-    for (i=0; i<phases; i=i+1) begin
-      pwm #(.bits(microstep_bits+current_bits)) mb (.clk(pwm_clk),
-              .resetn (resetn),
-              .val(pwm[i]),
-              .pwm(vref_pwm[i]));
-    end
   end
+
+  // Microstep*current -> vector angle voltage reference
+  // Center aligned for better response characteristics if available/selected
+  for (i=0; i<phases; i=i+1) begin
+    pwm #(.bits(microstep_bits+current_bits),
+          .delayed(can_delay)) mb (.clk(pwm_clk),
+            .resetn (resetn),
+            .val(pwm[i]),
+            .delay(pwm_delay[i]),
+            .pwm(vref_pwm[i]));
+  end
+
 
   always @(posedge clk) begin
     if (resetn) begin
