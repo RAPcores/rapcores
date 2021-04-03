@@ -39,24 +39,6 @@
 #define SPI_RX_OCTAL		0x4000
 #define SPI_3WIRE_HIZ		0x8000
 
-
-static uint64_t default_tx[] = {
-0x0a0000000000000f, 0x0000000000000000,
-0x0100000000000000,
-0x00000000004fffff,
-0x0000010000000000,
-0x0000000100000000,
-0x0000010000000000,
-0x0000000100000000,
-0x0000020000000000,
-0x0000000010000000,
-0x0062000000000000,
-0x0000000000000000
-};
-
-static uint64_t default_rx[sizeof(default_tx)] = {0, };
-
-
 static void pabort(const char *s)
 {
 	if (errno != 0)
@@ -67,7 +49,22 @@ static void pabort(const char *s)
 	abort();
 }
 
-struct RAPcore {
+static uint64_t default_tx[64];
+static uint64_t default_rx[64];
+
+typedef struct RAPcores_version {
+    uint8_t major;
+    uint8_t minor;
+    uint8_t patch;
+    uint8_t dev;
+} rapcores_version;
+
+typedef struct RAPcores_encoder {
+    int32_t position;
+    int32_t velocity;
+} rapcores_encoder;
+
+typedef struct RAPcore {
     char* device;
     uint32_t mode;
     uint8_t  bits; //8
@@ -75,16 +72,10 @@ struct RAPcore {
     uint64_t *tx;
     uint64_t *rx;
     uint8_t transfer_len;
-
     int fd;
-};
 
-struct RAPcores_version {
-    uint8_t major;
-    uint8_t minor;
-    uint8_t patch;
-    uint8_t dev;
-};
+    struct RAPcores_version version;
+} rapcore;
 
 static void transfer(struct RAPcore rapcore) //int fd, uint64_t const *tx, uint64_t const *rx, size_t len)
 {
@@ -101,6 +92,40 @@ static void transfer(struct RAPcore rapcore) //int fd, uint64_t const *tx, uint6
 		pabort("can't send spi message");
 
 };
+
+struct RAPcores_version get_version(struct RAPcore rapcore) {
+    rapcore.tx[0] = (uint64_t)0xfe << 56;
+    rapcore.tx[1] = 0;
+
+    rapcore.transfer_len = 2;
+
+    transfer(rapcore);
+
+    rapcores_version v = {
+        .patch = rapcore.rx[1] & 0xff,
+        .minor = (rapcore.rx[1] & 0xff<<8) >> 8,
+        .major = (rapcore.rx[1] & 0xff<<16) >> 16,
+        .dev   = (rapcore.rx[1] & 0xff<<24) >> 24
+    };
+    return v;
+}
+
+struct RAPcores_encoder get_encoder(struct RAPcore rapcore, uint8_t channel) {
+    rapcore.tx[0] = (uint64_t)0xfe << 56;
+    rapcore.tx[1] = 0;
+
+    rapcore.transfer_len = 2;
+
+    transfer(rapcore);
+
+    rapcores_encoder e = {
+        .position = rapcore.rx[1] & 0xffffff,
+        .velocity   = (rapcore.rx[1] & 0xffffffff<<24) >> 24
+    };
+    return e;
+}
+
+
 
 struct RAPcore init_rapcore(void) {
     uint32_t mode = 0x04;
@@ -157,27 +182,11 @@ struct RAPcore init_rapcore(void) {
 	if (ret == -1)
 		pabort("can't get max speed hz");
 
-    transfer(rapcore);
+	struct RAPcores_version ver = get_version(rapcore);
+    rapcore.version = ver;
+
+	if (ver.major == 0 && ver.minor == 0)
+		pabort("failed to query version, check connection");
 
     return rapcore;
-}
-
-
-struct RAPcores_version get_version(struct RAPcore rapcore) {
-    rapcore.tx[0] = (uint64_t)0xfe << 56;
-    rapcore.tx[1] = 0;
-
-    rapcore.transfer_len = 2;
-
-    transfer(rapcore);
-
-	printf("recieved: 0x%lx\n", rapcore.rx[1]);
-
-    struct RAPcores_version v = {
-        .patch = rapcore.rx[1] & 0xff,
-        .minor = (rapcore.rx[1] & 0xff<<8) >> 8,
-        .major = (rapcore.rx[1] & 0xff<<16) >> 16,
-        .dev   = (rapcore.rx[1] & 0xff<<24) >> 24
-    };
-    return v;
 }
