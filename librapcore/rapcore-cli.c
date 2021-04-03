@@ -59,5 +59,9 @@ int main(int argc, char *argv[])
 	printf("bits per word: %u\n", rapcore.bits);
 	printf("max speed: %u Hz (%.3f mbps)\n", rapcore.speed, rapcore.speed/8000000.0);
 
+	struct RAPcores_version ver = get_version(rapcore);
+	printf("Version: %u.%u.%u\n", ver.major, ver.minor, ver.patch);
+
+
 	return ret;
 }

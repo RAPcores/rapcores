@@ -67,25 +67,6 @@ static void pabort(const char *s)
 	abort();
 }
 
-
-static void transfer(int fd, uint64_t const *tx, uint64_t const *rx, size_t len)
-{
-	int ret;
-	struct spi_ioc_transfer tr = {
-		.tx_buf = (unsigned long)tx,
-		.rx_buf = (unsigned long)rx,
-		.len = len,
-		.delay_usecs = 0,
-		.speed_hz = 100000,
-		.bits_per_word = 0x08,
-	};
-
-	ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
-	if (ret < 1)
-		pabort("can't send spi message");
-
-};
-
 struct RAPcore {
     char* device;
     uint32_t mode;
@@ -96,6 +77,29 @@ struct RAPcore {
     uint8_t transfer_len;
 
     int fd;
+};
+
+struct RAPcores_version {
+    uint8_t major;
+    uint8_t minor;
+    uint8_t patch;
+    uint8_t dev;
+};
+
+static void transfer(struct RAPcore rapcore) //int fd, uint64_t const *tx, uint64_t const *rx, size_t len)
+{
+
+	int ret;
+	struct spi_ioc_transfer tr = {
+		.tx_buf = (unsigned long)rapcore.tx,
+		.rx_buf = (unsigned long)rapcore.rx,
+		.len = rapcore.transfer_len*8, // expects bytes
+	};
+
+	ret = ioctl(rapcore.fd, SPI_IOC_MESSAGE(1), &tr);
+	if (ret < 1)
+		pabort("can't send spi message");
+
 };
 
 struct RAPcore init_rapcore(void) {
@@ -153,8 +157,27 @@ struct RAPcore init_rapcore(void) {
 	if (ret == -1)
 		pabort("can't get max speed hz");
 
-    transfer(rapcore.fd, rapcore.tx, rapcore.rx, rapcore.transfer_len);
+    transfer(rapcore);
 
     return rapcore;
 }
 
+
+struct RAPcores_version get_version(struct RAPcore rapcore) {
+    rapcore.tx[0] = (uint64_t)0xfe << 56;
+    rapcore.tx[1] = 0;
+
+    rapcore.transfer_len = 2;
+
+    transfer(rapcore);
+
+	printf("recieved: 0x%lx\n", rapcore.rx[1]);
+
+    struct RAPcores_version v = {
+        .patch = rapcore.rx[1] & 0xff,
+        .minor = (rapcore.rx[1] & 0xff<<8) >> 8,
+        .major = (rapcore.rx[1] & 0xff<<16) >> 16,
+        .dev   = (rapcore.rx[1] & 0xff<<24) >> 24
+    };
+    return v;
+}
