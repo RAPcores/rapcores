@@ -139,7 +139,15 @@ SPI controller devices.</p>
 <td>Microsteps</td>
 </tr>
 </tbody>
-</table></div>
+</table><p>Current:
+Current is set 0-255 (0x0-0xff), and this value may be divided by the number of bits of internal resolution avaialble.</p>
+<p>Microsteps:
+<strong>Important Note</strong>
+This is set as the increment across the phase table. For example if a single electrical cycle
+e.g. cosine from 0 to pi, is divided by 64, to achieve full resolution microsteps is set to 1.
+For 32 divisions, microsteps would be set as 2. This is inverse from other systems that specify
+the microsteps in full divisions. Whereas this method allows for fractional steps such as 64/3.</p>
+</div>
 <div class="section" id="get-api-version-0xfe">
 <h2>Get API Version - 0xfe<a class="headerlink" href="#get-api-version-0xfe" title="Permalink to this headline">¶</a></h2>
 <table border="1" class="docutils">
