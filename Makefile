@@ -176,7 +176,7 @@ MAKEFLAGS += -r
 
 CFLAGS += -O2 -Wall -g -D_GNU_SOURCE -I$(OUTPUT)include
 
-ALL_TARGETS := spidev_test
+ALL_TARGETS := rapcore-cli
 ALL_PROGRAMS := $(patsubst %,$(OUTPUT)%,$(ALL_TARGETS))
 
 all: $(ALL_PROGRAMS)
@@ -184,7 +184,7 @@ all: $(ALL_PROGRAMS)
 #
 # spidev_test
 #
-spidev_test: src/spidev_test.c
+rapcore-cli: src/rapcore-cli.c
 	$(CC) $(CFLAGS) $(LDFLAGS) $< -o $@
 
 clean:

@@ -23,3 +23,6 @@ build
 logs
 testbench/vcd
 testbench/cxxrtl/*_tb.cpp
+
+
+rapcore-cli
