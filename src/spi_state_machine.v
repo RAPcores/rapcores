@@ -8,7 +8,7 @@ module spi_state_machine #(
     parameter dda_bits = 64,
     parameter move_duration_bits = 32,
     parameter encoder_bits = 32,
-    parameter default_microsteps = 64,
+    parameter default_microsteps = 1,
     parameter default_current = 140,
     parameter BUFFER_SIZE = 2,
     parameter default_clock_divisor = 32

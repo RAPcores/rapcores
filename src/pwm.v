@@ -2,40 +2,16 @@
 `default_nettype none
 
 /*
- Simple PWM module
+PWM module
+Parameters:
+  - bits - Accumulator resolution
+  - delayed - delay output by the value of `delay` wire
+  - resetable - allow the accumulator to reset
 */
 module pwm #(
     parameter bits = 8,
-    parameter resetable = 0
-) (
-    input  clk,
-    input  resetn,
-    input  [bits-1:0] val,
-    output pwm
-);
-
-  reg [bits-1:0] accum = 0; // FPGA ONLY
-  assign pwm = (accum < val);
-
-  always @(posedge clk)
-  if (resetable) begin
-    if(!resetn) accum <= 0;
-    else if(resetn) accum <= accum + 1'b1;
-  end else
-    accum <= accum + 1'b1;
-
-
-endmodule
-
-
-/*
-
- PWM with Delay on the output, useful for constructing
- center-aligned PWM
-*/
-module pwm_delayed #(
-    parameter bits = 8,
-    parameter resetable = 0
+    parameter resetable = 0,
+    parameter delayed = 0
 ) (
     input  clk,
     input  resetn,
@@ -45,7 +21,9 @@ module pwm_delayed #(
 );
 
   reg [bits-1:0] accum = 0; // FPGA ONLY
-  assign pwm = (accum[bits-2:0] >= delay) & (accum < (val+delay));
+
+  if (delayed) assign pwm = (accum[bits-2:0] >= delay) & (accum < (val+delay));
+  else assign pwm = (accum < val);
 
   always @(posedge clk)
   if (resetable) begin

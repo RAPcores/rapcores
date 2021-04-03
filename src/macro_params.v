@@ -46,7 +46,7 @@
 `endif
 
 `ifndef DEFAULT_MICROSTEPS
-`define DEFAULT_MICROSTEPS 8'd64
+`define DEFAULT_MICROSTEPS 8'd1
 `endif
 
 `ifndef DEFAULT_CURRENT

@@ -40,6 +40,16 @@ SPI controller devices.
 |--------|----------------|----------|----------|----------|----------|---------|------------|
 | 0x10   | Motor Channel  | Reserved | Reserved | Reserved | Reserved | Current | Microsteps |
 
+Current:
+Current is set 0-255 (0x0-0xff), and this value may be divided by the number of bits of internal resolution avaialble.
+
+Microsteps:
+**Important Note**
+This is set as the increment across the phase table. For example if a single electrical cycle
+e.g. cosine from 0 to pi, is divided by 64, to achieve full resolution microsteps is set to 1.
+For 32 divisions, microsteps would be set as 2. This is inverse from other systems that specify
+the microsteps in full divisions. Whereas this method allows for fractional steps such as 64/3. 
+
 ## Get API Version - 0xfe
 
 |Word| Word 1 | | | | | | | | Word 2 | | | |           |     |     |     |
