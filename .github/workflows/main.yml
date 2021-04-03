@@ -24,6 +24,9 @@ jobs:
       run: nix-shell --command 'make iverilog-parse'
     - name: reg initialization
       run: ./etc/reginit.sh
+    - name: RAPcore-cli
+      run: make rapcore-cli
+
 
     - uses: actions/upload-artifact@v2
       with:
@@ -31,3 +34,5 @@ jobs:
         path: |
           ./build/*.bit
           ./logs
+          ./rapcore-cli
+
