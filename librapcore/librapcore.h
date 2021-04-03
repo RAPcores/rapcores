@@ -76,7 +76,7 @@ static void transfer(int fd, uint64_t const *tx, uint64_t const *rx, size_t len)
 		.rx_buf = (unsigned long)rx,
 		.len = len,
 		.delay_usecs = 0,
-		.speed_hz = 1000000,
+		.speed_hz = 100000,
 		.bits_per_word = 0x08,
 	};
 
@@ -93,13 +93,15 @@ struct RAPcore {
     uint32_t speed;
     uint64_t *tx;
     uint64_t *rx;
+    uint8_t transfer_len;
+
     int fd;
 };
 
 struct RAPcore init_rapcore(void) {
     uint32_t mode = 0x04;
     uint8_t  bits = 0x08;
-    uint32_t speed = 1000000;
+    uint32_t speed = 100000;
     int fd = open("/dev/spidev0.0", O_RDWR);
 
     struct RAPcore rapcore = {
@@ -108,7 +110,8 @@ struct RAPcore init_rapcore(void) {
         .speed = speed,
         .fd = fd,
         .tx = default_tx,
-        .rx = default_rx
+        .rx = default_rx,
+        .transfer_len = 8*12
     };
 
 
@@ -150,7 +153,7 @@ struct RAPcore init_rapcore(void) {
 	if (ret == -1)
 		pabort("can't get max speed hz");
 
-    transfer(rapcore.fd, rapcore.tx, rapcore.rx, sizeof(rapcore.tx));
+    transfer(rapcore.fd, rapcore.tx, rapcore.rx, rapcore.transfer_len);
 
     return rapcore;
 }
