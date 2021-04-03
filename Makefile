@@ -184,7 +184,7 @@ all: $(ALL_PROGRAMS)
 #
 # spidev_test
 #
-rapcore-cli: src/rapcore-cli.c
+rapcore-cli: src/rapcore-cli.c src/librapcore.h
 	$(CC) $(CFLAGS) $(LDFLAGS) $< -o $@
 
 clean:
