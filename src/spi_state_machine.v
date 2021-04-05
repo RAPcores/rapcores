@@ -8,6 +8,7 @@ module spi_state_machine #(
     parameter dda_bits = 64,
     parameter move_duration_bits = 32,
     parameter encoder_bits = 32,
+    parameter encoder_velocity_bits = 32,
     parameter default_microsteps = 1,
     parameter default_current = 140,
     parameter BUFFER_SIZE = 2,
@@ -77,17 +78,19 @@ module spi_state_machine #(
 );
 
   localparam CMD_COORDINATED_STEP    = 8'h01;
+  localparam CMD_READ_ENCODER        = 8'h03;
   localparam CMD_MOTOR_ENABLE        = 8'h0a;
   localparam CMD_MOTOR_BRAKE         = 8'h0b;
   localparam CMD_MOTORCONFIG         = 8'h10;
   localparam CMD_CLK_DIVISOR         = 8'h20;
   localparam CMD_MICROSTEPPER_CONFIG = 8'h30;
   localparam CMD_COSINE_CONFIG       = 8'h40;
-  localparam CMD_API_VERSION         = 8'hfe;
   localparam CMD_CHARGEPUMP          = 8'h31;
   localparam CMD_BRIDGEINVERT        = 8'h32;
   localparam CMD_STEPPERFAULT        = 8'h50;
   localparam CMD_ENCODERFAULT        = 8'h51;
+  localparam CMD_CHANNEL_INFO        = 8'hfd;
+  localparam CMD_API_VERSION         = 8'hfe;
 
   localparam MOVE_BUFFER_SIZE = BUFFER_SIZE - 1; //This is the zero-indexed end index
   localparam MOVE_BUFFER_BITS = $clog2(BUFFER_SIZE) - 1; // number of bits to index given size
@@ -253,18 +256,21 @@ module spi_state_machine #(
   //
 
   wire signed [encoder_bits-1:0] encoder_count [num_encoders-1:0];
-  wire [num_encoders-1:0] encoder_fault;
+  wire [num_encoders-1:0] encoder_faultn;
+  wire [31:0] encoder_velocity [num_encoders-1:0];
 
   if(num_encoders > 0) begin
     for (i=0; i<num_encoders; i=i+1) begin
-      quad_enc #(.encbits(encoder_bits)) encoder0
+      quad_enc #(.encbits(encoder_bits),
+                 .velocity_bits(encoder_velocity_bits)) encoder0
       (
         .resetn(resetn),
         .clk(CLK),
         .a(ENC_A[i]),
         .b(ENC_B[i]),
-        .faultn(encoder_fault[i]),
-        .count(encoder_count[i])
+        .faultn(encoder_faultn[i]),
+        .count(encoder_count[i]),
+        .velocity(encoder_velocity[i])
         //.multiplier(encoder_multiplier)
         );
     end
@@ -334,7 +340,8 @@ module spi_state_machine #(
   wire awaiting_more_words = (message_header == CMD_COORDINATED_STEP) |
                              (message_header == CMD_API_VERSION) |
                              (message_header == CMD_STEPPERFAULT) |
-                             (message_header == CMD_ENCODERFAULT);
+                             (message_header == CMD_ENCODERFAULT) |
+                             (message_header == CMD_READ_ENCODER);
 
   wire [$clog2(num_motors-1):0] header_motor_channel = word_data_received[(48+$clog2(num_motors)):48];
 
@@ -426,12 +433,16 @@ module spi_state_machine #(
             enable_r[num_motors-1:0] <= word_data_received[num_motors-1:0];
           end
 
+          CMD_READ_ENCODER: begin
+            word_send_data[encoder_bits+encoder_velocity_bits-1:0] <= {encoder_velocity[header_motor_channel], encoder_count[header_motor_channel]};
+          end
+
           // Motor Brake on Disable
           CMD_MOTOR_BRAKE: begin
             brake_r[num_motors-1:0] <= word_data_received[num_motors-1:0];
           end
 
-          // Clock divisor (24 bit)
+          // Clock divisor
           CMD_CLK_DIVISOR: begin
             clock_divisor[7:0] <= word_data_received[7:0];
           end
@@ -468,14 +479,13 @@ module spi_state_machine #(
 
           // Read Stepper fault register
           CMD_STEPPERFAULT: begin
-            word_send_data[num_motors-1:0] <= stepper_faultn;
+            word_send_data[num_motors-1:0] <= ~stepper_faultn;
           end
 
           // Read Stepper fault register
-          // TODO
-          //CMD_ENCODERFAULT: begin
-          //  word_send_data[num_motors-1:0] <= stepper_faultn;
-          //end
+          CMD_ENCODERFAULT: begin
+            word_send_data[num_encoders-1:0] <= ~encoder_faultn;
+          end
 
 
           // Write to Cosine Table
@@ -495,6 +505,13 @@ module spi_state_machine #(
             word_send_data[15:8] <= `VERSION_MINOR;
             word_send_data[23:16] <= `VERSION_MAJOR;
             word_send_data[31:24] <= `VERSION_DEVEL;
+          end
+
+          CMD_CHANNEL_INFO: begin
+            word_send_data[7:0] <= num_motors;
+            word_send_data[15:8] <= num_encoders;
+            word_send_data[23:16] <= encoder_bits;
+            word_send_data[31:24] <= encoder_velocity_bits;
           end
 
           default: word_send_data <= 64'b0;
