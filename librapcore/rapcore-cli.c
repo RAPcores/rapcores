@@ -63,9 +63,9 @@ int main(int argc, char *argv[])
 	parse_opts(argc, argv);
 
 	if (print_version) {
-		printf("librapcores Version: %s\n", version_str);
+		printf("librapcores version: %s\n", version_str);
 		struct RAPcores_version ver = rapcore.version;
-		printf("Bitstream Version: %u.%u.%u-%s\n", ver.major, ver.minor, ver.patch, ver.dev ? "dev" : "");
+		printf("bitstream version: %u.%u.%u-%s\n", ver.major, ver.minor, ver.patch, ver.dev ? "dev" : "");
 		exit(0);
 	}
 
@@ -73,6 +73,11 @@ int main(int argc, char *argv[])
 		printf("spi mode: 0x%x\n", rapcore.mode);
 		printf("bits per word: %u\n", rapcore.bits);
 		printf("max speed: %u Hz (%.3f mbps)\n", rapcore.speed, rapcore.speed/8000000.0);
+		printf("motor count: %u\n", rapcore.motor_count);
+		printf("encoder count: %u\n", rapcore.encoder_count);
+		printf("encoder position bits: %u\n", rapcore.encoder_position_precision);
+		printf("encoder velocity bits: %u\n", rapcore.encoder_velocity_precision);
+
 		exit(0);
 	}
 
