@@ -39,6 +39,12 @@
 #define SPI_RX_OCTAL		0x4000
 #define SPI_3WIRE_HIZ		0x8000
 
+int32_t sign_extend_24_32(uint32_t x) {
+    const int bits = 24;
+    int32_t m = 1u << (bits - 1);
+    return (x ^ m) - m;
+}
+
 static void pabort(const char *s)
 {
 	if (errno != 0)
@@ -123,7 +129,7 @@ struct RAPcores_encoder get_encoder(struct RAPcore rapcore, uint64_t channel) {
     printf("sent: 0x%lx\n got: 0x%lx\n", rapcore.tx[0], rapcore.rx[1]);
 
     rapcores_encoder e = {
-        .position = rapcore.rx[1] & 0xffffff,
+        .position = sign_extend_24_32(rapcore.rx[1] & 0xffffff),
         .velocity   = (rapcore.rx[1] & (uint64_t)0xffffffff<<24) >> 24
     };
     return e;
