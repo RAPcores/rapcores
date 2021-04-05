@@ -141,20 +141,20 @@ struct RAPcores_encoder get_encoder(struct RAPcore rapcore, uint64_t channel) {
     return e;
 }
 
-void get_channel_info(struct RAPcore rapcore) {
-    rapcore.tx[0] = (uint64_t)0xfd << 56;
-    rapcore.tx[1] = 0;
+void get_channel_info(struct RAPcore *rapcore) {
+    rapcore->tx[0] = (uint64_t)0xfd << 56;
+    rapcore->tx[1] = 0;
 
-    rapcore.transfer_len = 2;
+    rapcore->transfer_len = 2;
 
-    transfer(rapcore);
+    transfer(*rapcore);
 
-    printf("sent: 0x%lx\n got: 0x%lx\n", rapcore.tx[0], rapcore.rx[1]);
+    printf("sent: 0x%lx\n got: 0x%lx\n", rapcore->tx[0], rapcore->rx[1]);
 
-    rapcore.motor_count = rapcore.rx[1] & 0xff;
-    rapcore.encoder_count = (rapcore.rx[1] & 0xff<<8) >> 8;
-    rapcore.encoder_position_precision = (rapcore.rx[1] & 0xff<<16) >> 16;
-    rapcore.encoder_velocity_precision = (rapcore.rx[1] & 0xff<<24) >> 24;
+    rapcore->motor_count = rapcore->rx[1] & 0xff;
+    rapcore->encoder_count = (rapcore->rx[1] & 0xff<<8) >> 8;
+    rapcore->encoder_position_precision = (rapcore->rx[1] & 0xff<<16) >> 16;
+    rapcore->encoder_velocity_precision = (rapcore->rx[1] & 0xff<<24) >> 24;
 }
 
 struct RAPcore init_rapcore(void) {
@@ -218,7 +218,7 @@ struct RAPcore init_rapcore(void) {
 	if (ver.major == 0 && ver.minor == 0)
 		pabort("failed to query version, check connection");
 
-    get_channel_info(rapcore);
+    get_channel_info(&rapcore);
 
     return rapcore;
 }
