@@ -85,11 +85,12 @@ module spi_state_machine #(
   localparam CMD_CLK_DIVISOR         = 8'h20;
   localparam CMD_MICROSTEPPER_CONFIG = 8'h30;
   localparam CMD_COSINE_CONFIG       = 8'h40;
-  localparam CMD_API_VERSION         = 8'hfe;
   localparam CMD_CHARGEPUMP          = 8'h31;
   localparam CMD_BRIDGEINVERT        = 8'h32;
   localparam CMD_STEPPERFAULT        = 8'h50;
   localparam CMD_ENCODERFAULT        = 8'h51;
+  localparam CMD_CHANNEL_INFO        = 8'hfd;
+  localparam CMD_API_VERSION         = 8'hfe;
 
   localparam MOVE_BUFFER_SIZE = BUFFER_SIZE - 1; //This is the zero-indexed end index
   localparam MOVE_BUFFER_BITS = $clog2(BUFFER_SIZE) - 1; // number of bits to index given size
@@ -504,6 +505,13 @@ module spi_state_machine #(
             word_send_data[15:8] <= `VERSION_MINOR;
             word_send_data[23:16] <= `VERSION_MAJOR;
             word_send_data[31:24] <= `VERSION_DEVEL;
+          end
+
+          CMD_CHANNEL_INFO: begin
+            word_send_data[7:0] <= num_motors;
+            word_send_data[15:8] <= num_encoders;
+            word_send_data[23:16] <= encoder_bits;
+            word_send_data[31:24] <= encoder_velocity_bits;
           end
 
           default: word_send_data <= 64'b0;
