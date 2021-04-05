@@ -1,0 +1,5 @@
+
+read_verilog -sv testbench/crc4_tb.v
+hierarchy -check -top crc4_tb
+prep -top crc4_tb
+sim -n 10000 -clock clk -resetn resetn -vcd testbench/vcd/crc4.vcd
