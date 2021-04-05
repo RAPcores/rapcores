@@ -18,6 +18,9 @@ static int verbose_flag;
 static int info_flag;
 static int telemetry_flag;
 char* version_str = "0.1.0-dev";
+char* device = "/dev/spidev0.0";
+static uint32_t speed = 100000;
+
 
 static void parse_opts(int argc, char *argv[])
 {
@@ -27,13 +30,14 @@ static void parse_opts(int argc, char *argv[])
 			{"version", no_argument, &print_version, 1},
 			{"info", no_argument, &info_flag, 1},
 			{"help", no_argument, NULL, 1},
-			{ "device",  1, 0, 'D' },
+			{"device",  1, 0, 'D' },
+			{"speed", 1, 0, 's'},
 			{ NULL, 0, 0, 0 },
 		};
 		int c;
 		int option_index = 0;
 
-		c = getopt_long(argc, argv, "D:",
+		c = getopt_long(argc, argv, "D:s",
 				lopts, &option_index);
 
 		if (c == -1)
@@ -46,7 +50,7 @@ static void parse_opts(int argc, char *argv[])
 					break;
 				break;
 			case 's':
-				//speed = atoi(optarg);
+				speed = atoi(optarg);
 				break;
 			default:
 				print_usage(argv[0]);
@@ -58,9 +62,9 @@ int main(int argc, char *argv[])
 {
 	int ret = 0;
 
-	struct RAPcore rapcore = init_rapcore();
-
 	parse_opts(argc, argv);
+
+	struct RAPcore rapcore = init_rapcore(device, speed);
 
 	if (print_version) {
 		printf("librapcores version: %s\n", version_str);
@@ -72,7 +76,7 @@ int main(int argc, char *argv[])
 	if (info_flag) {
 		printf("spi mode: 0x%x\n", rapcore.mode);
 		printf("bits per word: %u\n", rapcore.bits);
-		printf("max speed: %u Hz (%.3f mbps)\n", rapcore.speed, rapcore.speed/8000000.0);
+		printf("max speed: %u Hz (%.3f MB/s)\n", rapcore.speed, rapcore.speed/8000000.0);
 		printf("motor count: %u\n", rapcore.motor_count);
 		printf("encoder count: %u\n", rapcore.encoder_count);
 		printf("encoder position bits: %u\n", rapcore.encoder_position_precision);

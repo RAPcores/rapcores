@@ -78,13 +78,13 @@ typedef struct RAPcore {
     uint64_t *tx;
     uint64_t *rx;
     uint8_t transfer_len;
+    int fd;
 
+    // Queried from SPI FSM
     uint8_t motor_count;
     uint8_t encoder_count;
     uint8_t encoder_position_precision;
     uint8_t encoder_velocity_precision;
-
-    int fd;
 
     struct RAPcores_version version;
 } rapcore;
@@ -157,11 +157,11 @@ void get_channel_info(struct RAPcore *rapcore) {
     rapcore->encoder_velocity_precision = (rapcore->rx[1] & 0xff<<24) >> 24;
 }
 
-struct RAPcore init_rapcore(void) {
+struct RAPcore init_rapcore(char* device, uint32_t speed) {
     uint32_t mode = 0x04;
     uint8_t  bits = 0x08;
-    uint32_t speed = 100000;
-    int fd = open("/dev/spidev0.0", O_RDWR);
+
+    int fd = open(device, O_RDWR);
 
     struct RAPcore rapcore = {
         .mode = mode,
