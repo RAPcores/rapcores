@@ -77,7 +77,6 @@ typedef struct RAPcore {
     uint32_t speed;
     uint64_t *tx;
     uint64_t *rx;
-    uint8_t transfer_len;
     int fd;
 
     // Queried from SPI FSM
@@ -89,14 +88,14 @@ typedef struct RAPcore {
     struct RAPcores_version version;
 } rapcore;
 
-static void transfer(struct RAPcore rapcore) //int fd, uint64_t const *tx, uint64_t const *rx, size_t len)
+static void transfer(struct RAPcore rapcore, uint8_t length) //int fd, uint64_t const *tx, uint64_t const *rx, size_t len)
 {
 
 	int ret;
 	struct spi_ioc_transfer tr = {
 		.tx_buf = (unsigned long)rapcore.tx,
 		.rx_buf = (unsigned long)rapcore.rx,
-		.len = rapcore.transfer_len*8, // expects bytes
+		.len = length*8, // expects bytes
 	};
 
 	ret = ioctl(rapcore.fd, SPI_IOC_MESSAGE(1), &tr);
@@ -109,9 +108,7 @@ struct RAPcores_version get_version(struct RAPcore rapcore) {
     rapcore.tx[0] = (uint64_t)0xfe << 56;
     rapcore.tx[1] = 0;
 
-    rapcore.transfer_len = 2;
-
-    transfer(rapcore);
+    transfer(rapcore, 2);
 
     printf("sent: 0x%lx\n got: 0x%lx\n", rapcore.tx[0], rapcore.rx[1]);
 
@@ -128,9 +125,7 @@ struct RAPcores_encoder get_encoder(struct RAPcore rapcore, uint64_t channel) {
     rapcore.tx[0] = (uint64_t)0x03 << 56 | channel << 48;
     rapcore.tx[1] = 0;
 
-    rapcore.transfer_len = 2;
-
-    transfer(rapcore);
+    transfer(rapcore, 2);
 
     printf("sent: 0x%lx\n got: 0x%lx\n", rapcore.tx[0], rapcore.rx[1]);
 
@@ -145,9 +140,7 @@ void get_channel_info(struct RAPcore *rapcore) {
     rapcore->tx[0] = (uint64_t)0xfd << 56;
     rapcore->tx[1] = 0;
 
-    rapcore->transfer_len = 2;
-
-    transfer(*rapcore);
+    transfer(*rapcore,2);
 
     printf("sent: 0x%lx\n got: 0x%lx\n", rapcore->tx[0], rapcore->rx[1]);
 
@@ -172,7 +165,6 @@ struct RAPcore init_rapcore(char* device, uint32_t speed) {
         .fd = fd,
         .tx = default_tx,
         .rx = default_rx,
-        .transfer_len = 8*12
     };
 
 
