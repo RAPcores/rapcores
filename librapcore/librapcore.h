@@ -157,6 +157,8 @@ void get_channel_info(struct RAPcore *rapcore) {
     rapcore->encoder_velocity_precision = (rapcore->rx[1] & 0xff<<24) >> 24;
 }
 
+
+
 struct RAPcore init_rapcore(char* device, uint32_t speed) {
     uint32_t mode = 0x04;
     uint8_t  bits = 0x08;

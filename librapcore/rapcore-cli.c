@@ -52,6 +52,9 @@ static void parse_opts(int argc, char *argv[])
 			case 's':
 				speed = atoi(optarg);
 				break;
+			case 'D':
+				device = optarg;
+				break;
 			default:
 				print_usage(argv[0]);
 		}
@@ -66,14 +69,15 @@ int main(int argc, char *argv[])
 
 	struct RAPcore rapcore = init_rapcore(device, speed);
 
-	if (print_version) {
+	if (print_version || info_flag) {
 		printf("librapcores version: %s\n", version_str);
 		struct RAPcores_version ver = rapcore.version;
 		printf("bitstream version: %u.%u.%u-%s\n", ver.major, ver.minor, ver.patch, ver.dev ? "dev" : "");
-		exit(0);
+		if (!info_flag) exit(0);
 	}
 
 	if (info_flag) {
+		printf("device: %s\n", device);
 		printf("spi mode: 0x%x\n", rapcore.mode);
 		printf("bits per word: %u\n", rapcore.bits);
 		printf("max speed: %u Hz (%.3f MB/s)\n", rapcore.speed, rapcore.speed/8000000.0);
