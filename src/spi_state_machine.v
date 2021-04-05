@@ -8,6 +8,7 @@ module spi_state_machine #(
     parameter dda_bits = 64,
     parameter move_duration_bits = 32,
     parameter encoder_bits = 32,
+    parameter encoder_velocity_bits = 32,
     parameter default_microsteps = 1,
     parameter default_current = 140,
     parameter BUFFER_SIZE = 2,
@@ -259,7 +260,8 @@ module spi_state_machine #(
 
   if(num_encoders > 0) begin
     for (i=0; i<num_encoders; i=i+1) begin
-      quad_enc #(.encbits(encoder_bits)) encoder0
+      quad_enc #(.encbits(encoder_bits),
+                 .velocity_bits(encoder_velocity_bits)) encoder0
       (
         .resetn(resetn),
         .clk(CLK),
@@ -431,7 +433,7 @@ module spi_state_machine #(
           end
 
           CMD_READ_ENCODER: begin
-            word_send_data[encoder_bits-1:0] <= {encoder_velocity[header_motor_channel], encoder_count[header_motor_channel]};
+            word_send_data[encoder_bits+encoder_velocity_bits-1:0] <= {encoder_velocity[header_motor_channel], encoder_count[header_motor_channel]};
           end
 
           // Motor Brake on Disable
