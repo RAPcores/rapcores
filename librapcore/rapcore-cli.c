@@ -76,6 +76,8 @@ int main(int argc, char *argv[])
 		exit(0);
 	}
 
+	rapcores_encoder enc = get_encoder(rapcore, 3);
+	printf("Position:%u Velocity:%u\n", enc.position, enc.velocity);
 	//if (calibrate_flag) {
 	//	calibrate(rapcore);
 	//}

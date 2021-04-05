@@ -101,6 +101,8 @@ struct RAPcores_version get_version(struct RAPcore rapcore) {
 
     transfer(rapcore);
 
+    printf("sent: 0x%lx\n got: 0x%lx\n", rapcore.tx[0], rapcore.rx[1]);
+
     rapcores_version v = {
         .patch = rapcore.rx[1] & 0xff,
         .minor = (rapcore.rx[1] & 0xff<<8) >> 8,
@@ -110,17 +112,19 @@ struct RAPcores_version get_version(struct RAPcore rapcore) {
     return v;
 }
 
-struct RAPcores_encoder get_encoder(struct RAPcore rapcore, uint8_t channel) {
-    rapcore.tx[0] = (uint64_t)0xfe << 56;
+struct RAPcores_encoder get_encoder(struct RAPcore rapcore, uint64_t channel) {
+    rapcore.tx[0] = (uint64_t)0x03 << 56 | channel << 48;
     rapcore.tx[1] = 0;
 
     rapcore.transfer_len = 2;
 
     transfer(rapcore);
 
+    printf("sent: 0x%lx\n got: 0x%lx\n", rapcore.tx[0], rapcore.rx[1]);
+
     rapcores_encoder e = {
         .position = rapcore.rx[1] & 0xffffff,
-        .velocity   = (rapcore.rx[1] & 0xffffffff<<24) >> 24
+        .velocity   = (rapcore.rx[1] & (uint64_t)0xffffffff<<24) >> 24
     };
     return e;
 }
