@@ -45,6 +45,7 @@ RAPCOREFILES := boards/$(BOARD)/$(BOARD).v \
 														pwm.v \
 														quad_enc.v \
 														spi.v \
+														crc4.v \
 														dda_fsm.v \
 														dual_hbridge.v \
 														dda_timer.v \
