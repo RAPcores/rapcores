@@ -92,10 +92,14 @@ static void transfer(struct RAPcore rapcore, uint8_t length) //int fd, uint64_t 
 {
 
 	int ret;
+
 	struct spi_ioc_transfer tr = {
 		.tx_buf = (unsigned long)rapcore.tx,
 		.rx_buf = (unsigned long)rapcore.rx,
 		.len = length*8, // expects bytes
+        .speed_hz = rapcore.speed,
+        .delay_usecs = 0,
+        .bits_per_word = 8
 	};
 
 	ret = ioctl(rapcore.fd, SPI_IOC_MESSAGE(1), &tr);
@@ -109,8 +113,6 @@ struct RAPcores_version get_version(struct RAPcore rapcore) {
     rapcore.tx[1] = 0;
 
     transfer(rapcore, 2);
-
-    printf("sent: 0x%lx\n got: 0x%lx\n", rapcore.tx[0], rapcore.rx[1]);
 
     rapcores_version v = {
         .patch = rapcore.rx[1] & 0xff,
@@ -127,8 +129,6 @@ struct RAPcores_encoder get_encoder(struct RAPcore rapcore, uint64_t channel) {
 
     transfer(rapcore, 2);
 
-    printf("sent: 0x%lx\n got: 0x%lx\n", rapcore.tx[0], rapcore.rx[1]);
-
     rapcores_encoder e = {
         .position = sign_extend_24_32(rapcore.rx[1] & 0xffffff),
         .velocity   = (rapcore.rx[1] & (uint64_t)0xffffffff<<24) >> 24
@@ -141,8 +141,6 @@ void get_channel_info(struct RAPcore *rapcore) {
     rapcore->tx[1] = 0;
 
     transfer(*rapcore,2);
-
-    printf("sent: 0x%lx\n got: 0x%lx\n", rapcore->tx[0], rapcore->rx[1]);
 
     rapcore->motor_count = rapcore->rx[1] & 0xff;
     rapcore->encoder_count = (rapcore->rx[1] & 0xff<<8) >> 8;
