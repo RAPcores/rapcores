@@ -1,22 +1,23 @@
 
 #include "librapcore.h"
 
-
 static void print_usage(const char *prog)
 {
 	printf("Usage: %s \n", prog);
-	puts("  -D --device   device to use (default /dev/spidev0.0)\n"
-	     "  -s --speed    max speed (Hz)\n"
-	     "  -v --verbose  Verbose (show tx buffer)\n"
-		 "     --version  Print Version and exit"
-		 "     --info     Print info and exit");
+	puts("  -D --device          device to use (default /dev/spidev0.0)\n"
+	     "  -s --speed           max speed (Hz)\n"
+	     "  -v --verbose         Verbose (show tx buffer)\n"
+		 "     --test-connection Test the Bus error rate"
+		 "     --version         Print Version and exit"
+		 "     --info            Print info and exit");
 	exit(1);
 }
 
-static int print_version;
-static int verbose_flag;
-static int info_flag;
-static int telemetry_flag;
+static int print_version = 0;
+static int verbose_flag = 0;
+static int info_flag = 0;
+static int telemetry_flag = 0;
+static int connection_test_flag = 0;
 char* version_str = "0.1.0-dev";
 char* device = "/dev/spidev0.0";
 static uint32_t speed = 100000;
@@ -26,9 +27,10 @@ static void parse_opts(int argc, char *argv[])
 {
 	while (1) {
 		static const struct option lopts[] = {
-            {"verbose", no_argument, &verbose_flag, 1},
+            {"verbose", no_argument, &verbose_flag, 'v'},
 			{"version", no_argument, &print_version, 1},
 			{"info", no_argument, &info_flag, 1},
+			{"test-connection", no_argument, &connection_test_flag, 1},
 			{"help", no_argument, NULL, 1},
 			{"device",  1, 0, 'D' },
 			{"speed", 1, 0, 's'},
@@ -37,7 +39,7 @@ static void parse_opts(int argc, char *argv[])
 		int c;
 		int option_index = 0;
 
-		c = getopt_long(argc, argv, "D:s",
+		c = getopt_long(argc, argv, "D:sv",
 				lopts, &option_index);
 
 		if (c == -1)
@@ -61,6 +63,20 @@ static void parse_opts(int argc, char *argv[])
 	}
 }
 
+void connection_test(struct RAPcore rapcore) {
+
+	int error_ct = 0;
+	for (int i=0; i < 1000; i++) {
+		struct RAPcores_version ver = get_version(rapcore);
+		// TODO - Hardcoded
+		if (ver.major != 0x0 || ver.minor != 0x2 || ver.patch != 0x0 || ver.dev != 0x1) {
+			error_ct++;
+		}
+	}
+	printf("Error count: %u\n", error_ct);
+	printf("Error rate: %f%%\n", error_ct/10.0);
+}
+
 int main(int argc, char *argv[])
 {
 	int ret = 0;
@@ -69,14 +85,14 @@ int main(int argc, char *argv[])
 
 	struct RAPcore rapcore = init_rapcore(device, speed);
 
-	if (print_version || info_flag) {
+	if (print_version || info_flag || verbose_flag) {
 		printf("librapcores version: %s\n", version_str);
 		struct RAPcores_version ver = rapcore.version;
 		printf("bitstream version: %u.%u.%u-%s\n", ver.major, ver.minor, ver.patch, ver.dev ? "dev" : "");
-		if (!info_flag) exit(0);
+		if (!info_flag || !verbose_flag) exit(0);
 	}
 
-	if (info_flag) {
+	if (info_flag || verbose_flag) {
 		printf("device: %s\n", device);
 		printf("spi mode: 0x%x\n", rapcore.mode);
 		printf("bits per word: %u\n", rapcore.bits);
@@ -86,7 +102,11 @@ int main(int argc, char *argv[])
 		printf("encoder position bits: %u\n", rapcore.encoder_position_precision);
 		printf("encoder velocity bits: %u\n", rapcore.encoder_velocity_precision);
 
-		exit(0);
+		if (!verbose_flag) exit(0);
+	}
+
+	if (connection_test_flag){
+		connection_test(rapcore);
 	}
 
 	rapcores_encoder enc = get_encoder(rapcore, 3);
