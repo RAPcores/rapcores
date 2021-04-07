@@ -17,6 +17,7 @@ static void print_usage(const char *prog)
 static int print_version = 0;
 static int verbose_flag = 0;
 static int info_flag = 0;
+static int stream_enc_flag = 0;
 static int connection_test_flag = 0;
 char* version_str = "0.1.0-dev";
 char* device = "/dev/spidev0.0";
@@ -30,6 +31,7 @@ static void parse_opts(int argc, char *argv[])
             {"verbose", no_argument, &verbose_flag, 'v'},
             {"version", no_argument, &print_version, 1},
             {"info", no_argument, &info_flag, 1},
+            {"stream-encoder", no_argument, &stream_enc_flag, 1},
             {"test-connection", no_argument, &connection_test_flag, 1},
             {"help", no_argument, NULL, 1},
             {"device",  1, 0, 'D' },
@@ -124,8 +126,12 @@ int main(int argc, char *argv[])
         connection_test(rapcore);
     }
 
-    rapcores_encoder enc = get_encoder(rapcore, 3);
-    printf("Position:%d Velocity:%d\n", enc.position, enc.velocity);
+    if (stream_enc_flag){
+        while (1) {
+            rapcores_encoder enc = get_encoder(rapcore, 3);
+            printf("Position:%d Velocity:%d\n", enc.position, enc.velocity);
+        }
+    }
 
     return ret;
 }
