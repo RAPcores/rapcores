@@ -60,14 +60,13 @@ module SPI (
           rxbitcnt <= rxbitcnt + 1'b1;
           // Shift in Recieved bits
           rx_byte <= {rx_byte[6:0], COPI_data};
-
-          // Trigger Byte recieved
-          rx_byte_ready_r <= &rxbitcnt;
         end
 
         // Transmit increment
         if (SCK_fallingedge) begin
           txbitcnt <= txbitcnt - 1'b1; // rolls over
+          // Trigger Byte recieved
+          rx_byte_ready_r <= (txbitcnt == 3'b0);
         end
 
         //`ifdef FORMAL
