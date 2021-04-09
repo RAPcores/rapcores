@@ -13,13 +13,13 @@
 //`define HALT
 
 // Motor Definitions
-`define DUAL_HBRIDGE 4
+`define DUAL_HBRIDGE 2
 //`define VREF_AB
 
-`define MOTOR_COUNT 4
+`define MOTOR_COUNT 2
 
 // Encoder Count
-`define QUAD_ENC 4
+`define QUAD_ENC 2
 
 // Use a PLL for PWM generation
 `define PWMPLL
