@@ -8,6 +8,7 @@ static void print_usage(const char *prog)
     puts("  -D --device          device to use (default /dev/spidev0.0)\n"
          "  -s --speed           max speed (Hz)\n"
          "  -v --verbose         Verbose (show tx buffer)\n"
+         "  -n --samples         Number of samples\n"
          "     --test-connection Test the Bus error rate"
          "     --version         Print Version and exit"
          "     --info            Print info and exit");
@@ -18,10 +19,11 @@ static int print_version = 0;
 static int verbose_flag = 0;
 static int info_flag = 0;
 static int stream_enc_flag = 0;
+int samples = -1;
 static int connection_test_flag = 0;
 char* version_str = "0.1.0-dev";
 char* device = "/dev/spidev0.0";
-static uint32_t speed = 100000;
+static uint32_t speed = 1000000;
 
 
 static void parse_opts(int argc, char *argv[])
@@ -36,12 +38,13 @@ static void parse_opts(int argc, char *argv[])
             {"help", no_argument, NULL, 1},
             {"device",  1, 0, 'D' },
             {"speed", 1, 0, 's'},
+            {"samples", 1, 0, 'n'},
             { NULL, 0, 0, 0 },
         };
         int c;
         int option_index = 0;
 
-        c = getopt_long(argc, argv, "D:sv",
+        c = getopt_long(argc, argv, "D:snv",
                 lopts, &option_index);
 
         if (c == -1)
@@ -56,6 +59,9 @@ static void parse_opts(int argc, char *argv[])
             case 's':
                 speed = atoi(optarg);
                 break;
+            case 'n':
+                samples = atoi(optarg);
+                break;
             case 'D':
                 device = optarg;
                 break;
@@ -66,24 +72,28 @@ static void parse_opts(int argc, char *argv[])
 }
 
 void 
-connection_test(struct RAPcore rapcore) {
+connection_test(struct RAPcore rapcore, int samples) {
 
     struct timeval start_t;
     gettimeofday(&start_t, NULL);
 
+    samples = (samples == -1) ? 1000: samples;
+
     int error_ct = 0;
-    for (int i=0; i < 1000; i++) {
+    for (int i=0; i < samples; i++) {
         struct RAPcores_version ver = get_version(rapcore);
         // TODO - Hardcoded
         if (ver.major != 0x0 || ver.minor != 0x2 || ver.patch != 0x0 || ver.dev != 0x1) {
             error_ct++;
+            printf("Error on transfer: %u\n", i);
+            printf("bitstream version: %u.%u.%u-%s\n", ver.major, ver.minor, ver.patch, ver.dev ? "dev" : "");
+
         }
-        get_channel_info(&rapcore);
     }
 
     struct timeval end_t;
     gettimeofday(&end_t, NULL);
-    double ideal_time = (256.0*1000)/(double)rapcore.speed;
+    double ideal_time = (128.0*samples)/(double)rapcore.speed;
 
     double cpu_time_sec = (((end_t.tv_sec - start_t.tv_sec)*1000000L +end_t.tv_usec) - start_t.tv_usec)/1000000.0;
     printf("Error count: %u\n", error_ct);
@@ -106,7 +116,7 @@ int main(int argc, char *argv[])
         printf("librapcores version: %s\n", version_str);
         struct RAPcores_version ver = rapcore.version;
         printf("bitstream version: %u.%u.%u-%s\n", ver.major, ver.minor, ver.patch, ver.dev ? "dev" : "");
-        if (!info_flag || !verbose_flag) exit(0);
+        if (!info_flag && !verbose_flag) exit(0);
     }
 
     if (info_flag || verbose_flag) {
@@ -123,7 +133,7 @@ int main(int argc, char *argv[])
     }
 
     if (connection_test_flag){
-        connection_test(rapcore);
+        connection_test(rapcore, samples);
     }
 
     if (stream_enc_flag){
