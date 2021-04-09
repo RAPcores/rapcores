@@ -24,7 +24,6 @@
 // Use a PLL for PWM generation
 `define PWMPLL
 
-
 `define ENCODER_BITS 24
 
 // Change the Move Buffer Size. Should be power of two

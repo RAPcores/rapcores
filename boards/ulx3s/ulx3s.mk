@@ -3,5 +3,5 @@ ARCH = ecp5
 DEVICE = 85k
 PACKAGE = CABGA381
 FREQ = 25
-PROGRAMMER = fujprog
+PROGRAMMER = openFPGALoader --board=ulx3s
 SPIFREQ = 64

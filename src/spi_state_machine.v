@@ -353,6 +353,9 @@ module spi_state_machine #(
 
   reg [$clog2(num_motors):0] nmot;
 
+  reg [1:0] fsm_state;
+  reg [1:0] fsm_state_next;
+
   always @(posedge CLK) if (!resetn) begin
 
     config_chargepump_period <= 91;
@@ -373,8 +376,8 @@ module spi_state_machine #(
     clock_divisor <= default_clock_divisor;  // should be 40 for 400 khz at 16Mhz Clk
     message_word_count <= 0;
     message_header <= 0;
-    processing_header <= 0;
-    processing_message <= 0;
+    fsm_state <= 0;
+    fsm_state_next <= 0;
 
     // TODO change to for loops for buffer
     move_duration[0] <= 0;
@@ -404,24 +407,24 @@ module spi_state_machine #(
 
   end else if (resetn) begin
 
-    if (word_received_rising && !processing_header && !processing_message) begin
+    fsm_state <= fsm_state_next;
+
+    if (word_received_rising && fsm_state == 2'b00) begin
       // Zero out send data register
       word_send_data <= 64'b0;
 
       // First word so message count zero
       message_word_count <= 1;
 
-      processing_header <= 1;
-    end
-
-
-    // Header Processing
-    if (processing_header) begin
-      processing_header <= 0;
-      processing_message <= 1;
+      fsm_state_next <= 2'b01;
 
       // Save CMD header incase multi word transaction
       message_header <= word_data_received[word_bits-1:word_bits-8]; // Header is 8 MSB
+
+    end
+    
+    if (fsm_state == 2'b01) begin
+      fsm_state_next <= 2'b10;
 
       case (word_data_received[word_bits-1:word_bits-8])
 
@@ -528,10 +531,8 @@ module spi_state_machine #(
         default: word_send_data <= word_data_received;
 
       endcase
-    end
+    end else if (fsm_state == 2'b10) begin
 
-    if (processing_message) begin
-      message_word_count <= message_word_count + 1;
 
       case (message_header)
         // Move Routine
@@ -544,23 +545,17 @@ module spi_state_machine #(
                 move_duration[writemoveind][move_duration_bits-1:0] <= word_data_received[move_duration_bits-1:0];
                 word_send_data[encoder_bits-1:0] <= step_encoder_store[0]; // Prep to send steps
               end
-            end
-            /* verilator lint_off WIDTH */
-            if (message_word_count == (nmot+1)*2) begin
-            /* verilator lint_on WIDTH */
+            end else if (message_word_count == (nmot+1)*2) begin
               increment[writemoveind][nmot] <= word_data_received;
               word_send_data[encoder_bits-1:0] <= encoder_store[nmot]; // Prep to send steps
-            end
-            /* verilator lint_off WIDTH */
-            if (message_word_count == (nmot+1)*2+1) begin
-            /* verilator lint_on WIDTH */
+            end else if (message_word_count == (nmot+1)*2+1) begin
               incrementincrement[writemoveind][nmot] <= word_data_received;
               if (nmot != num_motors-1) word_send_data[encoder_bits-1:0] <= step_encoder_store[nmot+1]; // Prep to send steps
 
               if (nmot == num_motors-1) begin
                 writemoveind <= writemoveind + 1'b1;
                 stepready[writemoveind] <= ~stepready[writemoveind];
-                processing_message <= 0; // Reset Message Header at the end
+                fsm_state_next <= 2'b00;  // Reset Message Header at the end
                 message_word_count <= 1;
               end
               `ifdef FORMAL
@@ -570,7 +565,7 @@ module spi_state_machine #(
           end
         end // `CMD_COORDINATED_STEP
         // by default reset the message header if it was a two word transaction
-        default: processing_message <= 0; // Reset Message Header
+        default: fsm_state_next <= 2'b00; // Reset Message Header
       endcase
     end
   end

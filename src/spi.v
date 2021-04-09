@@ -34,7 +34,7 @@ module SPI (
   wire CS_active = ~CS;  // active low
   wire COPI_data = COPIr[1];
   // CIPO pin (tristated per convention)
-  assign CIPO = (CS_active) ? tx_byte[txbitcnt] : 1'bZ;
+  assign CIPO = tx_byte[txbitcnt]; //(CS_active) ? tx_byte[txbitcnt] : 1'bZ;
 
 
   always @(posedge clk) begin
