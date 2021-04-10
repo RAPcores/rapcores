@@ -42,7 +42,7 @@ module rising_edge_detector_tribuf (
     in_q <= {in_q[1:0], in};
   end
 
-  assign out = (in_q == 3'b001);
+  assign out = (in_q[2:1] == 2'b01);
 endmodule
 
 module falling_edge_detector_tribuf ( 
@@ -56,5 +56,5 @@ module falling_edge_detector_tribuf (
     in_q <= {in_q[1:0], in};
   end
 
-  assign out = (in_q == 3'b100);
+  assign out = (in_q[2:1] == 2'b10);
 endmodule

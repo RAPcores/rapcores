@@ -16,6 +16,7 @@ module SPI (
 
   // Registers to sync IO with FPGA clock
   reg [1:0] COPIr;
+  reg [1:0] CSr;
 
   // Output Byte and ready flag
   reg rx_byte_ready_r;
@@ -31,7 +32,7 @@ module SPI (
   rising_edge_detector_tribuf sck_rising (.clk(clk), .in(SCK), .out(SCK_risingedge));
   falling_edge_detector_tribuf sck_falling (.clk(clk), .in(SCK), .out(SCK_fallingedge));
 
-  wire CS_active = ~CS;  // active low
+  wire CS_active = ~CSr[1];  // active low
   wire COPI_data = COPIr[1];
   // CIPO pin (tristated per convention)
   assign CIPO = (CS_active) ? tx_byte[txbitcnt] : 1'bZ;
@@ -53,6 +54,7 @@ module SPI (
 
       // Use a 2 bit shift register to sync COPI with FPGA clock
       COPIr <= {COPIr[0], COPI};
+      CSr <= {CSr[0], CS};
 
       if (CS_active) begin
         // Recieve increment on rising edge
@@ -60,14 +62,10 @@ module SPI (
           rxbitcnt <= rxbitcnt + 1'b1;
           // Shift in Recieved bits
           rx_byte <= {rx_byte[6:0], COPI_data};
-
-          // Trigger Byte recieved
-          rx_byte_ready_r <= &rxbitcnt;
-        end
-
-        // Transmit increment
-        if (SCK_fallingedge) begin
+        end else if (SCK_fallingedge) begin
           txbitcnt <= txbitcnt - 1'b1; // rolls over
+          // Trigger Byte recieved
+          rx_byte_ready_r <= (txbitcnt == 3'b0);
         end
 
         //`ifdef FORMAL
