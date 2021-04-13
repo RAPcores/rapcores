@@ -21,7 +21,7 @@ module dda_timer #(parameter dda_bits = 64)
   wire dda_tick_rising;
   assign step = step_r;
 
-  rising_edge_detector dda_rising (.clk(CLK), .in(dda_tick), .out(dda_tick_rising));
+  edge_detector #(.buffered(0)) dda_rising (.clk(CLK), .in(dda_tick), .out(dda_tick_rising));
 
   always @(posedge CLK) if (!resetn) begin
 

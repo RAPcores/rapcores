@@ -347,7 +347,7 @@ module spi_state_machine #(
 
 
   wire word_received_rising;
-  rising_edge_detector word_recieved_edge_rising (.clk(CLK), .in(word_received), .out(word_received_rising));
+  edge_detector #(.buffered(0)) word_recieved_edge_rising (.clk(CLK), .in(word_received), .out(word_received_rising));
 
   reg [$clog2(num_motors):0] nmot;
 

@@ -29,8 +29,8 @@ module SPI (
   // Assign wires for SPI events, registers assigned in block below
   wire SCK_risingedge;
   wire SCK_fallingedge;
-  rising_edge_detector_tribuf sck_rising (.clk(clk), .in(SCK), .out(SCK_risingedge));
-  falling_edge_detector_tribuf sck_falling (.clk(clk), .in(SCK), .out(SCK_fallingedge));
+  edge_detector #(.buffered(1), .mode("rising")) sck_rising (.clk(clk), .in(SCK), .out(SCK_risingedge));
+  edge_detector #(.buffered(1), .mode("falling"))  sck_falling (.clk(clk), .in(SCK), .out(SCK_fallingedge));
 
   wire CS_active = ~CSr[1];  // active low
   wire COPI_data = COPIr[1];
@@ -118,7 +118,7 @@ module SPIWord #(parameter bits = 64) (
   wire rx_byte_ready_rising;
   reg word_received_r;
 
-  rising_edge_detector ready_rising (.clk(clk), .in(rx_byte_ready), .out(rx_byte_ready_rising));
+  edge_detector #(.buffered(0)) ready_rising (.clk(clk), .in(rx_byte_ready), .out(rx_byte_ready_rising));
 
   // Recieve Shift Register
   always @(posedge clk) if (!resetn) begin
