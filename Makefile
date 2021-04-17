@@ -81,6 +81,7 @@ ifeq ($(ARCH), gowin)
 	gowin_pack $(PACK_FLAGS) -o $(BUILD).bit $(BUILD).json
 endif
 
+build-full: build logs iverilog-parse formal $(BUILD).bit
 
 logs:
 	mkdir -p logs
