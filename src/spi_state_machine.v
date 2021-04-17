@@ -178,7 +178,6 @@ module spi_state_machine #(
   //
 
   `ifdef DUAL_HBRIDGE
-    genvar i;
     generate
       for (i=0; i<num_motors; i=i+1) begin
         dual_hbridge #(.step_count_bits(encoder_bits))
@@ -259,7 +258,7 @@ module spi_state_machine #(
   wire [num_encoders-1:0] encoder_faultn;
   wire [31:0] encoder_velocity [num_encoders-1:0];
 
-  if(num_encoders > 0) begin
+  `ifdef QUAD_ENC
     for (i=0; i<num_encoders; i=i+1) begin
       quad_enc #(.encbits(encoder_bits),
                  .velocity_bits(encoder_velocity_bits)) encoder0
@@ -274,7 +273,7 @@ module spi_state_machine #(
         //.multiplier(encoder_multiplier)
         );
     end
-  end
+  `endif
 
 
   wire loading_move;
@@ -483,8 +482,9 @@ module spi_state_machine #(
           end
 
           // Read Stepper fault register
+
           CMD_ENCODERFAULT: begin
-            word_send_data[num_encoders-1:0] <= ~encoder_faultn;
+            if (num_encoders > 0) word_send_data[num_encoders-1:0] <= ~encoder_faultn;
           end
 
 
