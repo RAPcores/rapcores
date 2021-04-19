@@ -1,0 +1,5 @@
+
+read_verilog -sv testbench/gray_count_tb.v
+hierarchy -check -top gray_count_tb
+prep -top gray_count_tb
+sim -n 10000 -clock clk -resetn resetn -vcd testbench/vcd/gray_count.vcd

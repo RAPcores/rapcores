@@ -49,7 +49,8 @@ RAPCOREFILES := boards/$(BOARD)/$(BOARD).v \
 														dual_hbridge.v \
 														dda_timer.v \
 														rapcore.v) \
-								$(wildcard src/microstepper/*.v)
+								$(wildcard src/microstepper/*.v)\
+								$(wildcard src/gray_code/*.v)
 GENERATEDFILES := src/generated/spi_pll.v src/generated/pwm_pll.v
 
 all: $(BUILD).bit
