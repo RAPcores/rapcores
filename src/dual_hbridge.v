@@ -7,7 +7,7 @@ module dual_hbridge #(
    parameter vref_off_brake = 1,
    parameter microstep_count = 64,
    parameter step_count_bits = 32,
-   parameter encoder_bits = 24
+   parameter encoder_bits = 32
 ) (
     input clk,
     input resetn,

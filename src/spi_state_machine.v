@@ -257,7 +257,7 @@ module spi_state_machine #(
 
   wire signed [encoder_bits-1:0] encoder_count [num_encoders-1:0];
   wire [num_encoders-1:0] encoder_faultn;
-  wire [31:0] encoder_velocity [num_encoders-1:0];
+  wire [encoder_velocity_bits:0] encoder_velocity [num_encoders-1:0];
 
   `ifdef QUAD_ENC
     for (i=0; i<num_encoders; i=i+1) begin
