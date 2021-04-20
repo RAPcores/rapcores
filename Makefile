@@ -59,40 +59,41 @@ RAPCOREFILES := boards/$(BOARD)/$(BOARD).v \
 #   		output locked
 #   	);
 ifndef MANUALPLL
-	GENERATEDFILES := src/generated/spi_pll.v src/generated/pwm_pll.v
+	PLLFILES := src/generated/spi_pll_$(ARCH)_$(SPIFREQ).v src/generated/pwm_pll_$(ARCH)_$(PWMFREQ).v
 endif
 ifdef MANUALPLL
-	GENERATEDFILES := boards/$(BOARD)/spi_pll.v boards/$(BOARD)/pwm_pll.v 
+	PLLFILES := boards/$(BOARD)/spi_pll.v boards/$(BOARD)/pwm_pll.v 
 endif
 
-RAPCOREFILES += $(GENERATEDFILES)
+SYNTHFILES  = $(RAPCOREFILES)
+SYNTHFILES += $(PLLFILES)
 
 all: $(BUILD).bit
 
-$(BUILD).bit: logs pll build $(RAPCOREFILES)
+$(BUILD).bit: logs build $(SYNTHFILES)
 ifeq ($(ARCH), ice40)
-	yosys -ql ./logs/$(BOARD)_yosys.log $(YOSYS_FLAGS) -p 'synth_ice40 -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json' $(RAPCOREFILES)
+	yosys -ql ./logs/$(BOARD)_yosys.log $(YOSYS_FLAGS) -p 'synth_ice40 -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json' $(SYNTHFILES)
 	nextpnr-ice40 -ql ./logs/$(BOARD)_nextpnr.log $(PNR_FLAGS) --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --json $(BUILD).json --asc $(BUILD).asc --pcf ./boards/$(BOARD)/$(PIN_DEF)
 	icetime -d $(DEVICE) -c $(FREQ) -mtr $(BUILD).rpt $(BUILD).asc
 	icepack $(BUILD).asc $(BUILD).bit
 endif
 ifeq ($(ARCH), ecp5)
-	yosys -ql ./logs/$(BOARD)_yosys.log $(YOSYS_FLAGS) -p 'synth_ecp5 -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json' $(RAPCOREFILES)
+	yosys -ql ./logs/$(BOARD)_yosys.log $(YOSYS_FLAGS) -p 'synth_ecp5 -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json' $(SYNTHFILES)
 	nextpnr-ecp5 -ql ./logs/$(BOARD)_nextpnr.log $(PNR_FLAGS) --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --textcfg $(BUILD)_out.config --json $(BUILD).json  --lpf ./boards/$(BOARD)/$(PIN_DEF)
 	ecppack --svf $(BUILD).svf $(BUILD)_out.config $(BUILD).bit
 endif
 ifeq ($(ARCH), nexus)
-	yosys -ql ./logs/$(BOARD)_yosys.log $(YOSYS_FLAGS) -p 'synth_nexus -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json' $(RAPCOREFILES)
+	yosys -ql ./logs/$(BOARD)_yosys.log $(YOSYS_FLAGS) -p 'synth_nexus -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json' $(SYNTHFILES)
 	nextpnr-nexus -ql ./logs/$(BOARD)_nextpnr.log $(PNR_FLAGS) --device $(DEVICE) --freq $(FREQ) --json $(BUILD).json --fasm $(BUILD).fasm --pdc ./boards/$(BOARD)/$(PIN_DEF)
 	prjoxide pack $(BUILD).fasm $(BUILD).bit
 endif
 ifeq ($(ARCH), gowin)
-	yosys -ql ./logs/$(BOARD)_yosys.log $(YOSYS_FLAGS) -p 'synth_gowin -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json' $(RAPCOREFILES)
+	yosys -ql ./logs/$(BOARD)_yosys.log $(YOSYS_FLAGS) -p 'synth_gowin -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json' $(SYNTHFILES)
 	nextpnr-gowin -ql ./logs/$(BOARD)_nextpnr.log $(PNR_FLAGS) --device $(DEVICE) --freq $(FREQ) --json $(BUILD).json --cst ./boards/$(BOARD)/$(PIN_DEF)
 	gowin_pack $(PACK_FLAGS) -o $(BUILD).bit $(BUILD).json
 endif
 
-pll:
+$(PLLFILES):
 ifndef MANUALPLL
 ifeq ($(ARCH), ice40)
 	icepll -i $(FREQ) -o $(SPIFREQ) -m -n spi_pll -f $(GENERATEDDIR)spi_pll.v
@@ -104,7 +105,7 @@ ifeq ($(ARCH), ecp5)
 endif
 endif
 
-build-full: build logs iverilog-parse formal $(BUILD).bit
+build-full: build logs formal $(BUILD).bit
 
 logs:
 	mkdir -p logs
@@ -128,28 +129,28 @@ formal:
 	cat symbiyosys/symbiyosys.sby boards/$(BOARD)/$(BOARD).v > symbiyosys/symbiyosys_$(BOARD).sby
 	sby -f symbiyosys/symbiyosys_$(BOARD).sby
 
-iverilog-parse: $(RAPCOREFILES)
-	iverilog -tnull $(RAPCOREFILES)
+iverilog-parse: $(SYNTHFILES)
+	iverilog -tnull $(SYNTHFILES)
 
-yosys-parse: $(RAPCOREFILES)
-	yosys -qp 'read -sv $(RAPCOREFILES)'
+yosys-parse: $(SYNTHFILES)
+	yosys -qp 'read -sv $(SYNTHFILES)'
 
-verilator-cdc: $(RAPCOREFILES)
-	verilator --top-module rapcore --clk CLK --cdc $(RAPCOREFILES)
+verilator-cdc: $(SYNTHFILES)
+	verilator --top-module rapcore --clk CLK --cdc $(SYNTHFILES)
 
 triple-check: yosys-parse iverilog-parse verilator-cdc
 
-svlint: $(RAPCOREFILES)
-	svlint $(RAPCOREFILES)
+svlint: $(SYNTHFILES)
+	svlint $(SYNTHFILES)
 
-vvp: $(RAPCOREFILES)
-	iverilog -tvvp $(RAPCOREFILES)
+vvp: $(SYNTHFILES)
+	iverilog -tvvp $(SYNTHFILES)
 
 testbench/vcd:
 	mkdir -p testbench/vcd
 
-yosys-%: testbench/vcd $(RAPCOREFILES)
-	yosys -s testbench/yosys/$*.ys src/sim/pwm_pll.v $(RAPCOREFILES)
+yosys-%: testbench/vcd $(SYNTHFILES)
+	yosys -s testbench/yosys/$*.ys src/sim/pwm_pll.v $(SYNTHFILES)
 	gtkwave testbench/vcd/$*.vcd
 
 cxxrtl-%: testbench/vcd
@@ -159,10 +160,10 @@ cxxrtl-%: testbench/vcd
 	gtkwave testbench/vcd/$*_cxxrtl.vcd
 
 stat:
-	yosys -s yosys/stats.ys $(RAPCOREFILES) $(GENERATEDFILES)
+	yosys -s yosys/stats.ys $(SYNTHFILES) $(GENERATEDFILES)
 
 ice40:
-	yosys -s yosys/ice40.ys $(RAPCOREFILES) $(GENERATEDFILES)
+	yosys -s yosys/ice40.ys $(SYNTHFILES) $(GENERATEDFILES)
 
 .SECONDARY:
-.PHONY: all prog clean formal
+.PHONY: all prog clean formal pll
