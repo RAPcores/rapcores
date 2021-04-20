@@ -13,19 +13,13 @@ jobs:
       with:
         nix_path: nixpkgs=channel:nixos-unstable
     - name: TinyFPGABX Flow
-      run: nix-shell --command 'make BOARD=tinyfpgabx'
+      run: nix-shell --command 'make build-full -j4 BOARD=tinyfpgabx'
     - name: ULX3S Flow
-      run: nix-shell --command 'make BOARD=ulx3s'
+      run: nix-shell --command 'make build-full -j4 BOARD=ulx3s'
     - name: RAPBo Flow
-      run: nix-shell --command 'make BOARD=rapbo'
+      run: nix-shell --command 'make build-full -j4 BOARD=rapbo'
     - name: ECP5 Eval Flow
-      run: nix-shell --command 'make BOARD=ecp5evn'
-    - name: Formal Verification
-      run: nix-shell --command 'make formal'
-    - name: iverilog parse compat
-      run: nix-shell --command 'make iverilog-parse'
-    - name: verilator CDC
-      run: nix-shell --command 'make verilator-cdc'
+      run: nix-shell --command 'make build-full -j4 BOARD=ecp5evn'
     - name: reg initialization
       run: ./etc/reginit.sh
 

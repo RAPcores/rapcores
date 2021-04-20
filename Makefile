@@ -104,6 +104,8 @@ ifeq ($(ARCH), ecp5)
 endif
 endif
 
+build-full: build logs iverilog-parse formal $(BUILD).bit
+
 logs:
 	mkdir -p logs
 

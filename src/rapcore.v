@@ -204,17 +204,6 @@ module rapcore #(
     `ifdef LA_OUT
       .LA_OUT(LA_OUT),
     `endif
-    .CLK(buffered_clk),
-    .pwm_clock(pwm_clock),
-    .resetn(resetn),
-
-    .word_data_received(word_data_received),
-    .word_send_data(word_send_data),
-    .word_received(word_received),
-
-    .buffer_dtr(BUFFER_DTR),
-    .move_done(MOVE_DONE),
-    .halt(HALT),
 
   `ifdef DUAL_HBRIDGE
     .PHASE_A1(PHASE_A1),  // Phase A
@@ -257,8 +246,21 @@ module rapcore #(
     `ifdef STEPOUTPUT
       .STEPOUTPUT(STEPOUTPUT),
       .DIROUTPUT(DIROUTPUT),
-      .ENOUTPUT(ENOUTPUT)
+      .ENOUTPUT(ENOUTPUT),
     `endif
+
+    .CLK(CLK),
+    .pwm_clock(pwm_clock),
+    .resetn(resetn),
+
+    .word_data_received(word_data_received),
+    .word_send_data(word_send_data),
+    .word_received(word_received),
+
+    .buffer_dtr(BUFFER_DTR),
+    .move_done(MOVE_DONE),
+    .halt(HALT)
+
   );
 
 
