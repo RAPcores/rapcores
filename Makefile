@@ -96,12 +96,12 @@ endif
 $(PLLFILES):
 ifndef MANUALPLL
 ifeq ($(ARCH), ice40)
-	icepll -i $(FREQ) -o $(SPIFREQ) -m -n spi_pll -f $(GENERATEDDIR)spi_pll.v
-	icepll -i $(FREQ) -o $(PWMFREQ) -m -n pwm_pll -f $(GENERATEDDIR)pwm_pll.v
+	icepll -i $(FREQ) -o $(SPIFREQ) -m -n spi_pll -f src/generated/spi_pll_$(ARCH)_$(SPIFREQ).v
+	icepll -i $(FREQ) -o $(PWMFREQ) -m -n pwm_pll -f src/generated/pwm_pll_$(ARCH)_$(PWMFREQ).v
 endif
 ifeq ($(ARCH), ecp5)
-	ecppll -i $(FREQ) -o $(SPIFREQ) --clkin_name clock_in --clkout0_name clock_out -n spi_pll -f $(GENERATEDDIR)spi_pll.v
-	ecppll -i $(FREQ) -o $(PWMFREQ) --clkin_name clock_in --clkout0_name clock_out -n pwm_pll -f $(GENERATEDDIR)pwm_pll.v
+	ecppll -i $(FREQ) -o $(SPIFREQ) --clkin_name clock_in --clkout0_name clock_out -n spi_pll -f src/generated/spi_pll_$(ARCH)_$(SPIFREQ).v
+	ecppll -i $(FREQ) -o $(PWMFREQ) --clkin_name clock_in --clkout0_name clock_out -n pwm_pll -f src/generated/pwm_pll_$(ARCH)_$(PWMFREQ).v
 endif
 endif
 
@@ -166,4 +166,4 @@ ice40:
 	yosys -s yosys/ice40.ys $(SYNTHFILES) $(GENERATEDFILES)
 
 .SECONDARY:
-.PHONY: all prog clean formal pll
+.PHONY: all prog clean formal build-full
