@@ -68,6 +68,9 @@ endif
 SYNTHFILES  = $(RAPCOREFILES)
 SYNTHFILES += $(PLLFILES)
 
+SIMFILES = $(RAPCOREFILES)
+SIMFILES += ./src/sim/pwm_pll.v
+
 all: $(BUILD).bit
 
 $(BUILD).bit: logs build $(SYNTHFILES)
@@ -105,7 +108,7 @@ ifeq ($(ARCH), ecp5)
 endif
 endif
 
-build-full: build logs formal $(BUILD).bit
+build-full: build logs formal iverilog-parse $(BUILD).bit
 
 logs:
 	mkdir -p logs
@@ -129,28 +132,28 @@ formal:
 	cat symbiyosys/symbiyosys.sby boards/$(BOARD)/$(BOARD).v > symbiyosys/symbiyosys_$(BOARD).sby
 	sby -f symbiyosys/symbiyosys_$(BOARD).sby
 
-iverilog-parse: $(SYNTHFILES)
-	iverilog -tnull $(SYNTHFILES)
+iverilog-parse: $(SIMFILES)
+	iverilog -tnull $(SIMFILES)
 
-yosys-parse: $(SYNTHFILES)
-	yosys -qp 'read -sv $(SYNTHFILES)'
+yosys-parse: $(SIMFILES)
+	yosys -qp 'read -sv $(SIMFILES)'
 
-verilator-cdc: $(SYNTHFILES)
-	verilator --top-module rapcore --clk CLK --cdc $(SYNTHFILES)
+verilator-cdc: $(SIMFILES)
+	verilator --top-module rapcore --clk CLK --cdc $(SIMFILES)
 
 triple-check: yosys-parse iverilog-parse verilator-cdc
 
-svlint: $(SYNTHFILES)
-	svlint $(SYNTHFILES)
+svlint: $(SIMFILES)
+	svlint $(SIMFILES)
 
-vvp: $(SYNTHFILES)
-	iverilog -tvvp $(SYNTHFILES)
+vvp: $(SIMFILES)
+	iverilog -tvvp $(SIMFILES)
 
 testbench/vcd:
 	mkdir -p testbench/vcd
 
-yosys-%: testbench/vcd $(SYNTHFILES)
-	yosys -s testbench/yosys/$*.ys src/sim/pwm_pll.v $(SYNTHFILES)
+yosys-%: testbench/vcd $(SIMFILES)
+	yosys -s testbench/yosys/$*.ys $(SIMFILES)
 	gtkwave testbench/vcd/$*.vcd
 
 cxxrtl-%: testbench/vcd
@@ -160,10 +163,10 @@ cxxrtl-%: testbench/vcd
 	gtkwave testbench/vcd/$*_cxxrtl.vcd
 
 stat:
-	yosys -s yosys/stats.ys $(SYNTHFILES) $(GENERATEDFILES)
+	yosys -s yosys/stats.ys $(SIMFILES) $(GENERATEDFILES)
 
 ice40:
-	yosys -s yosys/ice40.ys $(SYNTHFILES) $(GENERATEDFILES)
+	yosys -s yosys/ice40.ys $(SIMFILES) $(GENERATEDFILES)
 
 .SECONDARY:
 .PHONY: all prog clean formal build-full

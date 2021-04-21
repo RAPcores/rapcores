@@ -20,6 +20,8 @@ jobs:
       run: nix-shell --command 'make build-full -j4 BOARD=rapbo'
     - name: ECP5 Eval Flow
       run: nix-shell --command 'make build-full -j4 BOARD=ecp5evn'
+    - name: IVerilog Compat
+      run: nix-shell --command 'make iverilog-parse'
     - name: reg initialization
       run: ./etc/reginit.sh
 
