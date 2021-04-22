@@ -19,6 +19,7 @@ read -formal pwm_pll.v
 read -formal spi_state_machine.v
 read -formal microstepper_top.v
 read -formal microstepper_control.v
+read -formal space_vector_modulator.v
 read -formal analog_out.v
 read -formal chargepump.v
 read -formal cosine.v
@@ -43,6 +44,7 @@ src/rapcore.v
 src/quad_enc.v
 src/pwm.v
 src/sim/pwm_pll.v
+src/space_vector_modulator.v
 src/microstepper/microstepper_top.v
 src/microstepper/microstepper_control.v
 src/microstepper/analog_out.v

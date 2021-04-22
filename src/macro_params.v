@@ -52,3 +52,7 @@
 `ifndef DEFAULT_CURRENT
 `define DEFAULT_CURRENT 8'd150
 `endif
+
+`ifndef USE_DDA
+`define USE_DDA 1
+`endif
