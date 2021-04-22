@@ -34,6 +34,20 @@ FREQ = 16
 ```
 Device external clock frequency. Used to validate timings.
 
+### PLL Parameters and Setup
+
+```
+PWMFREQ = 275
+```
+Set the PLL frequency (Mhz) for PWM generation.
+
+```
+MANUALPLL = 1
+```
+Skips autogeneration of PLLs using bitstream tools (icepll, ecppll).
+The build system will look for *both* spi_pll.v and pwm_pll.v files in
+the boards/"myboard" location. 
+
 ### PROGRAMMER (Optional)
 ```
 PROGRAMMER = tinyprog -p
@@ -206,6 +220,15 @@ Changes the default move buffer size. Must be a power of two.
 Default: 40
 
 Sets the default clock divisor for the DDA.
+
+### Disabling DDA
+
+By default the DDA for step generation is used. It may be disabled in
+favor of a different interface by setting:
+
+```
+`define USE_DDA 0
+```
 
 ## Internal Register Sizes
 

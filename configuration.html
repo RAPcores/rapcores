@@ -72,6 +72,19 @@ tools to generate the bitstream of the RAPcores for FPGAs. These are required fo
 </div>
 <p>Device external clock frequency. Used to validate timings.</p>
 </div>
+<div class="section" id="pll-parameters-and-setup">
+<h3>PLL Parameters and Setup<a class="headerlink" href="#pll-parameters-and-setup" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">PWMFREQ</span> <span class="o">=</span> <span class="mi">275</span>
+</pre></div>
+</div>
+<p>Set the PLL frequency (Mhz) for PWM generation.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MANUALPLL</span> <span class="o">=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<p>Skips autogeneration of PLLs using bitstream tools (icepll, ecppll).
+The build system will look for <em>both</em> spi_pll.v and pwm_pll.v files in
+the boards/”myboard” location.</p>
+</div>
 <div class="section" id="programmer-optional">
 <h3>PROGRAMMER (Optional)<a class="headerlink" href="#programmer-optional" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">PROGRAMMER</span> <span class="o">=</span> <span class="n">tinyprog</span> <span class="o">-</span><span class="n">p</span>
@@ -229,6 +242,14 @@ dual H Bridges are specified.</p>
 </div>
 <p>Default: 40</p>
 <p>Sets the default clock divisor for the DDA.</p>
+<div class="section" id="disabling-dda">
+<h3>Disabling DDA<a class="headerlink" href="#disabling-dda" title="Permalink to this headline">¶</a></h3>
+<p>By default the DDA for step generation is used. It may be disabled in
+favor of a different interface by setting:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define USE_DDA 0
+</pre></div>
+</div>
+</div>
 </div>
 <div class="section" id="internal-register-sizes">
 <h2>Internal Register Sizes<a class="headerlink" href="#internal-register-sizes" title="Permalink to this headline">¶</a></h2>
