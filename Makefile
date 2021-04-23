@@ -133,7 +133,7 @@ formal:
 	sby -f symbiyosys/symbiyosys_$(BOARD).sby
 
 iverilog-parse: $(SIMFILES)
-	iverilog -tnull $(SIMFILES)
+	iverilog -tnull -Wall $(SIMFILES)
 
 yosys-parse: $(SIMFILES)
 	yosys -qp 'read -sv $(SIMFILES)'
