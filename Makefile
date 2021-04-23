@@ -68,31 +68,34 @@ endif
 SYNTHFILES  = $(RAPCOREFILES)
 SYNTHFILES += $(PLLFILES)
 
+# Essentially board config + dummy PLLs
 SIMFILES = $(RAPCOREFILES)
 SIMFILES += ./src/sim/pwm_pll.v
 
+PREPACK ?= build/clocks_$(BOARD).py
+
 all: $(BUILD).bit
 
-$(BUILD).bit: logs build $(SYNTHFILES)
+$(BUILD).bit: logs build $(SYNTHFILES) $(PREPACK)
 ifeq ($(ARCH), ice40)
 	yosys -ql ./logs/$(BOARD)_yosys.log $(YOSYS_FLAGS) -p 'synth_ice40 -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json' $(SYNTHFILES)
-	nextpnr-ice40 -ql ./logs/$(BOARD)_nextpnr.log $(PNR_FLAGS) --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --json $(BUILD).json --asc $(BUILD).asc --pcf ./boards/$(BOARD)/$(PIN_DEF)
+	nextpnr-ice40 --pre-pack $(PREPACK) -ql ./logs/$(BOARD)_nextpnr.log $(PNR_FLAGS) --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --json $(BUILD).json --asc $(BUILD).asc --pcf ./boards/$(BOARD)/$(PIN_DEF)
 	icetime -d $(DEVICE) -c $(FREQ) -mtr $(BUILD).rpt $(BUILD).asc
 	icepack $(BUILD).asc $(BUILD).bit
 endif
 ifeq ($(ARCH), ecp5)
 	yosys -ql ./logs/$(BOARD)_yosys.log $(YOSYS_FLAGS) -p 'synth_ecp5 -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json' $(SYNTHFILES)
-	nextpnr-ecp5 -ql ./logs/$(BOARD)_nextpnr.log $(PNR_FLAGS) --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --textcfg $(BUILD)_out.config --json $(BUILD).json  --lpf ./boards/$(BOARD)/$(PIN_DEF)
+	nextpnr-ecp5  --pre-pack $(PREPACK) -ql ./logs/$(BOARD)_nextpnr.log $(PNR_FLAGS) --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --textcfg $(BUILD)_out.config --json $(BUILD).json  --lpf ./boards/$(BOARD)/$(PIN_DEF)
 	ecppack --svf $(BUILD).svf $(BUILD)_out.config $(BUILD).bit
 endif
 ifeq ($(ARCH), nexus)
 	yosys -ql ./logs/$(BOARD)_yosys.log $(YOSYS_FLAGS) -p 'synth_nexus -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json' $(SYNTHFILES)
-	nextpnr-nexus -ql ./logs/$(BOARD)_nextpnr.log $(PNR_FLAGS) --device $(DEVICE) --freq $(FREQ) --json $(BUILD).json --fasm $(BUILD).fasm --pdc ./boards/$(BOARD)/$(PIN_DEF)
+	nextpnr-nexus --pre-pack $(PREPACK) -ql ./logs/$(BOARD)_nextpnr.log $(PNR_FLAGS) --device $(DEVICE) --freq $(FREQ) --json $(BUILD).json --fasm $(BUILD).fasm --pdc ./boards/$(BOARD)/$(PIN_DEF)
 	prjoxide pack $(BUILD).fasm $(BUILD).bit
 endif
 ifeq ($(ARCH), gowin)
 	yosys -ql ./logs/$(BOARD)_yosys.log $(YOSYS_FLAGS) -p 'synth_gowin -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json' $(SYNTHFILES)
-	nextpnr-gowin -ql ./logs/$(BOARD)_nextpnr.log $(PNR_FLAGS) --device $(DEVICE) --freq $(FREQ) --json $(BUILD).json --cst ./boards/$(BOARD)/$(PIN_DEF)
+	nextpnr-gowin --pre-pack $(PREPACK) -ql ./logs/$(BOARD)_nextpnr.log $(PNR_FLAGS) --device $(DEVICE) --freq $(FREQ) --json $(BUILD).json --cst ./boards/$(BOARD)/$(PIN_DEF)
 	gowin_pack $(PACK_FLAGS) -o $(BUILD).bit $(BUILD).json
 endif
 
@@ -116,8 +119,10 @@ logs:
 build:
 	mkdir -p build
 
-build/clocks_$(BOARD).py:
-	printf "ctx."
+$(PREPACK):
+	printf "ctx.addClock("spifsm.CLK", $(FREQ))\n" > $@
+	printf "ctx.addClock("spifsm.pwm_clock", $(PWMFREQ))\n" >> $@
+	printf "ctx.addClock("word_proc.clk", $(SPIFREQ))\n" >> $@
 
 prog: $(BUILD).bit
 	$(PROGRAMMER) $<
