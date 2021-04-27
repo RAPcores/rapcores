@@ -9,8 +9,9 @@ static void print_usage(const char *prog)
          "  -s --speed           max speed (Hz)\n"
          "  -v --verbose         Verbose (show tx buffer)\n"
          "  -n --samples         Number of samples\n"
-         "     --test-connection Test the Bus error rate"
-         "     --version         Print Version and exit"
+         "     --test-connection Test the Bus error rate\n"
+         "     --stream-encoder  Test the Bus error rate\n"
+         "     --version         Print Version and exit\n"
          "     --info            Print info and exit");
     exit(1);
 }
