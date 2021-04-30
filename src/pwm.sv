@@ -25,7 +25,7 @@ module pwm #(
   if (delayed) assign pwm = (accum[bits-2:0] >= delay) & (accum < (val+delay));
   else assign pwm = (accum < val);
 
-  always @(posedge clk)
+  always_ff @(posedge clk)
   if (resetable) begin
     if(!resetn) accum <= 0;
     else if(resetn) accum <= accum + 1'b1;

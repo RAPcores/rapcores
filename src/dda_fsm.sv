@@ -38,7 +38,7 @@ module dda_fsm #(parameter buffer_bits = 2,
   reg finishedmove_r;
   reg [1:0] dda_tick_r;
 
-  always @(posedge clk) if (!resetn) begin
+  always_ff @(posedge clk) if (!resetn) begin
     move_done_r <= 0;
     finishedmove_r <= 1; // set 1 init so we are in 'loading_move'
     stepfinished <= 0;

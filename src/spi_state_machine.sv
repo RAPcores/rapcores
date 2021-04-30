@@ -352,7 +352,7 @@ module spi_state_machine #(
 
   reg [$clog2(num_motors):0] nmot;
 
-  always @(posedge CLK) if (!resetn) begin
+  always_ff @(posedge CLK) if (!resetn) begin
 
     config_chargepump_period <= 91;
 

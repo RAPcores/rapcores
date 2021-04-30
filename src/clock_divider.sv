@@ -16,7 +16,7 @@ module clock_divider #(parameter divider_bits = 8)
 
   assign tick = (accum == divider);
 
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     if (!resetn) begin
       accum <= 0;
     end else begin

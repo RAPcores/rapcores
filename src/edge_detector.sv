@@ -8,7 +8,7 @@ module rising_edge_detector (
 );
   reg in_q;
 
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     in_q <= in;
   end
 
@@ -22,7 +22,7 @@ module falling_edge_detector (
 );
   reg in_q;
 
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     in_q <= in;
   end
 
@@ -38,7 +38,7 @@ module rising_edge_detector_tribuf (
 );
   reg [2:0] in_q;
 
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     in_q <= {in_q[1:0], in};
   end
 
@@ -52,7 +52,7 @@ module falling_edge_detector_tribuf (
 );
   reg [2:0] in_q;
 
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     in_q <= {in_q[1:0], in};
   end
 

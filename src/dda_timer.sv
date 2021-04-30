@@ -23,7 +23,7 @@ module dda_timer #(parameter dda_bits = 64)
 
   rising_edge_detector dda_rising (.clk(CLK), .in(dda_tick), .out(dda_tick_rising));
 
-  always @(posedge CLK) if (!resetn) begin
+  always_ff @(posedge CLK) if (!resetn) begin
 
     substep_accumulator <= {dda_bits{1'b0}}; // typemax(Int64) - 100 for buffer
     increment_r <= {dda_bits{1'b0}};
