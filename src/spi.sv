@@ -38,7 +38,7 @@ module SPI (
   assign CIPO = (CS_active) ? tx_byte[txbitcnt] : 1'bZ;
 
 
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     if (!resetn) begin
       // Registers to sync IO with FPGA clock
       COPIr <= 2'b0;

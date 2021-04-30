@@ -37,19 +37,19 @@ SRCDIR = ./src/
 BUILDDIR = ./build/
 BUILD = $(BUILDDIR)$(BOARD)
 RAPCOREFILES := boards/$(BOARD)/$(BOARD).v \
-								$(addprefix src/, clock_divider.v \
-														edge_detector.v \
-													  macro_params.v \
-														space_vector_modulator.v \
-														spi_state_machine.v \
-														pwm.v \
-														quad_enc.v \
-														spi.v \
-														dda_fsm.v \
-														dual_hbridge.v \
-														dda_timer.v \
-														rapcore.v) \
-								$(wildcard src/microstepper/*.v)
+								$(addprefix src/, clock_divider.sv \
+														edge_detector.sv \
+													  macro_params.sv \
+														space_vector_modulator.sv \
+														spi_state_machine.sv \
+														pwm.sv \
+														quad_enc.sv \
+														spi.sv \
+														dda_fsm.sv \
+														dual_hbridge.sv \
+														dda_timer.sv \
+														rapcore.sv) \
+								$(wildcard src/microstepper/*.sv)
 
 # Some architectures or clock specs cannot have auto generated PLL.
 # Define MANUALPLL=1 and instantiate PLL for include with a module like:
@@ -75,23 +75,23 @@ all: $(BUILD).bit
 
 $(BUILD).bit: logs build $(SYNTHFILES)
 ifeq ($(ARCH), ice40)
-	yosys -ql ./logs/$(BOARD)_yosys.log $(YOSYS_FLAGS) -p 'synth_ice40 -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json' $(SYNTHFILES)
+	yosys -ql ./logs/$(BOARD)_yosys.log $(YOSYS_FLAGS) -p 'read_verilog -sv $(SYNTHFILES); synth_ice40 -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json'
 	nextpnr-ice40 -ql ./logs/$(BOARD)_nextpnr.log $(PNR_FLAGS) --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --json $(BUILD).json --asc $(BUILD).asc --pcf ./boards/$(BOARD)/$(PIN_DEF)
 	icetime -d $(DEVICE) -c $(FREQ) -mtr $(BUILD).rpt $(BUILD).asc
 	icepack $(BUILD).asc $(BUILD).bit
 endif
 ifeq ($(ARCH), ecp5)
-	yosys -ql ./logs/$(BOARD)_yosys.log $(YOSYS_FLAGS) -p 'synth_ecp5 -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json' $(SYNTHFILES)
+	yosys -ql ./logs/$(BOARD)_yosys.log $(YOSYS_FLAGS) -p 'read_verilog -sv $(SYNTHFILES); synth_ecp5 -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json'
 	nextpnr-ecp5 -ql ./logs/$(BOARD)_nextpnr.log $(PNR_FLAGS) --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --textcfg $(BUILD)_out.config --json $(BUILD).json  --lpf ./boards/$(BOARD)/$(PIN_DEF)
 	ecppack --svf $(BUILD).svf $(BUILD)_out.config $(BUILD).bit
 endif
 ifeq ($(ARCH), nexus)
-	yosys -ql ./logs/$(BOARD)_yosys.log $(YOSYS_FLAGS) -p 'synth_nexus -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json' $(SYNTHFILES)
+	yosys -ql ./logs/$(BOARD)_yosys.log $(YOSYS_FLAGS) -p 'read_verilog -sv $(SYNTHFILES); synth_nexus -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json'
 	nextpnr-nexus -ql ./logs/$(BOARD)_nextpnr.log $(PNR_FLAGS) --device $(DEVICE) --freq $(FREQ) --json $(BUILD).json --fasm $(BUILD).fasm --pdc ./boards/$(BOARD)/$(PIN_DEF)
 	prjoxide pack $(BUILD).fasm $(BUILD).bit
 endif
 ifeq ($(ARCH), gowin)
-	yosys -ql ./logs/$(BOARD)_yosys.log $(YOSYS_FLAGS) -p 'synth_gowin -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json' $(SYNTHFILES)
+	yosys -ql ./logs/$(BOARD)_yosys.log $(YOSYS_FLAGS) -p 'read_verilog -sv $(SYNTHFILES); synth_gowin -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json'
 	nextpnr-gowin -ql ./logs/$(BOARD)_nextpnr.log $(PNR_FLAGS) --device $(DEVICE) --freq $(FREQ) --json $(BUILD).json --cst ./boards/$(BOARD)/$(PIN_DEF)
 	gowin_pack $(PACK_FLAGS) -o $(BUILD).bit $(BUILD).json
 endif
