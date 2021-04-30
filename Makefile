@@ -133,7 +133,7 @@ formal:
 	sby -f symbiyosys/symbiyosys_$(BOARD).sby
 
 iverilog-parse: $(SIMFILES)
-	iverilog -tnull -Wall $(SIMFILES)
+	iverilog -tnull -Wall -g2012 $(SIMFILES)
 
 yosys-parse: $(SIMFILES)
 	yosys -qp 'read -sv $(SIMFILES)'
@@ -147,7 +147,7 @@ svlint: $(SIMFILES)
 	svlint $(SIMFILES)
 
 vvp: $(SIMFILES)
-	iverilog -tvvp $(SIMFILES)
+	iverilog -tvvp -g2012 $(SIMFILES)
 
 testbench/vcd:
 	mkdir -p testbench/vcd
