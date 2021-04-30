@@ -6,54 +6,54 @@ smtbmc
 
 [script]
 read -formal config.v
-read -formal macro_params.v
-read -formal clock_divider.v
-read -formal dda_fsm.v
-read -formal dda_timer.v
-read -formal edge_detector.v
-read -formal spi.v
-read -formal dual_hbridge.v
-read -formal quad_enc.v
-read -formal pwm.v
+read -formal macro_params.sv
+read -formal clock_divider.sv
+read -formal dda_fsm.sv
+read -formal dda_timer.sv
+read -formal edge_detector.sv
+read -formal spi.sv
+read -formal dual_hbridge.sv
+read -formal quad_enc.sv
+read -formal pwm.sv
 read -formal pwm_pll.v
-read -formal spi_state_machine.v
-read -formal microstepper_top.v
-read -formal microstepper_control.v
-read -formal space_vector_modulator.v
-read -formal analog_out.v
-read -formal chargepump.v
-read -formal cosine.v
-read -formal microstep_counter.v
-read -formal mytimer.v
-read -formal mytimer_8.v
-read -formal mytimer_10.v
-read -formal rapcore.v
+read -formal spi_state_machine.sv
+read -formal microstepper_top.sv
+read -formal microstepper_control.sv
+read -formal space_vector_modulator.sv
+read -formal analog_out.sv
+read -formal chargepump.sv
+read -formal cosine.sv
+read -formal microstep_counter.sv
+read -formal mytimer.sv
+read -formal mytimer_8.sv
+read -formal mytimer_10.sv
+read -formal rapcore.sv
 prep -top rapcore
 
 [files]
 lut/cos_lut.bit src/lut/cos_lut.bit
-src/macro_params.v
-src/clock_divider.v
-src/dda_fsm.v
-src/dda_timer.v
-src/edge_detector.v
-src/spi.v
-src/dual_hbridge.v
-src/spi_state_machine.v
-src/rapcore.v
-src/quad_enc.v
-src/pwm.v
+src/macro_params.sv
+src/clock_divider.sv
+src/dda_fsm.sv
+src/dda_timer.sv
+src/edge_detector.sv
+src/spi.sv
+src/dual_hbridge.sv
+src/spi_state_machine.sv
+src/rapcore.sv
+src/quad_enc.sv
+src/pwm.sv
 src/sim/pwm_pll.v
-src/space_vector_modulator.v
-src/microstepper/microstepper_top.v
-src/microstepper/microstepper_control.v
-src/microstepper/analog_out.v
-src/microstepper/chargepump.v
-src/microstepper/cosine.v
-src/microstepper/microstep_counter.v
-src/microstepper/mytimer.v
-src/microstepper/mytimer_8.v
-src/microstepper/mytimer_10.v
+src/space_vector_modulator.sv
+src/microstepper/microstepper_top.sv
+src/microstepper/microstepper_control.sv
+src/microstepper/analog_out.sv
+src/microstepper/chargepump.sv
+src/microstepper/cosine.sv
+src/microstepper/microstep_counter.sv
+src/microstepper/mytimer.sv
+src/microstepper/mytimer_8.sv
+src/microstepper/mytimer_10.sv
 
 # Set in the makefile by concatenting the board config.
 [file config.v]
