@@ -134,14 +134,12 @@ module microstepper_control (
   assign offtimer_en0 = analog_cmp1 & (blank_timer0 == 0) & (off_timer0 == 0);
   assign offtimer_en1 = analog_cmp2 & (blank_timer1 == 0) & (off_timer1 == 0);
 
-`ifdef FORMAL
-  `define ON 1'b1
+  localparam ON = 1'b1;
   always @(*) begin
-    assert (!(phase_a1_l_control == `ON && phase_a1_h_control == `ON));
-    assert (!(phase_a2_l_control == `ON && phase_a2_h_control == `ON));
-    assert (!(phase_b1_l_control == `ON && phase_b1_h_control == `ON));
-    assert (!(phase_b2_l_control == `ON && phase_b2_h_control == `ON));
+    assert (!(phase_a1_l_control == ON && phase_a1_h_control == ON));
+    assert (!(phase_a2_l_control == ON && phase_a2_h_control == ON));
+    assert (!(phase_b1_l_control == ON && phase_b1_h_control == ON));
+    assert (!(phase_b2_l_control == ON && phase_b2_h_control == ON));
   end
-`endif
 
 endmodule

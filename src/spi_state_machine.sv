@@ -454,9 +454,7 @@ module spi_state_machine #(
             // TODO needs to be power of two
             current[header_motor_channel][7:0] <= word_data_received[15:8];
             microsteps[header_motor_channel][2:0] <= word_data_received[2:0];
-            `ifdef FORMAL
-              assert(header_motor_channel == word_data_received[(48+$clog2(num_motors)):48]);
-            `endif
+            assert(header_motor_channel == word_data_received[(48+$clog2(num_motors)):48]);
           end
 
           // Set Microstepping Parameters
@@ -556,9 +554,7 @@ module spi_state_machine #(
                   message_header <= 8'b0; // Reset Message Header at the end
                   message_word_count <= 0;
                 end
-                `ifdef FORMAL
-                  assert(writemoveind <= MOVE_BUFFER_SIZE);
-                `endif
+                assert(writemoveind <= MOVE_BUFFER_SIZE);
               end
             end
           end // `CMD_COORDINATED_STEP

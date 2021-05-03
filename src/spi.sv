@@ -68,9 +68,7 @@ module SPI (
           rx_byte_ready_r <= (txbitcnt == 3'b0);
         end
 
-        //`ifdef FORMAL
-        //  assert(rx_byte_ready && rxbitcnt == 3'b111);
-        //`endif
+        assert(rx_byte_ready_r && txbitcnt == 3'b0);
       end else begin // !CS_active
         // Reset counts if a txfer is interrupted for some reason
         rxbitcnt <= 3'b000;
