@@ -114,7 +114,6 @@ module SPIWord #(parameter bits = 64) (
             .rx_byte_ready(rx_byte_ready));
 
   reg [((bits == 64) ? 2 : 1):0] byte_count;
-  wire [7:0] word_slice [7:0]; // slice the register into 8 bits
   wire rx_byte_ready_rising;
   reg word_received_r;
 
@@ -142,19 +141,6 @@ module SPIWord #(parameter bits = 64) (
 
   assign word_received = word_received_r;
 
-  if (bits >= 32) begin
-    assign word_slice[0] = word_send_data[7:0]; // This should only hit at initialization
-    assign word_slice[1] = word_send_data[15:8];
-    assign word_slice[2] = word_send_data[23:16];
-    assign word_slice[3] = word_send_data[31:24];
-  end
-  if (bits >= 64) begin
-    assign word_slice[4] = word_send_data[39:32];
-    assign word_slice[5] = word_send_data[47:40];
-    assign word_slice[6] = word_send_data[55:48];
-    assign word_slice[7] = word_send_data[63:56];
-  end
-
-  assign tx_byte[7:0] = word_slice[byte_count];
+  assign tx_byte[7:0] = word_send_data[byte_count*8 +: 8];
 
 endmodule
