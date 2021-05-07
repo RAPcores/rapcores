@@ -105,8 +105,8 @@ module dual_hbridge #(
     end else if (resetn) begin
       // Traverse the table based on direction, rolls over
       if (step_rising) begin // rising edge
-        phase_ct <= dir ? phase_ct + abs_increment : phase_ct - abs_increment;
-        count_r <= dir ? count_r + abs_increment : count_r - abs_increment;
+        phase_ct <= phase_ct + phase_inc;
+        count_r <= count_r + phase_inc;
       end
 
     end

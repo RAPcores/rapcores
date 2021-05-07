@@ -34,7 +34,7 @@ module space_vector_modulator #(
   localparam integer phase_table_end = microsteps*2-1;
 
   // Table of phase agnles (BRAM on FPGA)
-  reg [microstep_bits:0] phase_table [0:phase_table_end];
+  reg [microstep_bits-1:0] phase_table [0:phase_table_end];
 
   // Initialize sine table into BRAM
   localparam real pi =  3.1415926535897;
@@ -117,7 +117,7 @@ module space_vector_modulator #(
         phase[1] <= phase_table[phase_idx];
       end if (phases == 2) begin
         phase[0] <= phase_table[phase_idx];
-        phase[1] <= phase_table[phase_idx-microsteps];
+        phase[1] <= phase_table[phase_idx+microsteps];
       end if (phases == 3) begin
         phase[0] <= phase_table[phase_idx+microsteps/3];
         phase[1] <= phase_table[phase_idx+microsteps*2/3];
