@@ -21,8 +21,8 @@ module space_vector_modulator #(
     input resetn,
     input pwm_clk,
     output [phases-1:0] vref_pwm,
-    output [phases*(current_bits+microstep_bits)-1:0] vref_val,
-    input  [7:0] current, // also called Phase Vector amplitude
+    //output [phases*(current_bits+microstep_bits)-1:0] vref_val,
+    input  [current_bits-1:0] current, // also called Phase Vector amplitude
     input [phase_ct_bits-1:0] phase_ct // Represents 0 -> 2pi integer range
 );
 
@@ -34,7 +34,7 @@ module space_vector_modulator #(
   localparam integer phase_table_end = microsteps*2-1;
 
   // Table of phase agnles (BRAM on FPGA)
-  reg [7:0] phase_table [0:phase_table_end];
+  reg [microstep_bits:0] phase_table [0:phase_table_end];
 
   // Initialize sine table into BRAM
   localparam real pi =  3.1415926535897;
@@ -55,9 +55,11 @@ module space_vector_modulator #(
   genvar ig;
   generate
     for (ig=0; ig<phases; ig=ig+1) begin
-      assign pwm[ig] = phase[ig][7:(8-microstep_bits)]*current[7:(8-current_bits)];
+      assign pwm[ig] = phase[ig][microstep_bits-1:0]*current[current_bits-1:0];
     end
   endgenerate
+
+  //assign vref_val = {pwm[0], pwm[1]};
 
   // PWM Types:
   //
@@ -106,7 +108,7 @@ module space_vector_modulator #(
   end
 
   localparam idx_end = phase_ct_bits - 2; // 
-  wire phase_idx = phase_ct[idx_end:0];
+  wire [idx_end:0] phase_idx = phase_ct[idx_end:0];
 
   always @(posedge clk) begin
     if (resetn) begin
@@ -115,7 +117,7 @@ module space_vector_modulator #(
         phase[1] <= phase_table[phase_idx];
       end if (phases == 2) begin
         phase[0] <= phase_table[phase_idx];
-        phase[1] <= phase_table[phase_idx+microsteps];
+        phase[1] <= phase_table[phase_idx-microsteps];
       end if (phases == 3) begin
         phase[0] <= phase_table[phase_idx+microsteps/3];
         phase[1] <= phase_table[phase_idx+microsteps*2/3];
