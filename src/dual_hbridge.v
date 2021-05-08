@@ -97,7 +97,7 @@ module dual_hbridge #(
 
 
   wire step_rising;
-  rising_edge_detector step_r (.clk(clk), .in(step), .out(step_rising));
+  edge_detector #(.buffered(0), .mode("rising")) step_r (.clk(clk), .in(step), .out(step_rising));
 
   always @(posedge clk) begin
     if (!resetn) begin
