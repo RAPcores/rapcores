@@ -37,7 +37,7 @@ module space_vector_modulator #(
   reg [microstep_bits-1:0] phase_table [0:phase_table_end];
 
   // Initialize sine table into BRAM
-  localparam real pi =  3.1415926535897;
+  localparam real pi = 3.1415926535897;
   integer i;
 
   initial begin

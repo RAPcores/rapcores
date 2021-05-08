@@ -2,12 +2,12 @@
 `default_nettype none
 
 module dual_hbridge #(
-   parameter current_bits = 4,
-   parameter microstep_bits = 8, // should not be greater than 8
-   parameter vref_off_brake = 1,
-   parameter microstep_count = 64,
-   parameter step_count_bits = 32,
-   parameter encoder_bits = 32
+   parameter current_bits = 4, // bit precision of current
+   parameter microstep_bits = 8, // bit precision of microsteps
+   parameter vref_off_brake = 1, // "decay mode"
+   parameter microstep_count = 256, // quarter-cycle divisions
+   parameter step_count_bits = 32, // internal encoder counter precision
+   parameter encoder_bits = 32 // external input encoder precision
 ) (
     input clk,
     input resetn,
@@ -56,7 +56,8 @@ module dual_hbridge #(
 
   space_vector_modulator #(
     .current_bits(current_bits),
-    .phase_ct_bits(phase_ct_end+1)
+    .phase_ct_bits(phase_ct_end+1),
+    .microsteps(microstep_count)
   )
     svm0 (.clk(clk),
           .pwm_clk(pwm_clk),
