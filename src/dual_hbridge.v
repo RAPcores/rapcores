@@ -35,10 +35,13 @@ module dual_hbridge #(
 
   reg signed [step_count_bits-1:0] count_r;
   assign step_count = count_r;
-  reg [7:0] phase_ct;
+
+  // Compute the lower bits to determine phase count
+  // Recall that microsteps is quarter wave and we want a counter for 0 -> 2pi
+  localparam phase_ct_end = $clog2(microstep_count*4) - 1; 
+
   // Set the increment sign based on direction
   wire signed [7:0] phase_inc = dir ? abs_increment : -abs_increment;
-  reg signed [encoder_bits-1:0] encoder_prev;
 
   // This is the integer value of the encoded SVM pulse
   // N Phases are packed here, to be unpacked elsewhere
@@ -52,7 +55,8 @@ module dual_hbridge #(
   //-------------------------------
 
   space_vector_modulator #(
-    .current_bits(current_bits)
+    .current_bits(current_bits),
+    .phase_ct_bits(phase_ct_end+1)
   )
     svm0 (.clk(clk),
           .pwm_clk(pwm_clk),
@@ -60,7 +64,7 @@ module dual_hbridge #(
           .vref_pwm({vref_b,vref_a}),
           //.vref_val(vref_val_packed),
           .current(current[7:(8-current_bits)]),
-          .phase_ct(phase_ct));
+          .phase_ct(count_r[phase_ct_end:0]));
 
 
   //-------------------------------
@@ -68,17 +72,18 @@ module dual_hbridge #(
   //-------------------------------
 
   // determine phase polarity from quadrant
-  wire [3:0] phase_polarity;
-  assign phase_polarity = (phase_ct < microstep_count  ) ? 4'b1010 :
-                          (phase_ct < microstep_count*2) ? 4'b0110 :
-                          (phase_ct < microstep_count*3) ? 4'b0101 :
-                                                           4'b1001 ;
+  wire [1:0] phase_polarity;
+  //hmm gray codes
+  assign phase_polarity = (count_r[phase_ct_end:phase_ct_end-1] == 2'b00 ) ? 2'b11 :
+                          (count_r[phase_ct_end:phase_ct_end-1] == 2'b01 ) ? 2'b01 :
+                          (count_r[phase_ct_end:phase_ct_end-1] == 2'b10 ) ? 2'b00 :
+                                                                             2'b10 ;
 
   // Set the bridge directions
-  assign phase_a1 = (enable & vref_a) ? phase_polarity[0] : brake_a;
-  assign phase_a2 = (enable & vref_a) ? phase_polarity[1] : brake_a;
-  assign phase_b1 = (enable & vref_b) ? phase_polarity[2] : brake_b;
-  assign phase_b2 = (enable & vref_b) ? phase_polarity[3] : brake_b;
+  assign phase_a1 = (enable & vref_a) ?  phase_polarity[0] : brake_a;
+  assign phase_a2 = (enable & vref_a) ? ~phase_polarity[0] : brake_a;
+  assign phase_b1 = (enable & vref_b) ?  phase_polarity[1] : brake_b;
+  assign phase_b2 = (enable & vref_b) ? ~phase_polarity[1] : brake_b;
 
 
   //-------------------------------
@@ -101,11 +106,10 @@ module dual_hbridge #(
 
   always @(posedge clk) begin
     if (!resetn) begin
-      phase_ct <= 8'b0;
+      count_r <= 0;
     end else if (resetn) begin
       // Traverse the table based on direction, rolls over
       if (step_rising) begin // rising edge
-        phase_ct <= phase_ct + phase_inc;
         count_r <= count_r + phase_inc;
       end
 
