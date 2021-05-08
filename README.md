@@ -6,16 +6,16 @@ http://rapcores.org/rapcores/
 
 Robotic Application Processing Cores.
 
-RAPcores is a project targeting FPGAs and ASIC devices for the next generation of motor and motion
-control applications. It is a peripheral that sits between firmwares and motors to free up
-processing on the microcontroller and greatly simplify the motor driver.
+RAPcores is a motor and motion control toolkit for FPGAs and ASIC devices.
+It creates a peripheral that sits between kinematics engines and motors to free up
+processing power, enrich dynamical models, and greatly simplify the motor driver.
 
 ## Features
 
-- Onboard stepper motor commutator (64x microstepping)
-- High precision Fixed Point Step-Timing Algorithm
-- High speed Quadrature Encoder Accumulator
-- High Speed SPI Bus
+- Onboard stepper motor commutator (at least 256x microsteps)
+- High precision 64-bit fixed-point second order motion interpolator
+- High speed second order quadrature encoder
+- High speed SPI bus
 - Multi-channel control with protocol support up to 56 motors
 
 ## Target Hardware
