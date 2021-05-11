@@ -13,7 +13,8 @@ module spi_state_machine #(
     parameter default_microsteps = 1,
     parameter default_current = 140,
     parameter BUFFER_SIZE = 2,
-    parameter default_clock_divisor = 32
+    parameter default_clock_divisor = 32,
+    parameter current_bits = 4
   )(
   `ifdef LA_IN
     input wire [`LA_IN:1] LA_IN,
@@ -164,7 +165,7 @@ module spi_state_machine #(
   //
 
   reg [7:0] microsteps [0:num_motors-1];
-  reg [7:0] current [0:num_motors-1];
+  reg [current_bits-1:0] current [0:num_motors-1];
   reg [9:0] config_offtime [0:num_motors-1];
   reg [7:0] config_blanktime [0:num_motors-1];
   reg [9:0] config_fastdecay_threshold [0:num_motors-1];
@@ -181,7 +182,8 @@ module spi_state_machine #(
   `ifdef DUAL_HBRIDGE
     generate
       for (i=0; i<num_motors; i=i+1) begin
-        dual_hbridge #(.step_count_bits(encoder_bits))
+        dual_hbridge #(.step_count_bits(encoder_bits),
+                       .current_bits(current_bits))
                     s0 (
                       .clk (CLK),
                       .resetn(resetn),
@@ -452,7 +454,7 @@ module spi_state_machine #(
           // Set Microstepping
           CMD_MOTORCONFIG: begin
             // TODO needs to be power of two
-            current[header_motor_channel][7:0] <= word_data_received[15:8];
+            current[header_motor_channel][current_bits-1:0] <= word_data_received[15:16-current_bits];
             microsteps[header_motor_channel][2:0] <= word_data_received[2:0];
             `ifdef FORMAL
               assert(header_motor_channel == word_data_received[(48+$clog2(num_motors)):48]);

@@ -22,8 +22,8 @@ module dual_hbridge #(
     input        dir,
     input        enable,
     input        brake,
-    input  [7:0] microsteps,
-    input  [7:0] current,
+    input  [microstep_bits-1:0] microsteps,
+    input  [current_bits-1:0] current,
     output wire [step_count_bits-1:0] step_count,
     input signed [encoder_bits-1:0] encoder_count,
     output wire faultn
@@ -36,8 +36,8 @@ module dual_hbridge #(
   reg signed [step_count_bits-1:0] count_r;
   assign step_count = count_r;
 
-  // Compute the lower bits to determine phase count
-  // Recall that microsteps is quarter wave and we want a counter for 0 -> 2pi
+  // Compute the lower bits need from the step_count for the 0 -> 2pi phase count.
+  // Microsteps is quarter wave but we want a full electrical cycle
   localparam phase_ct_end = $clog2(microstep_count*4) - 1; 
 
   // Set the increment sign based on direction
@@ -64,7 +64,7 @@ module dual_hbridge #(
           .resetn(resetn),
           .vref_pwm({vref_b,vref_a}),
           //.vref_val(vref_val_packed),
-          .current(current[7:(8-current_bits)]),
+          .current(current),
           .phase_ct(count_r[phase_ct_end:0]));
 
 
