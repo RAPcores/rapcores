@@ -1,0 +1,5 @@
+read_verilog -sv testbench/svm_tb.v
+hierarchy -check -top svm_tb
+prep -top svm_tb
+write_verilog svm_parsed.v
+sim -n 3000 -clock clk -resetn resetn -a -vcd testbench/vcd/svm.vcd
