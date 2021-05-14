@@ -120,8 +120,8 @@ module spi_state_machine #(
   wire [move_duration_bits-1:0] move_duration_w = move_duration[moveind];
 
   // Per-axis DDA parameters
-  wire [dda_bits-1:0] increment_w [num_motors-1:0];
-  wire [dda_bits-1:0] incrementincrement_w [num_motors-1:0];
+  wire signed [dda_bits-1:0] increment_w [num_motors-1:0];
+  wire signed [dda_bits-1:0] incrementincrement_w [num_motors-1:0];
 
   genvar i;
   for (i=0; i<num_motors; i=i+1) begin
@@ -158,7 +158,7 @@ module spi_state_machine #(
 
   wire [num_motors-1:0] stepper_faultn; // stepper fault
 
-  wire [encoder_bits-1:0] step_encoder [num_motors-1:0]; // step encoder
+  wire signed [encoder_bits-1:0] step_encoder [num_motors-1:0]; // step encoder
 
   //
   // Stepper Configs
@@ -174,6 +174,7 @@ module spi_state_machine #(
   reg config_invert_highside [0:num_motors-1];
   reg config_invert_lowside [0:num_motors-1];
   reg [7:0] config_chargepump_period; // one chargepump for all
+  wire [9:0] phase_angle [0:num_motors-1];
 
   //
   // Stepper Modules
@@ -182,8 +183,7 @@ module spi_state_machine #(
   `ifdef DUAL_HBRIDGE
     generate
       for (i=0; i<num_motors; i=i+1) begin
-        dual_hbridge #(.step_count_bits(encoder_bits),
-                       .current_bits(current_bits))
+        dual_hbridge #(.current_bits(current_bits))
                     s0 (
                       .clk (CLK),
                       .resetn(resetn),
@@ -196,14 +196,10 @@ module spi_state_machine #(
                         .vref_a (VREF_A[i]),
                         .vref_b (VREF_B[i]),
                       `endif
-                      .step (step[i]),
-                      .dir (dir[i]),
+                      .phase_angle(phase_angle[i]),
                       .enable (enable[i]),
                       .brake  (brake[i]),
-                      .microsteps (microsteps[i]),
                       .current (current[i]),
-                      .step_count(step_encoder[i]),
-                      .encoder_count(encoder_count[i]),
                       .faultn(stepper_faultn[i]));
       end
     endgenerate
@@ -314,14 +310,17 @@ module spi_state_machine #(
 
     // N dda timers per axis
     for (i=0; i<num_motors; i=i+1) begin
-      dda_timer ddan (
+      dda_timer #(.phase_angle_bits(10),
+                  .step_encoder_bits(encoder_bits))
+        ddan (
                     .resetn(resetn),
                     .dda_tick(dda_tick),
                     .increment(increment_w[i]),
                     .incrementincrement(incrementincrement_w[i]),
                     .loading_move(loading_move),
                     .executing_move(executing_move),
-                    .step(dda_step[i]),
+                    .step_encoder(step_encoder[i]),
+                    .phase_angle(phase_angle[i]),
                     .CLK(CLK)
                     );
     end
