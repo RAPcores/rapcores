@@ -112,7 +112,9 @@ module spi_state_machine #(
   localparam status_stepper_fault = status_encoder_fault + 1;
   localparam status_encoder_velocity_start = status_stepper_fault + 1;
   localparam status_encoder_velocity_end = status_encoder_velocity_start + num_encoders - 1;
-  localparam status_reg_end = status_encoder_velocity_end;
+  localparam status_phase_angle_start = status_encoder_velocity_end + 1;
+  localparam status_phase_angle_end = status_phase_angle_start + num_motors - 1;
+  localparam status_reg_end = status_phase_angle_end;
 
   // Status Register (read-only, so wires)
   wire [word_bits-1:0] status_reg_ro    [status_reg_end:0];
@@ -122,6 +124,7 @@ module spi_state_machine #(
   wire signed [encoder_bits-1:0] encoder_count [num_encoders-1:0];
   wire signed [encoder_velocity_bits-1:0] encoder_velocity [num_encoders-1:0];
   wire signed [encoder_velocity_bits-1:0] encoder_velocity_counter [num_encoders-1:0];
+  wire [9:0] phase_angle [0:num_motors-1];
 
   // Set Status Registers, these are reset by their respective module,
   // or set as constants here
@@ -138,6 +141,9 @@ module spi_state_machine #(
   for(g=0; g<num_encoders; g=g+1) begin
     assign status_reg_ro[status_encoder_velocity_start+g] = encoder_velocity[g];
     assign status_reg_ro[status_encoder_position_start+g] = encoder_count[g];
+  end
+  for(g=0; g<num_motors; g=g+1) begin
+    assign status_reg_ro[status_phase_angle_start+g] = phase_angle[g];
   end
 
   // ---
@@ -207,8 +213,8 @@ module spi_state_machine #(
   reg [num_motors:1] dir_r [MOVE_BUFFER_SIZE:0];
 
   // Per-axis DDA parameters
-  wire [dda_bits-1:0] increment_w [num_motors-1:0];
-  wire [dda_bits-1:0] incrementincrement_w [num_motors-1:0];
+  wire signed [dda_bits-1:0] increment_w [num_motors-1:0];
+  wire signed [dda_bits-1:0] incrementincrement_w [num_motors-1:0];
 
   // Command Buffer selection
   genvar i;
@@ -260,7 +266,7 @@ module spi_state_machine #(
     assign ENOUTPUT = enable;
   `endif
 
-  wire [encoder_bits-1:0] step_encoder [num_motors-1:0]; // step encoder
+  wire signed [encoder_bits-1:0] step_encoder [num_motors-1:0]; // step encoder
 
 
   //
@@ -270,8 +276,7 @@ module spi_state_machine #(
   `ifdef DUAL_HBRIDGE
     generate
       for (i=0; i<num_motors; i=i+1) begin
-        dual_hbridge #(.step_count_bits(encoder_bits),
-                       .current_bits(current_bits))
+        dual_hbridge #(.current_bits(current_bits))
                     s0 (
                       .clk (CLK),
                       .resetn(resetn),
@@ -284,14 +289,10 @@ module spi_state_machine #(
                         .vref_a (VREF_A[i]),
                         .vref_b (VREF_B[i]),
                       `endif
-                      .step (step[i]),
-                      .dir (dir[i]),
+                      .phase_angle (phase_angle[i]),
                       .enable (enable[i]),
                       .brake  (brake_r[i]),
-                      .microsteps (microsteps[i]),
                       .current (current[i]),
-                      .step_count(step_encoder[i]),
-                      .encoder_count(encoder_count[i]),
                       .faultn(stepper_faultn[i]));
       end
     endgenerate
@@ -399,14 +400,17 @@ module spi_state_machine #(
 
     // N dda timers per axis
     for (i=0; i<num_motors; i=i+1) begin
-      dda_timer ddan (
+      dda_timer #(.phase_angle_bits(10),
+                  .step_encoder_bits(encoder_bits))
+        ddan (
                     .resetn(resetn),
                     .dda_tick(dda_tick),
                     .increment(increment_w[i]),
                     .incrementincrement(incrementincrement_w[i]),
                     .loading_move(loading_move),
                     .executing_move(executing_move),
-                    .step(dda_step[i]),
+                    .step_encoder(step_encoder[i]),
+                    .phase_angle(phase_angle[i]),
                     .CLK(CLK)
                     );
     end
