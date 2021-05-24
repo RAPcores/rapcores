@@ -14,6 +14,10 @@
 #  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 #  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+# Do not use make's built-in rules
+# (this improves performance and avoids hard-to-debug behaviour);
+MAKEFLAGS += -r
+
 # default board is rapbo
 BOARD ?= rapbo
 
@@ -165,41 +169,21 @@ stat:
 ice40:
 	yosys -s yosys/ice40.ys $(SIMFILES) $(GENERATEDFILES)
 
-.SECONDARY:
-.PHONY: all prog clean formal build-full
 
+#
+# RAPcore-cli and librapcore recipes
+#
 
-
-# Do not use make's built-in rules
-# (this improves performance and avoids hard-to-debug behaviour);
-MAKEFLAGS += -r
 
 CFLAGS += -O2 -Wall -g -D_GNU_SOURCE -I$(OUTPUT)include
 
-ALL_TARGETS := rapcore-cli
-ALL_PROGRAMS := $(patsubst %,$(OUTPUT)%,$(ALL_TARGETS))
-
-all: $(ALL_PROGRAMS)
-
-#
-# spidev_test
-#
-rapcore-cli: src/rapcore-cli.c src/librapcore.h
+rapcore-cli: librapcore/rapcore-cli.c librapcore/librapcore.h
 	$(CC) $(CFLAGS) $(LDFLAGS) $< -o $@
 
-clean:
-	rm -f $(ALL_PROGRAMS)
-	rm -rf $(OUTPUT)include/
-	find $(if $(OUTPUT),$(OUTPUT),.) -name '*.o' -delete
-	find $(if $(OUTPUT),$(OUTPUT),.) -name '\.*.o.d' -delete
-	find $(if $(OUTPUT),$(OUTPUT),.) -name '\.*.o.cmd' -delete
 
-install: $(ALL_PROGRAMS)
-	install -d -m 755 $(DESTDIR)$(bindir);		\
-	for program in $(ALL_PROGRAMS); do		\
-		install $$program $(DESTDIR)$(bindir);	\
-	done
+#
+# Misc.
+#
 
-FORCE:
-
-.PHONY: all install clean FORCE prepare
+.SECONDARY:
+.PHONY: all prog clean formal build-full
