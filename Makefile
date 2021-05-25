@@ -14,6 +14,10 @@
 #  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 #  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+# Do not use make's built-in rules
+# (this improves performance and avoids hard-to-debug behaviour);
+MAKEFLAGS += -r
+
 # default board is rapbo
 BOARD ?= rapbo
 
@@ -164,6 +168,22 @@ stat:
 
 ice40:
 	yosys -s yosys/ice40.ys $(SIMFILES) $(GENERATEDFILES)
+
+
+#
+# RAPcore-cli and librapcore recipes
+#
+
+
+CFLAGS += -O2 -Wall -g -D_GNU_SOURCE -I$(OUTPUT)include
+
+rapcore-cli: librapcore/rapcore-cli.c librapcore/librapcore.h
+	$(CC) $(CFLAGS) $(LDFLAGS) $< -o $@
+
+
+#
+# Misc.
+#
 
 .SECONDARY:
 .PHONY: all prog clean formal build-full
