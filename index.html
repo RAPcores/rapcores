@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>RAPcore Documentation &#8212; RAPcores  documentation</title>
+    <title>RAPcores Documentation &#8212; RAPcores  documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -32,43 +32,11 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="rapcore-documentation">
-<h1>RAPcore Documentation<a class="headerlink" href="#rapcore-documentation" title="Permalink to this headline">¶</a></h1>
-<p>RAPcore stands for Robotic Application Processing Core, and
-seeks to develop high-performance hardware to enable the next generation
-of robotics application. The project was started by Ultimachine and Synthetos,
-two companies that have innovated technologies such as the RAMPS board, RAMBo, and
-jerk controlled kinematics in low-cost additive and subtractive systems.</p>
-<div class="section" id="objective">
-<h2>Objective<a class="headerlink" href="#objective" title="Permalink to this headline">¶</a></h2>
-<p>3D printers as one of the first ubiquitous robots, but there is far more value in automation
-and digital manufacturing technologies that has yet to be unlocked to the average person.
-RAPcore leverages recent advancements in technology to help accomplish this:</p>
-<ul class="simple">
-<li><p>Open Source FPGA synthesis</p></li>
-<li><p>Open Source formal verification</p></li>
-<li><p>Open Source RISC-V CPUs</p></li>
-<li><p>Advanced motor control and kinematic algorithms</p></li>
-</ul>
-<p>To start, the project is focused on FPGA hardware for high performance closed-loop motor
-control. These early iterations will prove-out the hardware and RAPcore gateware. Similarly,
-we will greatly reduce the computational overhead on microcontrollers by coordinating
-step sequences and commutation. This will lead to a suitable middle ground of price
-and performance based upon our analysis. By fusing the step timing and commutation logic
-into a single element (the FPGA) we allow for smaller and more efficient micro controllers,
-and on the drive side we allow for greater flexibility and power output of motor driver
-circuitry.</p>
-</div>
-<div class="section" id="feature-overview">
-<h2>Feature Overview<a class="headerlink" href="#feature-overview" title="Permalink to this headline">¶</a></h2>
-<p>The basic features of RAPcores is as follows:</p>
-<ul class="simple">
-<li><p>Onboard stepper motor commutator</p></li>
-<li><p>Fixed Point Step-Timing Algorithm</p></li>
-<li><p>High-speed Quadrature Encoder Accumulator</p></li>
-<li><p>High-Speed SPI Bus</p></li>
-</ul>
-</div>
+  <div class="section" id="rapcores-documentation">
+<h1>RAPcores Documentation<a class="headerlink" href="#rapcores-documentation" title="Permalink to this headline">¶</a></h1>
+<p>RAPcores is an open source project focused on widely deployable FPGA and ASIC hardware
+for high performance closed-loop motor control. RAPcores stands for
+Robotic Application Processing Cores.</p>
 <div class="section" id="contents">
 <h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
@@ -128,7 +96,9 @@ circuitry.</p>
 <li class="toctree-l2"><a class="reference internal" href="motor_control.html#references">References</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="interfaces.html">Interfaces</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="librapcore.html">librapcore</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces.html">Software Programs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="interfaces.html#rapcore-cli">RAPcore-cli</a></li>
 <li class="toctree-l2"><a class="reference internal" href="interfaces.html#interactive-spi-using-raspi-julia">Interactive SPI using RasPi + Julia</a></li>
 </ul>
 </li>
@@ -164,7 +134,8 @@ circuitry.</p>
 <li class="toctree-l1"><a class="reference internal" href="configuration.html">Board Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev.html">Developer Docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="motor_control.html">Motor Control</a></li>
-<li class="toctree-l1"><a class="reference internal" href="interfaces.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="librapcore.html">librapcore</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces.html">Software Programs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="asic.html">RAPcores on ASIC</a></li>
 </ul>
 
