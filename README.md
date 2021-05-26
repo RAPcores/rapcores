@@ -10,17 +10,20 @@ RAPcores is a motor and motion control toolkit for FPGAs and ASIC devices.
 It creates a peripheral that sits between kinematics engines and motors to free up
 processing power, enrich dynamical models, and greatly simplify the motor driver.
 
-## Features
+## Docs
 
-- Onboard stepper motor commutator (at least 256x microsteps)
-- High precision 64-bit fixed-point second order motion interpolator
-- High speed second order quadrature encoder
-- High speed SPI bus
-- Multi-channel control with protocol support up to 56 motors
+- [Build](http://rapcores.org/rapcores/dev.html)
+- [Configuration](http://rapcores.org/rapcores/configuration.html)
+- [Releases](http://rapcores.org/rapcores/releases.html)
+- [Motor Control Guide](http://rapcores.org/rapcores/motor_control.html)
+- [ASIC Deployments](http://rapcores.org/rapcores/asic.html)
+- [SPI Interface](http://rapcores.org/rapcores/spi_spec.html)
+- [Support Software](http://rapcores.org/rapcores/interfaces.html)
+- [C API](http://rapcores.org/rapcores/librapcore.html)
 
-## Target Hardware
+## FPGA Support
 
-The following FPGA architectures are supported and tested:
+The following FPGA architectures are supported and tested on our build configuration system:
 
 - iCE40
 - ECP5
@@ -33,15 +36,8 @@ An early pathfinder has been hardened on ASIC for the Skywater Open MPW run usin
 
 - [MPW-one ASIC](https://github.com/RAPcores/caravel_rapcores)
 
-## Build Requirements
-
-RAPcores uses the free and open source Yosys and nextpnr tool chains.
-See the [dev docs](https://rapcores.github.io/rapcores/dev.html) for more information.
-
-## Documentation
-
-https://rapcores.github.io/rapcores/
+RAPcores RTL is written in Verilog and tested with Yosys and IVerilog.
 
 ## License
 
-[ISC License](https://en.wikipedia.org/wiki/ISC_license).
+[ISC License](https://en.wikipedia.org/wiki/ISC_license)
