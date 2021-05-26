@@ -4,85 +4,78 @@ Motor Control
 
 This section describes the principles of motor control at a low level.
 
-Definitions
-===========
-
-- Integrated Driver - A IC taking step/direction signals with onboard logic for commutation and microstepping
-- Commutation - The process of controlling an electrical bridge for
-- Full Bridge - A center-tapped transistor circuit allowing for either high or low (ground) voltage
-- H-Bridge - Two full bridges allowing for bidirectional current flow
-
 Electrical Commutation
 ======================
 
-Electrical commutation is the process of timing and controlling electrical current in the
-windings of a motor. In years past you might use a brushed DC or induction motor, plug it
-into you power supply or wall mains outlet and that would be it. The reason the hookup
-for brushed DC is simple is due to electrical contacts called commutators. With induction
-motors your mains AC voltage will generate a rotating potential in the motor making it spin,
-which is also a form of commutation.
+Electrical commutation is the process of generating rotating magnetic fields in
+an electromagnetic system. In electric motors this involves the generation of AC and DC
+signals. Some simple motors may do this mechanically, however for precision applications
+such as robotics and manufacturing it is done with digital control systems. 
 
-However, modern brushless motors require much more logic and control to perform their best.
-First, since brushless motors (e.g. Steppers, BLDC) do not have electro-mechanical commutation
-(hence the name "brush-less"), we need to digitally switch the motor coils on and off.
-This is accomplished with arrays of transistors called "bridges" that allow for bidirectional
-current flow. By controlling these bridges we can generate alternative voltages that make
-the motor spin.
+Many types of motors may be controlled with electrical commutation:
 
-In contrast to integrated drivers e.g. that take PWM for BLDC, or step/direction for steppers,
-the approach in RAPcores is to provide higher level APIs tailored for the application or
-action. Some examples:
+* Brushless DC
+* Induction
+* Stepper
+* Switched Reluctance
 
-* "S"-curve stepping algorithms
-* Sensorless homing
-* Torque control
+There are of course many innovative topologies being developed every year, and
+many of these use the same operating principles as the above. RAPcores aims
+to provide a toolkit for controlling a wide range of motor types.
 
-Commutation Tables
-==================
+The two basic elements of a motor controller are:
 
-Bipolar Stepper
----------------
+* Power systems
+* Control systems
 
-== ==
-A  B 
-== ==
-\+ \- 
-\- \- 
-\- \+ 
-\+ \+ 
-== ==
+The power systems element is the element that handle the (relatively) high
+power that drives the motor. Typically MOSFETs or IGBTs are used in full or H bridge
+inverter configurations to generate AC voltages. It may include additional sensors such as an
+encoder, voltage sensor, and current sensor. All three are preferred for
+closed-loop control.  
 
-Three Phase (BLDC, Induction)
------------------------------
+The control systems element is the software or digital logic system managing
+inputs and outputs of the power circuitry, sensors, and input trajectories.
+In RAPcores the low levels of this are handled in FPGA or ASIC, with a
+microcontroller or CPU handling high level trajectory planning. The job of the
+control system is to ensure the motor is following the defined trajectory or
+set behavior. 
 
- == == ==
- A  B  C 
- == == ==
- \+ \- \  
- \+ \  \- 
- \  \+ \- 
- \- \+ \  
- \- \  \+ 
- \  \- \+ 
- == == ==
 
-Five Phase Stepper
-------------------
+Bridge Control
+==============
 
- == == == == ==
- A  B  C  D  E 
- == == == == ==
- \+ \  \- \- \  
- \+ \+ \  \- \  
- \  \+ \  \- \- 
- \  \+ \+ \  \- 
- \- \  \+ \  \- 
- \- \  \+ \+ \  
- \- \- \  \+ \  
- \  \- \  \+ \+ 
- \  \- \- \  \+ 
- \+ \  \- \  \+ 
- == == == == ==
+Below is a simple motor control hierarchy:
+
+.. image:: ./img/controller-hierarchy.svg
+
+Bridge control involves the timing of output signals such that
+the motor power circuitry creates the desires voltage and current
+in each coil of the motor. In addition, it needs to be fault aware
+and control timing to create smooth operation. Typically high-resolution
+PWM signals are used at supra-audible frequencies (>35kHz). 
+
+Due to the use of PWM and commutation, the voltages are non-contant. There
+are some timing considerations when switching the motor:
+
+* Dead time
+* Off time
+* On time
+* Blank time
+
+Dead time is the time required for a transistor in the bridge to turn on or off.
+When switching polarities, it is important the controller wait this "dead time",
+or delay, before changing the direction of the inverter otherwise breakage might occur.
+
+Off time and On time are the duration the PWM signal is on or off. The relation of
+these two is relevant to current and voltage measurements of the motor. Measuring
+voltage and current over time allows for measurement of resistance and inductance
+in the motor.
+
+Blank time is related to the propogation delay of measuring the outputs to the motor.
+Since a digital design can react on a cycle-to-cycle basis of the PWM, delays
+must be accounted in elements such as ADCs and comparators before measuring 
+then reacting to a change in the power output.
 
 
 Motor Fault Types
@@ -98,58 +91,31 @@ The following faults may occur in a motor:
 
 A good bridge design should be able to handle the majority of these
 fault conditions and report back to higher level controllers for
-rectification by the user or path planner.
+rectification by the user or path planner. In RAPcores there are
+fault diagnostic registers for each motor channel.
 
-Bridge Control
-==============
-
-Below is a simple motor control hierarchy:
-
-.. image:: ./img/controller-hierarchy.svg
-
-And the four motoring quadrants that occur in a motor:
-
-.. image:: ./img/motoring-quadrants.svg
-
-Bridge control involves the timing of output signals such that
-the motor bridge or motor inverter does not enter a state that may
-lead to failure or poor performance characteristics. Below are some
-common timing events that need to be handled in a direct bridge control
-paradigm:
-
-* Dead time
-* Off time
-* On time
-* Blank time
-
-
-Dead Time 
----------
-
-Dead time is the amount of time a bridge spends in an "off" state between state transitions.
-This avoids a scenario when in a given half bridge both the high and low side
-switching circuits are both on at the same time, thereby creating a short circuit.
 
 Space Vector Modulation
 =======================
 
-The key to smooth and efficient motor control is current regulation.
-Through current regulation in a motor, one can accomplish a few valuable things:
+The key to smooth and efficient motor control is a high precision electrical commutator.
+To achieve this, precise currents and voltages must be generated. Moreover, they
+must rotate the magnetic field at a wide variety of speeds and accelerations.
+As mentioned, PWM signals are used to control the power output and to rotate the
+magnetic field with PWM, we use a Space Vector Modulator. 
+
+Two elements are required for Space Vector Modulation or SVM:
 
 * Microstepping (subdividing the commutation table)
 * Current regulation (limiting power output for efficiency)
 
-With closed loop current regulation, e.g. through a current sense resistor, additional
-capabilities are also achieved:
-
-* Fault detection
-* Phase shift and skip detection
-
+To understand the concepts and mathematics of the rotating magnetic field,
+we will use vectors and phasors.
 
 Vector Concepts
 ---------------
 
-Here we will present the mathematical ideas of how to model the target current in a bipolar stepper
+Here we will present the mathematical ideas of how to model a rotating magnetic field in a bipolar stepper
 motor as a vector. This is known as `Space Vector Modulation <https://en.wikipedia.org/wiki/Space_vector_modulation>`_.
 To start we must understand some basic concepts from vector algebra and trigonometry.
 
@@ -259,9 +225,29 @@ Or for a dead-reckoned approach this PWM can be used to quickly turn the gate dr
 SVM in Three Phase
 ------------------
 
-For the mathematically inclined, you may notice that the bipolar stepper is nice as the phases form an orthonormal basis in 2D space. In three phase this is not the case.
-We have yet to implement three phase in RAPcores, but in the interim `the wikipedia page <https://en.wikipedia.org/wiki/Space_vector_modulation>`_ has some
-information on handling this case.
+For the mathematically inclined, you may notice that the bipolar stepper is nice
+as the phases form an orthonormal basis in 2D space. In three phase or more motors, this is not the case,
+as the vector is embedded in three or more dimensional space.
+
+The technique used in three phase control is to project the three dimensional vector down into a two dimensional
+space such that we can use simpler math for the control. In addition, the inverse may be applied, bringing us
+from the two dimensional frame of reference to the three dimensional frame of reference for the three phase motor.
+
+The forward transform:
+
+.. math::
+  i_{\alpha\beta}(t) = \frac23 \begin{bmatrix} 1 & -\frac12 & -\frac12\\ 
+  0 & \frac{\sqrt{3}}{2} & -\frac{\sqrt{3}}{2}
+  \end{bmatrix}\begin{bmatrix}i_a(t)\\i_b(t)\\i_c(t)\end{bmatrix}
+
+The inverse transform:
+
+.. math::
+  i_{abc}(t) = \frac32\begin{bmatrix} \frac23 & 0 \\
+  -\frac{1}{3} & \frac{\sqrt{3}}{3} \\
+  -\frac{1}{3} & -\frac{\sqrt{3}}{3} \end{bmatrix}
+  \begin{bmatrix}i_\alpha(t)\\i_\beta(t)\end{bmatrix}
+
 
 Frequency Considerations
 ========================
@@ -282,8 +268,60 @@ Microsteps/sec (homing)  5000   5000  5333.3
 Full Steps/sec (homing)  312.5  312.5 333.3
 ======================== =====  ===== ======  =====
 
-Analytical Model of a Stepper Motor
-===================================
+
+Commutation Tables
+==================
+
+Bipolar Stepper
+---------------
+
+== ==
+A  B 
+== ==
+\+ \- 
+\- \- 
+\- \+ 
+\+ \+ 
+== ==
+
+Three Phase (BLDC, Induction)
+-----------------------------
+
+ == == ==
+ A  B  C 
+ == == ==
+ \+ \- \  
+ \+ \  \- 
+ \  \+ \- 
+ \- \+ \  
+ \- \  \+ 
+ \  \- \+ 
+ == == ==
+
+Five Phase Stepper
+------------------
+
+ == == == == ==
+ A  B  C  D  E 
+ == == == == ==
+ \+ \  \- \- \  
+ \+ \+ \  \- \  
+ \  \+ \  \- \- 
+ \  \+ \+ \  \- 
+ \- \  \+ \  \- 
+ \- \  \+ \+ \  
+ \- \- \  \+ \  
+ \  \- \  \+ \+ 
+ \  \- \- \  \+ 
+ \+ \  \- \  \+ 
+ == == == == ==
+
+
+Analytical Models
+=================
+
+Stepper Motor
+-------------
 
 A model of a hybrid stepper motor is given by Bodson, et. al.: [1]
 
@@ -313,6 +351,16 @@ From this a simpler model for the current can be developed:
 .. math::
   i_{qr} = \frac{J}{K_m} \alpha_r + \frac{B}{K_m} \omega_r
 
+
+Motoring Quadrants
+------------------
+
+Motoring quadrants are the four possible states a rotor and stator may take. Assuming
+the stator is the driving portion and the rotor is connected to the load, either maybe
+generating torque in conjunction or opposition to the desired motoring trajectory.
+These states are illustrated below:
+
+.. image:: ./img/motoring-quadrants.svg
 
 
 
