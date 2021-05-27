@@ -14,7 +14,8 @@ module spi_state_machine #(
     parameter default_current = 140,
     parameter BUFFER_SIZE = 2,
     parameter default_clock_divisor = 32,
-    parameter current_bits = 4
+    parameter current_bits = 4,
+    parameter word_size = 64
   )(
   `ifdef LA_IN
     input wire [`LA_IN:1] LA_IN,
@@ -97,6 +98,29 @@ module spi_state_machine #(
   localparam MOVE_BUFFER_SIZE = BUFFER_SIZE - 1; //This is the zero-indexed end index
   localparam MOVE_BUFFER_BITS = $clog2(BUFFER_SIZE) - 1; // number of bits to index given size
 
+  // Register Blocks
+  reg [word_size-1:0] status_reg_ro [63:0];
+  reg [word_size-1:0] config_reg_rw [63:0];
+
+  // Status register locations and alignments
+  localparam status_version = 0;
+  localparam status_channel_info = 1;
+  localparam status_encoder_start = 2;
+  localparam status_encoder_end = status_encoder_start + num_encoders -1;
+  localparam status_encoder_fault = status_encoder_end + 1;
+  localparam status_stepper_fault = status_encoder_fault + 1;
+
+  // Status Register Initialization
+  initial begin
+    status_reg_ro[status_version][7:0]   = `VERSION_PATCH;
+    status_reg_ro[status_version][15:8]  = `VERSION_MINOR;
+    status_reg_ro[status_version][23:16] = `VERSION_MAJOR;
+    status_reg_ro[status_version][31:24] = `VERSION_DEVEL;
+    status_reg_ro[status_channel_info][7:0]   = num_motors;
+    status_reg_ro[status_channel_info][15:8]  = num_encoders;
+    status_reg_ro[status_channel_info][23:16] = encoder_bits;
+    status_reg_ro[status_channel_info][31:24] = encoder_velocity_bits;
+  end
 
   //
   // Stepper Timing and Buffer Setup
@@ -156,8 +180,6 @@ module spi_state_machine #(
     assign ENOUTPUT = enable;
   `endif
 
-  wire [num_motors-1:0] stepper_faultn; // stepper fault
-
   wire [encoder_bits-1:0] step_encoder [num_motors-1:0]; // step encoder
 
   //
@@ -204,7 +226,7 @@ module spi_state_machine #(
                       .current (current[i]),
                       .step_count(step_encoder[i]),
                       .encoder_count(encoder_count[i]),
-                      .faultn(stepper_faultn[i]));
+                      .faultn(status_reg_ro[status_stepper_fault][i]));
       end
     endgenerate
   `endif
@@ -246,7 +268,7 @@ module spi_state_machine #(
           .step (step[i]),
           .dir (dir[i]),
           .enable_in(enable[i]),
-          .faultn(stepper_faultn[i])
+          .faultn(status_reg_ro[status_stepper_fault][i])
           );
       end
     endgenerate
@@ -258,7 +280,6 @@ module spi_state_machine #(
   //
 
   wire signed [encoder_bits-1:0] encoder_count [num_encoders-1:0];
-  wire [num_encoders-1:0] encoder_faultn;
   wire [encoder_velocity_bits-1:0] encoder_velocity [num_encoders-1:0];
 
   `ifdef QUAD_ENC
@@ -270,7 +291,7 @@ module spi_state_machine #(
         .clk(CLK),
         .a(ENC_A[i]),
         .b(ENC_B[i]),
-        .faultn(encoder_faultn[i]),
+        .faultn(status_reg_ro[status_encoder_fault][i]),
         .count(encoder_count[i]),
         .velocity(encoder_velocity[i])
         //.multiplier(encoder_multiplier)
@@ -415,6 +436,7 @@ module spi_state_machine #(
         // First word so message count zero
         message_word_count <= 1;
 
+        if (word_data_received[word_bits-1:word_bits-8] < 8'd128)
         case (word_data_received[word_bits-1:word_bits-8])
 
           // Coordinated Move
@@ -481,47 +503,12 @@ module spi_state_machine #(
             config_invert_lowside[header_motor_channel] <= word_data_received[0];
           end
 
-          // Read Stepper fault register
-          CMD_STEPPERFAULT: begin
-            word_send_data[num_motors-1:0] <= ~stepper_faultn;
-          end
-
-          // Read Stepper fault register
-
-          CMD_ENCODERFAULT: begin
-            if (num_encoders > 0) word_send_data[num_encoders-1:0] <= ~encoder_faultn;
-          end
-
-
-          // Write to Cosine Table
-          // TODO Cosine Net is broken
-          //CMD_COSINE_CONFIG: begin
-            //cos_table[word_data_received[35:32]] <= word_data_received[31:0];
-            //cos_table[word_data_received[37:32]] <= word_data_received[7:0];
-            //cos_table[word_data_received[35:32]+3] <= word_data_received[31:25];
-            //cos_table[word_data_received[35:32]+2] <= word_data_received[24:16];
-            //cos_table[word_data_received[35:32]+1] <= word_data_received[15:8];
-            //cos_table[word_data_received[35:32]] <= word_data_received[7:0];
-          //end
-
-          // API Version
-          CMD_API_VERSION: begin
-            word_send_data[7:0] <= `VERSION_PATCH;
-            word_send_data[15:8] <= `VERSION_MINOR;
-            word_send_data[23:16] <= `VERSION_MAJOR;
-            word_send_data[31:24] <= `VERSION_DEVEL;
-          end
-
-          CMD_CHANNEL_INFO: begin
-            word_send_data[7:0] <= num_motors;
-            word_send_data[15:8] <= num_encoders;
-            word_send_data[23:16] <= encoder_bits;
-            word_send_data[31:24] <= encoder_velocity_bits;
-          end
-
           default: word_send_data <= 64'b0;
 
-        endcase
+        endcase else begin
+          // WIP: Simpler Register handling for some simple cases
+          word_send_data <= status_reg_ro[8'd255-word_data_received[word_bits-1:word_bits-8]];
+        end
 
       // Addition Word Processing
       end else begin
