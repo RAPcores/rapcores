@@ -259,7 +259,8 @@ module spi_state_machine #(
 
   wire signed [encoder_bits-1:0] encoder_count [num_encoders-1:0];
   wire [num_encoders-1:0] encoder_faultn;
-  wire [encoder_velocity_bits-1:0] encoder_velocity [num_encoders-1:0];
+  wire signed [encoder_velocity_bits-1:0] encoder_velocity [num_encoders-1:0];
+  wire signed [encoder_velocity_bits-1:0] encoder_velocity_counter [num_encoders-1:0];
 
   `ifdef QUAD_ENC
     for (i=0; i<num_encoders; i=i+1) begin
@@ -272,7 +273,8 @@ module spi_state_machine #(
         .b(ENC_B[i]),
         .faultn(encoder_faultn[i]),
         .count(encoder_count[i]),
-        .velocity(encoder_velocity[i])
+        .velocity(encoder_velocity[i]),
+        .velocity_counter(encoder_velocity_counter[i])
         //.multiplier(encoder_multiplier)
         );
     end

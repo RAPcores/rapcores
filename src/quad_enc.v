@@ -11,8 +11,9 @@ module quad_enc #(
   input wire  a,
   input wire  b,
   output reg faultn,
-  output wire signed [encbits-1:0] count,
-  output wire signed [velocity_bits-1:0] velocity
+  output reg signed [encbits-1:0] count,
+  output reg signed [velocity_bits-1:0] velocity,
+  output reg signed [velocity_bits-1:0] velocity_counter,
   //input [7:0] multiplier
   );
 
@@ -25,16 +26,12 @@ module quad_enc #(
   wire step = step_a ^ step_b;  //Step if a xor b stepped
   wire direction = a_stable[1] ^ b_stable[2];  //Direction determined by comparing current sample to last
 
-  reg signed [encbits-1:0] count_r;
-  assign count = count_r;
-
-  reg signed [velocity_bits-1:0] velocity_counter;
-  reg signed [velocity_bits-1:0] velocity_r;
-  assign velocity = velocity_r;
-
   always @(posedge clk) begin
     if (!resetn) begin
-      count_r <= 0;  //reset count
+      count <= 0;  //reset count
+      velocity <= 0;
+      velocity_counter <= 0;
+
       faultn <= 1'b1; //reset faultn
       a_stable <= 3'b0;
       b_stable <= 3'b0;
@@ -48,12 +45,12 @@ module quad_enc #(
         faultn <= 0;
       if (step) begin
         if (direction) begin
-          count_r <= count_r + 1'b1;
-          velocity_r <= velocity_counter;
+          count <= count + 1'b1;
+          velocity <= velocity_counter;
         end
         else begin
-          count_r <= count_r - 1'b1;
-          velocity_r <= -velocity_counter;
+          count <= count - 1'b1;
+          velocity <= -velocity_counter;
         end
         velocity_counter <= 0;
       end
