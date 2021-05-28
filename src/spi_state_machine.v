@@ -362,9 +362,6 @@ module spi_state_machine #(
 
   // check if the Header indicated multi-word transfer
   wire awaiting_more_words = (message_header == CMD_COORDINATED_STEP) |
-                             (message_header == CMD_STEPPERFAULT) |
-                             (message_header == CMD_ENCODERFAULT) |
-                             (message_header == CMD_READ_ENCODER) |
                              (message_header >= 8'd128);
 
   wire [$clog2(num_motors-1):0] header_motor_channel = word_data_received[(48+$clog2(num_motors)):48];
@@ -424,8 +421,6 @@ module spi_state_machine #(
 
   end else if (resetn) begin
     if (word_received_rising) begin
-      // Zero out send data register
-      word_send_data <= 64'b0;
 
       // Header Processing
       if (!awaiting_more_words) begin
@@ -508,7 +503,7 @@ module spi_state_machine #(
           endcase
         end else begin
           // WIP: Simpler Register handling for some simple cases
-          word_send_data <= status_reg_ro[8'd254-word_data_received[word_bits-1:word_bits-8]];
+          word_send_data <= status_reg_ro[8'hff-word_data_received[word_bits-1:word_bits-8]];
         end
 
       // Addition Word Processing
