@@ -362,10 +362,10 @@ module spi_state_machine #(
 
   // check if the Header indicated multi-word transfer
   wire awaiting_more_words = (message_header == CMD_COORDINATED_STEP) |
-                             (message_header == CMD_API_VERSION) |
                              (message_header == CMD_STEPPERFAULT) |
                              (message_header == CMD_ENCODERFAULT) |
-                             (message_header == CMD_READ_ENCODER);
+                             (message_header == CMD_READ_ENCODER) |
+                             (message_header >= 8'd128);
 
   wire [$clog2(num_motors-1):0] header_motor_channel = word_data_received[(48+$clog2(num_motors)):48];
 
@@ -436,78 +436,79 @@ module spi_state_machine #(
         // First word so message count zero
         message_word_count <= 1;
 
-        if (word_data_received[word_bits-1:word_bits-8] < 8'd128)
-        case (word_data_received[word_bits-1:word_bits-8])
+        if (word_data_received[word_bits-1:word_bits-8] < 8'd128) begin
+          case (word_data_received[word_bits-1:word_bits-8])
 
-          // Coordinated Move
-          CMD_COORDINATED_STEP: begin
+            // Coordinated Move
+            CMD_COORDINATED_STEP: begin
 
-            // Get Direction Bits
-            dir_r[writemoveind] <= word_data_received[num_motors-1:0];
+              // Get Direction Bits
+              dir_r[writemoveind] <= word_data_received[num_motors-1:0];
 
-            // Store encoder values across all axes
-            for (nmot=0; nmot<num_motors; nmot=nmot+1) begin
-              step_encoder_store[nmot] <= step_encoder[nmot];
-              if (num_encoders > 0)
-                encoder_store[nmot] <= encoder_count[nmot];
+              // Store encoder values across all axes
+              for (nmot=0; nmot<num_motors; nmot=nmot+1) begin
+                step_encoder_store[nmot] <= step_encoder[nmot];
+                if (num_encoders > 0)
+                  encoder_store[nmot] <= encoder_count[nmot];
+              end
+
             end
 
-          end
+            // Motor Enable/disable
+            CMD_MOTOR_ENABLE: begin
+              enable_r[num_motors-1:0] <= word_data_received[num_motors-1:0];
+            end
 
-          // Motor Enable/disable
-          CMD_MOTOR_ENABLE: begin
-            enable_r[num_motors-1:0] <= word_data_received[num_motors-1:0];
-          end
+            CMD_READ_ENCODER: begin
+              word_send_data[encoder_bits+encoder_velocity_bits-1:0] <= {encoder_velocity[header_motor_channel], encoder_count[header_motor_channel]};
+            end
 
-          CMD_READ_ENCODER: begin
-            word_send_data[encoder_bits+encoder_velocity_bits-1:0] <= {encoder_velocity[header_motor_channel], encoder_count[header_motor_channel]};
-          end
+            // Motor Brake on Disable
+            CMD_MOTOR_BRAKE: begin
+              brake_r[num_motors-1:0] <= word_data_received[num_motors-1:0];
+            end
 
-          // Motor Brake on Disable
-          CMD_MOTOR_BRAKE: begin
-            brake_r[num_motors-1:0] <= word_data_received[num_motors-1:0];
-          end
+            // Clock divisor
+            CMD_CLK_DIVISOR: begin
+              clock_divisor[7:0] <= word_data_received[7:0];
+            end
 
-          // Clock divisor
-          CMD_CLK_DIVISOR: begin
-            clock_divisor[7:0] <= word_data_received[7:0];
-          end
+            // Set Microstepping
+            CMD_MOTORCONFIG: begin
+              // TODO needs to be power of two
+              current[header_motor_channel][current_bits-1:0] <= word_data_received[15:16-current_bits];
+              microsteps[header_motor_channel][2:0] <= word_data_received[2:0];
+              `ifdef FORMAL
+                assert(header_motor_channel == word_data_received[(48+$clog2(num_motors)):48]);
+              `endif
+            end
 
-          // Set Microstepping
-          CMD_MOTORCONFIG: begin
-            // TODO needs to be power of two
-            current[header_motor_channel][current_bits-1:0] <= word_data_received[15:16-current_bits];
-            microsteps[header_motor_channel][2:0] <= word_data_received[2:0];
-            `ifdef FORMAL
-              assert(header_motor_channel == word_data_received[(48+$clog2(num_motors)):48]);
-            `endif
-          end
+            // Set Microstepping Parameters
+            CMD_MICROSTEPPER_CONFIG: begin
+              config_offtime[header_motor_channel][9:0] <= word_data_received[39:30];
+              config_blanktime[header_motor_channel][7:0] <= word_data_received[29:22];
+              config_fastdecay_threshold[header_motor_channel][9:0] <= word_data_received[21:12];
+              config_minimum_on_time[header_motor_channel][7:0] <= word_data_received[18:11];
+              config_current_threshold[header_motor_channel][10:0] <= word_data_received[10:0];
+            end
 
-          // Set Microstepping Parameters
-          CMD_MICROSTEPPER_CONFIG: begin
-            config_offtime[header_motor_channel][9:0] <= word_data_received[39:30];
-            config_blanktime[header_motor_channel][7:0] <= word_data_received[29:22];
-            config_fastdecay_threshold[header_motor_channel][9:0] <= word_data_received[21:12];
-            config_minimum_on_time[header_motor_channel][7:0] <= word_data_received[18:11];
-            config_current_threshold[header_motor_channel][10:0] <= word_data_received[10:0];
-          end
+            // Set chargepump period
+            CMD_CHARGEPUMP: begin
+              config_chargepump_period[7:0] <= word_data_received[7:0];
+            end
 
-          // Set chargepump period
-          CMD_CHARGEPUMP: begin
-            config_chargepump_period[7:0] <= word_data_received[7:0];
-          end
+            // Invert Bridge outputs
+            CMD_BRIDGEINVERT: begin
+              config_invert_highside[header_motor_channel] <= word_data_received[1];
+              config_invert_lowside[header_motor_channel] <= word_data_received[0];
+            end
 
-          // Invert Bridge outputs
-          CMD_BRIDGEINVERT: begin
-            config_invert_highside[header_motor_channel] <= word_data_received[1];
-            config_invert_lowside[header_motor_channel] <= word_data_received[0];
-          end
+            default: word_send_data <= 64'b0;
 
-          default: word_send_data <= 64'b0;
-
-        endcase else begin
+          endcase
+        end else begin
           // WIP: Simpler Register handling for some simple cases
-          word_send_data <= status_reg_ro[8'd255-word_data_received[word_bits-1:word_bits-8]];
+          word_send_data <= status_reg_ro[8'd254-word_data_received[word_bits-1:word_bits-8]];
         end
 
       // Addition Word Processing
