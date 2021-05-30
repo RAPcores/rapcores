@@ -55,7 +55,7 @@ module space_vector_modulator #(
   genvar ig;
   generate
     for (ig=0; ig<phases; ig=ig+1) begin
-      assign pwm[ig] = phase[ig][microstep_bits-1:0]*current[current_bits-1:0];
+      assign pwm[ig] = phase[ig]*current;
     end
   endgenerate
 
