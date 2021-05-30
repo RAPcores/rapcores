@@ -13,7 +13,7 @@ module quad_enc #(
   output reg faultn,
   output reg signed [encbits-1:0] count,
   output reg signed [velocity_bits-1:0] velocity,
-  output reg signed [velocity_bits-1:0] velocity_counter,
+  output reg signed [velocity_bits-1:0] velocity_counter
   //input [7:0] multiplier
   );
 

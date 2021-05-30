@@ -16,7 +16,7 @@ module dda_fsm #(parameter buffer_bits = 2,
   output executing_move,
   output reg move_done,
   output reg finishedmove,
-  output [buffer_bits-1:0] moveind,
+  output reg [buffer_bits-1:0] moveind,
   input [buffer_size-1:0] stepready,
   output buffer_dtr
 );
