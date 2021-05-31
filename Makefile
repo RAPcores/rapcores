@@ -78,8 +78,11 @@ SIMFILES += ./src/sim/pwm_pll.v
 
 all: $(BUILD).bit
 
-$(BUILD).bit: logs build $(SYNTHFILES)
+
+$(BUILD).json: logs build $(SYNTHFILES)
 	yosys -ql ./logs/$(BOARD)_yosys.log $(YOSYS_FLAGS) -p '$(YOSYS_READ_VERILOG) $(SYNTHFILES); synth_$(ARCH) -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json'
+
+$(BUILD).bit: $(BUILD).json ./boards/$(BOARD)/$(PIN_DEF)
 ifeq ($(ARCH), ice40)
 	nextpnr-ice40 -ql ./logs/$(BOARD)_nextpnr.log $(PNR_FLAGS) --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --json $(BUILD).json --asc $(BUILD).asc --pcf ./boards/$(BOARD)/$(PIN_DEF)
 	icetime -d $(DEVICE) -c $(FREQ) -mtr $(BUILD).rpt $(BUILD).asc
