@@ -33,6 +33,7 @@ PWMFREQ ?= 150
 SYNTH_FLAGS ?= -abc9
 PNR_FLAGS ?=
 YOSYS_FLAGS ?= -DBOARD=$(BOARD)
+YOSYS_READ_VERILOG ?= read_verilog -sv -noassert -noassume -norestrict # -defer may be needed for parametrics
 
 PROJ = rapcore
 TOP = ./src/rapcore.v
@@ -77,8 +78,11 @@ SIMFILES += ./src/sim/pwm_pll.v
 
 all: $(BUILD).bit
 
-$(BUILD).bit: logs build $(SYNTHFILES)
-	yosys -ql ./logs/$(BOARD)_yosys.log $(YOSYS_FLAGS) -p 'synth_$(ARCH) -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json' $(SYNTHFILES)
+
+$(BUILD).json: logs build $(SYNTHFILES)
+	yosys -ql ./logs/$(BOARD)_yosys.log $(YOSYS_FLAGS) -p '$(YOSYS_READ_VERILOG) $(SYNTHFILES); synth_$(ARCH) -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json'
+
+$(BUILD).bit: $(BUILD).json ./boards/$(BOARD)/$(PIN_DEF)
 ifeq ($(ARCH), ice40)
 	nextpnr-ice40 -ql ./logs/$(BOARD)_nextpnr.log $(PNR_FLAGS) --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --json $(BUILD).json --asc $(BUILD).asc --pcf ./boards/$(BOARD)/$(PIN_DEF)
 	icetime -d $(DEVICE) -c $(FREQ) -mtr $(BUILD).rpt $(BUILD).asc
@@ -134,7 +138,7 @@ formal:
 	sby -f symbiyosys/symbiyosys_$(BOARD).sby
 
 iverilog-parse: $(SIMFILES)
-	iverilog -tnull -Wall $(SIMFILES)
+	iverilog -tnull -g2012 -Wall $(SIMFILES)
 
 yosys-parse: $(SIMFILES)
 	yosys -qp 'read -sv $(SIMFILES)'
@@ -148,7 +152,7 @@ svlint: $(SIMFILES)
 	svlint $(SIMFILES)
 
 vvp: $(SIMFILES)
-	iverilog -tvvp $(SIMFILES)
+	iverilog -tvvp -g2012 $(SIMFILES)
 
 testbench/vcd:
 	mkdir -p testbench/vcd
