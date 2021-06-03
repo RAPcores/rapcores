@@ -97,6 +97,29 @@ module spi_state_machine #(
   localparam MOVE_BUFFER_SIZE = BUFFER_SIZE - 1; //This is the zero-indexed end index
   localparam MOVE_BUFFER_BITS = $clog2(BUFFER_SIZE) - 1; // number of bits to index given size
 
+  // Register Arrays
+  reg [word_bits-1:0] status_reg_ro [63:0];
+  reg [word_bits-1:0] config_reg_rw [63:0];
+
+  // Status register locations and alignments
+  localparam status_version = 0;
+  localparam status_channel_info = 1;
+  localparam status_encoder_start = 2;
+  localparam status_encoder_end = status_encoder_start + num_encoders -1;
+  localparam status_encoder_fault = status_encoder_end + 1;
+  localparam status_stepper_fault = status_encoder_fault + 1;
+
+  // Status Register Initialization
+  initial begin
+    status_reg_ro[status_version][7:0]   <= `VERSION_PATCH;
+    status_reg_ro[status_version][15:8]  <= `VERSION_MINOR;
+    status_reg_ro[status_version][23:16] <= `VERSION_MAJOR;
+    status_reg_ro[status_version][31:24] <= `VERSION_DEVEL;
+    status_reg_ro[status_channel_info][7:0]   <= num_motors;
+    status_reg_ro[status_channel_info][15:8]  <= num_encoders;
+    status_reg_ro[status_channel_info][23:16] <= encoder_bits;
+    status_reg_ro[status_channel_info][31:24] <= encoder_velocity_bits;
+  end
 
   //
   // Stepper Timing and Buffer Setup
@@ -389,6 +412,15 @@ module spi_state_machine #(
     move_duration[0] <= 0;
     move_duration[1] <= 0;
 
+    status_reg_ro[status_version][7:0]   <= `VERSION_PATCH;
+    status_reg_ro[status_version][15:8]  <= `VERSION_MINOR;
+    status_reg_ro[status_version][23:16] <= `VERSION_MAJOR;
+    status_reg_ro[status_version][31:24] <= `VERSION_DEVEL;
+    status_reg_ro[status_channel_info][7:0]   <= num_motors;
+    status_reg_ro[status_channel_info][15:8]  <= num_encoders;
+    status_reg_ro[status_channel_info][23:16] <= encoder_bits;
+    status_reg_ro[status_channel_info][31:24] <= encoder_velocity_bits;
+
     for (nmot=0; nmot<num_motors; nmot=nmot+1) begin
       increment[0][nmot] <= {dda_bits{1'b0}};
       increment[1][nmot] <= {dda_bits{1'b0}};
@@ -516,17 +548,11 @@ module spi_state_machine #(
 
           // API Version
           CMD_API_VERSION: begin
-            word_send_data[7:0] <= `VERSION_PATCH;
-            word_send_data[15:8] <= `VERSION_MINOR;
-            word_send_data[23:16] <= `VERSION_MAJOR;
-            word_send_data[31:24] <= `VERSION_DEVEL;
+            word_send_data[31:0] <= status_reg_ro[status_version];
           end
 
           CMD_CHANNEL_INFO: begin
-            word_send_data[7:0] <= num_motors;
-            word_send_data[15:8] <= num_encoders;
-            word_send_data[23:16] <= encoder_bits;
-            word_send_data[31:24] <= encoder_velocity_bits;
+            word_send_data[31:0] <= status_reg_ro[status_channel_info];
           end
 
           default: word_send_data <= 64'b0;
