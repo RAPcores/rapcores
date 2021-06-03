@@ -45,6 +45,7 @@ RAPCOREFILES := boards/$(BOARD)/$(BOARD).v \
 								$(addprefix src/, clock_divider.v \
 														edge_detector.v \
 													  macro_params.v \
+														register_input.v \
 														space_vector_modulator.v \
 														spi_state_machine.v \
 														pwm.v \
@@ -77,7 +78,6 @@ SIMFILES = $(RAPCOREFILES)
 SIMFILES += ./src/sim/pwm_pll.v
 
 all: $(BUILD).bit
-
 
 $(BUILD).json: logs build $(SYNTHFILES)
 	yosys -ql ./logs/$(BOARD)_yosys.log $(YOSYS_FLAGS) -p '$(YOSYS_READ_VERILOG) $(SYNTHFILES); synth_$(ARCH) -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json'
