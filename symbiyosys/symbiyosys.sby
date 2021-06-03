@@ -16,6 +16,7 @@ read -formal dual_hbridge.v
 read -formal quad_enc.v
 read -formal pwm.v
 read -formal pwm_pll.v
+read -formal register_input.v
 read -formal spi_state_machine.v
 read -formal microstepper_top.v
 read -formal microstepper_control.v
@@ -38,6 +39,7 @@ src/dda_timer.v
 src/edge_detector.v
 src/spi.v
 src/dual_hbridge.v
+src/register_input.v
 src/spi_state_machine.v
 src/rapcore.v
 src/quad_enc.v
