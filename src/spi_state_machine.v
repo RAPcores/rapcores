@@ -138,16 +138,24 @@ module spi_state_machine #(
 
   // Motor Brake
   reg [num_motors-1:0] brake_r;
-  wire [num_motors-1:0] brake = brake_r;
 
+
+  // handle External Step/Direction/Enable signals
+  // when acting as a traditional motor driver
   `ifndef STEPINPUT
-    wire [num_motors-1:0] dir = dir_r[moveind]; // set direction
+    wire [num_motors-1:0] dir = dir_r[moveind];
     wire [num_motors-1:0] step = dda_step;
     wire [num_motors-1:0] enable = enable_r;
   `else
-    wire [num_motors-1:0] dir = dir_r[moveind] ^ DIRINPUT; // set direction
-    wire [num_motors-1:0] step = dda_step ^ STEPINPUT;
-    wire [num_motors-1:0] enable = enable_r | ENINPUT;
+    wire [num_motors-1:0] step_input_r, dir_input_r, en_input_r;
+
+    register_input #(.width(num_motors)) stepin_m (.clk(CLK),.in(STEPINPUT), .out(step_input_r));
+    register_input #(.width(num_motors)) dirin_m  (.clk(CLK),.in(DIRINPUT), .out(dir_input_r));
+    register_input #(.width(num_motors)) enin_m   (.clk(CLK),.in(ENINPUT), .out(en_input_r));
+
+    wire [num_motors-1:0] dir = dir_r[moveind] ^ dir_input_r;
+    wire [num_motors-1:0] step = dda_step ^ step_input_r;
+    wire [num_motors-1:0] enable = enable_r | en_input_r;
   `endif
 
   `ifdef STEPOUTPUT
@@ -199,7 +207,7 @@ module spi_state_machine #(
                       .step (step[i]),
                       .dir (dir[i]),
                       .enable (enable[i]),
-                      .brake  (brake[i]),
+                      .brake  (brake_r[i]),
                       .microsteps (microsteps[i]),
                       .current (current[i]),
                       .step_count(step_encoder[i]),
