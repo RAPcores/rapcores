@@ -98,19 +98,26 @@ module spi_state_machine #(
   localparam MOVE_BUFFER_BITS = $clog2(BUFFER_SIZE) - 1; // number of bits to index given size
 
   // Register Arrays
+  // These are sectored by read only and read/write
   reg [word_bits-1:0] status_reg_ro [63:0];
   reg [word_bits-1:0] config_reg_rw [63:0];
 
-  // Status register locations and alignments
+  // Status register offset aliases,
+  // These may be used in instantiated modules via dot access, e.g. rapcores.status_version
+  // for procedural interface generation
   localparam status_version = 0;
   localparam status_channel_info = 1;
-  localparam status_encoder_start = 2;
-  localparam status_encoder_end = status_encoder_start + num_encoders -1;
-  localparam status_encoder_fault = status_encoder_end + 1;
+  localparam status_encoder_position_start = 2;
+  localparam status_encoder_position_end = status_encoder_position_start + num_encoders - 1;
+  localparam status_encoder_fault = status_encoder_position_end + 1;
   localparam status_stepper_fault = status_encoder_fault + 1;
+  localparam status_encoder_velocity_start = status_stepper_fault + 1;
+  localparam status_encoder_velocity_end = status_encoder_velocity_start + num_encoders - 1;;
 
-  // Status Register Initialization
-  initial begin
+  // Set Status Registers, these are reset by their respective module,
+  // or set as constants here
+  integer j;
+  always @(posedge CLK) begin
     status_reg_ro[status_version][7:0]   <= `VERSION_PATCH;
     status_reg_ro[status_version][15:8]  <= `VERSION_MINOR;
     status_reg_ro[status_version][23:16] <= `VERSION_MAJOR;
@@ -119,6 +126,14 @@ module spi_state_machine #(
     status_reg_ro[status_channel_info][15:8]  <= num_encoders;
     status_reg_ro[status_channel_info][23:16] <= encoder_bits;
     status_reg_ro[status_channel_info][31:24] <= encoder_velocity_bits;
+    for(j=0; j<num_encoders; j=j+1) begin
+      status_reg_ro[status_encoder_position_start+j] <= encoder_count[j];
+    end
+    status_reg_ro[status_encoder_fault][num_encoders-1:0] <= encoder_faultn;
+    status_reg_ro[status_stepper_fault][num_motors-1:0] <= stepper_faultn;
+    for(j=0; j<num_encoders; j=j+1) begin
+      status_reg_ro[status_encoder_velocity_start+j] <= encoder_velocity[j];
+    end
   end
 
   //
@@ -412,15 +427,6 @@ module spi_state_machine #(
     move_duration[0] <= 0;
     move_duration[1] <= 0;
 
-    status_reg_ro[status_version][7:0]   <= `VERSION_PATCH;
-    status_reg_ro[status_version][15:8]  <= `VERSION_MINOR;
-    status_reg_ro[status_version][23:16] <= `VERSION_MAJOR;
-    status_reg_ro[status_version][31:24] <= `VERSION_DEVEL;
-    status_reg_ro[status_channel_info][7:0]   <= num_motors;
-    status_reg_ro[status_channel_info][15:8]  <= num_encoders;
-    status_reg_ro[status_channel_info][23:16] <= encoder_bits;
-    status_reg_ro[status_channel_info][31:24] <= encoder_velocity_bits;
-
     for (nmot=0; nmot<num_motors; nmot=nmot+1) begin
       increment[0][nmot] <= {dda_bits{1'b0}};
       increment[1][nmot] <= {dda_bits{1'b0}};
@@ -480,7 +486,8 @@ module spi_state_machine #(
           end
 
           CMD_READ_ENCODER: begin
-            word_send_data[encoder_bits+encoder_velocity_bits-1:0] <= {encoder_velocity[header_motor_channel], encoder_count[header_motor_channel]};
+            word_send_data[encoder_bits+encoder_velocity_bits-1:0] <= {status_reg_ro[status_encoder_velocity_start+header_motor_channel][encoder_velocity_bits-1:0], 
+                                                                       status_reg_ro[status_encoder_position_start+header_motor_channel][encoder_bits-1:0]};
           end
 
           // Motor Brake on Disable
@@ -525,13 +532,13 @@ module spi_state_machine #(
 
           // Read Stepper fault register
           CMD_STEPPERFAULT: begin
-            word_send_data[num_motors-1:0] <= ~stepper_faultn;
+            word_send_data[num_motors-1:0] <= status_reg_ro[status_stepper_fault][num_motors-1:0];;
           end
 
           // Read Stepper fault register
 
           CMD_ENCODERFAULT: begin
-            if (num_encoders > 0) word_send_data[num_encoders-1:0] <= ~encoder_faultn;
+            if (num_encoders > 0) word_send_data[num_encoders-1:0] <= status_reg_ro[status_encoder_fault][num_encoders-1:0];
           end
 
 
