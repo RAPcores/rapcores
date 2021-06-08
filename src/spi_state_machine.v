@@ -97,6 +97,10 @@ module spi_state_machine #(
   localparam MOVE_BUFFER_SIZE = BUFFER_SIZE - 1; //This is the zero-indexed end index
   localparam MOVE_BUFFER_BITS = $clog2(BUFFER_SIZE) - 1; // number of bits to index given size
 
+  // Iteration consts
+  integer j;
+  genvar g;
+
   // Register Arrays
   // These are sectored by read only and read/write
   reg [word_bits-1:0] status_reg_ro [63:0];
@@ -116,7 +120,6 @@ module spi_state_machine #(
 
   // Set Status Registers, these are reset by their respective module,
   // or set as constants here
-  integer j;
   always @(posedge CLK) begin
     status_reg_ro[status_version][7:0]   <= `VERSION_PATCH;
     status_reg_ro[status_version][15:8]  <= `VERSION_MINOR;
@@ -129,12 +132,23 @@ module spi_state_machine #(
     for(j=0; j<num_encoders; j=j+1) begin
       status_reg_ro[status_encoder_position_start+j] <= encoder_count[j];
     end
-    status_reg_ro[status_encoder_fault][num_encoders-1:0] <= encoder_faultn;
-    status_reg_ro[status_stepper_fault][num_motors-1:0] <= stepper_faultn;
+    status_reg_ro[status_encoder_fault] <= encoder_faultn;
+    status_reg_ro[status_stepper_fault] <= stepper_faultn;
     for(j=0; j<num_encoders; j=j+1) begin
       status_reg_ro[status_encoder_velocity_start+j] <= encoder_velocity[j];
     end
   end
+
+  localparam config_enable = 0;
+  localparam config_brake = 1;
+  localparam config_clocks = 2;
+
+  wire [num_motors-1:0] enable_r;
+  wire [num_motors-1:0] brake_r;
+
+  // Loop for bitwise/algined on num_motors
+  assign enable_r[num_motors-1:0] = config_reg_rw[config_enable][num_motors-1:0]; 
+  assign brake_r[num_motors-1:0] = config_reg_rw[config_brake][num_motors-1:0]; 
 
   //
   // Stepper Timing and Buffer Setup
@@ -172,10 +186,6 @@ module spi_state_machine #(
 
   // Step IO
   wire [num_motors-1:0] dda_step;
-  reg [num_motors-1:0] enable_r;
-
-  // Motor Brake
-  reg [num_motors-1:0] brake_r;
 
 
   // handle External Step/Direction/Enable signals
@@ -406,7 +416,8 @@ module spi_state_machine #(
 
     config_chargepump_period <= 91;
 
-    enable_r <= {(num_motors){1'b0}};
+    config_reg_rw[config_enable] <= 0;
+    config_reg_rw[config_brake] <= 0;
 
     word_send_data <= 0;
 
@@ -416,8 +427,6 @@ module spi_state_machine #(
     // TODO fix this
     dir_r[0] <= {(num_motors){1'b0}};
     dir_r[1] <= {(num_motors){1'b0}};
-
-    brake_r <= 0;
 
     clock_divisor <= default_clock_divisor;  // should be 40 for 400 khz at 16Mhz Clk
     message_word_count <= 0;
@@ -482,7 +491,7 @@ module spi_state_machine #(
 
           // Motor Enable/disable
           CMD_MOTOR_ENABLE: begin
-            enable_r[num_motors-1:0] <= word_data_received[num_motors-1:0];
+            config_reg_rw[config_enable] <= word_data_received[num_motors-1:0];
           end
 
           CMD_READ_ENCODER: begin
@@ -492,7 +501,7 @@ module spi_state_machine #(
 
           // Motor Brake on Disable
           CMD_MOTOR_BRAKE: begin
-            brake_r[num_motors-1:0] <= word_data_received[num_motors-1:0];
+            config_reg_rw[config_brake] <= word_data_received[num_motors-1:0];
           end
 
           // Clock divisor
