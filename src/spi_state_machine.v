@@ -80,7 +80,6 @@ module spi_state_machine #(
 );
 
   localparam CMD_COORDINATED_STEP    = 8'h01;
-  localparam CMD_READ_ENCODER        = 8'h03;
   localparam CMD_MOTOR_ENABLE        = 8'h0a;
   localparam CMD_MOTOR_BRAKE         = 8'h0b;
   localparam CMD_MOTORCONFIG         = 8'h10;
@@ -89,10 +88,7 @@ module spi_state_machine #(
   localparam CMD_COSINE_CONFIG       = 8'h40;
   localparam CMD_CHARGEPUMP          = 8'h31;
   localparam CMD_BRIDGEINVERT        = 8'h32;
-  localparam CMD_STEPPERFAULT        = 8'h50;
-  localparam CMD_ENCODERFAULT        = 8'h51;
-  localparam CMD_CHANNEL_INFO        = 8'hfd;
-  localparam CMD_API_VERSION         = 8'hfe;
+  localparam CMD_DMA                 = 8'hfc;
 
   localparam MOVE_BUFFER_SIZE = BUFFER_SIZE - 1; //This is the zero-indexed end index
   localparam MOVE_BUFFER_BITS = $clog2(BUFFER_SIZE) - 1; // number of bits to index given size
@@ -103,8 +99,8 @@ module spi_state_machine #(
 
   // Register Arrays
   // These are sectored by read only and read/write
-  reg [word_bits-1:0] status_reg_ro [63:0];
-  reg [word_bits-1:0] config_reg_rw [63:0];
+  reg [word_bits-1:0] status_reg_ro [status_reg_end:0];
+  reg [word_bits-1:0] config_reg_rw [config_reg_end:0];
 
   // Status register offset aliases,
   // These may be used in instantiated modules via dot access, e.g. rapcores.status_version
@@ -117,6 +113,7 @@ module spi_state_machine #(
   localparam status_stepper_fault = status_encoder_fault + 1;
   localparam status_encoder_velocity_start = status_stepper_fault + 1;
   localparam status_encoder_velocity_end = status_encoder_velocity_start + num_encoders - 1;;
+  localparam status_reg_end = status_encoder_velocity_end;
 
   // Set Status Registers, these are reset by their respective module,
   // or set as constants here
@@ -142,11 +139,11 @@ module spi_state_machine #(
   localparam config_enable = 0;
   localparam config_brake = 1;
   localparam config_clocks = 2;
+  localparam config_reg_end = config_clocks;
 
   wire [num_motors-1:0] enable_r;
   wire [num_motors-1:0] brake_r;
 
-  // Loop for bitwise/algined on num_motors
   assign enable_r[num_motors-1:0] = config_reg_rw[config_enable][num_motors-1:0]; 
   assign brake_r[num_motors-1:0] = config_reg_rw[config_brake][num_motors-1:0]; 
 
@@ -399,10 +396,7 @@ module spi_state_machine #(
 
   // check if the Header indicated multi-word transfer
   wire awaiting_more_words = (message_header == CMD_COORDINATED_STEP) |
-                             (message_header == CMD_API_VERSION) |
-                             (message_header == CMD_STEPPERFAULT) |
-                             (message_header == CMD_ENCODERFAULT) |
-                             (message_header == CMD_READ_ENCODER);
+                             (message_header == CMD_DMA);
 
   wire [$clog2(num_motors-1):0] header_motor_channel = word_data_received[(48+$clog2(num_motors)):48];
 
@@ -494,11 +488,6 @@ module spi_state_machine #(
             config_reg_rw[config_enable] <= word_data_received[num_motors-1:0];
           end
 
-          CMD_READ_ENCODER: begin
-            word_send_data[encoder_bits+encoder_velocity_bits-1:0] <= {status_reg_ro[status_encoder_velocity_start+header_motor_channel][encoder_velocity_bits-1:0], 
-                                                                       status_reg_ro[status_encoder_position_start+header_motor_channel][encoder_bits-1:0]};
-          end
-
           // Motor Brake on Disable
           CMD_MOTOR_BRAKE: begin
             config_reg_rw[config_brake] <= word_data_received[num_motors-1:0];
@@ -539,17 +528,13 @@ module spi_state_machine #(
             config_invert_lowside[header_motor_channel] <= word_data_received[0];
           end
 
-          // Read Stepper fault register
-          CMD_STEPPERFAULT: begin
-            word_send_data[num_motors-1:0] <= status_reg_ro[status_stepper_fault][num_motors-1:0];;
+          CMD_DMA: begin
+            case (word_data_received[49:48])
+              2'd0: begin
+                word_send_data <= status_reg_ro[word_data_received[39:32]];
+              end
+            endcase
           end
-
-          // Read Stepper fault register
-
-          CMD_ENCODERFAULT: begin
-            if (num_encoders > 0) word_send_data[num_encoders-1:0] <= status_reg_ro[status_encoder_fault][num_encoders-1:0];
-          end
-
 
           // Write to Cosine Table
           // TODO Cosine Net is broken
@@ -561,15 +546,6 @@ module spi_state_machine #(
             //cos_table[word_data_received[35:32]+1] <= word_data_received[15:8];
             //cos_table[word_data_received[35:32]] <= word_data_received[7:0];
           //end
-
-          // API Version
-          CMD_API_VERSION: begin
-            word_send_data[31:0] <= status_reg_ro[status_version];
-          end
-
-          CMD_CHANNEL_INFO: begin
-            word_send_data[31:0] <= status_reg_ro[status_channel_info];
-          end
 
           default: word_send_data <= 64'b0;
 
