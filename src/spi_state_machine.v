@@ -112,7 +112,7 @@ module spi_state_machine #(
   localparam status_encoder_fault = status_encoder_position_end + 1;
   localparam status_stepper_fault = status_encoder_fault + 1;
   localparam status_encoder_velocity_start = status_stepper_fault + 1;
-  localparam status_encoder_velocity_end = status_encoder_velocity_start + num_encoders - 1;;
+  localparam status_encoder_velocity_end = status_encoder_velocity_start + num_encoders - 1;
   localparam status_reg_end = status_encoder_velocity_end;
 
   // Set Status Registers, these are reset by their respective module,
