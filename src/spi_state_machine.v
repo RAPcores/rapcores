@@ -400,6 +400,8 @@ module spi_state_machine #(
 
   wire [$clog2(num_motors-1):0] header_motor_channel = word_data_received[(48+$clog2(num_motors)):48];
 
+  reg [1:0] dma_reg;
+  reg [5:0] dma_addr;
 
   wire word_received_rising;
   rising_edge_detector word_recieved_edge_rising (.clk(CLK), .in(word_received), .out(word_received_rising));
@@ -483,55 +485,16 @@ module spi_state_machine #(
 
           end
 
-          // Motor Enable/disable
-          CMD_MOTOR_ENABLE: begin
-            config_reg_rw[config_enable] <= word_data_received[num_motors-1:0];
-          end
-
-          // Motor Brake on Disable
-          CMD_MOTOR_BRAKE: begin
-            config_reg_rw[config_brake] <= word_data_received[num_motors-1:0];
-          end
-
-          // Clock divisor
-          CMD_CLK_DIVISOR: begin
-            clock_divisor[7:0] <= word_data_received[7:0];
-          end
-
-          // Set Microstepping
-          CMD_MOTORCONFIG: begin
-            // TODO needs to be power of two
-            current[header_motor_channel][current_bits-1:0] <= word_data_received[15:16-current_bits];
-            microsteps[header_motor_channel][2:0] <= word_data_received[2:0];
-            `ifdef FORMAL
-              assert(header_motor_channel == word_data_received[(48+$clog2(num_motors)):48]);
-            `endif
-          end
-
-          // Set Microstepping Parameters
-          CMD_MICROSTEPPER_CONFIG: begin
-            config_offtime[header_motor_channel][9:0] <= word_data_received[39:30];
-            config_blanktime[header_motor_channel][7:0] <= word_data_received[29:22];
-            config_fastdecay_threshold[header_motor_channel][9:0] <= word_data_received[21:12];
-            config_minimum_on_time[header_motor_channel][7:0] <= word_data_received[18:11];
-            config_current_threshold[header_motor_channel][10:0] <= word_data_received[10:0];
-          end
-
-          // Set chargepump period
-          CMD_CHARGEPUMP: begin
-            config_chargepump_period[7:0] <= word_data_received[7:0];
-          end
-
-          // Invert Bridge outputs
-          CMD_BRIDGEINVERT: begin
-            config_invert_highside[header_motor_channel] <= word_data_received[1];
-            config_invert_lowside[header_motor_channel] <= word_data_received[0];
-          end
 
           CMD_DMA: begin
+            dma_reg <= word_data_received[49:48];
+            dma_addr <= word_data_received[37:32];
             case (word_data_received[49:48])
               2'd0: begin
-                word_send_data <= status_reg_ro[word_data_received[39:32]];
+                word_send_data <= status_reg_ro[word_data_received[37:32]];
+              end
+              2'd1: begin
+                word_send_data <= config_reg_rw[word_data_received[37:32]];
               end
             endcase
           end
@@ -592,6 +555,14 @@ module spi_state_machine #(
               end
             end
           end // `CMD_COORDINATED_STEP
+          CMD_DMA: begin
+            case (dma_reg)
+              2'd1: begin
+                config_reg_rw[dma_addr] <= word_data_received[31:0];
+              end
+            endcase
+            message_header <= 8'b0;
+          end
           // by default reset the message header if it was a two word transaction
           default: message_header <= 8'b0; // Reset Message Header
         endcase
