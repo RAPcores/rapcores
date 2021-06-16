@@ -80,15 +80,8 @@ module spi_state_machine #(
 );
 
   localparam CMD_COORDINATED_STEP    = 8'h01;
-  localparam CMD_MOTOR_ENABLE        = 8'h0a;
-  localparam CMD_MOTOR_BRAKE         = 8'h0b;
-  localparam CMD_MOTORCONFIG         = 8'h10;
-  localparam CMD_CLK_DIVISOR         = 8'h20;
-  localparam CMD_MICROSTEPPER_CONFIG = 8'h30;
-  localparam CMD_COSINE_CONFIG       = 8'h40;
-  localparam CMD_CHARGEPUMP          = 8'h31;
-  localparam CMD_BRIDGEINVERT        = 8'h32;
-  localparam CMD_DMA                 = 8'hfc;
+  localparam CMD_STATUS_REG          = 8'hf1;
+  localparam CMD_CONFIG_REG          = 8'hf2;
 
   localparam MOVE_BUFFER_SIZE = BUFFER_SIZE - 1; //This is the zero-indexed end index
   localparam MOVE_BUFFER_BITS = $clog2(BUFFER_SIZE) - 1; // number of bits to index given size
@@ -396,12 +389,10 @@ module spi_state_machine #(
 
   // check if the Header indicated multi-word transfer
   wire awaiting_more_words = (message_header == CMD_COORDINATED_STEP) |
-                             (message_header == CMD_DMA);
+                             (message_header == CMD_STATUS_REG) |
+                             (message_header == CMD_CONFIG_REG);
 
   wire [$clog2(num_motors-1):0] header_motor_channel = word_data_received[(48+$clog2(num_motors)):48];
-
-  reg [1:0] dma_reg;
-  reg [5:0] dma_addr;
 
   wire word_received_rising;
   rising_edge_detector word_recieved_edge_rising (.clk(CLK), .in(word_received), .out(word_received_rising));
@@ -485,30 +476,15 @@ module spi_state_machine #(
 
           end
 
-
-          CMD_DMA: begin
-            dma_reg <= word_data_received[49:48];
-            dma_addr <= word_data_received[37:32];
-            case (word_data_received[49:48])
-              2'd0: begin
-                word_send_data <= status_reg_ro[word_data_received[37:32]];
-              end
-              2'd1: begin
-                word_send_data <= config_reg_rw[word_data_received[37:32]];
-              end
-            endcase
+          CMD_CONFIG_REG: begin
+            dma_addr <= word_data_received[32:0];
+            word_send_data <= status_reg_ro[word_data_received[32:0]];
           end
 
-          // Write to Cosine Table
-          // TODO Cosine Net is broken
-          //CMD_COSINE_CONFIG: begin
-            //cos_table[word_data_received[35:32]] <= word_data_received[31:0];
-            //cos_table[word_data_received[37:32]] <= word_data_received[7:0];
-            //cos_table[word_data_received[35:32]+3] <= word_data_received[31:25];
-            //cos_table[word_data_received[35:32]+2] <= word_data_received[24:16];
-            //cos_table[word_data_received[35:32]+1] <= word_data_received[15:8];
-            //cos_table[word_data_received[35:32]] <= word_data_received[7:0];
-          //end
+          CMD_STATUS_REG: begin
+            dma_addr <= word_data_received[32:0];
+            word_send_data <= config_reg_rw[word_data_received[32:0]];
+          end
 
           default: word_send_data <= 64'b0;
 
@@ -520,6 +496,7 @@ module spi_state_machine #(
         message_word_count <= message_word_count + 1;
 
         case (message_header)
+
           // Move Routine
           CMD_COORDINATED_STEP: begin
             // Multiaxis
@@ -555,16 +532,15 @@ module spi_state_machine #(
               end
             end
           end // `CMD_COORDINATED_STEP
-          CMD_DMA: begin
-            case (dma_reg)
-              2'd1: begin
-                config_reg_rw[dma_addr] <= word_data_received[31:0];
-              end
-            endcase
+
+          CMD_STATUS_REG: begin
+            config_reg_rw[dma_addr] <= word_data_received[31:0];
             message_header <= 8'b0;
           end
+
           // by default reset the message header if it was a two word transaction
           default: message_header <= 8'b0; // Reset Message Header
+
         endcase
       end
     end
