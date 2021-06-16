@@ -399,6 +399,8 @@ module spi_state_machine #(
 
   reg [$clog2(num_motors):0] nmot;
 
+  reg [7:0] dma_addr;
+
   always @(posedge CLK) if (!resetn) begin
 
     config_chargepump_period <= 91;
@@ -476,13 +478,13 @@ module spi_state_machine #(
 
           end
 
-          CMD_CONFIG_REG: begin
-            dma_addr <= word_data_received[32:0];
+          CMD_STATUS_REG: begin
+            dma_addr <= word_data_received[7:0];
             word_send_data <= status_reg_ro[word_data_received[32:0]];
           end
 
-          CMD_STATUS_REG: begin
-            dma_addr <= word_data_received[32:0];
+          CMD_CONFIG_REG: begin
+            dma_addr <= word_data_received[7:0];
             word_send_data <= config_reg_rw[word_data_received[32:0]];
           end
 
@@ -533,7 +535,7 @@ module spi_state_machine #(
             end
           end // `CMD_COORDINATED_STEP
 
-          CMD_STATUS_REG: begin
+          CMD_CONFIG_REG: begin
             config_reg_rw[dma_addr] <= word_data_received[31:0];
             message_header <= 8'b0;
           end
