@@ -79,6 +79,10 @@ module spi_state_machine #(
   input pwm_clock
 );
 
+  // Static Parameter checks
+  if(encoder_bits > word_bits) $error("parameter: encoder_bits is greater than word_bits");
+
+
   localparam CMD_COORDINATED_STEP    = 8'h01;
   localparam CMD_STATUS_REG          = 8'hf1;
   localparam CMD_CONFIG_REG          = 8'hf2;
@@ -92,8 +96,10 @@ module spi_state_machine #(
 
   // Register Arrays
   // These are sectored by read only and read/write
-  reg [word_bits-1:0] status_reg_ro [status_reg_end:0];
-  reg [word_bits-1:0] config_reg_rw [config_reg_end:0];
+  wire [word_bits-1:0] status_reg_ro    [status_reg_end:0];
+  reg  [word_bits-1:0] telemetry_reg_ro [telemetry_reg_end:0];
+  reg  [word_bits-1:0] config_reg_rw    [config_reg_end:0];
+  reg  [word_bits-1:0] command_reg_rw   [command_reg_end:0];
 
   // Status register offset aliases,
   // These may be used in instantiated modules via dot access, e.g. rapcores.status_version
@@ -108,37 +114,77 @@ module spi_state_machine #(
   localparam status_encoder_velocity_end = status_encoder_velocity_start + num_encoders - 1;
   localparam status_reg_end = status_encoder_velocity_end;
 
+  wire [num_motors-1:0] stepper_faultn; // stepper fault
+  wire [num_encoders-1:0] encoder_faultn;
+  wire signed [encoder_bits-1:0] encoder_count [num_encoders-1:0];
+  wire signed [encoder_velocity_bits-1:0] encoder_velocity [num_encoders-1:0];
+  wire signed [encoder_velocity_bits-1:0] encoder_velocity_counter [num_encoders-1:0];
+
   // Set Status Registers, these are reset by their respective module,
   // or set as constants here
-  always @(posedge CLK) begin
-    status_reg_ro[status_version][7:0]   <= `VERSION_PATCH;
-    status_reg_ro[status_version][15:8]  <= `VERSION_MINOR;
-    status_reg_ro[status_version][23:16] <= `VERSION_MAJOR;
-    status_reg_ro[status_version][31:24] <= `VERSION_DEVEL;
-    status_reg_ro[status_channel_info][7:0]   <= num_motors;
-    status_reg_ro[status_channel_info][15:8]  <= num_encoders;
-    status_reg_ro[status_channel_info][23:16] <= encoder_bits;
-    status_reg_ro[status_channel_info][31:24] <= encoder_velocity_bits;
-    for(j=0; j<num_encoders; j=j+1) begin
-      status_reg_ro[status_encoder_position_start+j] <= encoder_count[j];
-    end
-    status_reg_ro[status_encoder_fault] <= encoder_faultn;
-    status_reg_ro[status_stepper_fault] <= stepper_faultn;
-    for(j=0; j<num_encoders; j=j+1) begin
-      status_reg_ro[status_encoder_velocity_start+j] <= encoder_velocity[j];
-    end
+  assign status_reg_ro[status_version][7:0]               = `VERSION_PATCH;
+  assign status_reg_ro[status_version][15:8]              = `VERSION_MINOR;
+  assign status_reg_ro[status_version][23:16]             = `VERSION_MAJOR;
+  assign status_reg_ro[status_version][31:24]             = `VERSION_DEVEL;
+  assign status_reg_ro[status_channel_info][7:0]          = num_motors;
+  assign status_reg_ro[status_channel_info][15:8]         = num_encoders;
+  assign status_reg_ro[status_channel_info][23:16]        = encoder_bits;
+  assign status_reg_ro[status_channel_info][31:24]        = encoder_velocity_bits;
+  assign status_reg_ro[status_encoder_fault]              = encoder_faultn;
+  assign status_reg_ro[status_stepper_fault]              = stepper_faultn;
+  for(g=0; g<num_encoders; g=g+1) begin
+    assign status_reg_ro[status_encoder_velocity_start+g] = encoder_velocity[g];
+    assign status_reg_ro[status_encoder_position_start+g] = encoder_count[g];
   end
 
+  // Config Register offset aliases
   localparam config_enable = 0;
   localparam config_brake = 1;
   localparam config_clocks = 2;
   localparam config_reg_end = config_clocks;
 
-  wire [num_motors-1:0] enable_r;
-  wire [num_motors-1:0] brake_r;
+  // Config Register - Set mappings for internal wiring
+  wire [num_motors-1:0] enable_r = config_reg_rw[config_enable][num_motors-1:0]; 
+  wire [num_motors-1:0] brake_r = config_reg_rw[config_brake][num_motors-1:0]; 
+  wire [7:0] clock_divisor = config_reg_rw[config_clocks][7:0];
+  reg [7:0] microsteps [0:num_motors-1];
+  reg [current_bits-1:0] current [0:num_motors-1];
+  reg [9:0] config_offtime [0:num_motors-1];
+  reg [7:0] config_blanktime [0:num_motors-1];
+  reg [9:0] config_fastdecay_threshold [0:num_motors-1];
+  reg [7:0] config_minimum_on_time [0:num_motors-1];
+  reg [10:0] config_current_threshold [0:num_motors-1];
+  reg config_invert_highside [0:num_motors-1];
+  reg config_invert_lowside [0:num_motors-1];
+  reg [7:0] config_chargepump_period; // one chargepump for all
 
-  assign enable_r[num_motors-1:0] = config_reg_rw[config_enable][num_motors-1:0]; 
-  assign brake_r[num_motors-1:0] = config_reg_rw[config_brake][num_motors-1:0]; 
+  // Config Register - Establish reset states
+  always @(posedge CLK) begin
+    if (!resetn) begin
+      config_reg_rw[config_enable] <= 0;
+      config_reg_rw[config_brake]  <= 0;
+      config_reg_rw[config_clocks] <= default_clock_divisor;
+    end
+  end
+
+  // Telemetry Register
+  localparam telemetry_reg_end = num_encoders*2 - 1;
+
+  always @(posedge CLK) begin
+    if (capture_telemetry) begin
+      for (j=0; j < num_encoders; j=j+1) begin
+        telemetry_reg_ro[j*2]   <= encoder_count[j]; 
+        telemetry_reg_ro[j*2+1] <= encoder_velocity[j];
+      end
+    end
+  end
+
+  // Command Register
+  localparam command_reg_end = 0;
+
+  // Any register/wire below this point is outside user space
+  wire capture_telemetry;
+
 
   //
   // Stepper Timing and Buffer Setup
@@ -172,7 +218,6 @@ module spi_state_machine #(
   end
 
   wire dda_tick;
-  reg [7:0] clock_divisor;  // should be 40 for 400 khz at 16Mhz Clk
 
   // Step IO
   wire [num_motors-1:0] dda_step;
@@ -202,24 +247,8 @@ module spi_state_machine #(
     assign ENOUTPUT = enable;
   `endif
 
-  wire [num_motors-1:0] stepper_faultn; // stepper fault
-
   wire [encoder_bits-1:0] step_encoder [num_motors-1:0]; // step encoder
 
-  //
-  // Stepper Configs
-  //
-
-  reg [7:0] microsteps [0:num_motors-1];
-  reg [current_bits-1:0] current [0:num_motors-1];
-  reg [9:0] config_offtime [0:num_motors-1];
-  reg [7:0] config_blanktime [0:num_motors-1];
-  reg [9:0] config_fastdecay_threshold [0:num_motors-1];
-  reg [7:0] config_minimum_on_time [0:num_motors-1];
-  reg [10:0] config_current_threshold [0:num_motors-1];
-  reg config_invert_highside [0:num_motors-1];
-  reg config_invert_lowside [0:num_motors-1];
-  reg [7:0] config_chargepump_period; // one chargepump for all
 
   //
   // Stepper Modules
@@ -302,12 +331,6 @@ module spi_state_machine #(
   //
   // Encoders
   //
-
-  wire signed [encoder_bits-1:0] encoder_count [num_encoders-1:0];
-  wire [num_encoders-1:0] encoder_faultn;
-  wire signed [encoder_velocity_bits-1:0] encoder_velocity [num_encoders-1:0];
-  wire signed [encoder_velocity_bits-1:0] encoder_velocity_counter [num_encoders-1:0];
-
   `ifdef QUAD_ENC
     for (i=0; i<num_encoders; i=i+1) begin
       quad_enc #(.encbits(encoder_bits),
@@ -354,6 +377,7 @@ module spi_state_machine #(
       .loading_move(loading_move),
       .move_duration(move_duration_w),
       .executing_move(executing_move),
+      .finishedmove(capture_telemetry),
       .move_done(move_done),
       .stepready(stepready),
       .buffer_dtr(buffer_dtr),
@@ -383,9 +407,6 @@ module spi_state_machine #(
   reg [7:0] message_word_count;
   reg [7:0] message_header;
 
-  // Encoder
-  reg signed [encoder_bits-1:0] encoder_store [num_motors-1:0]; // Snapshot for SPI comms
-  reg signed [encoder_bits-1:0] step_encoder_store [num_motors-1:0]; // Snapshot for SPI comms
 
   // check if the Header indicated multi-word transfer
   wire awaiting_more_words = (message_header == CMD_COORDINATED_STEP) |
@@ -405,9 +426,6 @@ module spi_state_machine #(
 
     config_chargepump_period <= 91;
 
-    config_reg_rw[config_enable] <= 0;
-    config_reg_rw[config_brake] <= 0;
-
     word_send_data <= 0;
 
     writemoveind <= 0;  // Move buffer
@@ -417,7 +435,6 @@ module spi_state_machine #(
     dir_r[0] <= {(num_motors){1'b0}};
     dir_r[1] <= {(num_motors){1'b0}};
 
-    clock_divisor <= default_clock_divisor;  // should be 40 for 400 khz at 16Mhz Clk
     message_word_count <= 0;
     message_header <= 0;
 
@@ -431,9 +448,6 @@ module spi_state_machine #(
       incrementincrement[0][nmot] <= {dda_bits{1'b0}};
       incrementincrement[1][nmot] <= {dda_bits{1'b0}};
   
-      // Encoders
-      step_encoder_store[nmot] <= 0;
-      encoder_store[nmot] <= 0;
 
       // Stepper Config
       microsteps[nmot] <= default_microsteps;
@@ -469,13 +483,6 @@ module spi_state_machine #(
             // Get Direction Bits
             dir_r[writemoveind] <= word_data_received[num_motors-1:0];
 
-            // Store encoder values across all axes
-            for (nmot=0; nmot<num_motors; nmot=nmot+1) begin
-              step_encoder_store[nmot] <= step_encoder[nmot];
-              if (num_encoders > 0)
-                encoder_store[nmot] <= encoder_count[nmot];
-            end
-
           end
 
           CMD_STATUS_REG: begin
@@ -503,24 +510,23 @@ module spi_state_machine #(
           CMD_COORDINATED_STEP: begin
             // Multiaxis
             for (nmot=0; nmot<num_motors; nmot=nmot+1) begin
+              word_send_data <= telemetry_reg_ro[message_word_count-1]; // Prep to send steps
               // the first non-header word is the move duration
               if (nmot == 0) begin
                 if (message_word_count == 1) begin
                   move_duration[writemoveind][move_duration_bits-1:0] <= word_data_received[move_duration_bits-1:0];
-                  word_send_data[encoder_bits-1:0] <= step_encoder_store[0]; // Prep to send steps
                 end
               end
               /* verilator lint_off WIDTH */
               if (message_word_count == (nmot+1)*2) begin
               /* verilator lint_on WIDTH */
                 increment[writemoveind][nmot] <= word_data_received;
-                word_send_data[encoder_bits-1:0] <= encoder_store[nmot]; // Prep to send steps
               end
               /* verilator lint_off WIDTH */
               if (message_word_count == (nmot+1)*2+1) begin
               /* verilator lint_on WIDTH */
                 incrementincrement[writemoveind][nmot] <= word_data_received;
-                if (nmot != num_motors-1) word_send_data[encoder_bits-1:0] <= step_encoder_store[nmot+1]; // Prep to send steps
+                //if (nmot != num_motors-1) word_send_data[encoder_bits-1:0] <= step_encoder_store[nmot+1]; // Prep to send steps
 
                 if (nmot == num_motors-1) begin
                   writemoveind <= writemoveind + 1'b1;
