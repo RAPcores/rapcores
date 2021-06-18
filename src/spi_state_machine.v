@@ -409,11 +409,7 @@ module spi_state_machine #(
 
 
   // check if the Header indicated multi-word transfer
-  wire awaiting_more_words = (message_header == CMD_COORDINATED_STEP) |
-                             (message_header == CMD_STATUS_REG) |
-                             (message_header == CMD_CONFIG_REG);
-
-  wire [$clog2(num_motors-1):0] header_motor_channel = word_data_received[(48+$clog2(num_motors)):48];
+  wire awaiting_more_words = message_header != 0;
 
   wire word_received_rising;
   rising_edge_detector word_recieved_edge_rising (.clk(CLK), .in(word_received), .out(word_received_rising));
