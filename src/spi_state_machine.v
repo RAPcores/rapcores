@@ -94,12 +94,9 @@ module spi_state_machine #(
   integer j;
   genvar g;
 
-  // Register Arrays
-  // These are sectored by read only and read/write
-  wire [word_bits-1:0] status_reg_ro    [status_reg_end:0];
-  reg  [word_bits-1:0] telemetry_reg_ro [telemetry_reg_end:0];
-  reg  [word_bits-1:0] config_reg_rw    [config_reg_end:0];
-  reg  [word_bits-1:0] command_reg_rw   [command_reg_end:0];
+  // ---
+  // Status Register
+  // ---
 
   // Status register offset aliases,
   // These may be used in instantiated modules via dot access, e.g. rapcores.status_version
@@ -114,7 +111,10 @@ module spi_state_machine #(
   localparam status_encoder_velocity_end = status_encoder_velocity_start + num_encoders - 1;
   localparam status_reg_end = status_encoder_velocity_end;
 
-  wire [num_motors-1:0] stepper_faultn; // stepper fault
+  // Status Register (read-only, so wires)
+  wire [word_bits-1:0] status_reg_ro    [status_reg_end:0];
+
+  wire [num_motors-1:0] stepper_faultn;
   wire [num_encoders-1:0] encoder_faultn;
   wire signed [encoder_bits-1:0] encoder_count [num_encoders-1:0];
   wire signed [encoder_velocity_bits-1:0] encoder_velocity [num_encoders-1:0];
@@ -137,11 +137,17 @@ module spi_state_machine #(
     assign status_reg_ro[status_encoder_position_start+g] = encoder_count[g];
   end
 
+  // ---
+  // Config Register
+  // ---
+
   // Config Register offset aliases
   localparam config_enable = 0;
   localparam config_brake = 1;
   localparam config_clocks = 2;
   localparam config_reg_end = config_clocks;
+
+  reg  [word_bits-1:0] config_reg_rw    [config_reg_end:0];
 
   // Config Register - Set mappings for internal wiring
   wire [num_motors-1:0] enable_r = config_reg_rw[config_enable][num_motors-1:0]; 
@@ -167,8 +173,14 @@ module spi_state_machine #(
     end
   end
 
+  // ---
+  // Telemetry Register
+  // ---
+
   // Telemetry Register
   localparam telemetry_reg_end = num_encoders*2 - 1;
+
+  reg  [word_bits-1:0] telemetry_reg_ro [telemetry_reg_end:0];
 
   always @(posedge CLK) begin
     if (capture_telemetry) begin
@@ -179,16 +191,38 @@ module spi_state_machine #(
     end
   end
 
+  // ---
   // Command Register
-  localparam command_reg_end = 0;
+  // ---
+
+  // Command Register
+  localparam command_reg_end = (2 + num_motors * 2)*BUFFER_SIZE; // Dir + Duration + (velocity, accel)*num_motors
+
+  // TODO what is the column vs row major trap in FPGA? Does it exist?
+  reg  [word_bits-1:0] command_reg_rw   [BUFFER_SIZE:0][command_reg_end:0];
+
+  reg [num_motors:1] dir_r [MOVE_BUFFER_SIZE:0];
+
+  //reg [move_duration_bits-1:0] move_duration [MOVE_BUFFER_SIZE:0];
+  //reg signed [dda_bits-1:0] increment [MOVE_BUFFER_SIZE:0][num_motors-1:0];
+  //reg signed [dda_bits-1:0] incrementincrement [MOVE_BUFFER_SIZE:0][num_motors-1:0];
+
+  // Per-axis DDA parameters
+  wire [dda_bits-1:0] increment_w [num_motors-1:0];
+  wire [dda_bits-1:0] incrementincrement_w [num_motors-1:0];
+
+  // Command Buffer selection
+  genvar i;
+  for (i=0; i<num_motors; i=i+1) begin
+    assign increment_w[i] = command_reg_rw[moveind][2+i*2];
+    assign incrementincrement_w[i] = command_reg_rw[moveind][2+i*2];
+  end
+  // DDA module input wires determined from buffer
+  wire [move_duration_bits-1:0] move_duration_w = command_reg_rw[moveind][1][move_duration_bits-1:0];
+
 
   // Any register/wire below this point is outside user space
   wire capture_telemetry;
-
-
-  //
-  // Stepper Timing and Buffer Setup
-  //
 
   // Move buffer
   reg [MOVE_BUFFER_BITS:0] writemoveind;
@@ -198,30 +232,10 @@ module spi_state_machine #(
   // the DDA side is internal to dda_fsm
   (* onehot *)reg [MOVE_BUFFER_SIZE:0] stepready;
 
-  reg [num_motors:1] dir_r [MOVE_BUFFER_SIZE:0];
-
-  reg [move_duration_bits-1:0] move_duration [MOVE_BUFFER_SIZE:0];
-  reg signed [dda_bits-1:0] increment [MOVE_BUFFER_SIZE:0][num_motors-1:0];
-  reg signed [dda_bits-1:0] incrementincrement [MOVE_BUFFER_SIZE:0][num_motors-1:0];
-
-  // DDA module input wires determined from buffer
-  wire [move_duration_bits-1:0] move_duration_w = move_duration[moveind];
-
-  // Per-axis DDA parameters
-  wire [dda_bits-1:0] increment_w [num_motors-1:0];
-  wire [dda_bits-1:0] incrementincrement_w [num_motors-1:0];
-
-  genvar i;
-  for (i=0; i<num_motors; i=i+1) begin
-    assign increment_w[i] = increment[moveind][i];
-    assign incrementincrement_w[i] = incrementincrement[moveind][i];
-  end
-
   wire dda_tick;
 
   // Step IO
   wire [num_motors-1:0] dda_step;
-
 
   // handle External Step/Direction/Enable signals
   // when acting as a traditional motor driver
@@ -420,42 +434,13 @@ module spi_state_machine #(
 
   always @(posedge CLK) if (!resetn) begin
 
-    config_chargepump_period <= 91;
-
     word_send_data <= 0;
 
     writemoveind <= 0;  // Move buffer
     stepready <= 0;  // Latching mechanism for engaging the buffered move.
 
-    // TODO fix this
-    dir_r[0] <= {(num_motors){1'b0}};
-    dir_r[1] <= {(num_motors){1'b0}};
-
     message_word_count <= 0;
     message_header <= 0;
-
-    // TODO change to for loops for buffer
-    move_duration[0] <= 0;
-    move_duration[1] <= 0;
-
-    for (nmot=0; nmot<num_motors; nmot=nmot+1) begin
-      increment[0][nmot] <= {dda_bits{1'b0}};
-      increment[1][nmot] <= {dda_bits{1'b0}};
-      incrementincrement[0][nmot] <= {dda_bits{1'b0}};
-      incrementincrement[1][nmot] <= {dda_bits{1'b0}};
-  
-
-      // Stepper Config
-      microsteps[nmot] <= default_microsteps;
-      current[nmot] <= default_current;
-      config_offtime[nmot] <= 810;
-      config_blanktime[nmot] <= 27;
-      config_fastdecay_threshold[nmot] <= 706;
-      config_minimum_on_time[nmot] <= 54;
-      config_current_threshold[nmot] <= 1024;
-      config_invert_highside[nmot] <= `DEFAULT_BRIDGE_INVERTING;
-      config_invert_lowside[nmot] <= `DEFAULT_BRIDGE_INVERTING;
-    end
 
   end else if (resetn) begin
     if (word_received_rising) begin
@@ -504,36 +489,11 @@ module spi_state_machine #(
 
           // Move Routine
           CMD_COORDINATED_STEP: begin
-            // Multiaxis
-            for (nmot=0; nmot<num_motors; nmot=nmot+1) begin
-              word_send_data <= telemetry_reg_ro[message_word_count-1]; // Prep to send steps
-              // the first non-header word is the move duration
-              if (nmot == 0) begin
-                if (message_word_count == 1) begin
-                  move_duration[writemoveind][move_duration_bits-1:0] <= word_data_received[move_duration_bits-1:0];
-                end
-              end
-              /* verilator lint_off WIDTH */
-              if (message_word_count == (nmot+1)*2) begin
-              /* verilator lint_on WIDTH */
-                increment[writemoveind][nmot] <= word_data_received;
-              end
-              /* verilator lint_off WIDTH */
-              if (message_word_count == (nmot+1)*2+1) begin
-              /* verilator lint_on WIDTH */
-                incrementincrement[writemoveind][nmot] <= word_data_received;
-                //if (nmot != num_motors-1) word_send_data[encoder_bits-1:0] <= step_encoder_store[nmot+1]; // Prep to send steps
-
-                if (nmot == num_motors-1) begin
-                  writemoveind <= writemoveind + 1'b1;
-                  stepready[writemoveind] <= ~stepready[writemoveind];
-                  message_header <= 8'b0; // Reset Message Header at the end
-                  message_word_count <= 0;
-                end
-                `ifdef FORMAL
-                  assert(writemoveind <= MOVE_BUFFER_SIZE);
-                `endif
-              end
+            word_send_data <= telemetry_reg_ro[message_word_count-1]; // Prep to send steps
+            config_reg_rw[moveind][message_word_count] <= word_data_received;
+            if (message_word_count == num_motors*2) begin
+              message_header <= 8'b0; // Reset Message Header at the end
+              message_word_count <= 0;
             end
           end // `CMD_COORDINATED_STEP
 
