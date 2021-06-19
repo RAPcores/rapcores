@@ -442,6 +442,21 @@ module spi_state_machine #(
     message_word_count <= 0;
     message_header <= 0;
 
+
+    for (nmot=0; nmot<num_motors; nmot=nmot+1) begin
+
+      // Stepper Config
+      microsteps[nmot] <= default_microsteps;
+      current[nmot] <= default_current;
+      config_offtime[nmot] <= 810;
+      config_blanktime[nmot] <= 27;
+      config_fastdecay_threshold[nmot] <= 706;
+      config_minimum_on_time[nmot] <= 54;
+      config_current_threshold[nmot] <= 1024;
+      config_invert_highside[nmot] <= `DEFAULT_BRIDGE_INVERTING;
+      config_invert_lowside[nmot] <= `DEFAULT_BRIDGE_INVERTING;
+    end
+
   end else if (resetn) begin
     if (word_received_rising) begin
       // Zero out send data register
@@ -453,7 +468,6 @@ module spi_state_machine #(
         // Save CMD header incase multi word transaction
         message_header <= word_data_received[word_bits-1:word_bits-8]; // Header is 8 MSB
 
-        // First word so message count zero
         message_word_count <= 1;
 
         case (word_data_received[word_bits-1:word_bits-8])
@@ -490,10 +504,12 @@ module spi_state_machine #(
           // Move Routine
           CMD_COORDINATED_STEP: begin
             word_send_data <= telemetry_reg_ro[message_word_count-1]; // Prep to send steps
-            config_reg_rw[moveind][message_word_count] <= word_data_received;
-            if (message_word_count == num_motors*2) begin
+            config_reg_rw[writemoveind][message_word_count] <= word_data_received;
+            if (message_word_count == num_motors*2 + 1) begin
               message_header <= 8'b0; // Reset Message Header at the end
               message_word_count <= 0;
+              writemoveind <= writemoveind + 1'b1;
+              stepready[writemoveind] <= ~stepready[writemoveind];
             end
           end // `CMD_COORDINATED_STEP
 
