@@ -203,10 +203,6 @@ module spi_state_machine #(
 
   reg [num_motors:1] dir_r [MOVE_BUFFER_SIZE:0];
 
-  //reg [move_duration_bits-1:0] move_duration [MOVE_BUFFER_SIZE:0];
-  //reg signed [dda_bits-1:0] increment [MOVE_BUFFER_SIZE:0][num_motors-1:0];
-  //reg signed [dda_bits-1:0] incrementincrement [MOVE_BUFFER_SIZE:0][num_motors-1:0];
-
   // Per-axis DDA parameters
   wire [dda_bits-1:0] increment_w [num_motors-1:0];
   wire [dda_bits-1:0] incrementincrement_w [num_motors-1:0];
@@ -504,7 +500,7 @@ module spi_state_machine #(
           // Move Routine
           CMD_COORDINATED_STEP: begin
             word_send_data <= telemetry_reg_ro[message_word_count-1]; // Prep to send steps
-            config_reg_rw[writemoveind][message_word_count] <= word_data_received;
+            command_reg_rw[writemoveind][message_word_count] <= word_data_received;
             if (message_word_count == num_motors*2 + 1) begin
               message_header <= 8'b0; // Reset Message Header at the end
               message_word_count <= 0;
