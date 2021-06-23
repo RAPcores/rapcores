@@ -81,6 +81,9 @@ module spi_state_machine #(
 
   // Static Parameter checks
   if(encoder_bits > word_bits) $error("parameter: encoder_bits is greater than word_bits");
+  if(move_duration_bits > word_bits) $error("parameter: move_duration_bits is greater than word_bits");
+  if(word_bits < 32) $error("paramter: word_bits must be at least 32 bits");
+  if(BUFFER_SIZE%2 != 0) $error("paramter: BUFFER_SIZE must be a power of two");
 
 
   localparam CMD_COORDINATED_STEP    = 8'h01;
