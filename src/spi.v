@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: ISC
 `default_nettype none
 
 // Mode 0 8Bit transfer SPI Peripheral implementation
@@ -14,9 +15,8 @@ module SPI (
 );
 
   // Registers to sync IO with FPGA clock
-  reg [2:0] SCKr;
-  reg [2:0] CSr; // active low, init unselected
   reg [1:0] COPIr;
+  reg [1:0] CSr;
 
   // Output Byte and ready flag
   reg rx_byte_ready_r;
@@ -27,57 +27,55 @@ module SPI (
   reg [2:0] txbitcnt; // counts down
 
   // Assign wires for SPI events, registers assigned in block below
-  wire SCK_risingedge = (SCKr[2:1] == 2'b01);
-  wire SCK_fallingedge = (SCKr[2:1] == 2'b10);
+  wire SCK_risingedge;
+  wire SCK_fallingedge;
+  rising_edge_detector_tribuf sck_rising (.clk(clk), .in(SCK), .out(SCK_risingedge));
+  falling_edge_detector_tribuf sck_falling (.clk(clk), .in(SCK), .out(SCK_fallingedge));
+
   wire CS_active = ~CSr[1];  // active low
   wire COPI_data = COPIr[1];
   // CIPO pin (tristated per convention)
   assign CIPO = (CS_active) ? tx_byte[txbitcnt] : 1'bZ;
 
 
-  always @(posedge clk) if (!resetn) begin
-    // Registers to sync IO with FPGA clock
-    SCKr <= 3'b0;
-    CSr <= 3'h1; // active low, init unselected
-    COPIr <= 2'b0;
+  always @(posedge clk) begin
+    if (!resetn) begin
+      // Registers to sync IO with FPGA clock
+      COPIr <= 2'b0;
 
-    // Output Byte and ready flag
-    rx_byte_ready_r <= 0;
-    rx_byte <= 8'b0;
+      // Output Byte and ready flag
+      rx_byte_ready_r <= 0;
+      rx_byte <= 8'b0;
 
-    // count the number of RX and TX bits RX incrments on rising, TX on falling SCK edge
-    rxbitcnt <= 3'b000; // counts up
-    txbitcnt <= 3'b111; // counts down
-  end else if (resetn) begin
+      // count the number of RX and TX bits RX incrments on rising, TX on falling SCK edge
+      rxbitcnt <= 3'b000; // counts up
+      txbitcnt <= 3'b111; // counts down
+    end else if (resetn) begin
 
-    // Use a 3 bit shift register to sync CS, COPI, CIPO, with FPGA clock
-    SCKr <= {SCKr[1:0], SCK};
-    CSr <= {CSr[1:0], CS};
-    COPIr <= {COPIr[0], COPI};
+      // Use a 2 bit shift register to sync COPI with FPGA clock
+      COPIr <= {COPIr[0], COPI};
+      CSr <= {CSr[0], CS};
 
-    if (CS_active) begin
-      // Recieve increment on rising edge
-      if (SCK_risingedge) begin
-        rxbitcnt <= rxbitcnt + 3'b001;
-        // Shift in Recieved bits
-        rx_byte <= {rx_byte[6:0], COPI_data};
+      if (CS_active) begin
+        // Recieve increment on rising edge
+        if (SCK_risingedge) begin
+          rxbitcnt <= rxbitcnt + 1'b1;
+          // Shift in Recieved bits
+          rx_byte <= {rx_byte[6:0], COPI_data};
+        end else if (SCK_fallingedge) begin
+          txbitcnt <= txbitcnt - 1'b1; // rolls over
+          // Trigger Byte recieved
+          rx_byte_ready_r <= (txbitcnt == 3'b0);
+        end
 
-        // Trigger Byte recieved
-        rx_byte_ready_r <= (rxbitcnt[2:0] == 3'b111);
+        //`ifdef FORMAL
+        //  assert(rx_byte_ready && rxbitcnt == 3'b111);
+        //`endif
+      end else begin // !CS_active
+        // Reset counts if a txfer is interrupted for some reason
+        rxbitcnt <= 3'b000;
+        txbitcnt <= 3'b111;
       end
-
-      // Transmit increment
-      if (SCK_fallingedge) begin
-        txbitcnt <= txbitcnt - 3'b001; // rolls over
-      end
-
-      //`ifdef FORMAL
-      //  assert(rx_byte_ready && rxbitcnt == 3'b111);
-      //`endif
-    end else begin
-      // Reset counts if a txfer is interrupted for some reason
-      rxbitcnt <= 3'b000;
-      txbitcnt <= 3'b111;
     end
   end
 
@@ -87,16 +85,16 @@ endmodule
 
 // 32 bit word SPI wrapper for Little endian 8 bit transfers
 //
-module SPIWord (
-    input             clk,
-    input             resetn,
-    input             SCK,
-    input             CS,
-    input             COPI,
-    output            CIPO,
-    input      [63:0] word_send_data,
-    output            word_received,
-    output reg [63:0] word_data_received
+module SPIWord #(parameter bits = 64) (
+    input wire        clk,
+    input wire        resetn,
+    input wire        SCK,
+    input wire        CS,
+    input wire        COPI,
+    output wire       CIPO,
+    input wire [bits-1:0] word_send_data,
+    output wire       word_received,
+    output reg [bits-1:0] word_data_received
 );
 
   // SPI Initialization
@@ -115,36 +113,28 @@ module SPIWord (
             .rx_byte(rx_byte),
             .rx_byte_ready(rx_byte_ready));
 
-  reg [3:0] byte_count;
-  wire [7:0] word_slice [8:0]; // slice the register into 8 bits
-  reg [1:0] rx_byte_ready_r;
+  reg [$clog2(bits/8)-1:0] byte_count;
+  wire rx_byte_ready_rising;
+  reg word_received_r;
+
+  rising_edge_detector ready_rising (.clk(clk), .in(rx_byte_ready), .out(rx_byte_ready_rising));
 
   // Recieve Shift Register
   always @(posedge clk) if (!resetn) begin
-    word_data_received <= 64'b0;
+    word_data_received <= {bits{1'b0}};
     byte_count <= 0;
-    rx_byte_ready_r <= 2'b0;
+    word_received_r <= 0;
   end else if (resetn) begin
-    rx_byte_ready_r <= {rx_byte_ready_r[0], rx_byte_ready};
-    if (rx_byte_ready_r == 2'b01) begin
-      byte_count <= (byte_count == 8) ? 1 : byte_count + 1;
-      word_data_received <= {rx_byte[7:0], word_data_received[63:8]};
+    if (rx_byte_ready_rising) begin
+      byte_count <= byte_count + 1'b1;
+      word_data_received <= {rx_byte[7:0], word_data_received[bits-1:8]};
+      if (&byte_count) word_received_r <= 1'b1;
+      else word_received_r <= 1'b0;
     end
   end
 
-  assign word_received = (byte_count == 8);
+  assign word_received = word_received_r;
 
-  //TODO: Use generate
-  assign word_slice[0] = word_send_data[7:0]; // This should only hit at initialization
-  assign word_slice[1] = word_send_data[15:8];
-  assign word_slice[2] = word_send_data[23:16];
-  assign word_slice[3] = word_send_data[31:24];
-  assign word_slice[4] = word_send_data[39:32];
-  assign word_slice[5] = word_send_data[47:40];
-  assign word_slice[6] = word_send_data[55:48];
-  assign word_slice[7] = word_send_data[63:56];
-  assign word_slice[8] = word_send_data[7:0];
-
-  assign tx_byte[7:0] = word_slice[byte_count];
+  assign tx_byte[7:0] = word_send_data[byte_count*8 +: 8];
 
 endmodule

@@ -1,5 +1,7 @@
 `timescale 1ns/100ps
-module rapcore_harness (
+module rapcore_harness #(
+  parameter motor_count = `MOTOR_COUNT
+  )(
     `ifdef LED
       input wire [`LED:1] LED,
     `endif
@@ -14,12 +16,14 @@ module rapcore_harness (
       input wire BOOT_DONE_IN,
     `endif
     `ifdef DUAL_HBRIDGE
-      input wire [`DUAL_HBRIDGE:1] PHASE_A1,  // Phase A
-      input wire [`DUAL_HBRIDGE:1] PHASE_A2,  // Phase A
-      input wire [`DUAL_HBRIDGE:1] PHASE_B1,  // Phase B
-      input wire [`DUAL_HBRIDGE:1] PHASE_B2,  // Phase B
-      input wire [`DUAL_HBRIDGE:1] VREF_A,  // VRef
-      input wire [`DUAL_HBRIDGE:1] VREF_B,  // VRef
+      input [`DUAL_HBRIDGE-1:0] PHASE_A1,  // Phase A
+      input [`DUAL_HBRIDGE-1:0] PHASE_A2,  // Phase A
+      input [`DUAL_HBRIDGE-1:0] PHASE_B1,  // Phase B
+      input [`DUAL_HBRIDGE-1:0] PHASE_B2,  // Phase B
+    `endif
+    `ifdef VREF_AB
+      input [`DUAL_HBRIDGE-1:0] VREF_A,  // VRef
+      input [`DUAL_HBRIDGE-1:0] VREF_B,  // VRef
     `endif
     `ifdef ULTIBRIDGE
       input wire CHARGEPUMP,
@@ -27,18 +31,18 @@ module rapcore_harness (
       input wire analog_out1,
       output reg analog_cmp2,
       input wire analog_out2,
-      input wire [`ULTIBRIDGE:1] PHASE_A1,  // Phase A
-      input wire [`ULTIBRIDGE:1] PHASE_A2,  // Phase A
-      input wire [`ULTIBRIDGE:1] PHASE_B1,  // Phase B
-      input wire [`ULTIBRIDGE:1] PHASE_B2,  // Phase B
-      input wire [`ULTIBRIDGE:1] PHASE_A1_H,  // Phase A
-      input wire [`ULTIBRIDGE:1] PHASE_A2_H,  // Phase A
-      input wire [`ULTIBRIDGE:1] PHASE_B1_H,  // Phase B
-      input wire [`ULTIBRIDGE:1] PHASE_B2_H,  // Phase B
+      input wire [`ULTIBRIDGE-1:0] PHASE_A1,  // Phase A
+      input wire [`ULTIBRIDGE-1:0] PHASE_A2,  // Phase A
+      input wire [`ULTIBRIDGE-1:0] PHASE_B1,  // Phase B
+      input wire [`ULTIBRIDGE-1:0] PHASE_B2,  // Phase B
+      input wire [`ULTIBRIDGE-1:0] PHASE_A1_H,  // Phase A
+      input wire [`ULTIBRIDGE-1:0] PHASE_A2_H,  // Phase A
+      input wire [`ULTIBRIDGE-1:0] PHASE_B1_H,  // Phase B
+      input wire [`ULTIBRIDGE-1:0] PHASE_B2_H,  // Phase B
     `endif
     `ifdef QUAD_ENC
-      output wire [`QUAD_ENC:1] ENC_B,
-      output wire [`QUAD_ENC:1] ENC_A,
+      output wire [`QUAD_ENC-1:0] ENC_B,
+      output wire [`QUAD_ENC-1:0] ENC_A,
     `endif
     `ifdef BUFFER_DTR
       input wire BUFFER_DTR,
@@ -71,15 +75,19 @@ module rapcore_harness (
     input CLK
 );
 
-  parameter NUMWORDS = 5;
+  parameter NUMWORDS = 12;
 
   reg hi = 1;
   reg lo = 0;
 
-  assign STEPINPUT = lo;
-  assign DIRINPUT = lo;
-  assign ENINPUT = lo;
-  assign HALT = hi;
+  `ifdef STEPINPUT
+    assign STEPINPUT = lo;
+    assign DIRINPUT = lo;
+    assign ENINPUT = lo;
+  `endif
+  `ifdef HALT
+    assign HALT = hi;
+  `endif
 
   // SCK can't be faster than every two clocks ~ use 4
   reg [1:0] SCK_r = 0;
@@ -104,7 +112,9 @@ module rapcore_harness (
       if(SCK_r == 2'b11) initialized <= 1; // we want copi to start shifting after first SCK cycle
     end
   end
-  assign resetn_in = resetn;
+  `ifdef RESETN
+    assign resetn_in = resetn;
+  `endif
 
   // COPI trigger 1/4 clk before SCK posedge
   wire COPI_tx;
@@ -122,12 +132,19 @@ module rapcore_harness (
 
   initial begin
     //enable
-    word_data_mem[0] = 64'h0a00000000000001;
+    word_data_mem[0] = 64'hf200000000000000;
+    word_data_mem[1] = 64'hffffffffffffffff;
     //move
-    word_data_mem[1] = 64'h0100000000000001;
-    word_data_mem[2] = 64'h00000000005fffff;
-    word_data_mem[3] = 64'h0100000000000000;
-    word_data_mem[4] = 64'h0000000000000000;
+    word_data_mem[2] = 64'h01000000000000aa;
+    word_data_mem[3] = 64'h00000000005fffff;
+    word_data_mem[4] = 64'hd000000000000000;
+    word_data_mem[5] = 64'h0000000000000000;
+    word_data_mem[6] = 64'hd000000000000000;
+    word_data_mem[7] = 64'h0000000000000000;
+    word_data_mem[8] = 64'hd000000000000000;
+    word_data_mem[9] = 64'h0000000000000000;
+    word_data_mem[10] = 64'hd000000000000000;
+    word_data_mem[11] = 64'h0000000000000000;
 
     word_data_tb = word_data_mem[0];
     tx_byte = word_data_tb[7:0];
@@ -161,69 +178,71 @@ module rapcore_harness (
     end
   end
 
-  wire         [12:0]  target_current1;
-  wire         [12:0]  target_current2;
-  reg         [12:0]  current_abs1;
-  reg         [12:0]  current_abs2;
-  wire signed  [12:0]  current1;
-  wire signed  [12:0]  current2;
+  `ifdef ULTIBRIDGE
 
-  always @(posedge CLK) begin
-    if (!resetn) begin
-      analog_cmp1 <= 1;
-      analog_cmp2 <= 1;
-    end
-    else begin
-      if (current1[12] == 1'b1) begin
-        current_abs1 = -current1;
+    wire         [12:0]  target_current1;
+    wire         [12:0]  target_current2;
+    reg         [12:0]  current_abs1;
+    reg         [12:0]  current_abs2;
+    wire signed  [12:0]  current1;
+    wire signed  [12:0]  current2;
+
+    always @(posedge CLK) begin
+      if (!resetn) begin
+        analog_cmp1 <= 1;
+        analog_cmp2 <= 1;
       end
       else begin
-        current_abs1 = current1;
+        if (current1[12] == 1'b1) begin
+          current_abs1 = -current1;
+        end
+        else begin
+          current_abs1 = current1;
+        end
+        if (current2[12] == 1'b1) begin
+          current_abs2 = -current2;
+        end
+        else begin
+          current_abs2 = current2;
+        end
+        analog_cmp1 <= (current_abs1[11:0] >= target_current1[11:0]); // compare unsigned
+        analog_cmp2 <= (current_abs2[11:0] >= target_current2[11:0]);
       end
-      if (current2[12] == 1'b1) begin
-        current_abs2 = -current2;
-      end
-      else begin
-        current_abs2 = current2;
-      end
-      analog_cmp1 <= (current_abs1[11:0] >= target_current1[11:0]); // compare unsigned
-      analog_cmp2 <= (current_abs2[11:0] >= target_current2[11:0]);
     end
-  end
 
-  pwm_duty duty1(
-      .clk(CLK),
-      .resetn(resetn),
-      .pwm(analog_out1),
-      .duty(target_current1)
-  );
-  pwm_duty duty2(
-      .clk(CLK),
-      .resetn(resetn),
-      .pwm(analog_out2),
-      .duty(target_current2)
-  );
-  hbridge_coil hbridge_coil1(
-      .clk(CLK),
-      .resetn(resetn),
-      .low_1(PHASE_A1[1]),
-      .high_1(PHASE_A1_H[1]),
-      .low_2(PHASE_A2[1]),
-      .high_2(PHASE_A2_H[1]),
-      .current(current1),
-      .polarity_invert_config(1'b0)
-  );
-  hbridge_coil hbridge_coil2(
-      .clk(CLK),
-      .resetn(resetn),
-      .low_1(PHASE_B1[1]),
-      .high_1(PHASE_B1_H[1]),
-      .low_2(PHASE_B2[1]),
-      .high_2(PHASE_B2_H[1]),
-      .current(current2),
-      .polarity_invert_config(1'b0)
-  );
-
+    pwm_duty duty1(
+        .clk(CLK),
+        .resetn(resetn),
+        .pwm(analog_out1),
+        .duty(target_current1)
+    );
+    pwm_duty duty2(
+        .clk(CLK),
+        .resetn(resetn),
+        .pwm(analog_out2),
+        .duty(target_current2)
+    );
+    hbridge_coil hbridge_coil1(
+        .clk(CLK),
+        .resetn(resetn),
+        .low_1(PHASE_A1[1]),
+        .high_1(PHASE_A1_H[1]),
+        .low_2(PHASE_A2[1]),
+        .high_2(PHASE_A2_H[1]),
+        .current(current1),
+        .polarity_invert_config(1'b0)
+    );
+    hbridge_coil hbridge_coil2(
+        .clk(CLK),
+        .resetn(resetn),
+        .low_1(PHASE_B1[1]),
+        .high_1(PHASE_B1_H[1]),
+        .low_2(PHASE_B2[1]),
+        .high_2(PHASE_B2_H[1]),
+        .current(current2),
+        .polarity_invert_config(1'b0)
+    );
+  `endif
 
   //
   // ENCODER

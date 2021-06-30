@@ -1,40 +1,43 @@
-# RAPcore
+# RAPcores
 
 ![RAPcore](https://github.com/RAPcores/Ulticores/workflows/RAPCore/badge.svg)
 
-https://rapcores.github.io/rapcores/
+http://rapcores.org/rapcores/
 
-The Robotic Application Processing Core.
+Robotic Application Processing Cores.
 
-RAPcore is a project targeting FPGAs and ASIC devices for the next generation of motor and motion
-control applications. It is a peripheral that sits between firmwares and motors to free up
-processing on the microcontroller and greatly simplify the motor driver.
+RAPcores is a motor and motion control toolkit for FPGAs and ASIC devices.
+It creates a peripheral that sits between kinematics engines and motors to free up
+processing power, enrich dynamical models, and greatly simplify the motor driver.
 
-## Features
+## Docs
 
-- Onboard stepper motor commutator
-- Fixed Point Step-Timing Algorithm
-- High-speed Quadrature Encoder Accumulator
-- High-Speed SPI Bus
+- [Build](http://rapcores.org/rapcores/dev.html)
+- [Configuration](http://rapcores.org/rapcores/configuration.html)
+- [Releases](http://rapcores.org/rapcores/releases.html)
+- [Motor Control Guide](http://rapcores.org/rapcores/motor_control.html)
+- [ASIC Deployments](http://rapcores.org/rapcores/asic.html)
+- [SPI Interface](http://rapcores.org/rapcores/spi_spec.html)
+- [Support Software](http://rapcores.org/rapcores/interfaces.html)
+- [C API](http://rapcores.org/rapcores/librapcore.html)
 
-## Target Hardware
+## FPGA Support
 
-The following FPGA architectures are supported and tested:
+The following FPGA architectures are supported and tested on our build configuration system:
 
 - iCE40
 - ECP5
+- Gowin (Experimental)
+- nexus (Experimental)
 
 We welcome ports to other architectures.
 
-## Build Requirements
+An early pathfinder has been hardened on ASIC for the Skywater Open MPW run using OpenLANE:
 
-RAPcore uses the free and open source Yosys and nextpnr tool chains.
-See the [dev docs](./docs/dev.md) for more information.
+- [MPW-one ASIC](https://github.com/RAPcores/caravel_rapcores)
 
-## Documentation
-
-https://rapcores.github.io/rapcores/
+RAPcores RTL is written in Verilog and tested with Yosys and IVerilog.
 
 ## License
 
-[ISC License](https://en.wikipedia.org/wiki/ISC_license).
+[ISC License](https://en.wikipedia.org/wiki/ISC_license)

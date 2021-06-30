@@ -1,24 +1,38 @@
 name: "RAPCore"
 on:
   pull_request:
-  push:
+
 jobs:
   tests:
     runs-on: ubuntu-latest
     steps:
+
     - uses: actions/checkout@v2
+  
     - uses: cachix/install-nix-action@v12
       with:
         nix_path: nixpkgs=channel:nixos-unstable
     - name: TinyFPGABX Flow
-      run: nix-shell --command 'make BOARD=tinyfpgabx'
+      run: nix-shell --command 'make build-full -j4 BOARD=tinyfpgabx'
     - name: ULX3S Flow
-      run: nix-shell --command 'make BOARD=ulx3s'
+      run: nix-shell --command 'make build-full -j4 BOARD=ulx3s'
     - name: RAPBo Flow
-      run: nix-shell --command 'make BOARD=rapbo'
-    - name: Formal Verification
-      run: nix-shell --command 'make formal'
-    - name: iverilog parse compat
+      run: nix-shell --command 'make build-full -j4 BOARD=rapbo'
+    - name: ECP5 Eval Flow
+      run: nix-shell --command 'make build-full -j4 BOARD=ecp5evn'
+    - name: IVerilog Compat
       run: nix-shell --command 'make iverilog-parse'
-    - name: verilator CDC
-      run: nix-shell --command 'make verilator-cdc'
+    - name: reg initialization
+      run: ./etc/reginit.sh
+    - name: RAPcore-cli
+      run: make rapcore-cli
+
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: RAPcores Build
+        path: |
+          ./build/*.bit
+          ./logs
+          ./rapcore-cli
+

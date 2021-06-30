@@ -18,16 +18,20 @@
 # -- Project information -----------------------------------------------------
 
 project = 'RAPcores'
-copyright = '2019, RAPcore developers'
+copyright = '2019-2021, RAPcore developers'
 author = 'sphinx-action Test Suite'
 
+import recommonmark
+from recommonmark.transform import AutoStructify
 
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['recommonmark', 'sphinx_markdown_tables']
+extensions = ['recommonmark',
+              'sphinx_markdown_tables',
+              'sphinx.ext.mathjax']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

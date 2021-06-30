@@ -11,12 +11,18 @@
 *.tmp/
 *.exp
 *.vlog
+*.bak
 build/*.json
 *.config
 *.vcd
-symbiyosys
+symbiyosys/symbiyosys_*
 a.out
 
 src/generated/*
-build/*
-logs/*
+build
+logs
+testbench/vcd
+testbench/cxxrtl/*_tb.cpp
+
+
+rapcore-cli

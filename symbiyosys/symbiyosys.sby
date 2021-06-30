@@ -5,17 +5,22 @@ mode prove
 smtbmc
 
 [script]
-read -formal formal_config.v
+read -formal config.v
 read -formal macro_params.v
-read -formal constants.v
+read -formal clock_divider.v
+read -formal dda_fsm.v
 read -formal dda_timer.v
+read -formal edge_detector.v
 read -formal spi.v
-read -formal stepper.v
+read -formal dual_hbridge.v
 read -formal quad_enc.v
 read -formal pwm.v
+read -formal pwm_pll.v
+read -formal register_input.v
 read -formal spi_state_machine.v
 read -formal microstepper_top.v
 read -formal microstepper_control.v
+read -formal space_vector_modulator.v
 read -formal analog_out.v
 read -formal chargepump.v
 read -formal cosine.v
@@ -27,16 +32,20 @@ read -formal rapcore.v
 prep -top rapcore
 
 [files]
-boards/formal_config.v
 src/macro_params.v
-src/constants.v
+src/clock_divider.v
+src/dda_fsm.v
 src/dda_timer.v
+src/edge_detector.v
 src/spi.v
-src/stepper.v
+src/dual_hbridge.v
+src/register_input.v
 src/spi_state_machine.v
 src/rapcore.v
 src/quad_enc.v
 src/pwm.v
+src/sim/pwm_pll.v
+src/space_vector_modulator.v
 src/microstepper/microstepper_top.v
 src/microstepper/microstepper_control.v
 src/microstepper/analog_out.v
@@ -46,3 +55,6 @@ src/microstepper/microstep_counter.v
 src/microstepper/mytimer.v
 src/microstepper/mytimer_8.v
 src/microstepper/mytimer_10.v
+
+# Set in the makefile by concatenting the board config.
+[file config.v]

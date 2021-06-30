@@ -1,215 +1,257 @@
+// SPDX-License-Identifier: ISC
 `default_nettype none
 
-module spi_state_machine(
+module spi_state_machine #(
+    parameter num_motors = 1,
+    parameter num_encoders = 0,
+    parameter word_bits = 64,
+    parameter dda_bits = 64,
+    parameter use_dda = 1,
+    parameter move_duration_bits = 32,
+    parameter encoder_bits = 32,
+    parameter encoder_velocity_bits = 32,
+    parameter default_microsteps = 1,
+    parameter default_current = 140,
+    parameter BUFFER_SIZE = 2,
+    parameter default_clock_divisor = 32,
+    parameter current_bits = 4
+  )(
+  `ifdef LA_IN
+    input wire [`LA_IN:1] LA_IN,
+  `endif
+  `ifdef LA_OUT
+    output wire [`LA_OUT:1] LA_OUT,
+  `endif
+
   input resetn,
-  // SPI pins
-  input SCK,
-  input CS,
-  input COPI,
-  output CIPO,
 
-  // Step IO
-  output step,
-  output dir,
-  output enable,
+  // Bus Interface
+  input wire [word_bits-1:0] word_data_received,
+  output reg [word_bits-1:0] word_send_data,
+  input wire word_received,
 
-  // Stepper Config
-  output reg [2:0] microsteps,
-  output reg [7:0] current,
-  output reg [9:0] config_offtime,
-  output reg [7:0] config_blanktime,
-  output reg [9:0] config_fastdecay_threshold,
-  output reg [7:0] config_minimum_on_time,
-  output reg [10:0] config_current_threshold,
-  output reg [7:0] config_chargepump_period,
-  output reg config_invert_highside,
-  output reg config_invert_lowside,
-  //output [511:0] cos_table,
-
-  // encoder
-  input [63:0] encoder_count,
+  `ifdef DUAL_HBRIDGE
+    output wire [`DUAL_HBRIDGE-1:0] PHASE_A1,  // Phase A
+    output wire [`DUAL_HBRIDGE-1:0] PHASE_A2,  // Phase A
+    output wire [`DUAL_HBRIDGE-1:0] PHASE_B1,  // Phase B
+    output wire [`DUAL_HBRIDGE-1:0] PHASE_B2,  // Phase B
+  `endif
+  `ifdef VREF_AB
+    output wire [`DUAL_HBRIDGE-1:0] VREF_A,  // VRef
+    output wire [`DUAL_HBRIDGE-1:0] VREF_B,  // VRef
+  `endif
+  `ifdef ULTIBRIDGE
+    output wire CHARGEPUMP,
+    input  wire [`ULTIBRIDGE-1:0] analog_cmp1,
+    output wire [`ULTIBRIDGE-1:0] analog_out1,
+    input  wire [`ULTIBRIDGE-1:0] analog_cmp2,
+    output wire [`ULTIBRIDGE-1:0] analog_out2,
+    output wire [`ULTIBRIDGE-1:0] PHASE_A1,  // Phase A
+    output wire [`ULTIBRIDGE-1:0] PHASE_A2,  // Phase A
+    output wire [`ULTIBRIDGE-1:0] PHASE_B1,  // Phase B
+    output wire [`ULTIBRIDGE-1:0] PHASE_B2,  // Phase B
+    output wire [`ULTIBRIDGE-1:0] PHASE_A1_H,  // Phase A
+    output wire [`ULTIBRIDGE-1:0] PHASE_A2_H,  // Phase A
+    output wire [`ULTIBRIDGE-1:0] PHASE_B1_H,  // Phase B
+    output wire [`ULTIBRIDGE-1:0] PHASE_B2_H,  // Phase B
+  `endif
+  `ifdef QUAD_ENC
+    input wire [num_encoders-1:0] ENC_B,
+    input wire [num_encoders-1:0] ENC_A,
+  `endif
 
   // Event IO
-  `ifdef BUFFER_DTR
-    output BUFFER_DTR,
-  `endif
-  `ifdef MOVE_DONE
-    output MOVE_DONE,
-  `endif
-  `ifdef HALT
-    input HALT,
-  `endif
+  output wire buffer_dtr,
+  output wire move_done,
+  input  wire halt,
+
   `ifdef STEPINPUT
-    input STEPINPUT,
-    input DIRINPUT,
-    input ENINPUT,
+    input wire [num_motors-1:0] STEPINPUT,
+    input wire [num_motors-1:0] DIRINPUT,
+    input wire [num_motors-1:0] ENINPUT,
   `endif
   `ifdef STEPOUTPUT
-    output STEPOUTPUT,
-    output DIROUTPUT,
-    output ENOUTPUT,
+    output wire [num_motors-1:0] STEPOUTPUT,
+    output wire [num_motors-1:0] DIROUTPUT,
+    output wire [num_motors-1:0] ENOUTPUT,
   `endif
-  input CLK
+  input CLK,
+  input pwm_clock
 );
 
-  `ifdef SPIPLL
-    // PLL for SPI Bus
-    wire spi_clock;
-    wire spipll_locked;
-    spi_pll spll (.clock_in(CLK),
-                  .clock_out(spi_clock),
-                  .locked(spipll_locked));
-  `else
-    wire spi_clock = CLK;
-  `endif
-
-  // Word handler
-  // The system operates on 64 bit little endian words
-  // This should make it easier to send 64 bit chunks from the host controller
-  reg [63:0] word_send_data;
-  reg [63:0] word_data_received;
-
-  wire [63:0] word_data_received_w;
-  always @(posedge spi_clock)
-  if(!resetn)
-    word_data_received <= 0;
-  else
-    word_data_received <= word_data_received_w;
-
-  wire word_received;
-  SPIWord word_proc (
-                .clk(spi_clock),
-                .resetn (resetn),
-                .SCK(SCK),
-                .CS(CS),
-                .COPI(COPI),
-                .CIPO(CIPO),
-                .word_send_data(word_send_data),
-                .word_received(word_received),
-                .word_data_received(word_data_received_w));
+  // Static Parameter checks
+  if(encoder_bits > word_bits) $error("parameter: encoder_bits is greater than word_bits");
+  if(move_duration_bits > word_bits) $error("parameter: move_duration_bits is greater than word_bits");
+  if(word_bits < 32) $error("paramter: word_bits must be at least 32 bits");
+  if(BUFFER_SIZE%2 != 0) $error("paramter: BUFFER_SIZE must be a power of two");
 
 
+  localparam CMD_COORDINATED_STEP    = 8'h01;
+  localparam CMD_STATUS_REG          = 8'hf1;
+  localparam CMD_CONFIG_REG          = 8'hf2;
 
-/*
-  reg [511:0] cos_table;
+  localparam MOVE_BUFFER_SIZE = BUFFER_SIZE - 1; //This is the zero-indexed end index
+  localparam MOVE_BUFFER_BITS = $clog2(BUFFER_SIZE) - 1; // number of bits to index given size
 
-  initial begin
-    cos_table	 [ 	7	 : 	0	 ] = 	255	;
-    cos_table	 [ 	15	 : 	8	 ] = 	255	;
-    cos_table	 [ 	23	 : 	16	 ] = 	255	;
-    cos_table	 [ 	31	 : 	24	 ] = 	254	;
-    cos_table	 [ 	39	 : 	32	 ] = 	254	;
-    cos_table	 [ 	47	 : 	40	 ] = 	253	;
-    cos_table	 [ 	55	 : 	48	 ] = 	252	;
-    cos_table	 [ 	63	 : 	56	 ] = 	251	;
-    cos_table	 [ 	71	 : 	64	 ] = 	250	;
-    cos_table	 [ 	79	 : 	72	 ] = 	249	;
-    cos_table	 [ 	87	 : 	80	 ] = 	247	;
-    cos_table	 [ 	95	 : 	88	 ] = 	246	;
-    cos_table	 [ 	103	 : 	96	 ] = 	244	;
-    cos_table	 [ 	111	 : 	104	 ] = 	242	;
-    cos_table	 [ 	119	 : 	112	 ] = 	240	;
-    cos_table	 [ 	127	 : 	120	 ] = 	238	;
-    cos_table	 [ 	135	 : 	128	 ] = 	236	;
-    cos_table	 [ 	143	 : 	136	 ] = 	233	;
-    cos_table	 [ 	151	 : 	144	 ] = 	231	;
-    cos_table	 [ 	159	 : 	152	 ] = 	228	;
-    cos_table	 [ 	167	 : 	160	 ] = 	225	;
-    cos_table	 [ 	175	 : 	168	 ] = 	222	;
-    cos_table	 [ 	183	 : 	176	 ] = 	219	;
-    cos_table	 [ 	191	 : 	184	 ] = 	215	;
-    cos_table	 [ 	199	 : 	192	 ] = 	212	;
-    cos_table	 [ 	207	 : 	200	 ] = 	208	;
-    cos_table	 [ 	215	 : 	208	 ] = 	205	;
-    cos_table	 [ 	223	 : 	216	 ] = 	201	;
-    cos_table	 [ 	231	 : 	224	 ] = 	197	;
-    cos_table	 [ 	239	 : 	232	 ] = 	193	;
-    cos_table	 [ 	247	 : 	240	 ] = 	189	;
-    cos_table	 [ 	255	 : 	248	 ] = 	185	;
-    cos_table	 [ 	263	 : 	256	 ] = 	180	;
-    cos_table	 [ 	271	 : 	264	 ] = 	176	;
-    cos_table	 [ 	279	 : 	272	 ] = 	171	;
-    cos_table	 [ 	287	 : 	280	 ] = 	167	;
-    cos_table	 [ 	295	 : 	288	 ] = 	162	;
-    cos_table	 [ 	303	 : 	296	 ] = 	157	;
-    cos_table	 [ 	311	 : 	304	 ] = 	152	;
-    cos_table	 [ 	319	 : 	312	 ] = 	147	;
-    cos_table	 [ 	327	 : 	320	 ] = 	142	;
-    cos_table	 [ 	335	 : 	328	 ] = 	136	;
-    cos_table	 [ 	343	 : 	336	 ] = 	131	;
-    cos_table	 [ 	351	 : 	344	 ] = 	126	;
-    cos_table	 [ 	359	 : 	352	 ] = 	120	;
-    cos_table	 [ 	367	 : 	360	 ] = 	115	;
-    cos_table	 [ 	375	 : 	368	 ] = 	109	;
-    cos_table	 [ 	383	 : 	376	 ] = 	103	;
-    cos_table	 [ 	391	 : 	384	 ] = 	98	;
-    cos_table	 [ 	399	 : 	392	 ] = 	92	;
-    cos_table	 [ 	407	 : 	400	 ] = 	86	;
-    cos_table	 [ 	415	 : 	408	 ] = 	80	;
-    cos_table	 [ 	423	 : 	416	 ] = 	74	;
-    cos_table	 [ 	431	 : 	424	 ] = 	68	;
-    cos_table	 [ 	439	 : 	432	 ] = 	62	;
-    cos_table	 [ 	447	 : 	440	 ] = 	56	;
-    cos_table	 [ 	455	 : 	448	 ] = 	50	;
-    cos_table	 [ 	463	 : 	456	 ] = 	44	;
-    cos_table	 [ 	471	 : 	464	 ] = 	37	;
-    cos_table	 [ 	479	 : 	472	 ] = 	31	;
-    cos_table	 [ 	487	 : 	480	 ] = 	25	;
-    cos_table	 [ 	495	 : 	488	 ] = 	19	;
-    cos_table	 [ 	503	 : 	496	 ] = 	13	;
-    cos_table	 [ 	511	 : 	504	 ] = 	6	;
+  // Iteration consts
+  integer j;
+  genvar g;
+
+  // ---
+  // Status Register
+  // ---
+
+  // Status register offset aliases,
+  // These may be used in instantiated modules via dot access, e.g. rapcores.status_version
+  // for procedural interface generation
+  localparam status_version = 0;
+  localparam status_channel_info = 1;
+  localparam status_encoder_position_start = 2;
+  localparam status_encoder_position_end = status_encoder_position_start + num_encoders - 1;
+  localparam status_encoder_fault = status_encoder_position_end + 1;
+  localparam status_stepper_fault = status_encoder_fault + 1;
+  localparam status_encoder_velocity_start = status_stepper_fault + 1;
+  localparam status_encoder_velocity_end = status_encoder_velocity_start + num_encoders - 1;
+  localparam status_reg_end = status_encoder_velocity_end;
+
+  // Status Register (read-only, so wires)
+  wire [word_bits-1:0] status_reg_ro    [status_reg_end:0];
+
+  wire [num_motors-1:0] stepper_faultn;
+  wire [num_encoders-1:0] encoder_faultn;
+  wire signed [encoder_bits-1:0] encoder_count [num_encoders-1:0];
+  wire signed [encoder_velocity_bits-1:0] encoder_velocity [num_encoders-1:0];
+  wire signed [encoder_velocity_bits-1:0] encoder_velocity_counter [num_encoders-1:0];
+
+  // Set Status Registers, these are reset by their respective module,
+  // or set as constants here
+  assign status_reg_ro[status_version][7:0]               = `VERSION_PATCH;
+  assign status_reg_ro[status_version][15:8]              = `VERSION_MINOR;
+  assign status_reg_ro[status_version][23:16]             = `VERSION_MAJOR;
+  assign status_reg_ro[status_version][31:24]             = `VERSION_DEVEL;
+  assign status_reg_ro[status_channel_info][7:0]          = num_motors;
+  assign status_reg_ro[status_channel_info][15:8]         = num_encoders;
+  assign status_reg_ro[status_channel_info][23:16]        = encoder_bits;
+  assign status_reg_ro[status_channel_info][31:24]        = encoder_velocity_bits;
+  assign status_reg_ro[status_encoder_fault]              = encoder_faultn;
+  assign status_reg_ro[status_stepper_fault]              = stepper_faultn;
+  for(g=0; g<num_encoders; g=g+1) begin
+    assign status_reg_ro[status_encoder_velocity_start+g] = encoder_velocity[g];
+    assign status_reg_ro[status_encoder_position_start+g] = encoder_count[g];
   end
-*/
-  //
-  // Stepper Timing and Buffer Setup
-  //
+
+  // ---
+  // Config Register
+  // ---
+
+  // Config Register offset aliases
+  localparam config_enable = 0;
+  localparam config_brake = 1;
+  localparam config_clocks = 2;
+  localparam config_reg_end = config_clocks;
+
+  reg  [word_bits-1:0] config_reg_rw    [config_reg_end:0];
+
+  // Config Register - Set mappings for internal wiring
+  wire [num_motors-1:0] enable_r = config_reg_rw[config_enable][num_motors-1:0]; 
+  wire [num_motors-1:0] brake_r = config_reg_rw[config_brake][num_motors-1:0]; 
+  wire [7:0] clock_divisor = config_reg_rw[config_clocks][7:0];
+  reg [7:0] microsteps [0:num_motors-1];
+  reg [current_bits-1:0] current [0:num_motors-1];
+  reg [9:0] config_offtime [0:num_motors-1];
+  reg [7:0] config_blanktime [0:num_motors-1];
+  reg [9:0] config_fastdecay_threshold [0:num_motors-1];
+  reg [7:0] config_minimum_on_time [0:num_motors-1];
+  reg [10:0] config_current_threshold [0:num_motors-1];
+  reg config_invert_highside [0:num_motors-1];
+  reg config_invert_lowside [0:num_motors-1];
+  reg [7:0] config_chargepump_period; // one chargepump for all
+
+  // Config Register - Establish reset states
+  always @(posedge CLK) begin
+    if (!resetn) begin
+      config_reg_rw[config_enable] <= 0;
+      config_reg_rw[config_brake]  <= 0;
+      config_reg_rw[config_clocks] <= default_clock_divisor;
+    end
+  end
+
+  // ---
+  // Telemetry Register
+  // ---
+
+  // Telemetry Register
+  localparam telemetry_reg_end = num_encoders*2 - 1;
+
+  reg  [word_bits-1:0] telemetry_reg_ro [telemetry_reg_end:0];
+
+  always @(posedge CLK) begin
+    if (capture_telemetry) begin
+      for (j=0; j < num_encoders; j=j+1) begin
+        telemetry_reg_ro[j*2]   <= encoder_count[j]; 
+        telemetry_reg_ro[j*2+1] <= encoder_velocity[j];
+      end
+    end
+  end
+
+  // ---
+  // Command Register
+  // ---
+
+  // Command Register
+  localparam command_reg_end = (2 + num_motors * 2)*BUFFER_SIZE; // Dir + Duration + (velocity, accel)*num_motors
+
+  // TODO what is the column vs row major trap in FPGA? Does it exist?
+  reg  [word_bits-1:0] command_reg_rw   [BUFFER_SIZE:0][command_reg_end:0];
+
+  reg [num_motors:1] dir_r [MOVE_BUFFER_SIZE:0];
+
+  // Per-axis DDA parameters
+  wire [dda_bits-1:0] increment_w [num_motors-1:0];
+  wire [dda_bits-1:0] incrementincrement_w [num_motors-1:0];
+
+  // Command Buffer selection
+  genvar i;
+  for (i=0; i<num_motors; i=i+1) begin
+    assign increment_w[i] = command_reg_rw[moveind][2+i*2];
+    assign incrementincrement_w[i] = command_reg_rw[moveind][2+i*2];
+  end
+  // DDA module input wires determined from buffer
+  wire [move_duration_bits-1:0] move_duration_w = command_reg_rw[moveind][1][move_duration_bits-1:0];
+
+
+  // Any register/wire below this point is outside user space
+  wire capture_telemetry;
 
   // Move buffer
-  reg [`MOVE_BUFFER_BITS:0] writemoveind;
-  wire [`MOVE_BUFFER_BITS:0] moveind; // set via DDA
+  reg [MOVE_BUFFER_BITS:0] writemoveind;
+  wire [MOVE_BUFFER_BITS:0] moveind; // set via DDA FSM
 
   // Latching mechanism for engaging the buffered move.
-  reg [`MOVE_BUFFER_SIZE:0] stepready;
-  wire [`MOVE_BUFFER_SIZE:0] stepfinished; // set via DDA
+  // the DDA side is internal to dda_fsm
+  (* onehot *)reg [MOVE_BUFFER_SIZE:0] stepready;
 
-  reg [`MOVE_BUFFER_SIZE:0] dir_r;
-
-  reg [63:0] move_duration [`MOVE_BUFFER_SIZE:0];
-  reg signed [63:0] increment [`MOVE_BUFFER_SIZE:0];
-  reg signed [63:0] incrementincrement [`MOVE_BUFFER_SIZE:0];
-
-  // initialize DDA mem to zero
-  // TODO: This doesn't work
-  //initial begin
-  //  increment[`MOVE_BUFFER_SIZE:0] <= {(`MOVE_BUFFER_SIZE){64'b0}};
-  //  incrementincrement[`MOVE_BUFFER_SIZE:0] <= {(`MOVE_BUFFER_SIZE){64'b0}};
-  //  move_duration [`MOVE_BUFFER_SIZE:0] <= {(`MOVE_BUFFER_SIZE){64'b0}};
-  //end
-
-  reg [7:0] clock_divisor;  // should be 40 for 400 khz at 16Mhz Clk
-
-  // DDA module input wires determined from buffer
-  wire [63:0] move_duration_w = move_duration[moveind];
-  wire [63:0] increment_w = increment[moveind];
-  wire [63:0] incrementincrement_w = incrementincrement[moveind];
+  wire dda_tick;
 
   // Step IO
-  wire dda_step;
-  reg enable_r;
+  wire [num_motors-1:0] dda_step;
 
-  // Implement flow control and event pins if specified
-  `ifdef BUFFER_DTR
-    assign BUFFER_DTR = ~(~stepfinished == stepready);
-  `endif
-
+  // handle External Step/Direction/Enable signals
+  // when acting as a traditional motor driver
   `ifndef STEPINPUT
-    assign dir = dir_r[moveind]; // set direction
-    assign step = dda_step;
-    assign enable = enable_r;
+    wire [num_motors-1:0] dir = dir_r[moveind];
+    wire [num_motors-1:0] step = dda_step;
+    wire [num_motors-1:0] enable = enable_r;
   `else
-    assign dir = dir_r[moveind] ^ DIRINPUT; // set direction
-    assign step = dda_step ^ STEPINPUT;
-    assign enable = enable_r | ENINPUT;
+    wire [num_motors-1:0] step_input_r, dir_input_r, en_input_r;
+
+    register_input #(.width(num_motors)) stepin_m (.clk(CLK),.in(STEPINPUT), .out(step_input_r));
+    register_input #(.width(num_motors)) dirin_m  (.clk(CLK),.in(DIRINPUT), .out(dir_input_r));
+    register_input #(.width(num_motors)) enin_m   (.clk(CLK),.in(ENINPUT), .out(en_input_r));
+
+    wire [num_motors-1:0] dir = dir_r[moveind] ^ dir_input_r;
+    wire [num_motors-1:0] step = dda_step ^ step_input_r;
+    wire [num_motors-1:0] enable = enable_r | en_input_r;
   `endif
 
   `ifdef STEPOUTPUT
@@ -218,25 +260,158 @@ module spi_state_machine(
     assign ENOUTPUT = enable;
   `endif
 
-  dda_timer dda (
-                .resetn(resetn),
-                .clock_divisor(clock_divisor),
-                .move_duration(move_duration_w),
-                .increment(increment_w),
-                .incrementincrement(incrementincrement_w),
-                .stepready(stepready),
-                .stepfinished(stepfinished),
-                .moveind(moveind),
-                .writemoveind(writemoveind),
-                .step(dda_step),
-                `ifdef HALT
-                  .halt(HALT),
-                `endif
-                `ifdef MOVE_DONE
-                  .move_done(MOVE_DONE),
-                `endif
-                .CLK(CLK)
-                );
+  wire [encoder_bits-1:0] step_encoder [num_motors-1:0]; // step encoder
+
+
+  //
+  // Stepper Modules
+  //
+
+  `ifdef DUAL_HBRIDGE
+    generate
+      for (i=0; i<num_motors; i=i+1) begin
+        dual_hbridge #(.step_count_bits(encoder_bits),
+                       .current_bits(current_bits))
+                    s0 (
+                      .clk (CLK),
+                      .resetn(resetn),
+                      .pwm_clk(pwm_clock),
+                      .phase_a1 (PHASE_A1[i]),
+                      .phase_a2 (PHASE_A2[i]),
+                      .phase_b1 (PHASE_B1[i]),
+                      .phase_b2 (PHASE_B2[i]),
+                      `ifdef VREF_AB
+                        .vref_a (VREF_A[i]),
+                        .vref_b (VREF_B[i]),
+                      `endif
+                      .step (step[i]),
+                      .dir (dir[i]),
+                      .enable (enable[i]),
+                      .brake  (brake_r[i]),
+                      .microsteps (microsteps[i]),
+                      .current (current[i]),
+                      .step_count(step_encoder[i]),
+                      .encoder_count(encoder_count[i]),
+                      .faultn(stepper_faultn[i]));
+      end
+    endgenerate
+  `endif
+
+  `ifdef ULTIBRIDGE
+    generate
+      for (i=0; i<num_motors; i=i+1) begin
+        microstepper_top microstepper0(
+          `ifdef LA_IN
+            .LA_IN(LA_IN),
+          `endif
+          `ifdef LA_OUT
+            .LA_OUT(LA_OUT),
+          `endif
+          .clk(CLK),
+          .resetn( resetn),
+          .phase_a1_l(PHASE_A1[i]),
+          .phase_a2_l(PHASE_A2[i]),
+          .phase_b1_l(PHASE_B1[i]),
+          .phase_b2_l(PHASE_B2[i]),
+          .phase_a1_h(PHASE_A1_H[i]),
+          .phase_a2_h(PHASE_A2_H[i]),
+          .phase_b1_h(PHASE_B1_H[i]),
+          .phase_b2_h(PHASE_B2_H[i]),
+          .analog_cmp1 (analog_cmp1[i]),
+          .analog_out1 (analog_out1[i]),
+          .analog_cmp2 (analog_cmp2[i]),
+          .analog_out2 (analog_out2[i]),
+          .chargepump_pin (CHARGEPUMP),
+          .config_offtime (config_offtime[i]),
+          .config_blanktime (config_blanktime[i]),
+          .config_fastdecay_threshold (config_fastdecay_threshold[i]),
+          .config_minimum_on_time (config_minimum_on_time[i]),
+          .config_current_threshold (config_current_threshold[i]),
+          .config_chargepump_period (config_chargepump_period),
+          .config_invert_highside (config_invert_highside[i]),
+          .config_invert_lowside (config_invert_lowside[i]),
+          //.cos_table (cos_table),
+          .step (step[i]),
+          .dir (dir[i]),
+          .enable_in(enable[i]),
+          .faultn(stepper_faultn[i])
+          );
+      end
+    endgenerate
+  `endif
+
+
+  //
+  // Encoders
+  //
+  `ifdef QUAD_ENC
+    for (i=0; i<num_encoders; i=i+1) begin
+      quad_enc #(.encbits(encoder_bits),
+                 .velocity_bits(encoder_velocity_bits)) encoder0
+      (
+        .resetn(resetn),
+        .clk(CLK),
+        .a(ENC_A[i]),
+        .b(ENC_B[i]),
+        .faultn(encoder_faultn[i]),
+        .count(encoder_count[i]),
+        .velocity(encoder_velocity[i]),
+        .velocity_counter(encoder_velocity_counter[i])
+        //.multiplier(encoder_multiplier)
+        );
+    end
+  `endif
+
+
+  wire loading_move;
+  wire executing_move;
+
+  //
+  // DDA Setup
+  //
+
+  // Clock divider used to continually make DDA ticks
+  clock_divider #(.divider_bits(8)) cd0
+  (
+    .resetn(resetn),
+    .divider(clock_divisor),
+    .tick(dda_tick),
+    .clk(CLK)
+  );
+
+  if (use_dda) begin
+    // DDA FSM for duration and buffer state managment
+    dda_fsm #(.buffer_bits(MOVE_BUFFER_BITS+1),
+              .buffer_size(BUFFER_SIZE),
+              .move_duration_bits(move_duration_bits)) ddam0 (
+      .clk(CLK),
+      .resetn(resetn),
+      .dda_tick(dda_tick),
+      .loading_move(loading_move),
+      .move_duration(move_duration_w),
+      .executing_move(executing_move),
+      .finishedmove(capture_telemetry),
+      .move_done(move_done),
+      .stepready(stepready),
+      .buffer_dtr(buffer_dtr),
+      .moveind(moveind)
+    );
+
+    // N dda timers per axis
+    for (i=0; i<num_motors; i=i+1) begin
+      dda_timer ddan (
+                    .resetn(resetn),
+                    .dda_tick(dda_tick),
+                    .increment(increment_w[i]),
+                    .incrementincrement(incrementincrement_w[i]),
+                    .loading_move(loading_move),
+                    .executing_move(executing_move),
+                    .step(dda_step[i]),
+                    .CLK(CLK)
+                    );
+    end
+  end // use_dda
+
 
   //
   // State Machine for handling SPI Messages
@@ -245,52 +420,44 @@ module spi_state_machine(
   reg [7:0] message_word_count;
   reg [7:0] message_header;
 
-  // Encoder
-  reg signed [63:0] encoder_store; // Snapshot for SPI comms
 
   // check if the Header indicated multi-word transfer
-  wire awaiting_more_words = (message_header == `CMD_COORDINATED_STEP) |
-                             (message_header == `CMD_API_VERSION);
-  reg [1:0] word_received_r;
+  wire awaiting_more_words = message_header != 0;
+
+  wire word_received_rising;
+  rising_edge_detector word_recieved_edge_rising (.clk(CLK), .in(word_received), .out(word_received_rising));
+
+  reg [$clog2(num_motors):0] nmot;
+
+  reg [7:0] dma_addr;
 
   always @(posedge CLK) if (!resetn) begin
-    // Stepper Config
-    microsteps <= 2;
-    current <= 140;
-    config_offtime <= 810;
-    config_blanktime <= 27;
-    config_fastdecay_threshold <= 706;
-    config_minimum_on_time <= 54;
-    config_current_threshold <= 1024;
-    config_chargepump_period <= 91;
-    config_invert_highside <= `DEFAULT_BRIDGE_INVERTING;
-    config_invert_lowside <= `DEFAULT_BRIDGE_INVERTING;
-    enable_r <= 0;
 
     word_send_data <= 0;
 
     writemoveind <= 0;  // Move buffer
     stepready <= 0;  // Latching mechanism for engaging the buffered move.
-    dir_r <= {(`MOVE_BUFFER_SIZE+1){1'b0}};
 
-    clock_divisor <= 40;  // should be 40 for 400 khz at 16Mhz Clk
     message_word_count <= 0;
     message_header <= 0;
 
-    word_received_r <= 2'b0;
 
-    // TODO change to for loops
-    move_duration[0] <= 64'b0;
-    move_duration[1] <= 64'b0;
-    increment[0] <= 64'b0;
-    increment[1] <= 64'b0;
-    incrementincrement[0] <= 64'b0;
-    incrementincrement[1] <= 64'b0;
-    encoder_store <= 64'b0;
+    for (nmot=0; nmot<num_motors; nmot=nmot+1) begin
+
+      // Stepper Config
+      microsteps[nmot] <= default_microsteps;
+      current[nmot] <= default_current;
+      config_offtime[nmot] <= 810;
+      config_blanktime[nmot] <= 27;
+      config_fastdecay_threshold[nmot] <= 706;
+      config_minimum_on_time[nmot] <= 54;
+      config_current_threshold[nmot] <= 1024;
+      config_invert_highside[nmot] <= `DEFAULT_BRIDGE_INVERTING;
+      config_invert_lowside[nmot] <= `DEFAULT_BRIDGE_INVERTING;
+    end
 
   end else if (resetn) begin
-    word_received_r <= {word_received_r[0], word_received};
-    if (word_received_r == 2'b01) begin
+    if (word_received_rising) begin
       // Zero out send data register
       word_send_data <= 64'b0;
 
@@ -298,77 +465,28 @@ module spi_state_machine(
       if (!awaiting_more_words) begin
 
         // Save CMD header incase multi word transaction
-        message_header <= word_data_received[63:56]; // Header is 8 MSB
+        message_header <= word_data_received[word_bits-1:word_bits-8]; // Header is 8 MSB
 
-        // First word so message count zero
         message_word_count <= 1;
 
-        case (word_data_received[63:56])
+        case (word_data_received[word_bits-1:word_bits-8])
 
           // Coordinated Move
-          `CMD_COORDINATED_STEP: begin
+          CMD_COORDINATED_STEP: begin
 
             // Get Direction Bits
-            dir_r[writemoveind] <= word_data_received[0];
-
-            // Store encoder values across all axes Now
-            encoder_store <= encoder_count;
+            dir_r[writemoveind] <= word_data_received[num_motors-1:0];
 
           end
 
-          // Motor Enable/disable
-          `CMD_MOTOR_ENABLE: begin
-            enable_r <= word_data_received[0];
+          CMD_STATUS_REG: begin
+            dma_addr <= word_data_received[7:0];
+            word_send_data <= status_reg_ro[word_data_received[32:0]];
           end
 
-          // Clock divisor (24 bit)
-          `CMD_CLK_DIVISOR: begin
-            clock_divisor[7:0] <= word_data_received[7:0];
-          end
-
-          // Set Microstepping
-          `CMD_MOTORCONFIG: begin
-            // TODO needs to be power of two
-            current[7:0] <= word_data_received[15:8];
-            microsteps[2:0] <= word_data_received[2:0];
-          end
-
-          // Set Microstepping Parameters
-          `CMD_MICROSTEPPER_CONFIG: begin
-            config_offtime[9:0] <= word_data_received[39:30];
-            config_blanktime[7:0] <= word_data_received[29:22];
-            config_fastdecay_threshold[9:0] <= word_data_received[21:12];
-            config_minimum_on_time[7:0] <= word_data_received[18:11];
-            config_current_threshold[10:0] <= word_data_received[10:0];
-          end
-
-          // Set chargepump period
-          `CMD_CHARGEPUMP: begin
-            config_chargepump_period[7:0] <= word_data_received[7:0];
-          end
-
-          // Invert Bridge outputs
-          `CMD_BRIDGEINVERT: begin
-            config_invert_highside <= word_data_received[1];
-            config_invert_lowside <= word_data_received[0];
-          end
-
-          // Write to Cosine Table
-          // TODO Cosine Net is broken
-          //`CMD_COSINE_CONFIG: begin
-            //cos_table[word_data_received[35:32]] <= word_data_received[31:0];
-            //cos_table[word_data_received[37:32]] <= word_data_received[7:0];
-            //cos_table[word_data_received[35:32]+3] <= word_data_received[31:25];
-            //cos_table[word_data_received[35:32]+2] <= word_data_received[24:16];
-            //cos_table[word_data_received[35:32]+1] <= word_data_received[15:8];
-            //cos_table[word_data_received[35:32]] <= word_data_received[7:0];
-          //end
-
-          // API Version
-          `CMD_API_VERSION: begin
-            word_send_data[7:0] <= `VERSION_PATCH;
-            word_send_data[15:8] <= `VERSION_MINOR;
-            word_send_data[23:16] <= `VERSION_MAJOR;
+          CMD_CONFIG_REG: begin
+            dma_addr <= word_data_received[7:0];
+            word_send_data <= config_reg_rw[word_data_received[32:0]];
           end
 
           default: word_send_data <= 64'b0;
@@ -381,37 +499,36 @@ module spi_state_machine(
         message_word_count <= message_word_count + 1;
 
         case (message_header)
+
           // Move Routine
-          `CMD_COORDINATED_STEP: begin
-            // the first non-header word is the move duration
-            case (message_word_count)
-              1: begin
-                move_duration[writemoveind][63:0] <= word_data_received[63:0];
-                //word_send_data[63:0] = last_steps_taken[63:0]; // Prep to send steps
-              end
-              2: begin
-                increment[writemoveind][63:0] <= word_data_received[63:0];
-                word_send_data[63:0] <= encoder_store[63:0]; // Prep to send encoder read
-              end
-              3: begin
-                incrementincrement[writemoveind][63:0] <= word_data_received[63:0];
-                message_word_count <= 0;
-                stepready[writemoveind] <= ~stepready[writemoveind];
-                writemoveind <= writemoveind + 1'b1;
-                message_header <= 8'b0; // Reset Message Header
-                `ifdef FORMAL
-                  assert(writemoveind <= `MOVE_BUFFER_SIZE);
-                `endif
-              end
-            endcase
+          CMD_COORDINATED_STEP: begin
+            word_send_data <= telemetry_reg_ro[message_word_count-1]; // Prep to send steps
+            command_reg_rw[writemoveind][message_word_count] <= word_data_received;
+            if (message_word_count == num_motors*2 + 1) begin
+              message_header <= 8'b0; // Reset Message Header at the end
+              message_word_count <= 0;
+              writemoveind <= writemoveind + 1'b1;
+              stepready[writemoveind] <= ~stepready[writemoveind];
+            end
           end // `CMD_COORDINATED_STEP
-            // by default reset the message header if it was a two word transaction
-            default: message_header <= 8'b0; // Reset Message Header
+
+          CMD_CONFIG_REG: begin
+            config_reg_rw[dma_addr] <= word_data_received[31:0];
+            message_header <= 8'b0;
+          end
+
+          // by default reset the message header if it was a two word transaction
+          default: message_header <= 8'b0; // Reset Message Header
+
         endcase
       end
     end
   end
 
+  // Macro external wiring statements here
+  `ifdef STATE_MACHINE_LA
+    `STATE_MACHINE_LA
+  `endif
 
 
 endmodule

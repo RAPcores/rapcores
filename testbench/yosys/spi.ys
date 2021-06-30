@@ -1,6 +1,5 @@
 
 read_verilog -sv testbench/spi_tb.v
-
+hierarchy -check -top testbench
 prep -top testbench
-show SPIWord
-sim -n 40000 -clock clk -vcd testbench/vcd/spi.vcd
+sim -n 10000 -clock clk -vcd testbench/vcd/spi.vcd

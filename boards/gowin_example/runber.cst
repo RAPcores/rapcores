@@ -1,0 +1,10 @@
+
+IO_LOC "CLK" 4;
+IO_LOC "SCK" 23;
+IO_LOC "COPI" 24;
+IO_LOC "CIPO" 25;
+IO_LOC "CS" 26;
+IO_LOC "ENC_A" 27;
+IO_LOC "ENC_B" 28;
+IO_LOC "led[6]" 29;
+IO_LOC "led[7]" 30;

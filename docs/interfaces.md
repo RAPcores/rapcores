@@ -1,4 +1,20 @@
-# Interfaces
+# Software Programs
+
+## RAPcore-cli
+
+The RAPcores repository includes a simple command line interface for diagnostics
+and testing. It is backed by `librapcore`.
+
+### Build Instructions
+
+run: `make rapcore-cli`
+
+### Usage
+
+Options are available by:
+
+`./rapcore-cli --help`
+
 
 ## Interactive SPI using RasPi + Julia
 
@@ -36,9 +52,9 @@ julia> Pkg.add("BaremetalPi")
 
 Step 6:
 
-You should be ready to send commands. The full docs to BaremetalPi are avaialble [here](https://github.com/ronisbr/BaremetalPi.jl).
+You should be ready to send commands. The full docs to BaremetalPi are available [here](https://github.com/ronisbr/BaremetalPi.jl).
 
-Some examples:
+Some examples (Note: these commands may be out of date):
 
 ```
 julia> using BaremetalPi # import Pkg

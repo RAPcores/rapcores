@@ -1,0 +1,83 @@
+###############################################################################
+#
+# TinyFPGA BX constraint file (.pcf)
+#
+###############################################################################
+#
+# Copyright (c) 2018, Luke Valenty
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice, this
+#    list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+#    this list of conditions and the following disclaimer in the documentation
+#    and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+# ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# The views and conclusions contained in the software and documentation are those
+# of the authors and should not be interpreted as representing official policies,
+# either expressed or implied, of the <project name> project.
+#
+###############################################################################
+
+####
+# TinyFPGA BX information: https://github.com/tinyfpga/TinyFPGA-BX/
+####
+
+# Left side of board
+set_io --warn-no-port SCK 15 # PIN_1
+set_io --warn-no-port CS 16 # PIN_2
+set_io --warn-no-port COPI 17 # PIN_3
+set_io --warn-no-port CIPO 14 # PIN_4
+
+set_io --warn-no-port PHASE_B2[0] 10
+set_io --warn-no-port PHASE_B1[0] 12
+set_io --warn-no-port PHASE_A1[0] 23
+set_io --warn-no-port PHASE_A2[0] 13
+
+set_io --warn-no-port PHASE_A1[1] 9
+set_io --warn-no-port PHASE_A2[1] 11
+set_io --warn-no-port PHASE_B1[1] 18
+set_io --warn-no-port PHASE_B2[1] 19
+
+set_io --warn-no-port PHASE_B2[2] 6
+set_io --warn-no-port PHASE_B1[2] 44
+set_io --warn-no-port PHASE_A1[2] 4
+set_io --warn-no-port PHASE_A2[2] 3
+
+set_io --warn-no-port PHASE_A1[3] 47
+set_io --warn-no-port PHASE_A2[3] 46
+set_io --warn-no-port PHASE_B2[3] 48
+set_io --warn-no-port PHASE_B1[3] 45 # PIN_22
+
+set_io --warn-no-port STEPINPUT[0] 23
+set_io --warn-no-port DIRINPUT[0] 25
+set_io --warn-no-port ENINPUT[0] 26
+
+set_io --warn-no-port STEPINPUT[1] 27
+set_io --warn-no-port DIRINPUT[1] 32
+set_io --warn-no-port ENINPUT[1] 35
+
+set_io --warn-no-port STEPINPUT[2] 31
+set_io --warn-no-port DIRINPUT[2] 37
+set_io --warn-no-port ENINPUT[2] 34
+
+set_io --warn-no-port STEPINPUT[3] 43
+set_io --warn-no-port DIRINPUT[3] 36
+set_io --warn-no-port ENINPUT[3] 42
+
+# 12MHz clock
+set_io --warn-no-port CLK 21 # input

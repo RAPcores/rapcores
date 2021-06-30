@@ -42,28 +42,28 @@ set_io --warn-no-port SCK A2 # PIN_1
 set_io --warn-no-port CS A1 # PIN_2
 set_io --warn-no-port COPI B1 # PIN_3
 set_io --warn-no-port CIPO C2 # PIN_4
-set_io --warn-no-port PIN_5 C1
-set_io --warn-no-port PIN_6 D2
-set_io --warn-no-port PIN_7 D1
+set_io --warn-no-port ENC_A[1] C1
+set_io --warn-no-port PHASE_A1[3] D2
+set_io --warn-no-port PHASE_A2[3] D1
 set_io --warn-no-port PHASE_A1[1] E2
 set_io --warn-no-port PHASE_A2[1] E1
 set_io --warn-no-port PHASE_B1[1] G2
 set_io --warn-no-port PHASE_B2[1] H1
-set_io --warn-no-port VREF_A[1] J1 # PIN_12
-set_io --warn-no-port VREF_B[1] H2 # PIN_13
+set_io --warn-no-port ENC_A[3] J1 # PIN_12
+set_io --warn-no-port ENC_B[3] H2 # PIN_13
 
 # Right side of board
-set_io --warn-no-port ENC_A[1] H9
-set_io --warn-no-port ENC_B[1] D9
-set_io --warn-no-port PIN_16 D8
-set_io --warn-no-port PIN_17 C9
-set_io --warn-no-port PIN_18 A9
-set_io --warn-no-port PIN_19 B8
-set_io --warn-no-port PIN_20 A8
-set_io --warn-no-port PIN_21 B7
-set_io --warn-no-port BUFFER_DTR A7 # PIN_22
-set_io --warn-no-port MOVE_DONE B6 # PIN_23
-set_io --warn-no-port -pullup yes HALT A6 # PIN_24
+set_io --warn-no-port ENC_B[0] H9
+set_io --warn-no-port PHASE_B2[0] D9
+set_io --warn-no-port PHASE_B1[0] D8
+set_io --warn-no-port PHASE_A1[0] C9
+set_io --warn-no-port PHASE_A2[0] A9
+set_io --warn-no-port ENC_A[0] B8
+set_io --warn-no-port ENC_B[1] A8
+set_io --warn-no-port PHASE_B2[3] B7
+set_io --warn-no-port PHASE_B1[3] A7 # PIN_22
+#set_io --warn-no-port ENC_B B6 # PIN_23
+#set_io --warn-no-port ENC_A A6 # PIN_24
 
 # SPI flash interface on bottom of board
 set_io --warn-no-port SPI_SS F7
@@ -75,12 +75,12 @@ set_io --warn-no-port SPI_IO3 J8
 
 # General purpose pins on bottom of board
 set_io --warn-no-port PIN_25 G1
-set_io --warn-no-port PIN_26 J3
-set_io --warn-no-port PIN_27 J4
-set_io --warn-no-port PIN_28 G9
-set_io --warn-no-port PIN_29 J9
-set_io --warn-no-port PIN_30 E8
-set_io --warn-no-port PIN_31 J2
+set_io --warn-no-port ENC_B[2] J3
+set_io --warn-no-port PHASE_B2[2] J4
+set_io --warn-no-port PHASE_B1[2] G9
+set_io --warn-no-port PHASE_A1[2] J9
+set_io --warn-no-port PHASE_A2[2] E8
+set_io --warn-no-port ENC_A[2] J2
 
 # LED
 set_io --warn-no-port LED[1] B3

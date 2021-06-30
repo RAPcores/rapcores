@@ -1,31 +1,25 @@
-`include "../boards/mpw_one_defines.v"
-`include "../src/macro_params.v"
-`include "../src/constants.v"
-`include "../src/pwm.v"
-`include "../src/quad_enc.v"
-`include "../src/rapcore.v"
-`include "../src/dda_timer.v"
-`include "../src/spi_state_machine.v"
-`include "../src/spi.v"
-`include "../src/stepper.v"
-`include "../src/microstepper/microstepper_top.v"
-`include "../src/microstepper/analog_out.v"
-`include "../src/microstepper/chargepump.v"
-`include "../src/microstepper/cosine.v"
-`include "../src/microstepper/microstep_counter.v"
-`include "../src/microstepper/microstepper_control.v"
-`include "../src/microstepper/mytimer.v"
-`include "../src/microstepper/mytimer_8.v"
-`include "../src/microstepper/mytimer_10.v"
+
+
+// Your config here
+//`include "../boards/mpw_one_defines.v"
+`include "../boards/tinyfpgabx/tinyfpgabx.v"
+
 `include "rapcore_harness_tb.v"
 `include "pwm_duty.v"
 `include "hbridge_coil.v"
 `timescale 1ns/100ps
 
-module rapcore_tb (
+module rapcore_tb #(
+  parameter motor_count = `MOTOR_COUNT
+  )(
+    `ifdef DUAL_HBRIDGE
+      output wire [`DUAL_HBRIDGE-1:0] PHASE_A1,  // Phase A
+      output wire [`DUAL_HBRIDGE-1:0] PHASE_A2,  // Phase A
+      output wire [`DUAL_HBRIDGE-1:0] PHASE_B1,  // Phase B
+      output wire [`DUAL_HBRIDGE-1:0] PHASE_B2,  // Phase B
+    `endif
     input             CLK,
     output CIPO
-
   );
 
   `ifdef SPI_INTERFACE
@@ -33,6 +27,14 @@ module rapcore_tb (
     wire CS;
     wire COPI;
     wire CIPO;
+  `endif
+  `ifdef DUAL_HBRIDGE
+    wire [`DUAL_HBRIDGE-1:0] PHASE_A1;  // Phase A
+    wire [`DUAL_HBRIDGE-1:0] PHASE_A2;  // Phase A
+    wire [`DUAL_HBRIDGE-1:0] PHASE_B1;  // Phase B
+    wire [`DUAL_HBRIDGE-1:0] PHASE_B2;  // Phase B
+    wire [`DUAL_HBRIDGE-1:0] VREF_A;  // VRef
+    wire [`DUAL_HBRIDGE-1:0] VREF_B;  // VRef
   `endif
   `ifdef ULTIBRIDGE
     wire CHARGEPUMP;
@@ -160,6 +162,16 @@ module rapcore_tb (
         .CS(CS),
         .COPI(COPI),
         .CIPO(CIPO),
+      `endif
+      `ifdef DUAL_HBRIDGE
+        .PHASE_A1(PHASE_A1),  // Phase A
+        .PHASE_A2(PHASE_A2),  // Phase A
+        .PHASE_B1(PHASE_B1),  // Phase B
+        .PHASE_B2(PHASE_B2),  // Phase B
+      `endif
+      `ifdef VREF_AB
+        .VREF_A(VREF_A),  // VRef
+        .VREF_B(VREF_B),  // VRef
       `endif
       `ifdef ULTIBRIDGE
         .CHARGEPUMP(CHARGEPUMP),
