@@ -75,7 +75,7 @@ module rapcore_harness #(
     input CLK
 );
 
-  parameter NUMWORDS = 11;
+  parameter NUMWORDS = 12;
 
   reg hi = 1;
   reg lo = 0;
@@ -132,18 +132,19 @@ module rapcore_harness #(
 
   initial begin
     //enable
-    word_data_mem[0] = 64'h0a000000000000ff;
+    word_data_mem[0] = 64'hf200000000000000;
+    word_data_mem[1] = 64'hffffffffffffffff;
     //move
-    word_data_mem[1] = 64'h01000000000000aa;
-    word_data_mem[2] = 64'h00000000005fffff;
-    word_data_mem[3] = 64'hd000000000000000;
-    word_data_mem[4] = 64'h0000000000000000;
-    word_data_mem[5] = 64'hd000000000000000;
-    word_data_mem[6] = 64'h0000000000000000;
-    word_data_mem[7] = 64'hd000000000000000;
-    word_data_mem[8] = 64'h0000000000000000;
-    word_data_mem[9] = 64'hd000000000000000;
-    word_data_mem[10] = 64'h0000000000000000;
+    word_data_mem[2] = 64'h01000000000000aa;
+    word_data_mem[3] = 64'h00000000005fffff;
+    word_data_mem[4] = 64'hd000000000000000;
+    word_data_mem[5] = 64'h0000000000000000;
+    word_data_mem[6] = 64'hd000000000000000;
+    word_data_mem[7] = 64'h0000000000000000;
+    word_data_mem[8] = 64'hd000000000000000;
+    word_data_mem[9] = 64'h0000000000000000;
+    word_data_mem[10] = 64'hd000000000000000;
+    word_data_mem[11] = 64'h0000000000000000;
 
     word_data_tb = word_data_mem[0];
     tx_byte = word_data_tb[7:0];
