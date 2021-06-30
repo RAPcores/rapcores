@@ -18,75 +18,23 @@ this repository.
 
 ## Overview
 
+The SPI bus protocol is designed to allow for DMA with status/config registers and
+fused telemetry/command registers. The protocol is a thin wrapper over the register maps:
+
+| Header                | Action                     | Transmission Length (Words) |
+|-----------------------|----------------------------|-----------------------------|
+| 0x01                  | Command/Telemetry Transfer | 2 + 2*N motors              |
+| 0xf1                  | Status Register            | 2                           |
+| 0xf2                  | Configuration Register     | 2                           |
+
+
 The SPI bus operated in peripheral mode 0 MSB.The protocol assumes any complete transfer is
 a 64 bit word. The word construction is set to little endian for improved compatibility with
-SPI controller devices.
+SPI controller devices. 
+
+## Status/Config Commands - (0xf1 0xf2)
 
 
-| Header                | Action                  | Transmission Length (Words) | Default Value |
-|-----------------------|-------------------------|-----------------------------|---------------|
-| 0x01                  | Coordinated Step Timer  | 2 + 2*N motors              | N/A           |
-| 0x0a                  | Motor Enable/Disable    | 1                           | 0             |
-| 0x0b                  | Motor Braking on Disable| 1                           | 0             |
-| 0x20                  | DDA Timer Divider       | 1                           | 32            |
-| 0x10                  | Set Motor Config        | 1                           | See Below     |
-| 0x31                  | Charge Pump Divider     | 1                           | See Below     |
-| 0xfe                  | Get Version             | 2                           | 0x...MMmmpp   |
-
-
-## Set Motor Config - 0x10
-
-| Byte 1 | Byte 2         | Byte 3   | Byte 4   | Byte 5   | Byte 6   | Byte 7  | Byte 8     |
-|--------|----------------|----------|----------|----------|----------|---------|------------|
-| 0x10   | Motor Channel  | Reserved | Reserved | Reserved | Reserved | Current | Microsteps |
-
-Current:
-Current is set 0-255 (0x0-0xff), and this value may be divided by the number of bits of internal resolution avaialble.
-
-Microsteps:
-**Important Note**
-This is set as the increment across the phase table. For example if a single electrical cycle
-e.g. cosine from 0 to pi, is divided by 64, to achieve full resolution microsteps is set to 1.
-For 32 divisions, microsteps would be set as 2. This is inverse from other systems that specify
-the microsteps in full divisions. Whereas this method allows for fractional steps such as 64/3. 
-
-## Get API Version - 0xfe
-
-|Word| Word 1 | | | | | | | | Word 2 | | | |           |     |     |     |
-|----|--------|-|-|-|-|-|-|-|--------|-|-|-|-----------|-----|-----|-----|
-|Byte| Byte 1 |2|3|4|5|6|7|8| Byte 1 |2|3|4|5          | 6   | 7   | 8   |
-|TX  | 0xfe   | | | | | | | |        | | | |           |     |     |     |
-|RX  | STATUS | | | | | | | |        | | | |DEVELOPMENT|MAJOR|MINOR|PATCH|
-
-Note: For stable release versions the development flag is 0.
-
-## Enable/Disable Motors - 0x0a
-
-|  | Word 1 |  |  |  |  |  |  |          |
-|--|--------|--|--|--|--|--|--|----------|
-|  | Byte 1 |B2|B3|B4|B5|B6|B7|B8        |
-|TX| 0x0a   |  |  |  |  |  |  |0b11111111|
-|RX| STATUS |  |  |  |  |  |  |          |
-
-Starting from 0x01 of B8, enable or disable (1/0 respectively) a motor channel.
-This will power up the motors. For example:
-
-|Byte 8||||||||
-|-|-|-|-|-|-|-|-|
-|Bit 8| Bit 7 | Bit 6|Bit 5| Bit 4| Bit 3| Bit 2| Bit 1|
-|Mot 8| Mot 7 | Mot 6|Mot 5| Mot 4| Mot 3| Mot 2| Mot 1|
-| Dis. | Dis.  | Dis.| Dis.| En.  | En.  | En.  | En.  |
-| 0    |  0    | 0   | 0   | 1    | 1    | 1    | 1    |
-
-### Brake motors on Disable - 0x0b
-
-|  | Word 1 |  |  |  |  |  |  |          |
-|--|--------|--|--|--|--|--|--|----------|
-|  | Byte 1 |B2|B3|B4|B5|B6|B7|B8        |
-|TX| 0x0b   |  |  |  |  |  |  |0b11111111|
-|RX| STATUS |  |  |  |  |  |  |          |
-
-Starting from 0x01 of B8, brake a motor channel on disable.
 
 ## Coordinated Step Timer - 0x01
 This message type specifies a move segment to be clocked out of the core. It uses 64bit words to specify the DDA values, and returns 32bit precision encoder readings.

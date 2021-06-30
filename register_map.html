@@ -1,0 +1,133 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Register Map &#8212; RAPcores  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="register-map">
+<h1>Register Map<a class="headerlink" href="#register-map" title="Permalink to this headline">¶</a></h1>
+<p>RAPcores has the following types of registers that may be used to interface with the device:</p>
+<ul class="simple">
+<li><p>Status - Read</p></li>
+<li><p>Configuration - Read/Write</p></li>
+<li><p>Telemetry - Read</p></li>
+<li><p>Command - Read/Write</p></li>
+</ul>
+<p>Status: Realtime data access/system state
+Configuration: Parameters for device setup
+Telemetry: Time-synced concurrent data snapshots
+Command: Sets movement segment parameters</p>
+<p>For the purposes of controlling RAPcores, the Telemetry and Command registers are used to set and observe the movements of the motors.
+In applications that use SPI, these two registers may be accessed concurrently.
+The basic operational primitive of RAPcores is a movement segment over some discrete time span. To allow for use in real-time and low-jitter
+applications, command registers are at least double buffered. Similarly, the telemetry registers are syncronized to the
+buffer switch events to allow for pathplanning correction and controls development. Telemetry registers differ from status registers
+in that Telemetry registers provide “snapshots” of stored data on some even, whereas status registers are continuously updated.
+Similarly, configuration registers take effect immediately whereas command registers are queued.</p>
+</div>
+<div class="section" id="config-register">
+<h1>Config Register<a class="headerlink" href="#config-register" title="Permalink to this headline">¶</a></h1>
+<p>| Address | Description |</p>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">RAPcores</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spi_spec.html">SPI Specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Board Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev.html">Developer Docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="motor_control.html">Motor Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="librapcore.html">librapcore</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces.html">Software Programs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="asic.html">RAPcores on ASIC</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019-2021, RAPcore developers.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/register_map.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

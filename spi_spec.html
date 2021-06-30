@@ -55,345 +55,39 @@ this repository.</p>
 </div>
 <div class="section" id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
-<p>The SPI bus operated in peripheral mode 0 MSB.The protocol assumes any complete transfer is
-a 64 bit word. The word construction is set to little endian for improved compatibility with
-SPI controller devices.</p>
+<p>The SPI bus protocol is designed to allow for DMA with status/config registers and
+fused telemetry/command registers. The protocol is a thin wrapper over the register maps:</p>
 <table border="1" class="docutils">
 <thead>
 <tr>
 <th>Header</th>
 <th>Action</th>
 <th>Transmission Length (Words)</th>
-<th>Default Value</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>0x01</td>
-<td>Coordinated Step Timer</td>
+<td>Command/Telemetry Transfer</td>
 <td>2 + 2*N motors</td>
-<td>N/A</td>
 </tr>
 <tr>
-<td>0x0a</td>
-<td>Motor Enable/Disable</td>
-<td>1</td>
-<td>0</td>
-</tr>
-<tr>
-<td>0x0b</td>
-<td>Motor Braking on Disable</td>
-<td>1</td>
-<td>0</td>
-</tr>
-<tr>
-<td>0x20</td>
-<td>DDA Timer Divider</td>
-<td>1</td>
-<td>32</td>
-</tr>
-<tr>
-<td>0x10</td>
-<td>Set Motor Config</td>
-<td>1</td>
-<td>See Below</td>
-</tr>
-<tr>
-<td>0x31</td>
-<td>Charge Pump Divider</td>
-<td>1</td>
-<td>See Below</td>
-</tr>
-<tr>
-<td>0xfe</td>
-<td>Get Version</td>
+<td>0xf1</td>
+<td>Status Register</td>
 <td>2</td>
-<td>0x...MMmmpp</td>
 </tr>
-</tbody>
-</table></div>
-<div class="section" id="set-motor-config-0x10">
-<h2>Set Motor Config - 0x10<a class="headerlink" href="#set-motor-config-0x10" title="Permalink to this headline">¶</a></h2>
-<table border="1" class="docutils">
-<thead>
 <tr>
-<th>Byte 1</th>
-<th>Byte 2</th>
-<th>Byte 3</th>
-<th>Byte 4</th>
-<th>Byte 5</th>
-<th>Byte 6</th>
-<th>Byte 7</th>
-<th>Byte 8</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>0x10</td>
-<td>Motor Channel</td>
-<td>Reserved</td>
-<td>Reserved</td>
-<td>Reserved</td>
-<td>Reserved</td>
-<td>Current</td>
-<td>Microsteps</td>
-</tr>
-</tbody>
-</table><p>Current:
-Current is set 0-255 (0x0-0xff), and this value may be divided by the number of bits of internal resolution avaialble.</p>
-<p>Microsteps:
-<strong>Important Note</strong>
-This is set as the increment across the phase table. For example if a single electrical cycle
-e.g. cosine from 0 to pi, is divided by 64, to achieve full resolution microsteps is set to 1.
-For 32 divisions, microsteps would be set as 2. This is inverse from other systems that specify
-the microsteps in full divisions. Whereas this method allows for fractional steps such as 64/3.</p>
-</div>
-<div class="section" id="get-api-version-0xfe">
-<h2>Get API Version - 0xfe<a class="headerlink" href="#get-api-version-0xfe" title="Permalink to this headline">¶</a></h2>
-<table border="1" class="docutils">
-<thead>
-<tr>
-<th>Word</th>
-<th>Word 1</th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th>Word 2</th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Byte</td>
-<td>Byte 1</td>
+<td>0xf2</td>
+<td>Configuration Register</td>
 <td>2</td>
-<td>3</td>
-<td>4</td>
-<td>5</td>
-<td>6</td>
-<td>7</td>
-<td>8</td>
-<td>Byte 1</td>
-<td>2</td>
-<td>3</td>
-<td>4</td>
-<td>5</td>
-<td>6</td>
-<td>7</td>
-<td>8</td>
-</tr>
-<tr>
-<td>TX</td>
-<td>0xfe</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>RX</td>
-<td>STATUS</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td>DEVELOPMENT</td>
-<td>MAJOR</td>
-<td>MINOR</td>
-<td>PATCH</td>
 </tr>
 </tbody>
-</table><p>Note: For stable release versions the development flag is 0.</p>
+</table><p>The SPI bus operated in peripheral mode 0 MSB.The protocol assumes any complete transfer is
+a 64 bit word. The word construction is set to little endian for improved compatibility with
+SPI controller devices.</p>
 </div>
-<div class="section" id="enable-disable-motors-0x0a">
-<h2>Enable/Disable Motors - 0x0a<a class="headerlink" href="#enable-disable-motors-0x0a" title="Permalink to this headline">¶</a></h2>
-<table border="1" class="docutils">
-<thead>
-<tr>
-<th></th>
-<th>Word 1</th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td></td>
-<td>Byte 1</td>
-<td>B2</td>
-<td>B3</td>
-<td>B4</td>
-<td>B5</td>
-<td>B6</td>
-<td>B7</td>
-<td>B8</td>
-</tr>
-<tr>
-<td>TX</td>
-<td>0x0a</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td>0b11111111</td>
-</tr>
-<tr>
-<td>RX</td>
-<td>STATUS</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-</tbody>
-</table><p>Starting from 0x01 of B8, enable or disable (1/0 respectively) a motor channel.
-This will power up the motors. For example:</p>
-<table border="1" class="docutils">
-<thead>
-<tr>
-<th>Byte 8</th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Bit 8</td>
-<td>Bit 7</td>
-<td>Bit 6</td>
-<td>Bit 5</td>
-<td>Bit 4</td>
-<td>Bit 3</td>
-<td>Bit 2</td>
-<td>Bit 1</td>
-</tr>
-<tr>
-<td>Mot 8</td>
-<td>Mot 7</td>
-<td>Mot 6</td>
-<td>Mot 5</td>
-<td>Mot 4</td>
-<td>Mot 3</td>
-<td>Mot 2</td>
-<td>Mot 1</td>
-</tr>
-<tr>
-<td>Dis.</td>
-<td>Dis.</td>
-<td>Dis.</td>
-<td>Dis.</td>
-<td>En.</td>
-<td>En.</td>
-<td>En.</td>
-<td>En.</td>
-</tr>
-<tr>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-<td>1</td>
-<td>1</td>
-<td>1</td>
-<td>1</td>
-</tr>
-</tbody>
-</table><div class="section" id="brake-motors-on-disable-0x0b">
-<h3>Brake motors on Disable - 0x0b<a class="headerlink" href="#brake-motors-on-disable-0x0b" title="Permalink to this headline">¶</a></h3>
-<table border="1" class="docutils">
-<thead>
-<tr>
-<th></th>
-<th>Word 1</th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td></td>
-<td>Byte 1</td>
-<td>B2</td>
-<td>B3</td>
-<td>B4</td>
-<td>B5</td>
-<td>B6</td>
-<td>B7</td>
-<td>B8</td>
-</tr>
-<tr>
-<td>TX</td>
-<td>0x0b</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td>0b11111111</td>
-</tr>
-<tr>
-<td>RX</td>
-<td>STATUS</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-</tbody>
-</table><p>Starting from 0x01 of B8, brake a motor channel on disable.</p>
-</div>
+<div class="section" id="status-config-commands-0xf1-0xf2">
+<h2>Status/Config Commands - (0xf1 0xf2)<a class="headerlink" href="#status-config-commands-0xf1-0xf2" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="coordinated-step-timer-0x01">
 <h2>Coordinated Step Timer - 0x01<a class="headerlink" href="#coordinated-step-timer-0x01" title="Permalink to this headline">¶</a></h2>
@@ -463,9 +157,7 @@ This will power up the motors. For example:</p>
 <li class="toctree-l2"><a class="reference internal" href="#definitions">Definitions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#versioning">Versioning</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#set-motor-config-0x10">Set Motor Config - 0x10</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#get-api-version-0xfe">Get API Version - 0xfe</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#enable-disable-motors-0x0a">Enable/Disable Motors - 0x0a</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#status-config-commands-0xf1-0xf2">Status/Config Commands - (0xf1 0xf2)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coordinated-step-timer-0x01">Coordinated Step Timer - 0x01</a></li>
 </ul>
 </li>
