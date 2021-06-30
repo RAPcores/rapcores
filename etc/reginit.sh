@@ -3,12 +3,12 @@
 directory="src/*"
 
 # Synchronous assigns 
-syncs="$(grep -nrP '(.*)([=<])(.*)(;)' $directory | grep -v 'assign\|wire\|reg\|parameter\|localparam\|for\|==\|<=' )"
+syncs="$(grep -nrP '(.*)([=<])(.*)(;)' $directory | grep -v 'assign\|wire\|reg\|parameter\|localparam\|for\|==\|<=\|>=\|!=\|<\|>' )"
 printf "Synchronous assigns:\n"
 echo "$syncs"
 
 # Reg initialization - disallowed unless tagged "FPGA ONLY"
-regs="$(grep -nrP '(reg)(.*)([=<])(.*)(;)' $directory | grep -v 'FPGA ONLY')"
+regs="$(grep -nrP '(reg)(\s*$)(.*)([=<])(.*)(;)' $directory | grep -v 'FPGA ONLY')"
 printf "\nRegister initializations:\n"
 echo "$regs"
 
