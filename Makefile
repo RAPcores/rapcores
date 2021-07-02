@@ -67,9 +67,7 @@ RAPCOREFILES := boards/$(BOARD)/$(BOARD).v \
 ifndef MANUALPLL
 	PLLFILES := src/generated/spi_pll_$(ARCH)_$(SPIFREQ).v src/generated/pwm_pll_$(ARCH)_$(PWMFREQ).v
 endif
-ifdef MANUALPLL
-	PLLFILES := boards/$(BOARD)/spi_pll.v boards/$(BOARD)/pwm_pll.v 
-endif
+
 
 SYNTHFILES  = $(RAPCOREFILES)
 SYNTHFILES += $(PLLFILES)
@@ -79,10 +77,10 @@ SIMFILES += ./src/sim/pwm_pll.v
 
 all: $(BUILD).bit
 
-$(BUILD).json: logs build $(SYNTHFILES)
+$(BUILD).bit: logs build $(SYNTHFILES) ./boards/$(BOARD)/$(PIN_DEF)
+ifneq ($(ARCH), quicklogic)
 	yosys -ql ./logs/$(BOARD)_yosys.log $(YOSYS_FLAGS) -p '$(YOSYS_READ_VERILOG) $(SYNTHFILES); synth_$(ARCH) -top $(PROJ) $(SYNTH_FLAGS) -json $(BUILD).json'
-
-$(BUILD).bit: $(BUILD).json ./boards/$(BOARD)/$(PIN_DEF)
+endif
 ifeq ($(ARCH), ice40)
 	nextpnr-ice40 -ql ./logs/$(BOARD)_nextpnr.log $(PNR_FLAGS) --$(DEVICE) --freq $(FREQ) --package $(PACKAGE) --json $(BUILD).json --asc $(BUILD).asc --pcf ./boards/$(BOARD)/$(PIN_DEF)
 	icetime -d $(DEVICE) -c $(FREQ) -mtr $(BUILD).rpt $(BUILD).asc
@@ -99,6 +97,9 @@ endif
 ifeq ($(ARCH), gowin)
 	nextpnr-gowin -ql ./logs/$(BOARD)_nextpnr.log $(PNR_FLAGS) --device $(DEVICE) --freq $(FREQ) --json $(BUILD).json --cst ./boards/$(BOARD)/$(PIN_DEF)
 	gowin_pack $(PACK_FLAGS) -o $(BUILD).bit $(BUILD).json
+endif
+ifeq ($(ARCH), quicklogic)
+	ql_symbiflow -compile -d ql-eos-s3  -P PD64 -v $(SYNTHFILES) -t $(PROJ) -p ./boards/$(BOARD)/$(PIN_DEF) 2>&1 > ./logs/$(BOARD).log
 endif
 
 $(PLLFILES):
