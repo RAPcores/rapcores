@@ -14,6 +14,8 @@ module SPI (
     output           rx_byte_ready
 );
 
+  parameter tristate = 0;
+
   // Registers to sync IO with FPGA clock
   reg [1:0] COPIr;
   reg [1:0] CSr;
@@ -35,7 +37,7 @@ module SPI (
   wire CS_active = ~CSr[1];  // active low
   wire COPI_data = COPIr[1];
   // CIPO pin (tristated per convention)
-  assign CIPO = (CS_active) ? tx_byte[txbitcnt] : 1'bZ;
+  assign CIPO = (CS_active || !tristate) ? tx_byte[txbitcnt] : 1'bZ;
 
 
   always @(posedge clk) begin

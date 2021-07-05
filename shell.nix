@@ -25,5 +25,13 @@ let
 # For other formal modes, may need:
 # z3 boolector
 
+  shellHook = ''
+    export INSTALL_DIR=./tools/quicklogic
+    export PATH="$INSTALL_DIR/quicklogic-arch-defs/bin:$INSTALL_DIR/quicklogic-arch-defs/bin/python:$PATH"
+
+    source "$INSTALL_DIR/conda/etc/profile.d/conda.sh"
+    conda activate
+  '';
+
 # Export a usable shell environment
-in runCommand "rapcore-shell" { inherit buildInputs; } ""
+in runCommand "rapcore-shell" { inherit buildInputs; inherit shellHook;} ""
