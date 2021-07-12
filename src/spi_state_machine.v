@@ -205,7 +205,7 @@ module spi_state_machine #(
   // ---
 
   // Command Register
-  localparam command_reg_end = (2 + num_motors * 2)*BUFFER_SIZE; // Dir + Duration + (velocity, accel)*num_motors
+  localparam command_reg_end = (2 + num_motors * 2);
 
   // TODO what is the column vs row major trap in FPGA? Does it exist?
   reg  [word_bits-1:0] command_reg_rw   [BUFFER_SIZE:0][command_reg_end:0];
@@ -421,7 +421,7 @@ module spi_state_machine #(
   // State Machine for handling SPI Messages
   //
 
-  reg [7:0] message_word_count;
+  reg [$clog2(command_reg_end)-1:0] message_word_count;
   reg [7:0] message_header;
 
 
@@ -500,7 +500,7 @@ module spi_state_machine #(
       // Addition Word Processing
       end else begin
 
-        message_word_count <= message_word_count + 1;
+        message_word_count <= message_word_count + 1'b1;
 
         case (message_header)
 
