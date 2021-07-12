@@ -156,7 +156,7 @@ module spi_state_machine #(
   localparam config_clocks = 2;
   localparam config_reg_end = config_clocks;
 
-  reg  [word_bits-1:0] config_reg_rw    [config_reg_end:0];
+  (* mem2reg *) reg  [word_bits-1:0] config_reg_rw    [config_reg_end:0];
 
   // Config Register - Set mappings for internal wiring
   wire [num_motors-1:0] enable_r = config_reg_rw[config_enable][num_motors-1:0]; 
@@ -173,15 +173,6 @@ module spi_state_machine #(
   reg config_invert_lowside [0:num_motors-1];
   reg [7:0] config_chargepump_period; // one chargepump for all
 
-  // Config Register - Establish reset states
-  always @(posedge CLK) begin
-    if (!resetn) begin
-      config_reg_rw[config_enable] <= 0;
-      config_reg_rw[config_brake]  <= 0;
-      config_reg_rw[config_clocks] <= default_clock_divisor;
-    end
-  end
-
   // ---
   // Telemetry Register
   // ---
@@ -189,7 +180,7 @@ module spi_state_machine #(
   // Telemetry Register
   localparam telemetry_reg_end = num_encoders*2 - 1;
 
-  reg  [word_bits-1:0] telemetry_reg_ro [telemetry_reg_end:0];
+  (* mem2reg *) reg  [word_bits-1:0] telemetry_reg_ro [telemetry_reg_end:0];
 
   always @(posedge CLK) begin
     if (capture_telemetry) begin
@@ -208,7 +199,7 @@ module spi_state_machine #(
   localparam command_reg_end = (2 + num_motors * 2);
 
   // TODO what is the column vs row major trap in FPGA? Does it exist?
-  reg  [word_bits-1:0] command_reg_rw   [BUFFER_SIZE:0][command_reg_end:0];
+  (* mem2reg *) reg  [word_bits-1:0] command_reg_rw   [BUFFER_SIZE:0][command_reg_end:0];
 
   reg [num_motors:1] dir_r [MOVE_BUFFER_SIZE:0];
 
@@ -445,6 +436,9 @@ module spi_state_machine #(
     message_word_count <= 0;
     message_header <= 0;
 
+    config_reg_rw[config_enable] <= 0;
+    config_reg_rw[config_brake]  <= 0;
+    config_reg_rw[config_clocks] <= default_clock_divisor;
 
     for (nmot=0; nmot<num_motors; nmot=nmot+1) begin
 
