@@ -137,14 +137,14 @@ module rapcore_harness #(
     //move
     word_data_mem[2] = 64'h01000000000000aa;
     word_data_mem[3] = 64'h00000000005fffff;
-    word_data_mem[4] = 64'hd000000000000000;
-    word_data_mem[5] = 64'h0000000000000000;
-    word_data_mem[6] = 64'hd000000000000000;
-    word_data_mem[7] = 64'h0000000000000000;
-    word_data_mem[8] = 64'hd000000000000000;
-    word_data_mem[9] = 64'h0000000000000000;
+    word_data_mem[4] = 64'ha000000000000000;
+    word_data_mem[5] = 64'ha100000000000000;
+    word_data_mem[6] = 64'hb000000000000000;
+    word_data_mem[7] = 64'hb100000000000000;
+    word_data_mem[8] = 64'hc000000000000000;
+    word_data_mem[9] = 64'hc100000000000000;
     word_data_mem[10] = 64'hd000000000000000;
-    word_data_mem[11] = 64'h0000000000000000;
+    word_data_mem[11] = 64'hd100000000000000;
 
     word_data_tb = word_data_mem[0];
     tx_byte = word_data_tb[7:0];
