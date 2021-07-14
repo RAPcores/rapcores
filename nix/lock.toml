@@ -1,9 +1,9 @@
 [mach-nix]
-ref = "3.2.0"
-rev = "ac62255e8112e547432ca0f09bfe8f4d1920fbb8"
-sha256 = "0qhg36l3c1i6p0p2l346fpj9zsh5kl0xpjmyasi1qcn7mbdfjb0m"
+ref = "3.3.0"
+rev = "773580c35bcdb8cbd0820018d304686282f88d16"
+sha256 = "105d6b6kgvn8kll639vx5adh5hp4gjcl4bs9rjzzyqz7367wbxj6"
 
 [nixpkgs]
-ref = "29b0d4d0b600f8f5dd0b86e3362a33d4181938f9"
-rev = "29b0d4d0b600f8f5dd0b86e3362a33d4181938f9"
-sha256 = "10cafssjk6wp7lr82pvqh8z7qiqwxpnh8cswnk1fbbw2pacrqxr1"
+ref = "7e9b0dff974c89e070da1ad85713ff3c20b0ca97"
+rev = "7e9b0dff974c89e070da1ad85713ff3c20b0ca97"
+sha256 = "1ckzhh24mgz6jd1xhfgx0i9mijk6xjqxwsshnvq789xsavrmsc36"
