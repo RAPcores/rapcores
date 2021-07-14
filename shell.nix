@@ -11,8 +11,9 @@ with import (builtins.fetchTarball {
   sha256 = "1ckzhh24mgz6jd1xhfgx0i9mijk6xjqxwsshnvq789xsavrmsc36";
 }) {};
 
-let
+with import (./nix/npm/default.nix) {};
 
+pkgs.mkShell {
   # These are all the packages that will be available inside the nix-shell
   # environment.
   buildInputs = with pkgs;
@@ -20,10 +21,6 @@ let
     # and deployment, etc
     [ yosys verilog verilator svlint symbiyosys nextpnr icestorm trellis
       yices tinyprog fujprog openocd
-    ];
-
-# For other formal modes, may need:
-# z3 boolector
-
-# Export a usable shell environment
-in runCommand "rapcore-shell" { inherit buildInputs; } ""
+      netlistsvg
+       ];
+}
