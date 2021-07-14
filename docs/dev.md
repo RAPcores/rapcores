@@ -33,7 +33,7 @@ distros may be out of date.
 | triple-check   |           | parse the src directory with yosys, iverilog, and verilator |
 | yosys-{test}   |           | run the testbench recipe in `testbench/yosys/{test}` |
 | cxxrtl-{test}  |           | run the testbench recipe in `testbench/cxxrtl/{test}` |
-
+| docs-{fmt}     |           | build docs in the specified format (e.g. docs-html)  |
 
 ## Board targets
 
