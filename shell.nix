@@ -13,7 +13,10 @@ with import (builtins.fetchTarball {
 
 with import (./nix/npm/default.nix) {};
 
-pkgs.mkShell {
+let 
+verible = import ./nix/verible.nix { inherit pkgs; };
+
+in pkgs.mkShell {
   # These are all the packages that will be available inside the nix-shell
   # environment.
   buildInputs = with pkgs;
@@ -22,5 +25,6 @@ pkgs.mkShell {
     [ yosys verilog verilator svlint symbiyosys nextpnr icestorm trellis
       yices tinyprog fujprog openocd
       netlistsvg
+      verible
        ];
 }
