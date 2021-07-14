@@ -27,9 +27,9 @@ pkgs.stdenv.mkDerivation rec {
 
   installPhase = ''
     mkdir -p $out/bin
-    mkdir -p $out/shar
-    cp -r ${src}/bin $out/bin
-    cp -r ${src}/share $out/share
+    mkdir -p $out/share
+    cp -r ${src}/bin $out
+    cp -r ${src}/share $out
   '';
 
   meta = with pkgs.lib; {
