@@ -3,7 +3,8 @@
 
 # params
 
-{docs ? false}:
+{docs ? true,
+ prog ? true}:
 
 
 # Pin the nixpkgs to stable
@@ -21,7 +22,6 @@ in pkgs.mkShell {
 
       # Frontends
       yosys verilog verilator
-      yosys_symbiflow_plugin
 
       # Support
       svlint verible
@@ -32,17 +32,15 @@ in pkgs.mkShell {
       # Bitstream Generation
       nextpnr icestorm trellis
 
-      # Programming tools
-      tinyprog fujprog openocd
-
-      # Python libs
-      mach-nix.mach-nix
-      (import ./nix/python/python.nix)
-       ]
-   ++ (lib.optional docs netlistsvg)
-   ++ (lib.optional docs sphinx)
-   ++ (lib.optional docs mach-nix.mach-nix)
-   ++ (lib.optional docs (import ./nix/python/python.nix))
-   ;
+    ]
+    ++ (lib.optional docs netlistsvg)
+    ++ (lib.optional docs sphinx)
+    ++ (lib.optional docs mach-nix.mach-nix)
+    ++ (lib.optional docs (import ./nix/python/python.nix))
+    ++ (lib.optional docs yosys_symbiflow_plugin)
+    ++ (lib.optional prog tinyprog)
+    ++ (lib.optional prog fujprog)
+    ++ (lib.optional prog openocd)
+    ;
 
 }
