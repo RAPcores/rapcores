@@ -1,5 +1,5 @@
 
-with (import ./inputs.nix);
+with (import ../inputs.nix);
 pkgs.mkShell {
   buildInputs = [
     mach-nix.mach-nix

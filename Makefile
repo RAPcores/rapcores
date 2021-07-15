@@ -167,6 +167,9 @@ cxxrtl-%: testbench/vcd
 	./testbench/cxxrtl/$*.bin
 	gtkwave testbench/vcd/$*_cxxrtl.vcd
 
+docs-%:
+	make -C docs $*
+
 stat:
 	yosys -s yosys/stats.ys $(SIMFILES) $(GENERATEDFILES)
 

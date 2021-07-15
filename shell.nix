@@ -1,29 +1,46 @@
 
-# nix.shell: RAPCore Development Environment
+# nix RAPCore Development Environment
+
+# params
+
+{docs ? true,
+ prog ? true}:
+
 
 # Pin the nixpkgs to stable
-with import (builtins.fetchTarball {
-  # Descriptive name to make the store path easier to identify
-  name = "nixos-2021-05";
-  # Commit hash
-  url = "https://github.com/NixOS/nixpkgs/archive/refs/tags/21.05.tar.gz";
-  # Hash obtained using `nix-prefetch-url --unpack <url>`
-  sha256 = "1ckzhh24mgz6jd1xhfgx0i9mijk6xjqxwsshnvq789xsavrmsc36";
-}) {};
+with (import ./nix/inputs.nix);
 
-let
+with import (./nix/npm/default.nix) {};
 
-  # These are all the packages that will be available inside the nix-shell
-  # environment.
+let 
+verible = import ./nix/verible.nix { inherit pkgs; }; # TODO Upstream?
+yosys_symbiflow_plugin = import ./nix/yosys_symbiflow_plugin.nix { inherit pkgs; };
+
+in pkgs.mkShell {
   buildInputs = with pkgs;
-    # these are generally useful packages for tests, verification, synthesis
-    # and deployment, etc
-    [ yosys verilog verilator svlint symbiyosys nextpnr icestorm trellis
-      yices tinyprog fujprog openocd
-    ];
+    [ 
 
-# For other formal modes, may need:
-# z3 boolector
+      # Frontends
+      yosys verilog verilator
 
-# Export a usable shell environment
-in runCommand "rapcore-shell" { inherit buildInputs; } ""
+      # Support
+      svlint verible
+      
+      # Formal
+      symbiyosys yices 
+
+      # Bitstream Generation
+      nextpnr icestorm trellis
+
+    ]
+    ++ (lib.optional docs netlistsvg)
+    ++ (lib.optional docs sphinx)
+    ++ (lib.optional docs mach-nix.mach-nix)
+    ++ (lib.optional docs (import ./nix/python/python.nix))
+    ++ (lib.optional docs yosys_symbiflow_plugin)
+    ++ (lib.optional prog tinyprog)
+    ++ (lib.optional prog fujprog)
+    ++ (lib.optional prog openocd)
+    ;
+
+}
