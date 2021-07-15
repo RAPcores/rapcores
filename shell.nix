@@ -1,5 +1,10 @@
 
-# nix.shell: RAPCore Development Environment
+# nix RAPCore Development Environment
+
+# params
+
+{docs ? false}:
+
 
 # Pin the nixpkgs to stable
 with (import ./nix/inputs.nix);
@@ -30,13 +35,14 @@ in pkgs.mkShell {
       # Programming tools
       tinyprog fujprog openocd
 
-      # Docs
-      netlistsvg
-      sphinx
-
       # Python libs
       mach-nix.mach-nix
       (import ./nix/python/python.nix)
-       ];
+       ]
+   ++ (lib.optional docs netlistsvg)
+   ++ (lib.optional docs sphinx)
+   ++ (lib.optional docs mach-nix.mach-nix)
+   ++ (lib.optional docs (import ./nix/python/python.nix))
+   ;
 
 }
