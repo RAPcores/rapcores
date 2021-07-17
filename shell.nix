@@ -34,9 +34,8 @@ in pkgs.mkShell {
 
     ]
     ++ (lib.optional docs netlistsvg)
-    ++ (lib.optional docs sphinx)
-    ++ (lib.optional docs mach-nix.mach-nix)
-    ++ (lib.optional docs (import ./nix/python/python.nix))
+    ++ (lib.optional docs python38Packages.sphinx)
+    ++ (lib.optional docs python38Packages.sphinx-markdown-parser)
     ++ (lib.optional docs yosys_symbiflow_plugin)
     ++ (lib.optional prog tinyprog)
     ++ (lib.optional prog fujprog)

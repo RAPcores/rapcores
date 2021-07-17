@@ -1,2 +1,2 @@
-recommonmark
-sphinx-markdown-tables
+sphinx
+sphinx-markdown-parser
