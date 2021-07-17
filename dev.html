@@ -1,18 +1,19 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Developer Docs &#8212; RAPcores  documentation</title>
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
-    <script src="_static/language_data.js"></script>
-    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="https://wavedrom.com/skins/default.js"></script>
+    <script src="https://wavedrom.com/wavedrom.min.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Motor Control" href="motor_control.html" />
@@ -38,9 +39,12 @@
 <div class="section" id="build-prerequisites">
 <h2>Build Prerequisites<a class="headerlink" href="#build-prerequisites" title="Permalink to this headline">¶</a></h2>
 <p>RAPcores targets the FOSS synthesis, place and route, and bitstream tools. Namely yosys and
+
 nextpnr. We are open to support other flows and open source tool chain. However do note
+
 that RAPcores does use some SystemVerilog features supported by Yosys.</p>
 <p>We recommend using a relatively recent build of these tools. The ones included in LTS Linux
+
 distros may be out of date.</p>
 <ul class="simple">
 <li><p><a class="reference external" href="https://github.com/YosysHQ/yosys">Yosys</a></p></li>
@@ -56,114 +60,126 @@ distros may be out of date.</p>
 </div>
 <div class="section" id="overview-of-make-targets">
 <h2>Overview of Make targets<a class="headerlink" href="#overview-of-make-targets" title="Permalink to this headline">¶</a></h2>
-<table border="1" class="docutils">
+<table class="colwidths-auto docutils align-default">
 <thead>
-<tr>
-<th>Target</th>
-<th>Arguments</th>
-<th>Description</th>
+<tr class="row-odd"><th class="head"><p>Target</p></th>
+<th class="head"><p>Arguments</p></th>
+<th class="head"><p>Description</p></th>
 </tr>
 </thead>
 <tbody>
-<tr>
-<td>clean</td>
-<td>BOARD</td>
-<td>remove build artifacts</td>
+<tr class="row-even"><td><p>clean</p></td>
+<td><p>BOARD</p></td>
+<td><p>remove build artifacts</p></td>
 </tr>
-<tr>
-<td>prog</td>
-<td>BOARD</td>
-<td>build and program BOARD</td>
+<tr class="row-odd"><td><p>prog</p></td>
+<td><p>BOARD</p></td>
+<td><p>build and program BOARD</p></td>
 </tr>
-<tr>
-<td>formal</td>
-<td>BOARD</td>
-<td>run formal verification</td>
+<tr class="row-even"><td><p>formal</p></td>
+<td><p>BOARD</p></td>
+<td><p>run formal verification</p></td>
 </tr>
-<tr>
-<td>stat</td>
-<td>BOARD</td>
-<td>get yosys synthesis statistics</td>
+<tr class="row-odd"><td><p>stat</p></td>
+<td><p>BOARD</p></td>
+<td><p>get yosys synthesis statistics</p></td>
 </tr>
-<tr>
-<td>iverilog-parse</td>
-<td></td>
-<td>parse the src directory with iverilog</td>
+<tr class="row-even"><td><p>iverilog-parse</p></td>
+<td><p></p></td>
+<td><p>parse the src directory with iverilog</p></td>
 </tr>
-<tr>
-<td>yosys-parse</td>
-<td></td>
-<td>parse the src directory with yosys</td>
+<tr class="row-odd"><td><p>yosys-parse</p></td>
+<td><p></p></td>
+<td><p>parse the src directory with yosys</p></td>
 </tr>
-<tr>
-<td>verilator-cdc</td>
-<td></td>
-<td>parse the src directory and run CDC checks with verilator</td>
+<tr class="row-even"><td><p>verilator-cdc</p></td>
+<td><p></p></td>
+<td><p>parse the src directory and run CDC checks with verilator</p></td>
 </tr>
-<tr>
-<td>triple-check</td>
-<td></td>
-<td>parse the src directory with yosys, iverilog, and verilator</td>
+<tr class="row-odd"><td><p>triple-check</p></td>
+<td><p></p></td>
+<td><p>parse the src directory with yosys, iverilog, and verilator</p></td>
 </tr>
-<tr>
-<td>yosys-{test}</td>
-<td></td>
-<td>run the testbench recipe in <code>testbench/yosys/{test}</code></td>
+<tr class="row-even"><td><p>yosys-{test}</p></td>
+<td><p></p></td>
+<td><p>run the testbench recipe in <code class="docutils literal notranslate"><span class="pre">testbench/yosys/{test}</span></code></p></td>
 </tr>
-<tr>
-<td>cxxrtl-{test}</td>
-<td></td>
-<td>run the testbench recipe in <code>testbench/cxxrtl/{test}</code></td>
+<tr class="row-odd"><td><p>cxxrtl-{test}</p></td>
+<td><p></p></td>
+<td><p>run the testbench recipe in <code class="docutils literal notranslate"><span class="pre">testbench/cxxrtl/{test}</span></code></p></td>
 </tr>
-<tr>
-<td>docs-{fmt}</td>
-<td></td>
-<td>build docs in the specified format (e.g. docs-html)</td>
+<tr class="row-even"><td><p>docs-{fmt}</p></td>
+<td><p></p></td>
+<td><p>build docs in the specified format (e.g. docs-html)</p></td>
 </tr>
 </tbody>
-</table></div>
+</table>
+</div>
 <div class="section" id="board-targets">
 <h2>Board targets<a class="headerlink" href="#board-targets" title="Permalink to this headline">¶</a></h2>
 <p>The following targets require a <code class="docutils literal notranslate"><span class="pre">BOARD</span></code> to be specified.</p>
-<p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">BOARD=&lt;board&gt;</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">BOARD</span><span class="o">=&lt;</span><span class="n">board</span><span class="o">&gt;</span>
+</pre></div>
+</div>
 <p>Generate bit stream.</p>
-<p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">clean</span> <span class="pre">BOARD=&lt;board&gt;</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">clean</span> <span class="n">BOARD</span><span class="o">=&lt;</span><span class="n">board</span><span class="o">&gt;</span>
+</pre></div>
+</div>
 <p>Clean build artifacts.</p>
-<p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">prog</span> <span class="pre">BOARD=&lt;board&gt;</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">prog</span> <span class="n">BOARD</span><span class="o">=&lt;</span><span class="n">board</span><span class="o">&gt;</span>
+</pre></div>
+</div>
 <p>Generate bitstream and upload.</p>
-<p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">stat</span> <span class="pre">BOARD=&lt;board&gt;</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">stat</span> <span class="n">BOARD</span><span class="o">=&lt;</span><span class="n">board</span><span class="o">&gt;</span>
+</pre></div>
+</div>
 <p>Get logic synthesis statistics for the given configuration.</p>
 </div>
 <div class="section" id="formal-verification">
 <h2>Formal Verification<a class="headerlink" href="#formal-verification" title="Permalink to this headline">¶</a></h2>
 <p>SymbiYosys is used for formal verification of the code base. It can be run with:</p>
-<p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">formal</span> <span class="pre">BOARD=&lt;board&gt;</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">formal</span> <span class="n">BOARD</span><span class="o">=&lt;</span><span class="n">board</span><span class="o">&gt;</span>
+</pre></div>
+</div>
 <p>This command will create a <code class="docutils literal notranslate"><span class="pre">symbiyosys_&lt;board&gt;</span></code> directory in the <code class="docutils literal notranslate"><span class="pre">symbiyosys</span></code> directory
+
 contains all the logs and data from the verification. If an assert or
+
 cover fails, a <code class="docutils literal notranslate"><span class="pre">.vcd</span></code> file will be generated that will display the states
+
 of registers and wires that induced the failure. GTKWave is a useful
+
 program for viewing the <code class="docutils literal notranslate"><span class="pre">.vcd</span></code> files.</p>
 <p>The base config for Symbiyosys is <code class="docutils literal notranslate"><span class="pre">symbiyosys.sby</span></code> in the <code class="docutils literal notranslate"><span class="pre">symbiyosys</span></code> directory.
+
 Board specific defines are overlaid on top to ensure that each board configuration
+
 can be validated.</p>
 </div>
 <div class="section" id="test-benches">
 <h2>Test Benches<a class="headerlink" href="#test-benches" title="Permalink to this headline">¶</a></h2>
 <p>The main RAPcores source is tested for compatibility against Yosys, IVerilog, and Verilator.
-In-tree testbenches use the Yosys suite with either the default ‘sim’ or ‘cxxrtl’ backends.</p>
+
+In-tree testbenches use the Yosys suite with either the default &lsquo;sim&rsquo; or &lsquo;cxxrtl&rsquo; backends.</p>
 <div class="section" id="yosys-sim-bench">
 <h3>Yosys Sim Bench<a class="headerlink" href="#yosys-sim-bench" title="Permalink to this headline">¶</a></h3>
 <p>The yosys test benches can be executed with:</p>
-<p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">yosys-&lt;sim</span> <span class="pre">name&gt;</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">yosys</span><span class="o">-&lt;</span><span class="n">sim</span> <span class="n">name</span><span class="o">&gt;</span>
+</pre></div>
+</div>
 <p>For example:</p>
 <p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">yosys-spi</span></code> will run the <code class="docutils literal notranslate"><span class="pre">spi.ys</span></code> simulation located in <code class="docutils literal notranslate"><span class="pre">testbench/yosys/&lt;sim</span> <span class="pre">name&gt;</span></code>.</p>
 </div>
 <div class="section" id="yosys-cxxrtl-bench-experimental">
 <h3>Yosys CXXRTL Bench (experimental)<a class="headerlink" href="#yosys-cxxrtl-bench-experimental" title="Permalink to this headline">¶</a></h3>
 <p>CXXRTL text benches are Verilog to C++ transpiled testbenches. To run these a compiler and C++ driver
-program is required.
+
+program is required. 
+
 The yosys CXXRTL test benches can be executed with:</p>
-<p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">cxxrtl-&lt;sim</span> <span class="pre">name&gt;</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">cxxrtl</span><span class="o">-&lt;</span><span class="n">sim</span> <span class="n">name</span><span class="o">&gt;</span>
+</pre></div>
+</div>
 <p>For example:</p>
 <p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">cxxrtl-rapcore</span></code> will run the <code class="docutils literal notranslate"><span class="pre">rapcore.ys</span></code> simulation located in <code class="docutils literal notranslate"><span class="pre">testbench/cxxrtl/&lt;sim</span> <span class="pre">name&gt;</span></code>.</p>
 </div>
@@ -186,9 +202,12 @@ The yosys CXXRTL test benches can be executed with:</p>
 <div class="section" id="developing-with-nix">
 <h2>Developing with Nix<a class="headerlink" href="#developing-with-nix" title="Permalink to this headline">¶</a></h2>
 <p>RAPcores includes a <a class="reference external" href="../shell.nix">shell.nix</a> for use with the Nix Package manager.
+
 This makes it easy to get a development environment with all build requirements installed
+
 for you.</p>
 <p>To start you will need to install Nix using the instructions <a class="reference external" href="https://nixos.wiki/wiki/Nix_Installation_Guide">here</a>.
+
 They are reproduced here with some recommendations:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>sudo install -d -m755 -o $(id -u) -g $(id -g) /nix
 curl -L https://nixos.org/nix/install | sh
@@ -196,15 +215,18 @@ source $HOME/.nix-profile/etc/profile.d/nix.sh &gt;&gt; ~/.bashrc
 </pre></div>
 </div>
 <p>Then restart the terminal. Next, <code class="docutils literal notranslate"><span class="pre">cd</span></code> to the RAPcores directory. Run <code class="docutils literal notranslate"><span class="pre">nix-shell</span></code>, and some
+
 packages will be installed. Once complete you should be able to run any of the <code class="docutils literal notranslate"><span class="pre">make</span></code> commands
+
 below. This environment includes all the tools to synthesis, place, route, program, and
+
 formally verify the RAPcores project.</p>
 <div class="section" id="packages-included-in-nix-environment">
 <h3>Packages included in Nix environment<a class="headerlink" href="#packages-included-in-nix-environment" title="Permalink to this headline">¶</a></h3>
 <p>Verilog frontends:</p>
 <ul class="simple">
 <li><p>yosys</p></li>
-<li><p>verilog</p></li>
+<li><p>verilog </p></li>
 <li><p>verilator</p></li>
 </ul>
 <p>Place and route/databases:</p>
@@ -235,13 +257,18 @@ formally verify the RAPcores project.</p>
 </div>
 <div class="section" id="useful-tools">
 <h2>Useful Tools<a class="headerlink" href="#useful-tools" title="Permalink to this headline">¶</a></h2>
-<p>Google’s Verilog formatter and linter:</p>
-<ul class="simple">
-<li><p>https://github.com/google/verible/</p></li>
-</ul>
+<p>Google&rsquo;s Verilog formatter and linter:
+
+- https://github.com/google/verible/</p>
 </div>
 </div>
 
+    <script type="text/javascript">
+        function init() {
+            WaveDrom.ProcessAll();
+        }
+        window.onload = init;
+    </script>
 
           </div>
           
@@ -295,7 +322,7 @@ formally verify the RAPcores project.</p>
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -317,7 +344,7 @@ formally verify the RAPcores project.</p>
       &copy;2019-2021, RAPcore developers.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.4</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.1.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

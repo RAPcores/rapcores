@@ -1,18 +1,19 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Board Configuration &#8212; RAPcores  documentation</title>
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
-    <script src="_static/language_data.js"></script>
-    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="https://wavedrom.com/skins/default.js"></script>
+    <script src="https://wavedrom.com/wavedrom.min.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Developer Docs" href="dev.html" />
@@ -36,6 +37,7 @@
   <div class="section" id="board-configuration">
 <h1>Board Configuration<a class="headerlink" href="#board-configuration" title="Permalink to this headline">¶</a></h1>
 <p>Each board should have the following three files in the name equal to the <code class="docutils literal notranslate"><span class="pre">BOARD</span></code>
+
 parameter sent to make:</p>
 <ul class="simple">
 <li><p>[.mk] FPGA Architecture parameters</p></li>
@@ -45,6 +47,7 @@ parameter sent to make:</p>
 <div class="section" id="makefile-mk-parameters">
 <h2>Makefile (.mk) Parameters<a class="headerlink" href="#makefile-mk-parameters" title="Permalink to this headline">¶</a></h2>
 <p>The following parameters are passed to place and route (nextpnr) and timing analysis
+
 tools to generate the bitstream of the RAPcores for FPGAs. These are required for bistream generation.</p>
 <div class="section" id="arch">
 <h3>ARCH<a class="headerlink" href="#arch" title="Permalink to this headline">¶</a></h3>
@@ -82,8 +85,10 @@ tools to generate the bitstream of the RAPcores for FPGAs. These are required fo
 </pre></div>
 </div>
 <p>Skips autogeneration of PLLs using bitstream tools (icepll, ecppll).
+
 The build system will look for <em>both</em> spi_pll.v and pwm_pll.v files in
-the boards/”myboard” location.</p>
+
+the boards/&rdquo;myboard&rdquo; location. </p>
 </div>
 <div class="section" id="programmer-optional">
 <h3>PROGRAMMER (Optional)<a class="headerlink" href="#programmer-optional" title="Permalink to this headline">¶</a></h3>
@@ -112,16 +117,18 @@ the boards/”myboard” location.</p>
 <div class="section" id="pwm">
 <h2>PWM<a class="headerlink" href="#pwm" title="Permalink to this headline">¶</a></h2>
 <p>For high resolution PWM signals a PLL is required. This acts as a clock multiplier, and for example
+
 given a 16mhz clock, a 200mhz signal can be used for things like accumulators and timing.</p>
-<p>To enable declare the following in the “.v” configuration file:</p>
+<p>To enable declare the following in the &ldquo;.v&rdquo; configuration file:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define PWMPLL
 </pre></div>
 </div>
-<p>Then inside of the “.mk” aguements we will need to declare the frequency (in mhz):</p>
+<p>Then inside of the &ldquo;.mk&rdquo; aguements we will need to declare the frequency (in mhz):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">PWMFREQ</span> <span class="o">=</span> <span class="mi">275</span>
 </pre></div>
 </div>
 <p>This will allow PWM signals to use this clock for accumulators giving higher precision and
+
 less audible noise in the case of motor drives.</p>
 </div>
 <div class="section" id="motors">
@@ -134,13 +141,14 @@ less audible noise in the case of motor drives.</p>
 </pre></div>
 </div>
 <p>Enables control of Dual H Bridge motor drivers used for stepper control. Where <code class="docutils literal notranslate"><span class="pre">&lt;N&gt;</span></code>
+
 dual H Bridges are specified.</p>
-<p>See: “Dual H Bridge” in Pinouts for name specification.</p>
+<p>See: &ldquo;Dual H Bridge&rdquo; in Pinouts for name specification.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define ULTIBRIDGE &lt;N&gt;
 </pre></div>
 </div>
 <p>Enables control of the Ultibridge. Where <code class="docutils literal notranslate"><span class="pre">&lt;N&gt;</span></code> Ultibridges are specified.</p>
-<p>See: “Ultibridge” in Pinouts for name specification.</p>
+<p>See: &ldquo;Ultibridge&rdquo; in Pinouts for name specification.</p>
 <div class="section" id="pin-names-dual-h-bridge">
 <h3>Pin Names - Dual H Bridge<a class="headerlink" href="#pin-names-dual-h-bridge" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
@@ -192,8 +200,8 @@ dual H Bridges are specified.</p>
 </pre></div>
 </div>
 <p>Sets the register size for encoder accumulators. Max: 32 bit.</p>
-<div class="section" id="id1">
-<h3>Pin Names<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="pin-names_1">
+<h3>Pin Names<a class="headerlink" href="#pin-names_1" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">ENC_A[N]</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ENC_B[N]</span></code></p></li>
@@ -218,8 +226,8 @@ dual H Bridges are specified.</p>
 </div>
 <p>Type: Input</p>
 <p>Immediately stops step timing and clears the buffer.</p>
-<div class="section" id="id2">
-<h3>Pin Names<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="pin-names_2">
+<h3>Pin Names<a class="headerlink" href="#pin-names_2" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">BUFFER_DTR</span></code> - Output active High when move buffer has slots.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">MOVE_DONE</span></code> - Output toggles when a move in the buffer has finished.</p></li>
@@ -245,6 +253,7 @@ dual H Bridges are specified.</p>
 <div class="section" id="disabling-dda">
 <h3>Disabling DDA<a class="headerlink" href="#disabling-dda" title="Permalink to this headline">¶</a></h3>
 <p>By default the DDA for step generation is used. It may be disabled in
+
 favor of a different interface by setting:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define USE_DDA 0
 </pre></div>
@@ -276,6 +285,7 @@ favor of a different interface by setting:</p>
 <div class="section" id="logic-analyzer">
 <h2>Logic Analyzer<a class="headerlink" href="#logic-analyzer" title="Permalink to this headline">¶</a></h2>
 <p>The Logic Analyzer interface allows for observation and injection of signals
+
 within the top-level RAPcores project without patching the core project.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define LA_OUT &lt;N&gt;
 </pre></div>
@@ -288,6 +298,7 @@ within the top-level RAPcores project without patching the core project.</p>
 <p>Type: Input</p>
 <p>Default: none/0</p>
 <p>Assignments can be done at the <code class="docutils literal notranslate"><span class="pre">BOARD.v</span></code> level
+
 by making a <code class="docutils literal notranslate"><span class="pre">LOGICANALYZER_MACRO</span></code> like so:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define LOGICANALYZER_MACRO\
   assign LA_OUT[1] = dir; \
@@ -297,6 +308,12 @@ by making a <code class="docutils literal notranslate"><span class="pre">LOGICAN
 </div>
 </div>
 
+    <script type="text/javascript">
+        function init() {
+            WaveDrom.ProcessAll();
+        }
+        window.onload = init;
+    </script>
 
           </div>
           
@@ -351,7 +368,7 @@ by making a <code class="docutils literal notranslate"><span class="pre">LOGICAN
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -373,7 +390,7 @@ by making a <code class="docutils literal notranslate"><span class="pre">LOGICAN
       &copy;2019-2021, RAPcore developers.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.4</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.1.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

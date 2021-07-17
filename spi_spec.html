@@ -1,18 +1,19 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SPI Specification &#8212; RAPcores  documentation</title>
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
-    <script src="_static/language_data.js"></script>
-    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="https://wavedrom.com/skins/default.js"></script>
+    <script src="https://wavedrom.com/wavedrom.min.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Board Configuration" href="configuration.html" />
@@ -49,45 +50,48 @@
 <div class="section" id="versioning">
 <h2>Versioning<a class="headerlink" href="#versioning" title="Permalink to this headline">¶</a></h2>
 <p>RAPcores follows <a class="reference external" href="https://semver.org/">Semantic Versioning</a>. This is still a pre-1.0
+
 project so breaking changes are likely to happen with the SPI protocol. This document
-serves as the “as-built” reference for the RAPcores, and may deviate from documents outside
+
+serves as the &ldquo;as-built&rdquo; reference for the RAPcores, and may deviate from documents outside
+
 this repository.</p>
 </div>
 <div class="section" id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
 <p>The SPI bus protocol is designed to allow for DMA with status/config registers and
+
 fused telemetry/command registers. The protocol is a thin wrapper over the register maps:</p>
-<table border="1" class="docutils">
+<table class="colwidths-auto docutils align-default">
 <thead>
-<tr>
-<th>Header</th>
-<th>Action</th>
-<th>Transmission Length (Words)</th>
+<tr class="row-odd"><th class="head"><p>Header</p></th>
+<th class="head"><p>Action</p></th>
+<th class="head"><p>Transmission Length (Words)</p></th>
 </tr>
 </thead>
 <tbody>
-<tr>
-<td>0x01</td>
-<td>Command/Telemetry Transfer</td>
-<td>2 + 2*N motors</td>
+<tr class="row-even"><td><p>0x01</p></td>
+<td><p>Command/Telemetry Transfer</p></td>
+<td><p>2 + 2*N motors</p></td>
 </tr>
-<tr>
-<td>0xf1</td>
-<td>Status Register</td>
-<td>2</td>
+<tr class="row-odd"><td><p>0xf1</p></td>
+<td><p>Status Register</p></td>
+<td><p>2</p></td>
 </tr>
-<tr>
-<td>0xf2</td>
-<td>Configuration Register</td>
-<td>2</td>
+<tr class="row-even"><td><p>0xf2</p></td>
+<td><p>Configuration Register</p></td>
+<td><p>2</p></td>
 </tr>
 </tbody>
-</table><p>The SPI bus operated in peripheral mode 0 MSB.The protocol assumes any complete transfer is
+</table>
+<p>The SPI bus operated in peripheral mode 0 MSB.The protocol assumes any complete transfer is
+
 a 64 bit word. The word construction is set to little endian for improved compatibility with
-SPI controller devices.</p>
+
+SPI controller devices. </p>
 </div>
-<div class="section" id="status-config-commands-0xf1-0xf2">
-<h2>Status/Config Commands - (0xf1 0xf2)<a class="headerlink" href="#status-config-commands-0xf1-0xf2" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="statusconfig-commands-0xf1-0xf2">
+<h2>Status/Config Commands - (0xf1 0xf2)<a class="headerlink" href="#statusconfig-commands-0xf1-0xf2" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="coordinated-step-timer-0x01">
 <h2>Coordinated Step Timer - 0x01<a class="headerlink" href="#coordinated-step-timer-0x01" title="Permalink to this headline">¶</a></h2>
@@ -103,37 +107,66 @@ SPI controller devices.</p>
 <th>B1</th> <th>B2</th> <th>B3</th> <th>B4</th> <th>B5</th> <th>B6</th> <th>B7</th> <th>B8</th>
 <th>B1</th> <th>B2</th> <th>B3</th> <th>B4</th> <th>B5</th> <th>B6</th> <th>B7</th> <th>B8</th>
 <th>B1</th> <th>B2</th> <th>B3</th> <th>B4</th> <th>B5</th> <th>B6</th> <th>B7</th> <th>B8</th>
-</tr><!-- left header--><tr><th>CO</th><!-- word 1--><td><code>0x01</code></td>
+</tr>
+
+<!-- left header-->
+<tr><th>CO</th>
+
+<!-- word 1-->
+<td><code>0x01</code></td>
 <td><code>RESERVED</code></td>
 <td><code>0bPONM_LKJI</code></td>
 <td><code>0bHGFE_DCBA</code></td>
-<td colspan="4"><code>dda_ticks</code></td><!-- word 2--><td colspan="8"><code>substep_increment_<i>N</i></code></td><!-- word 3--><td colspan="8"><code>substep_increment_increment_<i>N</i></code></td>
-</tr><tr>
+<td colspan="4"><code>dda_ticks</code></td>
+
+<!-- word 2-->
+<td colspan="8"><code>substep_increment_<i>N</i></code></td>
+
+<!-- word 3-->
+<td colspan="8"><code>substep_increment_increment_<i>N</i></code></td>
+</tr>
+
+<tr>
 <!-- left header-->
-<th>CI</th><!-- word 1--><td colspan="8">Status word is TBD</td><!-- word 2--><td colspan="4"></td>
-<td colspan="4"><code>shaft_encoder_<i>N</i></code></td><!-- word 3--><td colspan="4"></td>
-<td colspan="4"><code>effector_encoder_<i>N</i></code></td></tr>
-</table><div class="section" id="notes">
+<th>CI</th>
+
+<!-- word 1-->
+<td colspan="8">Status word is TBD</td>
+
+<!-- word 2-->
+<td colspan="4"></td>
+<td colspan="4"><code>shaft_encoder_<i>N</i></code></td>
+
+<!-- word 3-->
+<td colspan="4"></td>
+<td colspan="4"><code>effector_encoder_<i>N</i></code></td>
+
+</tr>
+</table>
+<div class="section" id="notes">
 <h3>Notes<a class="headerlink" href="#notes" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>CO is the forward SPI channel from the controller to the peripheral (core). CI is the reverse channel.</p></li>
 <li><p>Word1 is the 64bit message header, consisting of 8 bytes, MSbyte = B1, LSbyte = B8</p></li>
 <li><p>Word1 from CO is the <code class="docutils literal notranslate"><span class="pre">control</span> <span class="pre">word</span></code>. Word1 back from the CI is the <code class="docutils literal notranslate"><span class="pre">status</span> <span class="pre">word</span></code></p></li>
-<li><p>_<em>N</em> is the number of motor channels configured - making the message length 2xN+1 64bit words</p></li>
+<li><p>__N_ is the number of motor channels configured - making the message length 2xN+1 64bit words</p></li>
 <li><p>CO Word1, Byte1 is the message number in the control word</p></li>
-<li><p>CO direction bitfield: bit <code class="docutils literal notranslate"><span class="pre">A</span></code> is direction for motor 0; bit <code class="docutils literal notranslate"><span class="pre">P</span></code> is direction for motor 15;</p>
-<ul>
+<li><p>CO direction bitfield: bit <code class="docutils literal notranslate"><span class="pre">A</span></code> is direction for motor 0; bit <code class="docutils literal notranslate"><span class="pre">P</span></code> is direction for motor 15;</p></li>
 <li><p>Direction is arbitrary - 0 is considered Normal, 1 is Reverse</p></li>
-</ul>
-</li>
 <li><p>CO <code class="docutils literal notranslate"><span class="pre">dda_ticks</span></code> is the segment length in DDA ticks. For example, a value of 16000 at a 16 MHz DDA clock sets a 1 mS segment</p></li>
-<li><p>CI <code class="docutils literal notranslate"><span class="pre">shaft_encoder_N</span></code> is the signed 32-bit absolute, unscaled encoder count for the shaft encoder. If no encoder is present it’s absolute step count.</p></li>
+<li><p>CI <code class="docutils literal notranslate"><span class="pre">shaft_encoder_N</span></code> is the signed 32-bit absolute, unscaled encoder count for the shaft encoder. If no encoder is present it&rsquo;s absolute step count.</p></li>
 <li><p>CI <code class="docutils literal notranslate"><span class="pre">effector_encoder_N</span></code> is the signed 32-bit absolute, unscaled encoder count for the effector encoder; or zero if no encoder present</p></li>
 </ul>
 </div>
 </div>
 </div>
 
+    <script type="text/javascript">
+        function init() {
+            WaveDrom.ProcessAll();
+        }
+        window.onload = init;
+    </script>
 
           </div>
           
@@ -157,7 +190,7 @@ SPI controller devices.</p>
 <li class="toctree-l2"><a class="reference internal" href="#definitions">Definitions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#versioning">Versioning</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#status-config-commands-0xf1-0xf2">Status/Config Commands - (0xf1 0xf2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#statusconfig-commands-0xf1-0xf2">Status/Config Commands - (0xf1 0xf2)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coordinated-step-timer-0x01">Coordinated Step Timer - 0x01</a></li>
 </ul>
 </li>
@@ -182,7 +215,7 @@ SPI controller devices.</p>
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -204,7 +237,7 @@ SPI controller devices.</p>
       &copy;2019-2021, RAPcore developers.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.4</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.1.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

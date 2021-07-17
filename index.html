@@ -1,18 +1,19 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>RAPcores Documentation &#8212; RAPcores  documentation</title>
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
-    <script src="_static/language_data.js"></script>
-    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="https://wavedrom.com/skins/default.js"></script>
+    <script src="https://wavedrom.com/wavedrom.min.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Release Notes" href="releases.html" />
@@ -42,16 +43,16 @@ Robotic Application Processing Cores.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="releases.html#current-development">0.3.0 - (Current Development)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="releases.html#pathfinder2">0.2.0 - “Pathfinder2”</a></li>
-<li class="toctree-l2"><a class="reference internal" href="releases.html#pathfinder">0.1.0 - “Pathfinder”</a></li>
+<li class="toctree-l2"><a class="reference internal" href="releases.html#-030-current-development">0.3.0 - (Current Development)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="releases.html#-020-pathfinder2">0.2.0 - &ldquo;Pathfinder2&rdquo;</a></li>
+<li class="toctree-l2"><a class="reference internal" href="releases.html#-010-pathfinder">0.1.0 - &ldquo;Pathfinder&rdquo;</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="spi_spec.html">SPI Specification</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="spi_spec.html#definitions">Definitions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="spi_spec.html#versioning">Versioning</a></li>
 <li class="toctree-l2"><a class="reference internal" href="spi_spec.html#overview">Overview</a></li>
-<li class="toctree-l2"><a class="reference internal" href="spi_spec.html#status-config-commands-0xf1-0xf2">Status/Config Commands - (0xf1 0xf2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spi_spec.html#statusconfig-commands-0xf1-0xf2">Status/Config Commands - (0xf1 0xf2)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="spi_spec.html#coordinated-step-timer-0x01">Coordinated Step Timer - 0x01</a></li>
 </ul>
 </li>
@@ -108,6 +109,12 @@ Robotic Application Processing Cores.</p>
 </div>
 </div>
 
+    <script type="text/javascript">
+        function init() {
+            WaveDrom.ProcessAll();
+        }
+        window.onload = init;
+    </script>
 
           </div>
           
@@ -148,7 +155,7 @@ Robotic Application Processing Cores.</p>
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -170,7 +177,7 @@ Robotic Application Processing Cores.</p>
       &copy;2019-2021, RAPcore developers.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.4</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.1.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
