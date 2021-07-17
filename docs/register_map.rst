@@ -23,6 +23,11 @@ Similarly, configuration registers take effect immediately whereas command regis
 
 # Config Register
 
-| Address | Description |
+.. wavedrom::
 
+        { "signal": [
+                { "name": "clk",  "wave": "P......" },
+                { "name": "bus",  "wave": "x.==.=x", "data": ["head", "body", "tail", "data"] },
+                { "name": "wire", "wave": "0.1..0." }
+        ]}
 

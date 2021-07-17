@@ -34,7 +34,7 @@ in pkgs.mkShell {
 
     ]
     ++ (lib.optional docs netlistsvg)
-    ++ (lib.optional docs sphinx)
+    ++ (lib.optional docs python38Packages.cairocffi)
     ++ (lib.optional docs mach-nix.mach-nix)
     ++ (lib.optional docs (import ./nix/python/python.nix))
     ++ (lib.optional docs yosys_symbiflow_plugin)

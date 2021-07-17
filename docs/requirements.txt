@@ -1,2 +1,3 @@
-recommonmark
-sphinx-markdown-tables
+sphinx~=4.0
+sphinx-markdown-parser~=0.2
+sphinxcontrib-wavedrom~=3.0

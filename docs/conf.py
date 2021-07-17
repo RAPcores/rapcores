@@ -21,17 +21,35 @@ project = 'RAPcores'
 copyright = '2019-2021, RAPcore developers'
 author = 'sphinx-action Test Suite'
 
-import recommonmark
-from recommonmark.transform import AutoStructify
+# for MarkdownParser
+from sphinx_markdown_parser.parser import MarkdownParser
+
+def setup(app):
+    app.add_source_suffix('.md', 'markdown')
+    app.add_source_parser(MarkdownParser)
+    app.add_config_value('markdown_parser_config', {
+        'auto_toc_tree_section': 'Content',
+        'enable_auto_doc_ref': True,
+        'enable_auto_toc_tree': True,
+        'enable_eval_rst': True,
+        'extensions': [
+            'extra',
+            'nl2br',
+            'sane_lists',
+            'smarty',
+            'toc',
+            'wikilinks',
+        ],
+    }, True)
 
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['recommonmark',
-              'sphinx_markdown_tables',
-              'sphinx.ext.mathjax']
+extensions = [
+              'sphinx.ext.mathjax',
+              'sphinxcontrib.wavedrom']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -45,7 +63,6 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 source_suffix = {
     '.rst': 'restructuredtext',
     '.txt': 'markdown',
-    '.md': 'markdown',
 }
 
 # -- Options for HTML output -------------------------------------------------
