@@ -1,4 +1,5 @@
 [
   "netlistsvg",
-  "wavedrom-cli"
+  "wavedrom-cli",
+  "git://github.com/TerosTechnology/colibri.git"
 ]
