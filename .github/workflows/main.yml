@@ -26,7 +26,8 @@ jobs:
       run: ./etc/reginit.sh
     - name: RAPcore-cli
       run: make rapcore-cli
-
+    - name: Build Docs
+      run: nix-shell --arg prog false --command 'make docs-html'
 
     - uses: actions/upload-artifact@v2
       with:
@@ -35,4 +36,5 @@ jobs:
           ./build/*.bit
           ./logs
           ./rapcore-cli
+          ./docs/_build/html
 
