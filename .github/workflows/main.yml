@@ -1,10 +1,11 @@
 name: "RAPCore"
-on:
-  pull_request:
+on: ['pull_request', 'push']
 
 jobs:
   tests:
     runs-on: ubuntu-latest
+    env:
+      PUSH_DOCS: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     steps:
 
     - uses: actions/checkout@v2
@@ -29,6 +30,7 @@ jobs:
     - name: Build Docs
       run: nix-shell --arg prog false --command 'make docs-html'
 
+    # Upload bitstreams, support software, and documentation
     - uses: actions/upload-artifact@v2
       with:
         name: RAPcores Build
@@ -38,3 +40,23 @@ jobs:
           ./rapcore-cli
           ./docs/_build/html
 
+    # publish documentation changes if on main branch
+    - name: Commit documentation changes
+      if: ${{ env.PUSH_DOCS }}
+      run: |
+        git clone https://github.com/rapcores/rapcores.git --branch gh-pages --single-branch gh-pages
+        cp -r docs/_build/html/* gh-pages/
+        cd gh-pages
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add .
+        git commit -m "Update documentation" -a || true
+        # The above command will fail if no changes were present, so we ignore
+        # that.
+    - name: Push changes
+      if: ${{ env.PUSH_DOCS }}
+      uses: ad-m/github-push-action@master
+      with:
+        branch: gh-pages
+        directory: gh-pages
+        github_token: ${{ secrets.GITHUB_TOKEN }}
