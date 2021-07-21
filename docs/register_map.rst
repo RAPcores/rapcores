@@ -55,10 +55,17 @@ Note: All values here are read-only.
               {bits: 8,  name: 'Encoder Velocity Bits'}
           ]} 
 
+.. |encoder_fault| wavedrom::
+
+          {reg:[                        
+              {bits: 32,  name: 'Encoder Fault mask'},
+          ]} 
+
 
 =====   ===============
 Entry   Bit Fields
 =====   ===============
 0x00     |version|
 0x01     |channel_info|
+0x02     |encoder_fault|
 =====   ===============
