@@ -42,7 +42,7 @@ jobs:
 
     # publish documentation changes if on main branch
     - name: Commit documentation changes
-      if: env.PUSH_DOCS
+      if: contains('refs/heads/main', github.ref)
       run: |
         git clone https://github.com/rapcores/rapcores.git --branch gh-pages --single-branch gh-pages
         cp -r docs/_build/html/* gh-pages/
@@ -54,7 +54,7 @@ jobs:
         # The above command will fail if no changes were present, so we ignore
         # that.
     - name: Push changes
-      if: env.PUSH_DOCS
+      if: contains('refs/heads/main', github.ref)
       uses: ad-m/github-push-action@master
       with:
         branch: gh-pages
