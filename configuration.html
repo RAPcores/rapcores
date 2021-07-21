@@ -4,7 +4,8 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>Board Configuration &#8212; RAPcores  documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
@@ -34,7 +35,7 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="board-configuration">
+  <section id="board-configuration">
 <h1>Board Configuration<a class="headerlink" href="#board-configuration" title="Permalink to this headline">¶</a></h1>
 <p>Each board should have the following three files in the name equal to the <code class="docutils literal notranslate"><span class="pre">BOARD</span></code>
 
@@ -44,38 +45,38 @@ parameter sent to make:</p>
 <li><p>[.v] Verilog configuration parameters</p></li>
 <li><p>[.pcf/.lpf] Pin out and pin name information</p></li>
 </ul>
-<div class="section" id="makefile-mk-parameters">
+<section id="makefile-mk-parameters">
 <h2>Makefile (.mk) Parameters<a class="headerlink" href="#makefile-mk-parameters" title="Permalink to this headline">¶</a></h2>
 <p>The following parameters are passed to place and route (nextpnr) and timing analysis
 
 tools to generate the bitstream of the RAPcores for FPGAs. These are required for bistream generation.</p>
-<div class="section" id="arch">
+<section id="arch">
 <h3>ARCH<a class="headerlink" href="#arch" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ARCH</span> <span class="o">=</span> <span class="n">ice40</span>
 </pre></div>
 </div>
 <p>Values: ice40, ecp5</p>
-</div>
-<div class="section" id="device">
+</section>
+<section id="device">
 <h3>DEVICE<a class="headerlink" href="#device" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DEVICE</span> <span class="o">=</span> <span class="n">lp8k</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="package">
+</section>
+<section id="package">
 <h3>PACKAGE<a class="headerlink" href="#package" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">PACKAGE</span> <span class="o">=</span> <span class="n">cm81</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="freq">
+</section>
+<section id="freq">
 <h3>FREQ<a class="headerlink" href="#freq" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">FREQ</span> <span class="o">=</span> <span class="mi">16</span>
 </pre></div>
 </div>
 <p>Device external clock frequency. Used to validate timings.</p>
-</div>
-<div class="section" id="pll-parameters-and-setup">
+</section>
+<section id="pll-parameters-and-setup">
 <h3>PLL Parameters and Setup<a class="headerlink" href="#pll-parameters-and-setup" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">PWMFREQ</span> <span class="o">=</span> <span class="mi">275</span>
 </pre></div>
@@ -89,22 +90,22 @@ tools to generate the bitstream of the RAPcores for FPGAs. These are required fo
 The build system will look for <em>both</em> spi_pll.v and pwm_pll.v files in
 
 the boards/&rdquo;myboard&rdquo; location. </p>
-</div>
-<div class="section" id="programmer-optional">
+</section>
+<section id="programmer-optional">
 <h3>PROGRAMMER (Optional)<a class="headerlink" href="#programmer-optional" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">PROGRAMMER</span> <span class="o">=</span> <span class="n">tinyprog</span> <span class="o">-</span><span class="n">p</span>
 </pre></div>
 </div>
 <p>The programming command for the device used with the <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">prog</span></code> target.</p>
-</div>
-</div>
-<div class="section" id="spi-interface">
+</section>
+</section>
+<section id="spi-interface">
 <h2>SPI Interface<a class="headerlink" href="#spi-interface" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define SPI_INTERFACE
 </pre></div>
 </div>
 <p>Enables the SPI Interface.</p>
-<div class="section" id="pin-names">
+<section id="pin-names">
 <h3>Pin Names<a class="headerlink" href="#pin-names" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">SCK</span></code> - SPI Clock</p></li>
@@ -112,9 +113,9 @@ the boards/&rdquo;myboard&rdquo; location. </p>
 <li><p><code class="docutils literal notranslate"><span class="pre">COPI</span></code> - SPI Controller Out Peripheral In (RAPcores is the Peripheral)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">CIPO</span></code> - SPI Controller In Peripheral Out</p></li>
 </ul>
-</div>
-</div>
-<div class="section" id="pwm">
+</section>
+</section>
+<section id="pwm">
 <h2>PWM<a class="headerlink" href="#pwm" title="Permalink to this headline">¶</a></h2>
 <p>For high resolution PWM signals a PLL is required. This acts as a clock multiplier, and for example
 
@@ -130,8 +131,8 @@ given a 16mhz clock, a 200mhz signal can be used for things like accumulators an
 <p>This will allow PWM signals to use this clock for accumulators giving higher precision and
 
 less audible noise in the case of motor drives.</p>
-</div>
-<div class="section" id="motors">
+</section>
+<section id="motors">
 <h2>Motors<a class="headerlink" href="#motors" title="Permalink to this headline">¶</a></h2>
 <p>In addition to device-specific counts, a motor count must be defines as so:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define MOTOR_COUNT &lt;N&gt;
@@ -149,7 +150,7 @@ dual H Bridges are specified.</p>
 </div>
 <p>Enables control of the Ultibridge. Where <code class="docutils literal notranslate"><span class="pre">&lt;N&gt;</span></code> Ultibridges are specified.</p>
 <p>See: &ldquo;Ultibridge&rdquo; in Pinouts for name specification.</p>
-<div class="section" id="pin-names-dual-h-bridge">
+<section id="pin-names-dual-h-bridge">
 <h3>Pin Names - Dual H Bridge<a class="headerlink" href="#pin-names-dual-h-bridge" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">PHASE_A1[N]</span></code></p></li>
@@ -159,8 +160,8 @@ dual H Bridges are specified.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">VREF_A[N]</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">VREF_B[N]</span></code></p></li>
 </ul>
-</div>
-<div class="section" id="pin-names-ultibridge">
+</section>
+<section id="pin-names-ultibridge">
 <h3>Pin Names ULTIBRIDGE<a class="headerlink" href="#pin-names-ultibridge" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">CHARGEPUMP</span></code></p></li>
@@ -177,8 +178,8 @@ dual H Bridges are specified.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">PHASE_B1_H[N]</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">PHASE_B2_H[N]</span></code></p></li>
 </ul>
-</div>
-<div class="section" id="defaults">
+</section>
+<section id="defaults">
 <h3>Defaults<a class="headerlink" href="#defaults" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define DEFAULT_MICROSTEPS &lt;N&gt;
 </pre></div>
@@ -188,9 +189,9 @@ dual H Bridges are specified.</p>
 </pre></div>
 </div>
 <p>Set the default current for all motor channels.</p>
-</div>
-</div>
-<div class="section" id="encoders">
+</section>
+</section>
+<section id="encoders">
 <h2>Encoders<a class="headerlink" href="#encoders" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define QUAD_ENC &lt;N&gt;
 </pre></div>
@@ -200,15 +201,15 @@ dual H Bridges are specified.</p>
 </pre></div>
 </div>
 <p>Sets the register size for encoder accumulators. Max: 32 bit.</p>
-<div class="section" id="pin-names_1">
+<section id="pin-names_1">
 <h3>Pin Names<a class="headerlink" href="#pin-names_1" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">ENC_A[N]</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ENC_B[N]</span></code></p></li>
 </ul>
-</div>
-</div>
-<div class="section" id="flow-control-and-events">
+</section>
+</section>
+<section id="flow-control-and-events">
 <h2>Flow Control and Events<a class="headerlink" href="#flow-control-and-events" title="Permalink to this headline">¶</a></h2>
 <p>The following Input/Output tied to certain events can be enabled:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define BUFFER_DTR
@@ -226,31 +227,31 @@ dual H Bridges are specified.</p>
 </div>
 <p>Type: Input</p>
 <p>Immediately stops step timing and clears the buffer.</p>
-<div class="section" id="pin-names_2">
+<section id="pin-names_2">
 <h3>Pin Names<a class="headerlink" href="#pin-names_2" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">BUFFER_DTR</span></code> - Output active High when move buffer has slots.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">MOVE_DONE</span></code> - Output toggles when a move in the buffer has finished.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">HALT</span></code> - Input immediately stops step timing and clears the buffer.</p></li>
 </ul>
-</div>
-</div>
-<div class="section" id="move-buffer-size">
+</section>
+</section>
+<section id="move-buffer-size">
 <h2>Move Buffer Size<a class="headerlink" href="#move-buffer-size" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define MOVE_BUFFER_SIZE 2
 </pre></div>
 </div>
 <p>Default: 2</p>
 <p>Changes the default move buffer size. Must be a power of two.</p>
-</div>
-<div class="section" id="dda">
+</section>
+<section id="dda">
 <h2>DDA<a class="headerlink" href="#dda" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define DEFAULT_CLOCK_DIVISOR 40
 </pre></div>
 </div>
 <p>Default: 40</p>
 <p>Sets the default clock divisor for the DDA.</p>
-<div class="section" id="disabling-dda">
+<section id="disabling-dda">
 <h3>Disabling DDA<a class="headerlink" href="#disabling-dda" title="Permalink to this headline">¶</a></h3>
 <p>By default the DDA for step generation is used. It may be disabled in
 
@@ -258,9 +259,9 @@ favor of a different interface by setting:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define USE_DDA 0
 </pre></div>
 </div>
-</div>
-</div>
-<div class="section" id="internal-register-sizes">
+</section>
+</section>
+<section id="internal-register-sizes">
 <h2>Internal Register Sizes<a class="headerlink" href="#internal-register-sizes" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define MOVE_DURATION_BITS 32
 </pre></div>
@@ -272,8 +273,8 @@ favor of a different interface by setting:</p>
 </div>
 <p>Default: 8</p>
 <p>Sets the width for internal clock dividers.</p>
-</div>
-<div class="section" id="led">
+</section>
+<section id="led">
 <h2>LED<a class="headerlink" href="#led" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`define LED &lt;N&gt;
 </pre></div>
@@ -281,8 +282,8 @@ favor of a different interface by setting:</p>
 <p>Type: Output</p>
 <p>Default: none/0</p>
 <p>Enables LED output. Currently unused, but useful for low-frequency visual debugging.</p>
-</div>
-<div class="section" id="logic-analyzer">
+</section>
+<section id="logic-analyzer">
 <h2>Logic Analyzer<a class="headerlink" href="#logic-analyzer" title="Permalink to this headline">¶</a></h2>
 <p>The Logic Analyzer interface allows for observation and injection of signals
 
@@ -305,8 +306,8 @@ by making a <code class="docutils literal notranslate"><span class="pre">LOGICAN
   assign LA_OUT[2] = analog_cmp2;
 </pre></div>
 </div>
-</div>
-</div>
+</section>
+</section>
 
     <script type="text/javascript">
         function init() {
@@ -353,6 +354,7 @@ by making a <code class="docutils literal notranslate"><span class="pre">LOGICAN
 <li class="toctree-l1"><a class="reference internal" href="librapcore.html">librapcore</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interfaces.html">Software Programs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="asic.html">RAPcores on ASIC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internals.html">Internals</a></li>
 </ul>
 
 <div class="relations">
@@ -368,7 +370,7 @@ by making a <code class="docutils literal notranslate"><span class="pre">LOGICAN
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -387,10 +389,10 @@ by making a <code class="docutils literal notranslate"><span class="pre">LOGICAN
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2019-2021, RAPcore developers.
+      &copy;2019-1980, RAPcore developers.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.1.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.0.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

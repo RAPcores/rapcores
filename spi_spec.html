@@ -4,7 +4,8 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>SPI Specification &#8212; RAPcores  documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
@@ -34,9 +35,9 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="spi-specification">
+  <section id="spi-specification">
 <h1>SPI Specification<a class="headerlink" href="#spi-specification" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="definitions">
+<section id="definitions">
 <h2>Definitions<a class="headerlink" href="#definitions" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>SPI Transfer: An 8 bit, Mode 0 MSB SPI communication</p></li>
@@ -46,8 +47,8 @@
 <li><p>Reverse Channel: Data transmitted by FPGA to firmware during message transfer</p></li>
 <li><p>Motor Channel:</p></li>
 </ul>
-</div>
-<div class="section" id="versioning">
+</section>
+<section id="versioning">
 <h2>Versioning<a class="headerlink" href="#versioning" title="Permalink to this headline">¶</a></h2>
 <p>RAPcores follows <a class="reference external" href="https://semver.org/">Semantic Versioning</a>. This is still a pre-1.0
 
@@ -56,8 +57,8 @@ project so breaking changes are likely to happen with the SPI protocol. This doc
 serves as the &ldquo;as-built&rdquo; reference for the RAPcores, and may deviate from documents outside
 
 this repository.</p>
-</div>
-<div class="section" id="overview">
+</section>
+<section id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
 <p>The SPI bus protocol is designed to allow for DMA with status/config registers and
 
@@ -89,11 +90,11 @@ fused telemetry/command registers. The protocol is a thin wrapper over the regis
 a 64 bit word. The word construction is set to little endian for improved compatibility with
 
 SPI controller devices. </p>
-</div>
-<div class="section" id="statusconfig-commands-0xf1-0xf2">
+</section>
+<section id="statusconfig-commands-0xf1-0xf2">
 <h2>Status/Config Commands - (0xf1 0xf2)<a class="headerlink" href="#statusconfig-commands-0xf1-0xf2" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="coordinated-step-timer-0x01">
+</section>
+<section id="coordinated-step-timer-0x01">
 <h2>Coordinated Step Timer - 0x01<a class="headerlink" href="#coordinated-step-timer-0x01" title="Permalink to this headline">¶</a></h2>
 <p>This message type specifies a move segment to be clocked out of the core. It uses 64bit words to specify the DDA values, and returns 32bit precision encoder readings.</p>
 <table>
@@ -143,7 +144,7 @@ SPI controller devices. </p>
 
 </tr>
 </table>
-<div class="section" id="notes">
+<section id="notes">
 <h3>Notes<a class="headerlink" href="#notes" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>CO is the forward SPI channel from the controller to the peripheral (core). CI is the reverse channel.</p></li>
@@ -157,9 +158,9 @@ SPI controller devices. </p>
 <li><p>CI <code class="docutils literal notranslate"><span class="pre">shaft_encoder_N</span></code> is the signed 32-bit absolute, unscaled encoder count for the shaft encoder. If no encoder is present it&rsquo;s absolute step count.</p></li>
 <li><p>CI <code class="docutils literal notranslate"><span class="pre">effector_encoder_N</span></code> is the signed 32-bit absolute, unscaled encoder count for the effector encoder; or zero if no encoder present</p></li>
 </ul>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
     <script type="text/javascript">
         function init() {
@@ -200,6 +201,7 @@ SPI controller devices. </p>
 <li class="toctree-l1"><a class="reference internal" href="librapcore.html">librapcore</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interfaces.html">Software Programs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="asic.html">RAPcores on ASIC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internals.html">Internals</a></li>
 </ul>
 
 <div class="relations">
@@ -215,7 +217,7 @@ SPI controller devices. </p>
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -234,10 +236,10 @@ SPI controller devices. </p>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2019-2021, RAPcore developers.
+      &copy;2019-1980, RAPcore developers.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.1.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.0.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
