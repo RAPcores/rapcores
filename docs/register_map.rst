@@ -1,15 +1,17 @@
-# Register Map
+============
+Register Map
+============
 
-RAPcores has the following types of registers that may be used to interface with the device:
+RAPcores has the following four types of registers to interface with the device:
 
 - Status - Read
 - Configuration - Read/Write
 - Telemetry - Read
 - Command - Read/Write
 
-Status: Realtime data access/system state
+Status: Access to system state
 Configuration: Parameters for device setup
-Telemetry: Time-synced concurrent data snapshots
+Telemetry: Synchronized data snapshots
 Command: Sets movement segment parameters
 
 For the purposes of controlling RAPcores, the Telemetry and Command registers are used to set and observe the movements of the motors.
@@ -21,13 +23,49 @@ in that Telemetry registers provide "snapshots" of stored data on some even, whe
 Similarly, configuration registers take effect immediately whereas command registers are queued.
 
 
-# Config Register
 
-.. wavedrom::
+---------------
+Config Register
+---------------
 
-        { "signal": [
-                { "name": "clk",  "wave": "P......" },
-                { "name": "bus",  "wave": "x.==.=x", "data": ["head", "body", "tail", "data"] },
-                { "name": "wire", "wave": "0.1..0." }
-        ]}
 
+
+
+---------------
+Status Register
+---------------
+
+Note: All values here are read-only.
+
+.. |version| wavedrom::
+
+          {reg:[                        
+              {bits: 8,  name: 'Patch'},
+              {bits: 8,  name: 'Minor'},
+              {bits: 8,  name: 'Major'},
+              {bits: 8,  name: 'Devel'} 
+          ]} 
+
+.. |channel_info| wavedrom::
+
+          {reg:[                        
+              {bits: 8,  name: 'Motor Count'},
+              {bits: 8,  name: 'Encoder Count'},
+              {bits: 8,  name: 'Encoder Position Bits'},
+              {bits: 8,  name: 'Encoder Velocity Bits'}
+          ]} 
+
+.. |encoder_fault| wavedrom::
+
+          {reg:[                        
+              {bits: 32,  name: 'Encoder Fault mask'},
+          ]} 
+
+
+=====   ===============
+Entry   Bit Fields
+=====   ===============
+0x00     |version|
+0x01     |channel_info|
+0x02     |encoder_fault|
+=====   ===============

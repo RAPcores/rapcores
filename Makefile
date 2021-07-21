@@ -168,6 +168,7 @@ cxxrtl-%: testbench/vcd
 	gtkwave testbench/vcd/$*_cxxrtl.vcd
 
 docs-%:
+	make -C docs teros-$*
 	make -C docs $*
 
 stat:
