@@ -24,7 +24,7 @@ in pkgs.mkShell {
       yosys verilog verilator
 
       # Support
-      svlint verible
+      verible
       
       # Formal
       symbiyosys yices 
@@ -33,12 +33,12 @@ in pkgs.mkShell {
       nextpnr icestorm trellis
 
     ]
-    ++ (lib.optional docs netlistsvg)
+    # ++ (lib.optional docs netlistsvg)
     ++ (lib.optional docs python38Packages.cairocffi)
     ++ (lib.optional docs jsteros)
     ++ (lib.optional docs mach-nix.mach-nix)
     ++ (lib.optional docs (import ./nix/python/python.nix))
-    ++ (lib.optional docs yosys_symbiflow_plugin)
+    # ++ (lib.optional docs yosys_symbiflow_plugin)
     ++ (lib.optional prog tinyprog)
     ++ (lib.optional prog fujprog)
     ++ (lib.optional prog openocd)
