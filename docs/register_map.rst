@@ -24,18 +24,16 @@ Similarly, configuration registers take effect immediately whereas command regis
 
 
 
----------------
-Config Register
----------------
+----------------------------
+Config Register - Read/Write
+----------------------------
 
 
 
 
----------------
-Status Register
----------------
-
-Note: All values here are read-only.
+---------------------------
+Status Register - Read Only
+---------------------------
 
 .. |version| wavedrom::
 
@@ -61,6 +59,23 @@ Note: All values here are read-only.
               {bits: 32,  name: 'Encoder Fault mask'},
           ]} 
 
+.. |motor_fault| wavedrom::
+
+          {reg:[                        
+              {bits: 32,  name: 'Motor Fault mask'},
+          ]} 
+
+.. |encoder_position_start| wavedrom::
+
+          {reg:[                        
+              {bits: 32,  name: 'Encoder Position', attr: 'channel 0'},
+          ]} 
+
+.. |encoder_position_end| wavedrom::
+
+          {reg:[                        
+              {bits: 32,  name: 'Encoder Position', attr: 'channel 31'},
+          ]} 
 
 =====   ===============
 Entry   Bit Fields
@@ -68,4 +83,8 @@ Entry   Bit Fields
 0x00     |version|
 0x01     |channel_info|
 0x02     |encoder_fault|
+0x03     |motor_fault|
+0x04     |encoder_position_start|
+...      ...
+0x24     |encoder_position_end|
 =====   ===============
