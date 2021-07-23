@@ -2,7 +2,7 @@
 Register Map
 ============
 
-RAPcores has the following four types of registers to interface with the device:
+RAPcores has the following four types of registers/memories:
 
 - Status - Read
 - Configuration - Read/Write
@@ -12,7 +12,7 @@ RAPcores has the following four types of registers to interface with the device:
 Status: Access to system state
 Configuration: Parameters for device setup
 Telemetry: Synchronized data snapshots
-Command: Sets movement segment parameters
+Command: Sets move segment parameters
 
 For the purposes of controlling RAPcores, the Telemetry and Command registers are used to set and observe the movements of the motors.
 In applications that use SPI, these two registers may be accessed concurrently.
@@ -22,20 +22,32 @@ buffer switch events to allow for pathplanning correction and controls developme
 in that Telemetry registers provide "snapshots" of stored data on some even, whereas status registers are continuously updated.
 Similarly, configuration registers take effect immediately whereas command registers are queued.
 
-
+By default, RAPcores reserves memory and register sections for up to 32 motor channels and 64 encoder channels. This ensures
+hardware devices below this limit are API compatible.
 
 ----------------------------
 Config Register - Read/Write
 ----------------------------
 
+.. |cfg_motor_enable| wavedrom::
 
+          {reg:[                        
+              {bits: 32,  name: 'Motor Enable Mask'},
+          ]} 
+
+=====   ===============
+Entry   Bit Fields
+=====   ===============
+0x00     |cfg_motor_enable|
+
+=====   ===============
 
 
 ---------------------------
 Status Register - Read Only
 ---------------------------
 
-.. |version| wavedrom::
+.. |stat_version| wavedrom::
 
           {reg:[                        
               {bits: 8,  name: 'Patch'},
@@ -44,7 +56,7 @@ Status Register - Read Only
               {bits: 8,  name: 'Devel'} 
           ]} 
 
-.. |channel_info| wavedrom::
+.. |stat_channel_info| wavedrom::
 
           {reg:[                        
               {bits: 8,  name: 'Motor Count'},
@@ -53,25 +65,25 @@ Status Register - Read Only
               {bits: 8,  name: 'Encoder Velocity Bits'}
           ]} 
 
-.. |encoder_fault| wavedrom::
+.. |stat_encoder_fault| wavedrom::
 
           {reg:[                        
               {bits: 32,  name: 'Encoder Fault mask'},
           ]} 
 
-.. |motor_fault| wavedrom::
+.. |stat_motor_fault| wavedrom::
 
           {reg:[                        
               {bits: 32,  name: 'Motor Fault mask'},
           ]} 
 
-.. |encoder_position_start| wavedrom::
+.. |stat_encoder_position_start| wavedrom::
 
           {reg:[                        
               {bits: 32,  name: 'Encoder Position', attr: 'channel 0'},
           ]} 
 
-.. |encoder_position_end| wavedrom::
+.. |stat_encoder_position_end| wavedrom::
 
           {reg:[                        
               {bits: 32,  name: 'Encoder Position', attr: 'channel 31'},
@@ -80,11 +92,12 @@ Status Register - Read Only
 =====   ===============
 Entry   Bit Fields
 =====   ===============
-0x00     |version|
-0x01     |channel_info|
-0x02     |encoder_fault|
-0x03     |motor_fault|
-0x04     |encoder_position_start|
+0x00     |stat_version|
+0x01     |stat_channel_info|
+0x02     |stat_encoder_fault|
+0x03     |stat_motor_fault|
+0x04     |stat_encoder_position_start|
 ...      ...
-0x24     |encoder_position_end|
+0x24     |stat_encoder_position_end|
+
 =====   ===============

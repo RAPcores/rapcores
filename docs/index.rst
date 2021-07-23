@@ -14,6 +14,7 @@ Contents
 
    releases
    spi_spec
+   register_map
    configuration
    dev
    motor_control
