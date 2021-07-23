@@ -11,22 +11,21 @@ RAPcores has the following four types of registers/memories:
 
 Status: Access to system state
 Configuration: Parameters for device setup
-Telemetry: Synchronized data snapshots
-Command: Sets move segment parameters
+Telemetry: Synchronized data snapshots tied to command events
+Command: Initiates a move or control pattern
 
-For the purposes of controlling RAPcores, the Telemetry and Command registers are used to set and observe the movements of the motors.
-In applications that use SPI, these two registers may be accessed concurrently.
 The basic operational primitive of RAPcores is a movement segment over some discrete time span. To allow for use in real-time and low-jitter
 applications, command registers are at least double buffered. Similarly, the telemetry registers are syncronized to the
-buffer switch events to allow for pathplanning correction and controls development. Telemetry registers differ from status registers
-in that Telemetry registers provide "snapshots" of stored data on some even, whereas status registers are continuously updated.
+buffer swap events to allow for pathplanning correction and controls development. Telemetry registers differ from status registers
+in that Telemetry registers provide "snapshots" of stored data on some event, whereas status registers are continuously updated.
+In practice, telemetry also may be a RAM resource whereas status is a hardware register.
 Similarly, configuration registers take effect immediately whereas command registers are queued.
 
 By default, RAPcores reserves memory and register sections for up to 32 motor channels and 64 encoder channels. This ensures
-hardware devices below this limit are API compatible.
+hardware devices below this limit are API compatible. The word size is selectable to 64 or 32 bits.
 
 ----------------------------
-Config Register - Read/Write
+Configuration Register - Read/Write
 ----------------------------
 
 .. |cfg_motor_enable| wavedrom::
@@ -35,11 +34,24 @@ Config Register - Read/Write
               {bits: 32,  name: 'Motor Enable Mask'},
           ]} 
 
+.. |cfg_motor_brake| wavedrom::
+
+          {reg:[                        
+              {bits: 32,  name: 'Motor Brake-on-Disable Mask'},
+          ]} 
+
+.. |cfg_clocks| wavedrom::
+
+          {reg:[                        
+              {bits: 8,  name: 'DDA Clock Divider'},
+          ]} 
+
 =====   ===============
 Entry   Bit Fields
 =====   ===============
 0x00     |cfg_motor_enable|
-
+0x01     |cfg_motor_brake|
+0x02     |cfg_clocks|
 =====   ===============
 
 

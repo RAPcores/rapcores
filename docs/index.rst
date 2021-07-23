@@ -13,12 +13,12 @@ Contents
    :maxdepth: 2
 
    releases
+   interfaces
    spi_spec
    register_map
    configuration
-   dev
    motor_control
    librapcore
-   interfaces
    asic
+   dev
    internals
