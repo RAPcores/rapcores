@@ -24,9 +24,9 @@ Similarly, configuration registers take effect immediately whereas command regis
 By default, RAPcores reserves memory and register sections for up to 32 motor channels and 64 encoder channels. This ensures
 hardware devices below this limit are API compatible. The word size is selectable to 64 or 32 bits.
 
-----------------------------
+-----------------------------------
 Configuration Register - Read/Write
-----------------------------
+-----------------------------------
 
 .. |cfg_motor_enable| wavedrom::
 
