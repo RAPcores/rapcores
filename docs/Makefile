@@ -18,9 +18,7 @@ help:
 teros-%:
 	mkdir -p $(TEROS_PATH)
 	teroshdl-hdl-documenter --recursive -i ../src/ -o html --outpath $(TEROS_PATH)
-	cp $(TEROS_PATH)/index.html teros.html
-	mkdir -p $(TEROS_PATH)/../$*/doc_internal
-	cp $(TEROS_PATH)/doc_internal/* $(TEROS_PATH)/../$*/doc_internal
+	python3 teros_sphinx_wrap.py $(TEROS_PATH)/doc_internal ./internals.rst
 
 
 # Catch-all target: route all unknown targets to Sphinx using the new
