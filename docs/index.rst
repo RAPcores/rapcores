@@ -1,5 +1,5 @@
-RAPcores Documentation
-=====================
+About
+=====
 
 RAPcores is an open source project focused on widely deployable FPGA and ASIC hardware 
 for high performance closed-loop motor control. RAPcores stands for
@@ -13,11 +13,12 @@ Contents
    :maxdepth: 2
 
    releases
+   interfaces
    spi_spec
+   register_map
    configuration
-   dev
    motor_control
    librapcore
-   interfaces
    asic
+   dev
    internals

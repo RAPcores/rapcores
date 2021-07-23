@@ -14,7 +14,8 @@ module spi_state_machine #(
     parameter default_current = 140,
     parameter BUFFER_SIZE = 2,
     parameter default_clock_divisor = 32,
-    parameter current_bits = 4
+    parameter current_bits = 4,
+    parameter reserved_channels = 32 // Represents the channel length to reserve, ill advised to change
   )(
   `ifdef LA_IN
     input wire [`LA_IN:1] LA_IN,
@@ -106,17 +107,17 @@ module spi_state_machine #(
   // for procedural interface generation
   localparam status_version = 0;
   localparam status_channel_info = 1;
-  localparam status_encoder_position_start = 2;
-  localparam status_encoder_position_end = status_encoder_position_start + num_encoders - 1;
-  localparam status_encoder_fault = status_encoder_position_end + 1;
-  localparam status_stepper_fault = status_encoder_fault + 1;
+  localparam status_encoder_fault = 2;
+  localparam status_stepper_fault = 3;
+  localparam status_encoder_position_start = 4;
+  localparam status_encoder_position_end = status_encoder_position_start + reserved_channels - 1;
   localparam status_encoder_velocity_start = status_stepper_fault + 1;
-  localparam status_encoder_velocity_end = status_encoder_velocity_start + num_encoders - 1;
+  localparam status_encoder_velocity_end = status_encoder_velocity_start + reserved_channels - 1;
   localparam status_phase_angle_start = status_encoder_velocity_end + 1;
-  localparam status_phase_angle_end = status_phase_angle_start + num_motors - 1;
+  localparam status_phase_angle_end = status_phase_angle_start + reserved_channels - 1;
   localparam status_reg_end = status_phase_angle_end;
 
-  // Status Register (read-only, so wires)
+  // Status Register (read-only)
   wire [word_bits-1:0] status_reg_ro    [status_reg_end:0];
 
   wire [num_motors-1:0] stepper_faultn;
@@ -128,14 +129,14 @@ module spi_state_machine #(
 
   // Set Status Registers, these are reset by their respective module,
   // or set as constants here
-  assign status_reg_ro[status_version][7:0]               = `VERSION_PATCH;
-  assign status_reg_ro[status_version][15:8]              = `VERSION_MINOR;
-  assign status_reg_ro[status_version][23:16]             = `VERSION_MAJOR;
-  assign status_reg_ro[status_version][31:24]             = `VERSION_DEVEL;
-  assign status_reg_ro[status_channel_info][7:0]          = num_motors;
-  assign status_reg_ro[status_channel_info][15:8]         = num_encoders;
-  assign status_reg_ro[status_channel_info][23:16]        = encoder_bits;
-  assign status_reg_ro[status_channel_info][31:24]        = encoder_velocity_bits;
+  assign status_reg_ro[status_version][7:0]               = `VERSION_PATCH;        // constant
+  assign status_reg_ro[status_version][15:8]              = `VERSION_MINOR;        // constant
+  assign status_reg_ro[status_version][23:16]             = `VERSION_MAJOR;        // constant
+  assign status_reg_ro[status_version][31:24]             = `VERSION_DEVEL;        // constant
+  assign status_reg_ro[status_channel_info][7:0]          = num_motors;            // constant
+  assign status_reg_ro[status_channel_info][15:8]         = num_encoders;          // constant
+  assign status_reg_ro[status_channel_info][23:16]        = encoder_bits;          // constant
+  assign status_reg_ro[status_channel_info][31:24]        = encoder_velocity_bits; // constant
   assign status_reg_ro[status_encoder_fault]              = encoder_faultn;
   assign status_reg_ro[status_stepper_fault]              = stepper_faultn;
   for(g=0; g<num_encoders; g=g+1) begin
