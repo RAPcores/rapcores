@@ -10,7 +10,7 @@
 # Pin the nixpkgs to stable
 with (import ./nix/inputs.nix);
 
-with import (./nix/npm/default.nix) {};
+with import (fetchGit "https://github.com/RAPcores/nix-rapcores-support.git") {};
 
 let 
 verible = import ./nix/verible.nix { inherit pkgs; }; # TODO Upstream?
