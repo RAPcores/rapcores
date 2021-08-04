@@ -2,7 +2,7 @@
 
 ![RAPcore](https://github.com/RAPcores/Ulticores/workflows/RAPCore/badge.svg)
 
-http://rapcores.org/rapcores/
+https://rapcores.org/rapcores/
 
 Robotic Application Processing Cores.
 
@@ -12,14 +12,15 @@ processing power, enrich dynamical models, and greatly simplify the motor driver
 
 ## Docs
 
-- [Build](http://rapcores.org/rapcores/dev.html)
-- [Configuration](http://rapcores.org/rapcores/configuration.html)
-- [Releases](http://rapcores.org/rapcores/releases.html)
-- [Motor Control Guide](http://rapcores.org/rapcores/motor_control.html)
-- [ASIC Deployments](http://rapcores.org/rapcores/asic.html)
-- [SPI Interface](http://rapcores.org/rapcores/spi_spec.html)
-- [Support Software](http://rapcores.org/rapcores/interfaces.html)
-- [C API](http://rapcores.org/rapcores/librapcore.html)
+- [Build](https://rapcores.org/rapcores/dev.html)
+- [Configuration](https://rapcores.org/rapcores/configuration.html)
+- [Releases](https://rapcores.org/rapcores/releases.html)
+- [Motor Control Guide](https://rapcores.org/rapcores/motor_control.html)
+- [ASIC Deployments](https://rapcores.org/rapcores/asic.html)
+- [SPI Interface](https://rapcores.org/rapcores/spi_spec.html)
+- [Register Map](https://rapcores.org/rapcores/register_map.html)
+- [Support Software](https://rapcores.org/rapcores/interfaces.html)
+- [C API](https://rapcores.org/rapcores/librapcore.html)
 
 ## FPGA Support
 
