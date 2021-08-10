@@ -14,7 +14,7 @@ pkgs.stdenv.mkDerivation rec {
     owner  = "chipsalliance";
     repo   = "Surelog";
     rev    = "792de2fcc5f51d233dbb677ca6f1a1a05e483483";
-    sha256 = "1iqqd887rqyr8qj2w9sy7bhad8fmgyzmh39gzspz2j67y0x5dfx3";
+    sha256 = "0k2hgimbnqbgxz2ds3bi2zzvjv6ydkw9m3yb3c078xki4k2jrigs";
     fetchSubmodules = true;
   };
 
