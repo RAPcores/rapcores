@@ -154,12 +154,12 @@ module rapcore #(
     if(!resetn_in)
       resetn_counter <= 0;
     else
-      if (!resetn) resetn_counter <= resetn_counter + 1'b1;
+      resetn_counter <= resetn_counter + !resetn;
   `endif
   `ifndef RESETN
     reg [7:0] resetn_counter = 0; // FPGA ONLY
     always @(posedge buffered_clk) begin
-      if (!resetn) resetn_counter <= resetn_counter + 1'b1;
+      resetn_counter <= resetn_counter + !resetn;
     end
   `endif
   wire reset = resetn;

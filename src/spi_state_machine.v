@@ -15,7 +15,8 @@ module spi_state_machine #(
     parameter BUFFER_SIZE = 2,
     parameter default_clock_divisor = 32,
     parameter current_bits = 4,
-    parameter reserved_channels = 32 // Represents the channel length to reserve, ill advised to change
+    parameter reserved_motor_channels = 32, // Represents the motor channel length to reserve, ill advised to change
+    parameter reserved_encoder_channels = 64 // Represents the encoder channel length to reserve, ill advised to change
   )(
   `ifdef LA_IN
     input wire [`LA_IN:1] LA_IN,
@@ -110,11 +111,11 @@ module spi_state_machine #(
   localparam status_encoder_fault = 2;
   localparam status_stepper_fault = 3;
   localparam status_encoder_position_start = 4;
-  localparam status_encoder_position_end = status_encoder_position_start + reserved_channels - 1;
+  localparam status_encoder_position_end = status_encoder_position_start + reserved_encoder_channels - 1;
   localparam status_encoder_velocity_start = status_stepper_fault + 1;
-  localparam status_encoder_velocity_end = status_encoder_velocity_start + reserved_channels - 1;
+  localparam status_encoder_velocity_end = status_encoder_velocity_start + reserved_encoder_channels - 1;
   localparam status_phase_angle_start = status_encoder_velocity_end + 1;
-  localparam status_phase_angle_end = status_phase_angle_start + reserved_channels - 1;
+  localparam status_phase_angle_end = status_phase_angle_start + reserved_motor_channels - 1;
   localparam status_reg_end = status_phase_angle_end;
 
   // Status Register (read-only)
