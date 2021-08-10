@@ -4,7 +4,8 @@
 # params
 
 {docs ? true,
- prog ? true}:
+ prog ? true,
+ svng ? false}:
 
 
 # Pin the nixpkgs to stable
@@ -15,6 +16,7 @@ with import (fetchGit "https://github.com/RAPcores/nix-rapcores-support.git") {}
 let 
 verible = import ./nix/verible.nix { inherit pkgs; }; # TODO Upstream?
 yosys_symbiflow_plugin = import ./nix/yosys_symbiflow_plugin.nix { inherit pkgs; };
+lsoracle = import ./nix/lsoracle.nix { inherit pkgs; }; # TODO Upstream?
 
 in pkgs.mkShell {
   buildInputs = with pkgs;
@@ -42,6 +44,7 @@ in pkgs.mkShell {
     ++ (lib.optional prog tinyprog)
     ++ (lib.optional prog fujprog)
     ++ (lib.optional prog openocd)
+    ++ (lib.optional svng lsoracle)
     ;
 
 }
