@@ -47,23 +47,21 @@ module SPI #(
   // CIPO pin (tristated per convention)
   assign CIPO = (CS_active) ? tx_byte[txbitcnt] : 1'bZ;
 
-    assign rx_byte = rx_shreg;
- // assign rx_byte = {rx_shreg[0+:8],
- //                   rx_shreg[8+:8],
- //                   rx_shreg[16+:8],
- //                   rx_shreg[24+:8],
- //                   rx_shreg[32+:8],
- //                   rx_shreg[40+:8],
- //                   rx_shreg[48+:8],
- //                   rx_shreg[56+:8]};
-  //genvar i;
-  //if (endianness == "little") begin
-  //  generate
-  //    for (i=0; i<word_bits/8; i=i+1) begin
-  //      assign rx_byte[i +: 8] = rx_shreg[word_bits/8-(i+1) +: 8];
-  //    end
-  //  endgenerate
-  //end
+  if (word_bits == 64) begin
+    assign rx_byte = {rx_shreg[0:7],
+                      rx_shreg[8:15],
+                      rx_shreg[16:23],
+                      rx_shreg[24:31],
+                      rx_shreg[32:39],
+                      rx_shreg[40:47],
+                      rx_shreg[48:55],
+                      rx_shreg[56:63]};
+  end if (word_bits == 32) begin
+    assign rx_byte = {rx_shreg[0:7],
+                      rx_shreg[8:15],
+                      rx_shreg[16:23],
+                      rx_shreg[24:31]};
+  end
 
   always @(posedge clk) begin
     if (!resetn) begin
