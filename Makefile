@@ -33,7 +33,7 @@ PWMFREQ ?= 150
 SYNTH_FLAGS ?= -abc9
 PNR_FLAGS ?=
 YOSYS_FLAGS ?= -DBOARD=$(BOARD)
-YOSYS_READ_VERILOG ?= read_verilog -sv -noassert -noassume -norestrict # -defer may be needed for parametrics
+YOSYS_READ_VERILOG ?= read_verilog -sv -noassert -noassume -norestrict -defer
 
 PROJ = rapcore
 TOP = ./src/rapcore.v
