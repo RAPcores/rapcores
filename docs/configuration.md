@@ -262,7 +262,7 @@ Enables LED output. Currently unused, but useful for low-frequency visual debugg
 ## Logic Analyzer
 
 The Logic Analyzer interface allows for observation and injection of signals
-within the top-level RAPcores project without patching the core project.
+with standard pin names.
 
 ```
 `define LA_OUT <N>
@@ -282,11 +282,9 @@ Default: none/0
 
 
 
-Assignments can be done at the `BOARD.v` level
-by making a `LOGICANALYZER_MACRO` like so:
+Assignments can be done at the top level module (rapcore.v) using dot access:
 
 ```
-`define LOGICANALYZER_MACRO\
-  assign LA_OUT[1] = dir; \
-  assign LA_OUT[2] = analog_cmp2;
+assign LA_OUT[1] = spifsm.dir[1];
+assign LA_OUT[2] = spifsm.s0.phase_angle[1];
 ```

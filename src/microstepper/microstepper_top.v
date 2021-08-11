@@ -2,12 +2,6 @@
 `default_nettype none
 
 module microstepper_top (
-    `ifdef LA_IN
-      input wire [`LA_IN:1] LA_IN,
-    `endif
-    `ifdef LA_OUT
-      output wire [`LA_OUT:1] LA_OUT,
-    `endif
     input   wire       clk,
     input   wire       resetn,
     output  wire       phase_a1_l,
