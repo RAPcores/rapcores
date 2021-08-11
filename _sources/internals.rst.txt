@@ -2,6 +2,13 @@
 Verilog Modules
 ===============
 
+----------------
+microstepper_top
+----------------
+
+.. raw:: html
+  :file: _build/teroshdl/doc_internal/microstepper_top.html
+
 -----------------
 spi_state_machine
 -----------------
