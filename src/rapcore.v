@@ -198,12 +198,6 @@ module rapcore #(
                       .encoder_bits(`ENCODER_BITS),
                       .use_dda(`USE_DDA)) spifsm
   (
-    `ifdef LA_IN
-      .LA_IN(LA_IN),
-    `endif
-    `ifdef LA_OUT
-      .LA_OUT(LA_OUT),
-    `endif
 
   `ifdef DUAL_HBRIDGE
     .PHASE_A1(PHASE_A1),  // Phase A
@@ -263,10 +257,5 @@ module rapcore #(
 
   );
 
-
-  // Macro external wiring statements here
-  `ifdef TOP_LA
-    `TOP_LA
-  `endif
 
 endmodule

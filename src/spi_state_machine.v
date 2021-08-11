@@ -18,12 +18,6 @@ module spi_state_machine #(
     parameter reserved_motor_channels = 32, // Represents the motor channel length to reserve, ill advised to change
     parameter reserved_encoder_channels = 64 // Represents the encoder channel length to reserve, ill advised to change
   )(
-  `ifdef LA_IN
-    input wire [`LA_IN:1] LA_IN,
-  `endif
-  `ifdef LA_OUT
-    output wire [`LA_OUT:1] LA_OUT,
-  `endif
 
   input resetn,
 
@@ -295,12 +289,6 @@ module spi_state_machine #(
     generate
       for (i=0; i<num_motors; i=i+1) begin
         microstepper_top microstepper0(
-          `ifdef LA_IN
-            .LA_IN(LA_IN),
-          `endif
-          `ifdef LA_OUT
-            .LA_OUT(LA_OUT),
-          `endif
           .clk(CLK),
           .resetn( resetn),
           .phase_a1_l(PHASE_A1[i]),
@@ -523,11 +511,5 @@ module spi_state_machine #(
       end
     end
   end
-
-  // Macro external wiring statements here
-  `ifdef STATE_MACHINE_LA
-    `STATE_MACHINE_LA
-  `endif
-
 
 endmodule
