@@ -15,7 +15,7 @@ jobs:
         nix_path: nixpkgs=channel:nixos-unstable
 
     - name: Cache install Nix packages
-      uses: rikhuijzer/cache-install
+      uses: rikhuijzer/cache-install@v1.0.8
       with:
         key: nix-${{ hashFiles('shell.nix', 'nix/*') }}
         nix_file: 'shell.nix'
