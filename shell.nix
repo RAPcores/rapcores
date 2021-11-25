@@ -3,7 +3,7 @@
 
 # params
 
-{docs ? true,
+{docs ? false,
  prog ? true,
  svng ? false}:
 

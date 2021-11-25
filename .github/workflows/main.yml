@@ -14,21 +14,21 @@ jobs:
       with:
         nix_path: nixpkgs=channel:nixos-unstable
     - name: TinyFPGABX Flow
-      run: nix-shell --arg docs false --arg prog false --command 'make build-full BOARD=tinyfpgabx'
+      run: nix-shell --arg prog false --command 'make build-full BOARD=tinyfpgabx'
     - name: ULX3S Flow
-      run: nix-shell --arg docs false --arg prog false --command 'make build-full BOARD=ulx3s'
+      run: nix-shell --arg prog false --command 'make build-full BOARD=ulx3s'
     - name: RAPBo Flow
-      run: nix-shell --arg docs false --arg prog false --command 'make build-full BOARD=rapbo'
+      run: nix-shell --arg prog false --command 'make build-full BOARD=rapbo'
     - name: ECP5 Eval Flow
-      run: nix-shell --arg docs false --arg prog false --command 'make build-full BOARD=ecp5evn'
+      run: nix-shell --arg prog false --command 'make build-full BOARD=ecp5evn'
     - name: IVerilog Compat
-      run: nix-shell --arg docs false --arg prog false --command 'make iverilog-parse'
+      run: nix-shell --arg prog false --command 'make iverilog-parse'
     - name: reg initialization
       run: ./etc/reginit.sh
     - name: RAPcore-cli
       run: make rapcore-cli
     - name: Build Docs
-      run: nix-shell --arg prog false --command 'make docs-html'
+      run: nix-shell --arg docs true --arg prog false --command 'make docs-html'
 
     # Upload bitstreams, support software, and documentation
     - uses: actions/upload-artifact@v2
