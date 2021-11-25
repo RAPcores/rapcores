@@ -13,6 +13,7 @@ with (import ./nix/inputs.nix);
 
 with import (fetchGit {
     url = "https://github.com/RAPcores/nix-rapcores-support.git";
+    ref = "refs/heads/main";                     
     rev = "5ac21598b927af16b2d6600cfa9d6ed9dc1b712c";}) {};
 
 let 
