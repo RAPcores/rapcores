@@ -3,7 +3,7 @@
 
 # params
 
-{docs ? true,
+{docs ? false,
  prog ? true,
  svng ? false}:
 
@@ -11,7 +11,10 @@
 # Pin the nixpkgs to stable
 with (import ./nix/inputs.nix);
 
-with import (fetchGit "https://github.com/RAPcores/nix-rapcores-support.git") {};
+with import (fetchGit {
+    url = "https://github.com/RAPcores/nix-rapcores-support.git";
+    ref = "refs/heads/main";                     
+    rev = "5ac21598b927af16b2d6600cfa9d6ed9dc1b712c";}) {};
 
 let 
 verible = import ./nix/verible.nix { inherit pkgs; }; # TODO Upstream?

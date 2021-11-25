@@ -8,27 +8,28 @@ jobs:
       PUSH_DOCS: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     steps:
 
-    - uses: actions/checkout@v2
-  
-    - uses: cachix/install-nix-action@v12
+    - uses: actions/checkout@v2.2.0
+
+    - uses: cachix/install-nix-action@v16
       with:
         nix_path: nixpkgs=channel:nixos-unstable
+
     - name: TinyFPGABX Flow
-      run: nix-shell --arg docs false --arg prog false --command 'make build-full BOARD=tinyfpgabx'
+      run: nix-shell --arg prog false --command 'make build-full BOARD=tinyfpgabx'
     - name: ULX3S Flow
-      run: nix-shell --arg docs false --arg prog false --command 'make build-full BOARD=ulx3s'
+      run: nix-shell --arg prog false --command 'make build-full BOARD=ulx3s'
     - name: RAPBo Flow
-      run: nix-shell --arg docs false --arg prog false --command 'make build-full BOARD=rapbo'
+      run: nix-shell --arg prog false --command 'make build-full BOARD=rapbo'
     - name: ECP5 Eval Flow
-      run: nix-shell --arg docs false --arg prog false --command 'make build-full BOARD=ecp5evn'
+      run: nix-shell --arg prog false --command 'make build-full BOARD=ecp5evn'
     - name: IVerilog Compat
-      run: nix-shell --arg docs false --arg prog false --command 'make iverilog-parse'
+      run: nix-shell --arg prog false --command 'make iverilog-parse'
     - name: reg initialization
       run: ./etc/reginit.sh
     - name: RAPcore-cli
       run: make rapcore-cli
     - name: Build Docs
-      run: nix-shell --arg prog false --command 'make docs-html'
+      run: nix-shell --arg docs true --arg prog false --command 'make docs-html'
 
     # Upload bitstreams, support software, and documentation
     - uses: actions/upload-artifact@v2
@@ -55,7 +56,7 @@ jobs:
         # that.
     - name: Push changes
       if: contains('refs/heads/main', github.ref)
-      uses: ad-m/github-push-action@master
+      uses: ad-m/github-push-action@v0.6.0
       with:
         branch: gh-pages
         directory: gh-pages
