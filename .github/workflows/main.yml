@@ -55,7 +55,7 @@ jobs:
         # that.
     - name: Push changes
       if: contains('refs/heads/main', github.ref)
-      uses: ad-m/github-push-action@master
+      uses: ad-m/github-push-action@v0.6
       with:
         branch: gh-pages
         directory: gh-pages
