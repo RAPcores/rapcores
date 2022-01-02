@@ -2,26 +2,40 @@
 Verilog Modules
 ===============
 
--------------
-clock_divider
--------------
+-----------------
+pwm_pll_ice40_140
+-----------------
 
 .. raw:: html
-  :file: _build/teroshdl/doc_internal/clock_divider.html
+  :file: _build/teroshdl/doc_internal/pwm_pll_ice40_140.html
 
-----------------------
-space_vector_modulator
-----------------------
-
-.. raw:: html
-  :file: _build/teroshdl/doc_internal/space_vector_modulator.html
-
-----------------
-pwm_pll_ecp5_200
-----------------
+---------------
+spi_pll_ecp5_64
+---------------
 
 .. raw:: html
-  :file: _build/teroshdl/doc_internal/pwm_pll_ecp5_200.html
+  :file: _build/teroshdl/doc_internal/spi_pll_ecp5_64.html
+
+----------
+mytimer_10
+----------
+
+.. raw:: html
+  :file: _build/teroshdl/doc_internal/mytimer_10.html
+
+-------
+dda_fsm
+-------
+
+.. raw:: html
+  :file: _build/teroshdl/doc_internal/dda_fsm.html
+
+---------
+dda_timer
+---------
+
+.. raw:: html
+  :file: _build/teroshdl/doc_internal/dda_timer.html
 
 --------------
 register_input
@@ -29,6 +43,20 @@ register_input
 
 .. raw:: html
   :file: _build/teroshdl/doc_internal/register_input.html
+
+-----------------
+spi_state_machine
+-----------------
+
+.. raw:: html
+  :file: _build/teroshdl/doc_internal/spi_state_machine.html
+
+-------
+pwm_pll
+-------
+
+.. raw:: html
+  :file: _build/teroshdl/doc_internal/pwm_pll.html
 
 ---
 spi
@@ -38,18 +66,53 @@ spi
   :file: _build/teroshdl/doc_internal/spi.html
 
 -----------------
-spi_state_machine
------------------
-
-.. raw:: html
-  :file: _build/teroshdl/doc_internal/spi_state_machine.html
-
------------------
 microstep_counter
 -----------------
 
 .. raw:: html
   :file: _build/teroshdl/doc_internal/microstep_counter.html
+
+----------
+analog_out
+----------
+
+.. raw:: html
+  :file: _build/teroshdl/doc_internal/analog_out.html
+
+----------------
+pwm_pll_ecp5_150
+----------------
+
+.. raw:: html
+  :file: _build/teroshdl/doc_internal/pwm_pll_ecp5_150.html
+
+----------------
+microstepper_top
+----------------
+
+.. raw:: html
+  :file: _build/teroshdl/doc_internal/microstepper_top.html
+
+----------------
+pwm_pll_ecp5_200
+----------------
+
+.. raw:: html
+  :file: _build/teroshdl/doc_internal/pwm_pll_ecp5_200.html
+
+--------------------
+microstepper_control
+--------------------
+
+.. raw:: html
+  :file: _build/teroshdl/doc_internal/microstepper_control.html
+
+--------
+quad_enc
+--------
+
+.. raw:: html
+  :file: _build/teroshdl/doc_internal/quad_enc.html
 
 ------
 cosine
@@ -65,61 +128,12 @@ edge_detector
 .. raw:: html
   :file: _build/teroshdl/doc_internal/edge_detector.html
 
--------
-mytimer
--------
-
-.. raw:: html
-  :file: _build/teroshdl/doc_internal/mytimer.html
-
----
-pwm
----
-
-.. raw:: html
-  :file: _build/teroshdl/doc_internal/pwm.html
-
--------
-pwm_pll
--------
-
-.. raw:: html
-  :file: _build/teroshdl/doc_internal/pwm_pll.html
-
----------
-dda_timer
----------
-
-.. raw:: html
-  :file: _build/teroshdl/doc_internal/dda_timer.html
-
---------------------
-microstepper_control
---------------------
-
-.. raw:: html
-  :file: _build/teroshdl/doc_internal/microstepper_control.html
-
-------------
-dual_hbridge
-------------
-
-.. raw:: html
-  :file: _build/teroshdl/doc_internal/dual_hbridge.html
-
 ----------
-mytimer_10
+chargepump
 ----------
 
 .. raw:: html
-  :file: _build/teroshdl/doc_internal/mytimer_10.html
-
-----------------
-microstepper_top
-----------------
-
-.. raw:: html
-  :file: _build/teroshdl/doc_internal/microstepper_top.html
+  :file: _build/teroshdl/doc_internal/chargepump.html
 
 ---------
 mytimer_8
@@ -129,39 +143,39 @@ mytimer_8
   :file: _build/teroshdl/doc_internal/mytimer_8.html
 
 -------
-dda_fsm
--------
-
-.. raw:: html
-  :file: _build/teroshdl/doc_internal/dda_fsm.html
-
---------
-quad_enc
---------
-
-.. raw:: html
-  :file: _build/teroshdl/doc_internal/quad_enc.html
-
--------
 rapcore
 -------
 
 .. raw:: html
   :file: _build/teroshdl/doc_internal/rapcore.html
 
-----------
-chargepump
-----------
+---
+pwm
+---
 
 .. raw:: html
-  :file: _build/teroshdl/doc_internal/chargepump.html
+  :file: _build/teroshdl/doc_internal/pwm.html
 
-----------------
-pwm_pll_ecp5_150
-----------------
+-------
+mytimer
+-------
 
 .. raw:: html
-  :file: _build/teroshdl/doc_internal/pwm_pll_ecp5_150.html
+  :file: _build/teroshdl/doc_internal/mytimer.html
+
+-------------
+clock_divider
+-------------
+
+.. raw:: html
+  :file: _build/teroshdl/doc_internal/clock_divider.html
+
+------------
+dual_hbridge
+------------
+
+.. raw:: html
+  :file: _build/teroshdl/doc_internal/dual_hbridge.html
 
 ----------------
 spi_pll_ice40_64
@@ -170,24 +184,10 @@ spi_pll_ice40_64
 .. raw:: html
   :file: _build/teroshdl/doc_internal/spi_pll_ice40_64.html
 
-----------
-analog_out
-----------
+----------------------
+space_vector_modulator
+----------------------
 
 .. raw:: html
-  :file: _build/teroshdl/doc_internal/analog_out.html
-
----------------
-spi_pll_ecp5_64
----------------
-
-.. raw:: html
-  :file: _build/teroshdl/doc_internal/spi_pll_ecp5_64.html
-
------------------
-pwm_pll_ice40_140
------------------
-
-.. raw:: html
-  :file: _build/teroshdl/doc_internal/pwm_pll_ice40_140.html
+  :file: _build/teroshdl/doc_internal/space_vector_modulator.html
 
