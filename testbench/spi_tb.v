@@ -66,16 +66,16 @@ module testbench #(parameter SPIBITS = 32)(
   reg [7:0] tx_byte;
 
   // SPI 64 bit module
-  SPIWord #(.bits(SPIBITS)) word_proc (
+  SPI #(.word_bits(SPIBITS)) word_proc (
                 .clk(clk),
                 .resetn(resetn),
                 .SCK(SCK),
                 .CS(CS),
                 .COPI(COPI),
                 .CIPO(CIPO),
-                .word_send_data(word_send_data),
-                .word_received(word_received),
-                .word_data_received(word_data_received));
+                .tx_byte(word_send_data),
+                .rx_byte(word_received),
+                .rx_byte_ready(word_data_received));
 
   initial begin
     if (SPIBITS == 64) begin

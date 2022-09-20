@@ -171,16 +171,16 @@ module rapcore #(
   wire [63:0] word_data_received;
   wire word_received;
 
-  SPIWord word_proc (
+  SPI word_proc (
                 .clk(spi_clock),
                 .resetn (resetn),
                 .SCK(SCK),
                 .CS(CS),
                 .COPI(COPI),
                 .CIPO(CIPO),
-                .word_send_data(word_send_data),
-                .word_received(word_received),
-                .word_data_received(word_data_received));
+                .tx_byte(word_send_data),
+                .rx_byte_ready(word_received),
+                .rx_byte(word_data_received));
 
 
 
